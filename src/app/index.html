@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html lang="en-US" ng-app="itesoft" ng-strict-di >
+<head>
+    <meta charset="utf-8" />
+    <title>Demo</title>
+
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+    <link rel='stylesheet' type='text/css' href='../assets/css/demo.css' />
+    <link rel='stylesheet' type='text/css' href='../assets/lib/bootstrap/dist/css/bootstrap.min.css' />
+    <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
+
+    <link rel='stylesheet' type='text/css' href='../assets/lib/bootstrap-material-design/dist/css/material-fullpalette.min.css' />
+
+
+</head>
+<body>
+
+<it-side-menus>
+    <it-side-menu-header>
+
+        <form class="navbar-form navbar-left" style="color: white !important;"  action="#">
+            <input type="text" class="form-control " placeholder="Search"/>
+        </form>
+    </it-side-menu-header>
+
+    <it-side-menu>
+        <h1 class="">Demo</h1>
+        <br/>
+        <ul>
+            <li ><a class="btn" href="#">Link 1</a></li>
+            <li ><a class="btn" href="#">Link 2</a></li>
+            <li ><a  class="btn " href="#">Link 3</a></li>
+        </ul>
+    </it-side-menu>
+
+
+    <it-side-menu-content>
+        <div class="row">
+            <div class="col-lg-3"></div>
+            <div class="col-lg-6">
+
+
+                <div class="card">
+                    <div style="height: 300px;"></div>
+
+                    <div class="card-content">
+                        <div class="card-body inpu">
+
+                            <form action="#">
+                                <input class="form-control floating-label" type="text" placeholder="Nom"/>
+                                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+                                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+
+                            </form>
+                        </div>
+                        <footer class="card-footer"></footer>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </it-side-menu-content>
+</it-side-menus>
+
+<!-- JavaScript Includes -->
+
+
+
+<script src="../assets/lib/angularjs/angular.js"></script>
+<script src="../assets/lib/angular-route/angular-route.min.js"></script>
+
+<script src="demo.js"></script>
+
+
+<script src="composite/side-menu/sideMenus.js"></script>
+<script src="composite/side-menu/sideMenu.js"></script>
+
+<script src="composite/side-menu/sideMenuHeader.js"></script>
+<script src="composite/side-menu/menuToggle.js"></script>
+<script src="composite/side-menu/sideMenuCtrl.js"></script>
+<script src="composite/side-menu/sideMenuContent.js"></script>
+
+
+
+<!--script src="lib/bootstrap-material-design/dist/js/ripples.min.js"></script-->
+
+
+
+
+</body>
+</html>

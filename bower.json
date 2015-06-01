@@ -1,0 +1,14 @@
+{
+  "name": "slide-menu",
+  "private": "true",
+  "version": "1.0.0",
+  "description": "Simple AngularJS POC.",
+  "devDependencies": {},
+  "dependencies": {
+    "bootstrap": "~3.3.4",
+    "bootstrap-material-design": "~0.3.0",
+    "angularjs": "~1.4.0",
+    "angular-route": "~1.4.0",
+    "angular-touch": "~1.4.0"
+  }
+}
