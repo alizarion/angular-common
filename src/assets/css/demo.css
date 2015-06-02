@@ -1,35 +1,33 @@
 
+.menu-content{
+    list-style: none;
+    padding-left: 0;
+    margin: 20px 0 0 0;
 
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
 }
-button,a{outline:0;overflow:visible;cursor:pointer;border:0;background-color:transparent}
-ul,li{list-style-type:none}
+.menu-content > li > a {
+    padding: 14px 20px 14px 52px;
+    display: block;
+    color: #4C4C4C;
+    font-weight: 500;
+    position: relative;
+}
 
-
+.menu-content > li > a > i {
+    position: absolute;
+    left: 16px;
+    font-size: 20px;
+    top: 0;
+    width: 25px;
+    text-align: center;
+    padding: 9px 0;
+}
 
 .itesoft-side-menu-left{
-    left:-20%;
+    left:-250px;
     position:fixed;
     top:50px;
-    width:20%;
+    width:250px;
     height:100%;
     z-index:1000;
     display:block;
@@ -39,13 +37,6 @@ ul,li{list-style-type:none}
 .itesoft-side-menu-left.itesoft-slide{
     left:0;
 }
-.itesoft-side-menu-left a {
-    display:block;
-    width:98%;
-    padding:10px 0 10px 2%;
-    color:#424242;
-    border-bottom:1px solid #424242;
-}
 
 .itesoft-all{
     display:block;
@@ -53,7 +44,7 @@ ul,li{list-style-type:none}
 }
 .itesoft-all.itesoft-hide{
     position:fixed;
-    left:20%;
+    left:250px;
     width:100%;
 }
 .itesoft-all.itesoft-slide{
@@ -61,7 +52,7 @@ ul,li{list-style-type:none}
 }
 .itesoft-side-menu-content.itesoft-hide{
     position:fixed;
-    left:20%;
+    left:250px;
     top:50px;
     width:100%;
 }
@@ -77,17 +68,9 @@ ul,li{list-style-type:none}
     background-color:#4285F4;
     width:100%;
     height:50px;
-    padding:0 2%
+    padding:0 15px;
 }
-.itesoft-header  button.itesoft-toggle{
-    float:left;
-    width:29px;
-    height:28px;
-    margin-top:12px;
-    background:transparent url('../img/button.png') no-repeat;
-    color:#777;
 
-}
 
 form .form-control-wrapper {
     margin: 30px 0;
@@ -331,6 +314,3 @@ p{
     100% {
     }
 }
-
-
-/*.overlay.show{position:fixed;left:50%;right:0;bottom:0;background-color:rgba(0, 0, 0, 0.8);z-index:9999}*/
