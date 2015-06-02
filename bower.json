@@ -3,7 +3,9 @@
   "private": "true",
   "version": "1.0.0",
   "description": "Simple AngularJS POC.",
-  "devDependencies": {},
+  "devDependencies": {
+    "material-design-hamburger": "~1.0.0"
+  },
   "dependencies": {
     "bootstrap": "~3.3.4",
     "bootstrap-material-design": "~0.3.0",

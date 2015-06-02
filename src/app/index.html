@@ -7,7 +7,8 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
     <link rel='stylesheet' type='text/css' href='../assets/css/demo.css' />
-    <link rel='stylesheet' type='text/css' href='../assets/lib/bootstrap/dist/css/bootstrap.min.css' />
+    <link rel='stylesheet' type='text/css' href='../assets/css/bootstrap.css' />
+
     <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
 
     <link rel='stylesheet' type='text/css' href='../assets/lib/bootstrap-material-design/dist/css/material-fullpalette.min.css' />
@@ -19,18 +20,66 @@
 <it-side-menus>
     <it-side-menu-header>
 
-        <form class="navbar-form navbar-left" style="color: white !important;"  action="#">
-            <input type="text" class="form-control " placeholder="Search"/>
-        </form>
+
     </it-side-menu-header>
 
     <it-side-menu>
-        <h1 class="">Demo</h1>
-        <br/>
-        <ul>
-            <li ><a class="btn" href="#">Link 1</a></li>
-            <li ><a class="btn" href="#">Link 2</a></li>
-            <li ><a  class="btn " href="#">Link 3</a></li>
+
+        <ul class="menu-content  out">
+            <li>
+                <a  class="btn btn-default" href="#">
+                    <i class="mdi-action-3d-rotation"></i> Dashboard
+                </a>
+            </li>
+
+            <li  data-toggle="collapse" data-target="#products" class="collapsed active">
+                <a  class="btn btn-default"  href="#"><i class="mdi-image-slideshow"></i> UI Elements <span class="arrow"></span></a>
+            </li>
+            <ul class="sub-menu collapse" id="products">
+                <li class="active"><a href="#">CSS3 Animation</a></li>
+                <li><a href="#">General</a></li>
+                <li><a href="#">Buttons</a></li>
+                <li><a href="#">Tabs & Accordions</a></li>
+                <li><a href="#">Typography</a></li>
+                <li><a href="#">FontAwesome</a></li>
+                <li><a href="#">Slider</a></li>
+                <li><a href="#">Panels</a></li>
+                <li><a href="#">Widgets</a></li>
+                <li><a href="#">Bootstrap Model</a></li>
+            </ul>
+
+
+            <li data-toggle="collapse" data-target="#service" class="collapsed">
+                <a href="#"><i class="fa fa-globe fa-lg"></i> Services <span class="arrow"></span></a>
+            </li>
+            <ul class="sub-menu collapse" id="service">
+                <li>New Service 1</li>
+                <li>New Service 2</li>
+                <li>New Service 3</li>
+            </ul>
+
+
+            <li data-toggle="collapse" data-target="#new" class="collapsed">
+                <a href="#"><i class="fa fa-car fa-lg"></i> New <span class="arrow"></span></a>
+            </li>
+            <ul class="sub-menu collapse" id="new">
+                <li>New New 1</li>
+                <li>New New 2</li>
+                <li>New New 3</li>
+            </ul>
+
+
+            <li>
+                <a href="#">
+                    <i class="fa fa-user fa-lg"></i> Profile
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    <i class="fa fa-users fa-lg"></i> Users
+                </a>
+            </li>
         </ul>
     </it-side-menu>
 

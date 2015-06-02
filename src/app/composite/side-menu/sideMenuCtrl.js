@@ -1,7 +1,9 @@
 /**
- * Created by SBN on 01/06/2015.
+ * @author sbn
+ *
  */
-IteSoft.controller("$sideMenuCtrl",['$scope', function($scope){
+IteSoft
+    .controller("$sideMenuCtrl",['$scope', function($scope){
     $scope.showmenu=false;
     $scope.toggleMenu = function(){
         $scope.showmenu=($scope.showmenu) ? false : true;
