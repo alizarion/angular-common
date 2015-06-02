@@ -1,15 +1,16 @@
 IteSoft
     .directive('itMenuToggle', ['$animate', function($animate) {
     return function(scope, element, attrs) {
+        var child = angular.element(element[0].querySelector('.material-design-hamburger__layer'));
         element.on('click', function() {
-            if(element.hasClass('itesoft-rotate-left')) {
-                $animate.removeClass(element, 'itesoft-rotate-left');
-                $animate.addClass(element, 'itesoft-rotate-right');
-
+            if(child.hasClass('material-design-hamburger__icon--to-arrow')) {
+                $animate.removeClass(child, 'material-design-hamburger__icon--to-arrow');
+                $animate.addClass(child, 'material-design-hamburger__icon--from-arrow');
+                console.log('yes');
             } else {
-                $animate.removeClass(element, 'itesoft-rotate-right');
-                $animate.addClass(element, 'itesoft-rotate-left');
-
+                $animate.removeClass(child, 'material-design-hamburger__icon--from-arrow');
+                $animate.addClass(child, 'material-design-hamburger__icon--to-arrow');
+                console.log('no');
             }
         });
     };
