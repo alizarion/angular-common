@@ -11,17 +11,18 @@ IteSoft
                 var menuItems = angular.element(element[0]
                     .querySelector('ul'));
                 var link = angular.element(element[0]
-                                    .querySelector('a'));
+                    .querySelector('a'));
                 console.log(menuItems);
                 console.log(link);
-                menuItems.addClass('collapse');
+                menuItems.addClass('it-collapse');
                 element.on('click', function () {
                     console.log('click');
-                    if (menuItems.hasClass('collapse')) {
-
-                        menuItems.removeClass('collapse');
+                    if (menuItems.hasClass('it-collapse')) {
+                        menuItems.removeClass('it-collapse');
+                        menuItems.addClass('it-expanded');
                     } else {
-                        menuItems.addClass('collapse');
+                        menuItems.removeClass('it-expanded');
+                        menuItems.addClass('it-collapse');
 
                     }
                 });

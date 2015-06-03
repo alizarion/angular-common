@@ -16,15 +16,11 @@ IteSoft
                         'material-design-hamburger__icon--to-arrow');
                     $animate.addClass(child,
                         'material-design-hamburger__icon--from-arrow');
-                    console.log('yes');
                 } else {
                     $animate.removeClass(child,
                         'material-design-hamburger__icon--from-arrow');
                     $animate.addClass(child,
                         'material-design-hamburger__icon--to-arrow');
-
-                    console.log(child);
-                    console.log('no');
                 }
             });
         }
