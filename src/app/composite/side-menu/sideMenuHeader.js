@@ -13,6 +13,8 @@ IteSoft
                 var button = angular.element(element[0]
                     .querySelector('.material-design-hamburger__icon'));
 
+
+
                 button.on('click', function () {
                     if (child.hasClass('material-design-hamburger__icon--to-arrow')) {
 

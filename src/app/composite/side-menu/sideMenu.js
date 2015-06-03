@@ -13,5 +13,6 @@ IteSoft
                 'ng-class="{\'itesoft-hide\':!showmenu,\'itesoft-slide\':showmenu}">' +
                 '<div ng-transclude ></div></div>'
 
+
         }
 });
