@@ -18,101 +18,208 @@
 <body>
 
 <it-side-menus>
-    <it-side-menu-header>
+<it-side-menu-header>
 
 
-    </it-side-menu-header>
+</it-side-menu-header>
 
-    <it-side-menu>
+<it-side-menu>
 
-        <ul class="menu-content  out">
-            <li>
-                <a  class="btn btn-default" href="#">
-                    <i class="mdi-action-3d-rotation"></i> Dashboard
-                </a>
-            </li>
+    <ul class="menu-content  out">
+        <li>
+            <a  class="btn btn-default" href="#">
+                <i class="mdi-action-3d-rotation"></i> Dashboard
+            </a>
+        </li>
 
-            <li  data-toggle="collapse" it-collapsed-item="" class="collapsed active">
-                <a  class="btn btn-default"  href="#"><i class="mdi-image-slideshow">
+        <li  it-collapsed-item="" class="">
+            <a  class="btn btn-default"  href="#"><i class="mdi-image-slideshow">
 
-                </i> UI Elements <span class="arrow"></span></a>
-                <ul class="sub-menu collapse" id="products">
-                    <li class="active"><a href="#">CSS3 Animation</a></li>
-                    <li><a href="#">General</a></li>
-                    <li><a href="#">Buttons</a></li>
-                    <li><a href="#">Tabs & Accordions</a></li>
-                    <li><a href="#">Typography</a></li>
-                    <li><a href="#">FontAwesome</a></li>
-                    <li><a href="#">Slider</a></li>
-                    <li><a href="#">Panels</a></li>
-                    <li><a href="#">Widgets</a></li>
-                    <li><a href="#">Bootstrap Model</a></li>
-                </ul>
-
-            </li>
-
-
-            <li data-toggle="collapse" data-target="#service" class="collapsed">
-                <a href="#"><i class="fa fa-globe fa-lg"></i> Services <span class="arrow"></span></a>
-            </li>
-            <ul class="sub-menu collapse" id="service">
-                <li>New Service 1</li>
-                <li>New Service 2</li>
-                <li>New Service 3</li>
+            </i> UI Elements <span class="arrow"></span></a>
+            <ul class="sub-menu it-collapsable it-collapse " id="products">
+                <li ><a  class="btn btn-default" href="#">CSS3 Animation</a></li>
+                <li><a  class="btn btn-default"  href="#">General</a></li>
+                <li><a  class="btn btn-default"  href="#">Buttons</a></li>
+                <li><a  class="btn btn-default" href="#">Tabs & Accordions</a></li>
+                <li><a  class="btn btn-default" href="#">Typography</a></li>
+                <li><a  class="btn btn-default" href="#">FontAwesome</a></li>
+                <li><a class="btn btn-default"  href="#">Slider</a></li>
+                <li><a  class="btn btn-default" href="#">Panels</a></li>
+                <li><a class="btn btn-default"  href="#">Widgets</a></li>
+                <li><a class="btn btn-default"  href="#">Bootstrap Model</a></li>
             </ul>
 
-
-            <li data-toggle="collapse" data-target="#new" class="collapsed">
-                <a href="#"><i class="fa fa-car fa-lg"></i> New <span class="arrow"></span></a>
-            </li>
-            <ul class="sub-menu collapse" id="new">
-                <li>New New 1</li>
-                <li>New New 2</li>
-                <li>New New 3</li>
-            </ul>
+        </li>
 
 
-            <li>
-                <a href="#">
-                    <i class="fa fa-user fa-lg"></i> Profile
-                </a>
-            </li>
-
-            <li>
-                <a href="#">
-                    <i class="fa fa-users fa-lg"></i> Users
-                </a>
-            </li>
+        <li data-toggle="collapse" data-target="#service" class="collapsed">
+            <a href="#"><i class="fa fa-globe fa-lg"></i> Services <span class="arrow"></span></a>
+        </li>
+        <ul class="sub-menu collapse" id="service">
+            <li>New Service 1</li>
+            <li>New Service 2</li>
+            <li>New Service 3</li>
         </ul>
-    </it-side-menu>
 
 
-    <it-side-menu-content>
-        <div class="row">
-            <div class="col-lg-3"></div>
-            <div class="col-lg-6">
+        <li data-toggle="collapse" data-target="#new" class="collapsed">
+            <a href="#"><i class="fa fa-car fa-lg"></i> New <span class="arrow"></span></a>
+        </li>
+        <ul class="sub-menu collapse" id="new">
+            <li>New New 1</li>
+            <li>New New 2</li>
+            <li>New New 3</li>
+        </ul>
 
 
-                <div class="card">
-                    <div style="height: 300px;"></div>
+        <li>
+            <a href="#">
+                <i class="fa fa-user fa-lg"></i> Profile
+            </a>
+        </li>
 
-                    <div class="card-content">
-                        <div class="card-body inpu">
+        <li>
+            <a href="#">
+                <i class="fa fa-users fa-lg"></i> Users
+            </a>
+        </li>
+    </ul>
+</it-side-menu>
 
-                            <form action="#">
-                                <input class="form-control floating-label" type="text" placeholder="Nom"/>
-                                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
-                                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
 
-                            </form>
+<it-side-menu-content>
+    <div class="row">
+        <h1>Jumbotron</h1>
+        <div class="jumbotron">
+
+            <form class="form-horizontal">
+                <fieldset>
+                    <legend>Legend</legend>
+                    <div class="form-group">
+                        <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                        <div class="col-lg-10">
+                            <input type="email" class="form-control" id="inputEmail" placeholder="Email">
                         </div>
-                        <footer class="card-footer"></footer>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword" class="col-lg-2 control-label">Password</label>
+                        <div class="col-lg-10">
+                            <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox"> Checkbox
+                                </label>
+                            </div>
+                            <br>
+                            <div class="togglebutton">
+                                <label>
+                                    <input type="checkbox" checked=""> Toggle button
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                </div>
-            </div>
+                    <div class="form-group">
+                        <label for="textArea" class="col-lg-2 control-label">Textarea</label>
+                        <div class="col-lg-10">
+                            <textarea class="form-control" rows="3" id="textArea"></textarea>
+                            <span class="help-block">A longer block of help text that breaks onto a new line and may extend beyond one line.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="select" class="col-lg-2 control-label">Selects</label>
+                        <div class="col-lg-10">
+                            <select class="form-control" id="select">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                            <br>
+                            <select multiple="" class="form-control">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10 col-lg-offset-2">
+                            <button class="btn btn-default">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
         </div>
-    </it-side-menu-content>
+
+
+        <h1 class="header">Floating Action Button</h1>
+        <div class="jumbotron">
+            <h2>Regular</h2>
+            <button class="btn btn-fab btn-raised btn-material-red"><i class="mdi-navigation-arrow-forward"></i></button>
+            <button class="btn btn-fab btn-raised btn-primary"><i class="mdi-image-edit"></i></button>
+
+            <h2>Mini</h2>
+            <button class="btn btn-fab btn-fab-mini btn-raised btn-sm btn-success"><i class="mdi-navigation-check"></i></button>
+            <button class="btn btn-fab btn-fab-mini btn-raised btn-material-lightyellow"><i class="mdi-content-reply"></i></button>
+
+            <style>
+                #floating-action-button .btn {
+                    margin: 20px;
+                }
+                #floating-action-button h2 {
+                    padding: 14px;
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: 400;
+                }
+            </style>
+        </div>
+
+
+        <h1 class="header">Floating Action Button</h1>
+        <div class="jumbotron">
+            <form action="#">
+                <input class="form-control floating-label" type="text" placeholder="Nom"/>
+                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+                <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+
+            </form>
+        </div>
+        <h2 class="header">Flat buttons</h2>
+        <div  class="jumbotron">
+
+            <button class="btn btn-default btn-flat">Button</button>
+            <button class="btn btn-primary btn-flat">Colored</button>
+            <button class="btn btn-default btn-flat" disabled="">Disabled</button>
+            <button class="btn btn-default btn-flat btn-link">Noink</button>
+        </div>
+        <h2 class="header" >Raised buttons</h2>
+        <div class="jumbotron">
+
+            <button class="btn btn-default btn-raised">Button</button>
+            <button class="btn btn-primary btn-raised">Colored</button>
+            <button class="btn btn-default btn-raised" disabled="">Disabled</button>
+            <button class="btn btn-default btn-raised btn-link">Noink</button>
+        </div>
+
+
+        <h2>Custom button content</h2>
+        <div class="jumbotron">
+
+            <button class="btn btn-primary btn-flat"><i class="mdi-navigation-check"></i> Ok</button>
+            <button class="btn btn-default btn-flat"><i class="mdi-navigation-close"></i> Cancel</button>
+        </div>
+
+
+
+    </div>
+</it-side-menu-content>
 </it-side-menus>
 
 <!-- JavaScript Includes -->
