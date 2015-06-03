@@ -1,9 +1,59 @@
+@-webkit-keyframes it-sub-menu-close {
+    0%   {transform: translateY(0%);;visibility: visible}
+    100%  {transform: translateY(-100%);visibility: hidden}
+}
+
+/* Standard syntax */
+@keyframes it-sub-menu-close  {
+    0%   {transform: translateY(0);;visibility: visible}
+    100%  {transform: translateY(-100%);visibility: hidden}
+}
+
+@-webkit-keyframes it-sub-menu-open {
+    0%  {transform: translateY(-100%);visibility: hidden}
+    100%  {transform: translateY(0%);visibility: visible}
+}
+
+/* Standard syntax */
+@keyframes it-sub-menu-open {
+    0%  {transform: translateY(-100%);visibility: hidden}
+    100%   { transform: translateY(0%);visibility: visible}
+}
+
+.it-collapse {
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+}
+
+.it-expanded{
+    max-height: 900px;
+    transition: max-height 0.3s ease-in;
+}
+
+.menu-content > li .it-collapsable {
+
+}
+
+
+.it-collapsable {
+    overflow-y: hidden;
+
+}
+
 
 .menu-content{
     list-style: none;
     padding-left: 0;
-    margin: 20px 0 0 0;
+    margin: 0;
 
+}
+.btn {
+    text-align: left;
+}
+
+ul ul, ol ul {
+    list-style-type: none ;
 }
 .menu-content > li > a {
     padding: 14px 20px 14px 52px;
@@ -11,6 +61,7 @@
     color: #4C4C4C;
     font-weight: 500;
     position: relative;
+    margin: 0;
 }
 
 .menu-content > li > a > i {
@@ -22,6 +73,7 @@
     text-align: center;
     padding: 9px 0;
 }
+
 
 .itesoft-side-menu-left{
     left:-250px;
@@ -40,7 +92,8 @@
 
 .itesoft-all{
     display:block;
-    width:100%;
+
+    margin: 30px;
 }
 .itesoft-all.itesoft-hide{
     position:fixed;
@@ -104,9 +157,7 @@ p{
 }
 
 .itesoft-overlay {
-    left:0;
-    top:50px;
-    transition: all 0.3S ease;
+  transition: all 0.3S ease;
 }
 
 .material-design-hamburger button {
