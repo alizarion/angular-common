@@ -1,0 +1,159 @@
+.it-material-design-hamburger__icon--to-arrow {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide;
+    animation-name: it-material-design-hamburger__icon--slide;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+
+.it-material-design-hamburger__icon--to-arrow:before {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide-before;
+    animation-name: it-material-design-hamburger__icon--slide-before;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+
+.it-material-design-hamburger__icon--to-arrow:after {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide-after;
+    animation-name: it-material-design-hamburger__icon--slide-after;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+
+.it-material-design-hamburger__icon--from-arrow {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide-from;
+    animation-name: it-material-design-hamburger__icon--slide-from;
+}
+
+.it-material-design-hamburger__icon--from-arrow:before {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide-before-from;
+    animation-name: it-material-design-hamburger__icon--slide-before-from;
+}
+
+.it-material-design-hamburger__icon--from-arrow:after {
+    -webkit-animation-name: it-material-design-hamburger__icon--slide-after-from;
+    animation-name: it-material-design-hamburger__icon--slide-after-from;
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(180deg);
+        transform: rotate(180deg);
+    }
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide-before {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide-before {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide-after {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide-after {
+    0% {
+    }
+    100% {
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide-from {
+    0% {
+        -webkit-transform: rotate(-180deg);
+        transform: rotate(-180deg);
+    }
+    100% {
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide-from {
+    0% {
+        -webkit-transform: rotate(-180deg);
+        transform: rotate(-180deg);
+    }
+    100% {
+    }
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide-before-from {
+    0% {
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+    100% {
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide-before-from {
+    0% {
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+    100% {
+    }
+}
+
+@-webkit-keyframes it-material-design-hamburger__icon--slide-after-from {
+    0% {
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+    100% {
+    }
+}
+
+@keyframes it-material-design-hamburger__icon--slide-after-from {
+    0% {
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        margin: 3% 37%;
+        width: 75%;
+    }
+    100% {
+    }
+}
