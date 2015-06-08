@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html lang="en-US" ng-app="itesoft" ng-strict-di >
+<head>
+    <meta charset="utf-8" />
+    <title>Demo</title>
+
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+    <link rel='stylesheet' type='text/css' href='assets/css/itesoft.css' />
+    <link rel='stylesheet' type='text/css' href='assets/css/bootstrap.css' />
+
+    <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
+
+    <link rel='stylesheet' type='text/css' href='assets/lib/bootstrap-material-design/dist/css/material-fullpalette.min.css' />
+
+
+</head>
+<body>
+<it-side-menus>
+    <it-side-menu-header>
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Brand</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">One more separated link</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <form class="navbar-form navbar-left" role="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+              </form>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div><!-- /.navbar-collapse -->
+          </div><!-- /.container-fluid -->
+
+    </it-side-menu-header>
+
+    <it-side-menu>
+        <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a href="#">Home</a></li>
+            <li it-collapsed-item="" role="presentation"><a href="#">Profile</a>
+                <ul  class="nav nav-pills nav-stacked menu-animated ">
+                       <li role="presentation" ><a href="#">Home</a></li>
+                       <li role="presentation"><a href="#">Profile</a></li>
+                       <li role="presentation"><a href="#">Messages</a></li>
+                   </ul>
+            </li>
+            <li  role="presentation"><a href="#">Messages</a>
+
+            </li>
+
+        </ul>
+
+    </it-side-menu>
+
+
+    <it-side-menu-content>
+        <div class="row">
+            <div class="col-lg-6">
+                <h1>Jumbotron</h1>
+                <div class="jumbotron">
+
+                    <form class="form-horizontal">
+                        <fieldset>
+                            <legend>Legend</legend>
+                            <div class="form-group">
+                                <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                                <div class="col-lg-10">
+                                    <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword" class="col-lg-2 control-label">Password</label>
+                                <div class="col-lg-10">
+                                    <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox"> Checkbox
+                                        </label>
+                                    </div>
+                                    <br>
+                                    <div class="togglebutton">
+                                        <label>
+                                            <input type="checkbox" checked=""> Toggle button
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="textArea" class="col-lg-2 control-label">Textarea</label>
+                                <div class="col-lg-10">
+                                    <textarea class="form-control" rows="3" id="textArea"></textarea>
+                                    <span class="help-block">A longer block of help text that breaks onto a new line and may extend beyond one line.</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="select" class="col-lg-2 control-label">Selects</label>
+                                <div class="col-lg-10">
+                                    <select class="form-control" id="select">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </select>
+                                    <br>
+                                    <select multiple="" class="form-control">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-lg-10 col-lg-offset-2">
+                                    <button class="btn btn-default">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h1 class="header">Floating Action Button</h1>
+                <div class="jumbotron">
+                    <h2>Regular</h2>
+                    <button class="btn btn-fab btn-raised btn-material-red"><i class="mdi-navigation-arrow-forward"></i></button>
+                    <button class="btn btn-fab btn-raised btn-primary"><i class="mdi-image-edit"></i></button>
+
+                    <h2>Mini</h2>
+                    <button class="btn btn-fab btn-fab-mini btn-raised btn-sm btn-success"><i class="mdi-navigation-check"></i></button>
+                    <button class="btn btn-fab btn-fab-mini btn-raised btn-material-lightyellow"><i class="mdi-content-reply"></i></button>
+
+                    <style>
+                        #floating-action-button .btn {
+                            margin: 20px;
+                        }
+                        #floating-action-button h2 {
+                            padding: 14px;
+                            margin: 0;
+                            font-size: 16px;
+                            font-weight: 400;
+                        }
+                    </style>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+
+            <div class="col-lg-6">
+                <h1 class="header">Floating Action Button</h1>
+                <div class="jumbotron">
+                    <form action="#">
+                        <input class="form-control floating-label" type="text" placeholder="Nom"/>
+                        <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+                        <input class="form-control floating-label" type="text" placeholder="Prénom"/>
+
+                    </form>
+                </div>
+                <h2 class="header">Flat buttons</h2>
+                <div  class="jumbotron">
+
+                    <button class="btn btn-default btn-flat">Button</button>
+                    <button class="btn btn-primary btn-flat">Colored</button>
+                    <button class="btn btn-default btn-flat" disabled="">Disabled</button>
+                    <button class="btn btn-default btn-flat btn-link">Noink</button>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h2 class="header" >Raised buttons</h2>
+                <div class="jumbotron">
+
+                    <button class="btn btn-default btn-raised">Button</button>
+                    <button class="btn btn-primary btn-raised">Colored</button>
+                    <button class="btn btn-default btn-raised" disabled="">Disabled</button>
+                    <button class="btn btn-default btn-raised btn-link">Noink</button>
+                </div>
+
+
+                <h2>Custom button content</h2>
+                <div class="jumbotron">
+
+                    <button class="btn btn-primary btn-flat"><i class="mdi-navigation-check"></i> Ok</button>
+                    <button class="btn btn-default btn-flat"><i class="mdi-navigation-close"></i> Cancel</button>
+                </div>
+            </div>
+
+
+        </div>
+    </it-side-menu-content>
+</it-side-menus>
+
+<!-- JavaScript Includes -->
+
+
+
+<script src="assets/lib/angularjs/angular.js"></script>
+<script src="assets/lib/angular-route/angular-route.min.js"></script>
+
+<script src="app/demo.js"></script>
+
+
+<script src="app/composite/side-menu/sideMenus.js"></script>
+<script src="app/composite/side-menu/sideMenu.js"></script>
+
+<script src="app/composite/side-menu/sideMenuHeader.js"></script>
+<script src="app/composite/side-menu/sideMenuToggle.js"></script>
+<script src="app/composite/side-menu/sideMenuCtrl.js"></script>
+<script src="app/composite/side-menu/sideMenuContent.js"></script>
+<script src="app/composite/side-menu/collapsedItem.js"></script>
+
+
+
+
+<!--script src="lib/bootstrap-material-design/dist/js/ripples.min.js"></script-->
+
+
+
+
+</body>
+</html>

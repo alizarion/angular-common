@@ -1,7 +1,5 @@
-/**
- * @author sbn
- *
- */
+'use strict';
+
 IteSoft
     .controller("$sideMenuCtrl",['$scope', function($scope){
     $scope.showmenu=false;
