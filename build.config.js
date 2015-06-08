@@ -23,14 +23,14 @@ module.exports = {
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.
      */
     appFiles: [
-        '!src/app/**/*Test.js', // Exclude test files
-        'src/app/**/*.js'
+        '!main/app/**/*Test.js', // Exclude test files
+        'main/app/**/*.js'
     ],
     /**
      * Liste des librairies minifié à utiliser en prod
      */
     vendorFiles: [
-            'src/assets/lib/angularjs/angular.js',
-            'src/assets/lib/angular-route/angular-route.min.js'
+            'main/assets/lib/angularjs/angular.js',
+            'main/assets/lib/angular-route/angular-route.min.js'
     ]
 };

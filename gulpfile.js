@@ -20,15 +20,15 @@ var sh = require('shelljs');
 gulp.task('build', ['sass','css','uglify','vendor','html','assets']);
 
 /**
- * Compile les fichier scss en css et les dépose dans le répertoire /src/assets/css
+ * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
 gulp.task('sass', function(done) {
-    gulp.src('./src/assets/scss/**/*.scss')
+    gulp.src('./main/assets/scss/**/*.scss')
         .pipe(sass({
             errLogToConsole: true
         }))
-        .pipe(gulp.dest('./src/assets/css'))
-        .on('end', done);;
+        .pipe(gulp.dest('./main/assets/css'))
+        .on('end', done);
 
 
 });
@@ -37,13 +37,14 @@ gulp.task('sass', function(done) {
  * Minifie les fichiers css
  */
 gulp.task('css', function(done) {
-    gulp.src('./src/assets/css/*.css')
+    gulp.src('./main/assets/css/*.css')
         .pipe(concat('main.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
         }))
         .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest('./dist/assets/css')).on('end', done);
+        .pipe(gulp.dest('./dist/assets/css'))
+        .on('end', done);
 
 
 });
@@ -77,7 +78,7 @@ gulp.task('vendor', function() {
  *
  */
 gulp.task('html', function() {
-    gulp.src('./src/app/**/*.html')
+    gulp.src('./main/app/**/*.html')
         // And put it in the dist folder
         .pipe(gulp.dest('dist/app'));
 });
@@ -86,7 +87,7 @@ gulp.task('html', function() {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('assets', function() {
-    gulp.src(['!src/assets/lib/**/*.js','!src/assets/css/**/*','!src/assets/scss/**/*.scss','src/assets/**/*'])
+    gulp.src(['!main/assets/lib/**/*.js','!main/assets/css/**/*','!main/assets/scss/**/*.scss','main/assets/**/*'])
         // And put it in the dist folder
         .pipe(gulp.dest('dist/assets'));
 });
