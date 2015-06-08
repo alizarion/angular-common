@@ -5,7 +5,7 @@ $menu-bg:                         #eee !default;
 $menu-width:                      250px !default;
 $menu-header:                      50px !default;
 
-.it-sub-menu > a:after {
+.it-sub-menu > a:before {
   content: "+";
   font-size: 14px;
   float: right;
@@ -19,15 +19,15 @@ $menu-header:                      50px !default;
 }
 
 
-.it-sub-menu.toggled > a:after {
+.it-sub-menu.toggled > a:before {
   content: "-";
   float: right;
   font-size: 14px;
 
-  -webkit-transform: scale(2) rotate(-180deg);
-  -ms-transform: scale(2) rotate(-180deg);
-  -o-transform:scale(2) rotate(-180deg);
-  transform:  scale(2) rotate(-180deg);
+  -webkit-transform: scale(2) rotate(180deg);
+  -ms-transform: scale(2) rotate(180deg);
+  -o-transform:scale(2) rotate(180deg);
+  transform:  scale(2) rotate(180deg);
   -webkit-transition: all $menu-animation-speed ease;
   transition: all $menu-animation-speed ease;
 }
@@ -125,7 +125,6 @@ $menu-header:                      50px !default;
   border: none;
   float: left;
   margin-right: 15px;
-  margin-left: 15px;
   background: none;
 }
 
@@ -222,6 +221,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(180deg);
+    -ms-transform:  rotate(180deg);;
     transform: rotate(180deg);
   }
 }
@@ -231,6 +231,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(180deg);
+    -ms-transform:  rotate(180deg);;
     transform: rotate(180deg);
   }
 }
@@ -240,6 +241,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(45deg);
+    -ms-transform:  rotate(45deg);;
     transform: rotate(45deg);
     margin: 3% 37%;
     width: 75%;
@@ -251,6 +253,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(45deg);
+    -ms-transform:  rotate(45deg);;
     transform: rotate(45deg);
     margin: 3% 37%;
     width: 75%;
@@ -262,6 +265,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(-45deg);
+    -ms-transform:  rotate(-45deg);;
     transform: rotate(-45deg);
     margin: 3% 37%;
     width: 75%;
@@ -273,6 +277,7 @@ $menu-header:                      50px !default;
   }
   100% {
     -webkit-transform: rotate(-45deg);
+    -ms-transform:  rotate(-45deg);
     transform: rotate(-45deg);
     margin: 3% 37%;
     width: 75%;
@@ -282,6 +287,7 @@ $menu-header:                      50px !default;
 @-webkit-keyframes it-material-design-hamburger__icon--slide-from {
   0% {
     -webkit-transform: rotate(-180deg);
+    -ms-transform:  rotate(-180deg);
     transform: rotate(-180deg);
   }
   100% {
@@ -291,6 +297,7 @@ $menu-header:                      50px !default;
 @keyframes it-material-design-hamburger__icon--slide-from {
   0% {
     -webkit-transform: rotate(-180deg);
+    -ms-transform:  rotate(-180deg);
     transform: rotate(-180deg);
   }
   100% {
@@ -300,6 +307,7 @@ $menu-header:                      50px !default;
 @-webkit-keyframes it-material-design-hamburger__icon--slide-before-from {
   0% {
     -webkit-transform: rotate(45deg);
+    -ms-transform:  rotate(45deg);
     transform: rotate(45deg);
     margin: 3% 37%;
     width: 75%;
@@ -311,6 +319,7 @@ $menu-header:                      50px !default;
 @keyframes it-material-design-hamburger__icon--slide-before-from {
   0% {
     -webkit-transform: rotate(45deg);
+    -ms-transform:  rotate(45deg);
     transform: rotate(45deg);
     margin: 3% 37%;
     width: 75%;
@@ -322,6 +331,7 @@ $menu-header:                      50px !default;
 @-webkit-keyframes it-material-design-hamburger__icon--slide-after-from {
   0% {
     -webkit-transform: rotate(-45deg);
+    -ms-transform:  rotate(-45deg);
     transform: rotate(-45deg);
     margin: 3% 37%;
     width: 75%;
@@ -333,6 +343,7 @@ $menu-header:                      50px !default;
 @keyframes it-material-design-hamburger__icon--slide-after-from {
   0% {
     -webkit-transform: rotate(-45deg);
+    -ms-transform:  rotate(-45deg);
     transform: rotate(-45deg);
     margin: 3% 37%;
     width: 75%;

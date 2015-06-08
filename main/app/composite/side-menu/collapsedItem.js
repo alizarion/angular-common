@@ -9,13 +9,9 @@ IteSoft
                     .querySelector('ul'));
                 var link = angular.element(element[0]
                     .querySelector('a'));
-                console.log(menuItems);
-                console.log(link);
                 menuItems.addClass('it-side-menu-collapse');
                 element.addClass('it-sub-menu');
-
-                element.on('click', function () {
-                    console.log('click');
+                link.on('click', function () {
                     if (menuItems.hasClass('it-side-menu-collapse')) {
                         menuItems.removeClass('it-side-menu-collapse');
                         menuItems.addClass('it-side-menu-expanded');
