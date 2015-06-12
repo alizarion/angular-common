@@ -93,13 +93,20 @@ $menu-header:                      50px !default;
 .it-menu-content {
   position: absolute;
   top: $menu-header;
-  overflow: scroll;
+  overflow: auto;
   width: 100%;
   clear: both;
   z-index: 0;
   display: block;
   height: 100%;
   background-color: $menu-bg;
+}
+
+.it-container {
+  padding-left : 0px;
+  padding-right : 0px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .it-menu-content.it-side-menu-overlay {
@@ -109,13 +116,8 @@ $menu-header:                      50px !default;
 
 
 .it-side-menu-header.navbar {
-  background-color:#4285F4;
-  width:100%;
   height:$menu-header;
   padding:0 15px;
-  margin-bottom: 0;
-  z-index: 1000;
-  position: fixed;
 }
 
 

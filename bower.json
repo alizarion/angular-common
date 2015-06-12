@@ -11,6 +11,8 @@
     "bootstrap-material-design": "~0.3.0",
     "angularjs": "~1.4.0",
     "angular-route": "~1.4.0",
-    "angular-touch": "~1.4.0"
+    "angular-touch": "~1.4.0",
+    "bootstrap-ui": "~0.13.0",
+    "angular-bootstrap": "~0.13.0"
   }
 }

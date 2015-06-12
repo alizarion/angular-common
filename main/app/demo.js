@@ -1,4 +1,4 @@
-var IteSoft = angular.module('itesoft', ['ngRoute']);
+var IteSoft = angular.module('itesoft', ['ngRoute','ui.bootstrap']);
 
 
 
