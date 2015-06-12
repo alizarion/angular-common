@@ -1,10 +1,9 @@
 {
-  "name": "slide-menu",
+  "name": "angular-common",
   "private": "true",
   "version": "1.0.0",
-  "description": "Simple AngularJS POC.",
+  "description": "Mise en commun de directives AngularJS",
   "devDependencies": {
-    "material-design-hamburger": "~1.0.0"
   },
   "dependencies": {
     "bootstrap": "~3.3.4",
