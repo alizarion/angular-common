@@ -1,7 +1,7 @@
 {
-  "name": "slide-menu",
+  "name": "angular-common",
   "version": "1.0.0",
-  "description": "packaging-poc: An Ionic project",
+  "description": "Mise en commun de directives AngularJS",
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-concat": "^2.2.0",
