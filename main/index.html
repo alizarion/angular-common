@@ -49,7 +49,7 @@
                 </li>
               </ul>
               <form class="navbar-form navbar-left" role="search">
-                  <input type="text" class="form-control col-lg-8" placeholder="Search">
+                  <it-input it-type="text" class="col-lg-8" it-text="Search"></it-input>
               </form>
               <button type="submit" class="btn btn-primary navbar-btn">Submit</button>              
               <ul class="nav navbar-nav navbar-right">
@@ -109,17 +109,9 @@
                                 <label for="inputPassword" class="col-lg-2 control-label">Password</label>
                                 <div class="col-lg-10">
                                     <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox"> Checkbox
-                                        </label>
-                                    </div>
+                                    <it-checkbox it-text="Checkbox" it-model="user.checkbox"></it-checkbox>
                                     <br>
-                                    <div class="togglebutton">
-                                        <label>
-                                            <input type="checkbox" checked=""> Toggle button
-                                        </label>
-                                    </div>
+                                    <it-toggle it-text="Toggle button" it-model="user.toggle"></it-toggle>
                                 </div>
                             </div>
 
@@ -195,15 +187,19 @@
                 <h1 class="header">Floating Action Button</h1>
                 <div class="jumbotron">
                     <form action="#">
-                        <input class="form-control floating-label" type="text" placeholder="Nom"/>
-                        <input class="form-control floating-label" type="text" placeholder="Prénom"/>
-                        <input class="form-control floating-label" type="text" placeholder="Prénom"/>
-
+                        <div class="form-group">
+                            <it-input it-type="text" it-text="Nom" it-model="user.name"></it-input>
+                        </div>
+                        <div class="form-group">
+                            <it-input it-type="text" it-text="Prénom" it-model="user.surname"></it-input>
+                        </div>
+                        <div class="form-group">
+                            <it-input it-type="email" it-text="Email" it-model="user.email"></it-input>
+                        </div>
                     </form>
                 </div>
                 <h2 class="header">Flat buttons</h2>
                 <div  class="jumbotron">
-
                     <button class="btn btn-default btn-flat">Button</button>
                     <button class="btn btn-primary btn-flat">Colored</button>
                     <button class="btn btn-default btn-flat" disabled="">Disabled</button>
@@ -248,6 +244,9 @@
 
 <script src="app/composite/side-menu/sideMenus.js"></script>
 <script src="app/composite/side-menu/sideMenu.js"></script>
+<script src="app/composite/material-input/itInput.js"></script>
+<script src="app/composite/material-input/itToggle.js"></script>
+<script src="app/composite/material-input/itCheckbox.js"></script>
 
 <script src="app/composite/side-menu/sideMenuHeader.js"></script>
 <script src="app/composite/side-menu/sideMenuToggle.js"></script>
