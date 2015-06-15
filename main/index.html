@@ -49,7 +49,9 @@
                 </li>
               </ul>
               <form class="navbar-form navbar-left" role="search">
-                  <it-input it-type="text" class="col-lg-8" it-text="Search"></it-input>
+                  <it-input it-text="Search">
+                        <input class="form-control floating-label col-lg-8" type="text" ng-model="user.search">
+                  </it-input>
               </form>
               <button type="submit" class="btn btn-primary navbar-btn">Submit</button>              
               <ul class="nav navbar-nav navbar-right">
@@ -188,13 +190,19 @@
                 <div class="jumbotron">
                     <form action="#">
                         <div class="form-group">
-                            <it-input it-type="text" it-text="Nom" it-model="user.name"></it-input>
+                            <it-input>
+                                <input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
+                            </it-input>
                         </div>
                         <div class="form-group">
-                            <it-input it-type="text" it-text="Prénom" it-model="user.surname"></it-input>
+                            <it-input>
+                                <input class="form-control floating-label" type="text" placeholder="Prénom" ng-model="user.surname">
+                            </it-input>
                         </div>
                         <div class="form-group">
-                            <it-input it-type="email" it-text="Email" it-model="user.email"></it-input>
+                            <it-input>
+                                <input class="form-control floating-label" type="email" placeholder="Email" ng-model="user.email">
+                            </it-input>
                         </div>
                     </form>
                 </div>

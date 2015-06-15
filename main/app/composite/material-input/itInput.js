@@ -7,30 +7,37 @@ IteSoft
             transclude : true,
             link : function (scope, element, attrs ) {
                 var input = angular.element(element[0].querySelector('input'));
-                input.attr('placeholder',scope.text);
-                input.attr('type',scope.type);
                 if (input.hasClass('floating-label')) {
                     var placeholder = input.attr('placeholder');
                     input.attr('placeholder', '').removeClass('floating-label');
-                    input.after('<div class=floating-label>' + placeholder + '</div');
+                    if (scope.itText == undefined) {
+                        input.after('<div class="floating-label">' + placeholder + '</div');
+                    } else  {
+                        input.after('<div class="floating-label">' + scope.itText + '</div');
+                    }
                 }
 
                 if (input.attr('data-hint')) {
-                    input.after('<div class=hint>' + $this.attr('data-hint') + '</div>');
+                    input.after('<div class="hint">' + $this.attr('data-hint') + '</div>');
                 }
 
                 if (input.val() === null || input.val() == "undefined" || input.val() === "") {
                     input.addClass('empty');
                 }
+                input.on('key change', function() {
+                    if (input.val() === null || input.val() == "undefined" || input.val() === "") {
+                        input.addClass('empty');
+                    } else {
+                        input.removeClass('empty');
+                    }
+                });
             },
-            scope: {
-                type: '@itType',
-                text: '@itText',
-                itModel : '='
-            },            
+            scope : {
+                itText : '@'
+            },
             template :
                 '<div class="form-control-wrapper">'
-               +'<input class="form-control floating-label" ng-model="itModel"/>'
+               +'<ng-transclude></ng-transclude>'
                +'</div>'
                +'<span class="material-input"></span>' 
         }
