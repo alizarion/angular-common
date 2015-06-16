@@ -71,8 +71,7 @@ gulp.task('sass', function(done) {
  * Minifie les fichiers css
  */
 gulp.task('css', function(done) {
-    gulp.src(buildConfig.vendorCssFiles
-        .concat(['./main/assets/css/*.css']))
+    gulp.src(buildConfig.vendorCssFiles)
         .pipe(concat('main.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
@@ -89,7 +88,7 @@ gulp.task('css', function(done) {
  */
 gulp.task('fonts', function() {
     gulp.src(
-        'main/assets/lib/**/dist/fonts/*'
+        'main/assets/lib/**/fonts/*'
     )
         .pipe(flatten())
         .pipe(gulp.dest('./dist/assets/fonts'));
