@@ -6,237 +6,360 @@
 
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
+
     <link rel='stylesheet' type='text/css' href='assets/css/itesoft.css' />
     <link rel='stylesheet' type='text/css' href='assets/lib/bootstrap/dist/css/bootstrap.min.css' />
+
+    <link rel='stylesheet' type='text/css' href='assets/css/material.css' />
+    <link rel='stylesheet' type='text/css' href='assets/lib/components-font-awesome/css/font-awesome.min.css' />
+
     <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
 
-    <link rel='stylesheet' type='text/css' href='assets/lib/bootstrap-material-design/dist/css/material-fullpalette.min.css' />
     <link rel='stylesheet' type='text/css' href='assets/lib/angular-bootstrap/ui-bootstrap-csp.css' />
-    <link rel='stylesheet' type='text/css' href='assets/lib/bootstrap-material-design/dist/css/material.min.css' />
 
 
 </head>
 <body>
 <it-side-menus>
-    <it-side-menu-header>
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+<it-side-menu-header>
+    <div class="container-fluid">
+
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#">Brand</a>
-            </div>
+            </button>
+            <a class="navbar-brand" href="#">Brand</a>
+        </div>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="navbar-collapse collapse" collapse="navCollapsed">
-              <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="navbar-collapse collapse" collapse="navCollapsed">
+            <ul class="nav navbar-nav">
+                <li ><a href="#">Link <span class="sr-only">(current)</span></a></li>
                 <li><a href="#">Link</a></li>
                 <li class="dropdown" dropdown>
-                  <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Action</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li><a href="#">Something else here</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">Separated link</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">One more separated link</a></li>
-                  </ul>
+                    <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+                    </ul>
                 </li>
-              </ul>
-              <form class="navbar-form navbar-left" role="search">
-                  <it-input it-text="Search">
-                        <input class="form-control floating-label col-lg-8" type="text" ng-model="user.search">
-                  </it-input>
-              </form>
-              <button type="submit" class="btn btn-primary navbar-btn">Submit</button>              
-              <ul class="nav navbar-nav navbar-right">
+            </ul>
+            <form class="navbar-form navbar-left" role="search">
+                <it-input it-text="Search">
+                    <input class="form-control floating-label col-lg-8" type="text" ng-model="user.search">
+                </it-input>
+            </form>
+            <button type="submit" class="btn btn-primary navbar-btn">Submit</button>
+            <ul class="nav navbar-nav navbar-right">
                 <li><a href="#">Link</a></li>
                 <li class="dropdown" dropdown>
-                  <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Action</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li><a href="#">Something else here</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">Separated link</a></li>
-                  </ul>
+                    <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
                 </li>
-              </ul>
-            </div><!-- /.navbar-collapse -->
-          </div><!-- /.container-fluid -->
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
 
-    </it-side-menu-header>
+</it-side-menu-header>
 
-    <it-side-menu>
-        <ul class="nav nav-pills nav-stacked">
-            <li role="presentation"><a href="#">Home</a></li>
-            <li it-collapsed-item="" role="presentation">
-                <a href="#"><h4>Profile</h4></a>
-                <ul  class="nav nav-pills nav-stacked menu-animated ">
-                       <li role="presentation" ><a href="#">Home</a></li>
-                       <li role="presentation"><a href="#">Profile</a></li>
-                       <li role="presentation"><a href="#">Messages</a></li>
-                   </ul>
-            </li>
-            <li  role="presentation"><a href="#">Messages</a>
+<it-side-menu>
+    <ul class="nav navbar-nav nav-pills nav-stacked list-group">
+        <li class="active" role="presentation"><a href="#"><h4><i class="fa fa-home fa-fw"></i>&nbsp; Home</h4></a></li>
+        <li it-collapsed-item="" role="presentation">
+            <a href="#"><h4><i class="fa fa-book fa-fw"></i>&nbsp; Profile</h4></a>
+            <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
+                <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Profile</a></li>
+                <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Messages</a></li>
+            </ul>
+        </li>
+        <li role="presentation"><a href="#"><h4><i class="fa fa-cog fa-fw"></i>&nbsp; Messages</h4></a>
+        </li>
 
-            </li>
+    </ul>
 
-        </ul>
-
-    </it-side-menu>
+</it-side-menu>
 
 
-    <it-side-menu-content>
-        <div class="row">
-            <div class="col-lg-6">
-                <h1>Jumbotron</h1>
-                <div class="jumbotron">
+<it-side-menu-content>
 
-                    <form class="form-horizontal">
-                        <fieldset>
-                            <legend>Legend</legend>
-                            <div class="form-group">
-                                <label for="inputEmail" class="col-lg-2 control-label">Email</label>
-                                <div class="col-lg-10">
-                                    <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="inputPassword" class="col-lg-2 control-label">Password</label>
-                                <div class="col-lg-10">
-                                    <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-                                    <it-checkbox it-text="Checkbox" it-model="user.checkbox"></it-checkbox>
-                                    <br>
-                                    <it-toggle it-text="Toggle button" it-model="user.toggle"></it-toggle>
-                                </div>
-                            </div>
+<div class="row">
+    <div class="col-lg-6">
+        <h1>Jumbotron</h1>
+        <div class="jumbotron">
 
-                            <div class="form-group">
-                                <label for="textArea" class="col-lg-2 control-label">Textarea</label>
-                                <div class="col-lg-10">
-                                    <textarea class="form-control" rows="3" id="textArea"></textarea>
-                                    <span class="help-block">A longer block of help text that breaks onto a new line and may extend beyond one line.</span>
-                                </div>
-                            </div>
+            <form class="form-horizontal">
+                <fieldset>
+                    <legend>Legend</legend>
+                    <div class="form-group">
+                        <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                        <div class="col-lg-10">
+                            <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword" class="col-lg-2 control-label">Password</label>
+                        <div class="col-lg-10">
+                            <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                            <it-checkbox it-text="Checkbox" it-model="user.checkbox"></it-checkbox>
+                            <br>
+                            <it-toggle it-text="Toggle button" it-model="user.toggle"></it-toggle>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">Selects</label>
-                                <div class="col-lg-10">
-                                    <select class="form-control" id="select">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </select>
-                                    <br>
-                                    <select multiple="" class="form-control">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-lg-10 col-lg-offset-2">
-                                    <button class="btn btn-default">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
+                    <div class="form-group">
+                        <label for="textArea" class="col-lg-2 control-label">Textarea</label>
+                        <div class="col-lg-10">
+                            <textarea class="form-control" rows="3" id="textArea"></textarea>
+                            <span class="help-block">A longer block of help text that breaks onto a new line and may extend beyond one line.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="select" class="col-lg-2 control-label">Selects</label>
+                        <div class="col-lg-10">
+                            <select class="form-control" id="select">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                            <br>
+                            <select multiple="" class="form-control">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10 col-lg-offset-2">
+                            <button class="btn btn-default">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <h1 class="header">Floating Action Button</h1>
+        <div class="jumbotron">
+            <h2>Regular</h2>
+            <button class="btn btn-fab btn-raised btn-material-red"><i class="mdi-navigation-arrow-forward"></i></button>
+            <button class="btn btn-fab btn-raised btn-primary"><i class="mdi-image-edit"></i></button>
+
+            <h2>Mini</h2>
+            <button class="btn btn-fab btn-fab-mini btn-raised btn-sm btn-success"><i class="mdi-navigation-check"></i></button>
+            <button class="btn btn-fab btn-fab-mini btn-raised btn-material-lightyellow"><i class="mdi-content-reply"></i></button>
+
+            <style>
+                #floating-action-button .btn {
+                    margin: 20px;
+                }
+                #floating-action-button h2 {
+                    padding: 14px;
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: 400;
+                }
+            </style>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+
+
+    <div class="col-lg-6">
+        <h1 class="header">Floating Action Button</h1>
+        <div class="jumbotron">
+            <form action="#">
+                <div class="form-group">
+                    <it-input>
+                        <input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
+                    </it-input>
                 </div>
-            </div>
-            <div class="col-lg-6">
-                <h1 class="header">Floating Action Button</h1>
-                <div class="jumbotron">
-                    <h2>Regular</h2>
-                    <button class="btn btn-fab btn-raised btn-material-red"><i class="mdi-navigation-arrow-forward"></i></button>
-                    <button class="btn btn-fab btn-raised btn-primary"><i class="mdi-image-edit"></i></button>
-
-                    <h2>Mini</h2>
-                    <button class="btn btn-fab btn-fab-mini btn-raised btn-sm btn-success"><i class="mdi-navigation-check"></i></button>
-                    <button class="btn btn-fab btn-fab-mini btn-raised btn-material-lightyellow"><i class="mdi-content-reply"></i></button>
-
-                    <style>
-                        #floating-action-button .btn {
-                            margin: 20px;
-                        }
-                        #floating-action-button h2 {
-                            padding: 14px;
-                            margin: 0;
-                            font-size: 16px;
-                            font-weight: 400;
-                        }
-                    </style>
+                <div class="form-group">
+                    <it-input>
+                        <input class="form-control floating-label" type="text" placeholder="Prénom" ng-model="user.surname">
+                    </it-input>
                 </div>
+                <div class="form-group">
+                    <it-input>
+                        <input class="form-control floating-label" type="email" placeholder="Email" ng-model="user.email">
+                    </it-input>
+                </div>
+            </form>
+        </div>
+        <h2 class="header">Flat buttons</h2>
+        <div  class="jumbotron">
+            <button class="btn btn-default btn-flat">Button</button>
+            <button class="btn btn-primary btn-flat">Colored</button>
+            <button class="btn btn-default btn-flat" disabled="">Disabled</button>
+            <button class="btn btn-default btn-flat btn-link">Noink</button>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <h2 class="header" >Raised buttons</h2>
+        <div class="jumbotron">
+            <a href="javascript:void(0)" class="btn btn-default">Default</a>
+            <a href="javascript:void(0)" class="btn btn-primary">Primary</a>
+            <a href="javascript:void(0)" class="btn btn-success">Success</a>
+            <a href="javascript:void(0)" class="btn btn-info">Info</a>
+            <a href="javascript:void(0)" class="btn btn-warning">Warning</a>
+            <a href="javascript:void(0)" class="btn btn-danger">Danger</a>
+            <a href="javascript:void(0)" class="btn btn-link">Link</a>
+            <button class="btn btn-default btn-raised">Button</button>
+            <button class="btn btn-primary btn-raised">Colored</button>
+            <button class="btn btn-default btn-raised" disabled="">Disabled</button>
+            <button class="btn btn-default btn-raised btn-link">Noink</button>
+        </div>
+
+
+        <h2>Custom button content</h2>
+        <div class="jumbotron">
+
+            <button class="btn btn-primary btn-flat"><i class="mdi-navigation-check"></i> Ok</button>
+            <button class="btn btn-default btn-flat"><i class="mdi-navigation-close"></i> Cancel</button>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="row ">
+    <div class="col-lg-12">
+        <div class="card jumbotron">
+            <h1 class="header">Progress Bar</h1>
+            <h2>Basic</h2>
+            <div class="progress">
+                <div class="progress-bar" style="width: 60%;"></div>
             </div>
+
+            <h2>Contextual alternatives</h2>
+            <div class="progress">
+                <div class="progress-bar progress-bar-info" style="width: 20%"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-success" style="width: 40%"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar progress-bar-danger" style="width: 80%"></div>
+            </div>
+
+            <h2>Striped</h2>
+            <div class="progress progress-striped">
+                <div class="progress-bar progress-bar-info" style="width: 20%"></div>
+            </div>
+            <div class="progress progress-striped">
+                <div class="progress-bar progress-bar-success" style="width: 40%"></div>
+            </div>
+            <div class="progress progress-striped">
+                <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+            </div>
+            <div class="progress progress-striped">
+                <div class="progress-bar progress-bar-danger" style="width: 80%"></div>
+            </div>
+
+            <h2>Animated</h2>
+            <div class="progress progress-striped active">
+                <div class="progress-bar" style="width: 45%"></div>
+            </div>
+
+            <h2>Stacked</h2>
+            <div class="progress">
+                <div class="progress-bar progress-bar-success" style="width: 35%"></div>
+                <div class="progress-bar progress-bar-warning" style="width: 20%"></div>
+                <div class="progress-bar progress-bar-danger" style="width: 10%"></div>
+            </div>
+
+            <style>
+                #progress-bar h2 {
+                    font-size: 18.7199993133545px;
+                    font-weight: bold;
+                    margin-bottom: 30px;
+                }
+            </style>
 
         </div>
 
-        <div class="row">
-
-
-            <div class="col-lg-6">
-                <h1 class="header">Floating Action Button</h1>
-                <div class="jumbotron">
-                    <form action="#">
-                        <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
-                            </it-input>
-                        </div>
-                        <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="text" placeholder="Prénom" ng-model="user.surname">
-                            </it-input>
-                        </div>
-                        <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="email" placeholder="Email" ng-model="user.email">
-                            </it-input>
-                        </div>
-                    </form>
-                </div>
-                <h2 class="header">Flat buttons</h2>
-                <div  class="jumbotron">
-                    <button class="btn btn-default btn-flat">Button</button>
-                    <button class="btn btn-primary btn-flat">Colored</button>
-                    <button class="btn btn-default btn-flat" disabled="">Disabled</button>
-                    <button class="btn btn-default btn-flat btn-link">Noink</button>
-                </div>
+    </div>
+    </div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card jumbotron">
+            <h1 class="header">Toggle Button</h1>
+            <div class="togglebutton">
+                <label>
+                    Wi-Fi
+                    <input type="checkbox" checked="">
+                </label>
             </div>
-            <div class="col-lg-6">
-                <h2 class="header" >Raised buttons</h2>
-                <div class="jumbotron">
-
-                    <button class="btn btn-default btn-raised">Button</button>
-                    <button class="btn btn-primary btn-raised">Colored</button>
-                    <button class="btn btn-default btn-raised" disabled="">Disabled</button>
-                    <button class="btn btn-default btn-raised btn-link">Noink</button>
-                </div>
-
-
-                <h2>Custom button content</h2>
-                <div class="jumbotron">
-
-                    <button class="btn btn-primary btn-flat"><i class="mdi-navigation-check"></i> Ok</button>
-                    <button class="btn btn-default btn-flat"><i class="mdi-navigation-close"></i> Cancel</button>
-                </div>
+            <div class="togglebutton">
+                <label>
+                    Bluetooth
+                    <input type="checkbox">
+                </label>
             </div>
 
+            <h1 class="header">Toggle Button Variations</h1>
+            <div class="togglebutton togglebutton-material-pink">
+                <label>
+                    Wi-Fi
+                    <input type="checkbox" checked="">
+                </label>
+            </div>
+            <div class="togglebutton togglebutton-material-deep-orange">
+                <label>
+                    Bluetooth
+                    <input type="checkbox" checked="">
+                </label>
+            </div>
 
+            <style>
+                #toggle-button h2 {
+                    font-size: 18.7199993133545px;
+                    font-weight: bold;
+                    margin-bottom: 30px;
+                    margin-top: 50px;
+                }
+                #toggle-button .togglebutton label {
+                    margin: 20px 10px;
+                    width: 200px;
+                }
+                #toggle-button .togglebutton .toggle {
+                    float: right;
+                }
+            </style>
         </div>
-    </it-side-menu-content>
+    </div>
+</div>
+
+
+</it-side-menu-content>
 </it-side-menus>
 
 <!-- JavaScript Includes -->
