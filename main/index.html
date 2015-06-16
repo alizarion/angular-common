@@ -15,7 +15,7 @@
     <link rel='stylesheet' type='text/css' href='assets/lib/angular-bootstrap/ui-bootstrap-csp.css' />
 
 </head>
-<body>
+<body ng-controller="MainCtrl">
 <it-side-menus>
     <it-side-menu-header>
         <div class="container-fluid">
@@ -118,9 +118,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="textArea" class="col-lg-2 control-label">Textarea</label>
                                 <div class="col-lg-10">
-                                    <textarea class="form-control" rows="3" id="textArea"></textarea>
+                                    <textarea it-input class="form-control floating-label" rows="3" id="textArea" placeholder="textarea floating label" ng-model="user.text"></textarea>
                                     <span class="help-block">A longer block of help text that breaks onto a new line and may extend beyond one line.</span>
                                 </div>
                             </div>
@@ -190,19 +189,13 @@
                 <div class="jumbotron">
                     <form action="#">
                         <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
-                            </it-input>
+                            <input it-input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
                         </div>
                         <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="text" placeholder="Prénom" ng-model="user.surname">
-                            </it-input>
+                            <input it-input class="form-control floating-label" type="text" it-text="user.name" ng-model="user.surname">
                         </div>
                         <div class="form-group">
-                            <it-input>
-                                <input class="form-control floating-label" type="email" placeholder="Email" ng-model="user.email">
-                            </it-input>
+                            <input it-input class="form-control floating-label" type="email" placeholder="Email" it-error="user.error" ng-model="user.email">
                         </div>
                     </form>
                 </div>
