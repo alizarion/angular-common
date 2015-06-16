@@ -10,6 +10,7 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
+var footer = require('gulp-footer');
 var header = require('gulp-header');
 var ghPages = require('gulp-gh-pages');
 var clean = require('gulp-clean');
@@ -102,6 +103,8 @@ gulp.task('fonts', function() {
 gulp.task('uglify', function() {
     return gulp.src(buildConfig.appFiles)
         .pipe(concat('app.min.js'))
+        .pipe(header(buildConfig.closureStart))
+        .pipe(footer(buildConfig.closureEnd))
         .pipe(uglify())
         .pipe(header(buildConfig.banner,{pkg:pkg}))
         .pipe(gulp.dest('dist/app'));
