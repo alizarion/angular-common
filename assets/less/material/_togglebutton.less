@@ -55,13 +55,13 @@
   }
 
   // Switch bg on
-  .generic-variations(~" label input[type=checkbox]:checked + .toggle", @primary, {
+  .generic-variations(~" label input[type=checkbox]:checked + .toggle", @success, {
     background-color: fade(@material-color, 50%);
   });
   // Handle on
-  .variations(~" label input[type=checkbox]:checked + .toggle:after", background-color, @primary);
+  .variations(~" label input[type=checkbox]:checked + .toggle:after", background-color, @success);
   // Ripple on
-  .generic-variations(~" label input[type=checkbox]:checked + .toggle:active:after", @primary, {
+  .generic-variations(~" label input[type=checkbox]:checked + .toggle:active:after", @success, {
     box-shadow: 0 1px 3px 1px rgba(0,0,0,0.4), 0 0 0 15px fade(@material-color, 10%);
   });
 }
