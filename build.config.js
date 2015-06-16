@@ -32,8 +32,6 @@ module.exports = {
      */
     vendorCssFiles : [
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
-        'main/assets/lib/bootstrap-material-design/dist/css/material.min.css',
-        'main/assets/lib/bootstrap-material-design/dist/css/material-fullpalette.min.css',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css'
 
     ],
