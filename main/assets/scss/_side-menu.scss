@@ -116,8 +116,7 @@ $menu-header:                      50px !default;
 }
 
 .it-menu-content {
-  position: relative;
-  margin-top: 60px;
+  position: absolute;
   left: 0px;
   overflow: auto;
   width: 100%;

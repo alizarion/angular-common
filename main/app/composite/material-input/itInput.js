@@ -37,19 +37,21 @@ IteSoft
                     input.attr('placeholder', '').removeClass('floating-label');
                 }
                 // Check if error message is set
-                input.after('<div class="alert alert-danger ng-hide"></div>');
+                input.after('<div class="alert alert-danger" style="display:none;"></div>');
                 scope.$watch('itError', function(value) {
                     var elementDiv = input[0].offsetParent.children;
                     angular.forEach(elementDiv, function(divHtml) {
                         var div = angular.element(divHtml);     
                         if (div.hasClass('alert')) {
                             div.text(value);
-                            if (value != '') {
+                            if (value != '' && value != undefined) {
                                 div.removeClass('ng-hide');
                                 div.addClass('ng-show');
+                                div.css('display','block');
                             } else {
                                 div.removeClass('ng-show');
                                 div.addClass('ng-hide');
+                                div.css('display','none');
                             }
                         }
                     });
