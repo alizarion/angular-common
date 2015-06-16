@@ -15,6 +15,8 @@ var ghPages = require('gulp-gh-pages');
 var clean = require('gulp-clean');
 var runSequence = require('run-sequence');
 var buildConfig = require('./build.config.js');
+
+var less = require('gulp-less');
 var flatten = require('gulp-flatten');
 var sh = require('shelljs');
 
@@ -22,10 +24,22 @@ var sh = require('shelljs');
  * Execute les actions de build dans l'ordre
  */
 gulp.task('build', function(callback) {
-    runSequence('clean','sass',
+    runSequence('clean','sass','less',
         'css',
         ['uglify','vendor','html','assets','fonts'],
         callback);
+});
+
+
+/**
+ *
+ * Supression des fichiers du precedent build
+ *
+ */
+gulp.task('less', function () {
+    return gulp.src('./main/assets/less/material/material.less')
+        .pipe(less())
+        .pipe(gulp.dest('./main/assets/css'));
 });
 
 /**
@@ -57,8 +71,8 @@ gulp.task('sass', function(done) {
  * Minifie les fichiers css
  */
 gulp.task('css', function(done) {
-    gulp.src(['./main/assets/css/*.css']
-        .concat(buildConfig.vendorCssFiles))
+    gulp.src(buildConfig.vendorCssFiles
+        .concat(['./main/assets/css/*.css']))
         .pipe(concat('main.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
@@ -134,7 +148,7 @@ gulp.task('deploy', function() {
  * Obsérve les modification des scss et compile en css
  */
 gulp.task('watch', function() {
-    gulp.watch(paths.sass, ['sass']);
+    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
 });
 
 /**
