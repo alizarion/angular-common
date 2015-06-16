@@ -24,13 +24,25 @@ module.exports = {
      */
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
+        'main/app/app.module.js',
         'main/app/**/*.js'
     ],
     /**
      * Liste des librairies minifié à utiliser en prod
      */
-    vendorFiles: [
-            'main/assets/lib/angularjs/angular.js',
-            'main/assets/lib/angular-route/angular-route.min.js'
+    vendorCssFiles : [
+        'main/assets/css/itesoft.css',
+        'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
+        'main/assets/css/material.css',
+        'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
+        'main/assets/lib/components-font-awesome/css/font-awesome.min.css'
+
+
+    ],
+    vendorJavascriptFiles: [
+        'main/assets/lib/angularjs/angular.js',
+        'main/assets/lib/angular-route/angular-route.min.js',
+        'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
+        'main/assets/lib/angular-bootstrap/ui-bootstrap.min.js'
     ]
 };

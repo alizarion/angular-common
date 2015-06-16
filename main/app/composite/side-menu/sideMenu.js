@@ -8,8 +8,10 @@ IteSoft
             controller : '$sideMenuCtrl',
             transclude : true,
             template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                    '<nav ng-transclude ></nav>' +
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated " ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="nav navbar navbar-inverse">'+
+                    '<nav class="" ng-transclude ></nav>' +
+                    '</div>'+
                 '</div>'
 
 

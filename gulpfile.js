@@ -11,13 +11,47 @@ var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var header = require('gulp-header');
+var ghPages = require('gulp-gh-pages');
+var clean = require('gulp-clean');
+var runSequence = require('run-sequence');
 var buildConfig = require('./build.config.js');
+
+var less = require('gulp-less');
+var flatten = require('gulp-flatten');
 var sh = require('shelljs');
 
 /**
  * Execute les actions de build dans l'ordre
  */
-gulp.task('build', ['sass','css','uglify','vendor','html','assets']);
+gulp.task('build', function(callback) {
+    runSequence('clean','sass','less',
+        'css',
+        ['uglify','vendor','html','assets','fonts'],
+        callback);
+});
+
+
+/**
+ *
+ * Supression des fichiers du precedent build
+ *
+ */
+gulp.task('less', function () {
+    return gulp.src('./main/assets/less/material/material.less')
+        .pipe(less())
+        .pipe(gulp.dest('./main/assets/css'));
+});
+
+/**
+ *
+ * Supression des fichiers du precedent build
+ *
+ */
+gulp.task('clean', function () {
+    return gulp.src(['dist/assets','dist/app'],
+        {force: true})
+        .pipe(clean());
+});
 
 /**
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
@@ -37,7 +71,7 @@ gulp.task('sass', function(done) {
  * Minifie les fichiers css
  */
 gulp.task('css', function(done) {
-    gulp.src('./main/assets/css/*.css')
+    gulp.src(buildConfig.vendorCssFiles)
         .pipe(concat('main.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
@@ -45,8 +79,19 @@ gulp.task('css', function(done) {
         .pipe(rename({ extname: '.min.css' }))
         .pipe(gulp.dest('./dist/assets/css'))
         .on('end', done);
+});
 
 
+
+/**
+ * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
+ */
+gulp.task('fonts', function() {
+    gulp.src(
+        'main/assets/lib/**/fonts/*'
+    )
+        .pipe(flatten())
+        .pipe(gulp.dest('./dist/assets/fonts'));
 });
 
 
@@ -67,7 +112,7 @@ gulp.task('uglify', function() {
  * et les déplace
  */
 gulp.task('vendor', function() {
-    return gulp.src(buildConfig.vendorFiles)
+    return gulp.src(buildConfig.vendorJavascriptFiles)
         .pipe(concat('vendor.min.js'))
         .pipe(gulp.dest('dist/assets/lib'));
 });
@@ -93,11 +138,16 @@ gulp.task('assets', function() {
 });
 
 
+gulp.task('deploy', function() {
+    return gulp.src('./dist/**/*')
+        .pipe(ghPages());
+});
+
 /**
  * Obsérve les modification des scss et compile en css
  */
 gulp.task('watch', function() {
-    gulp.watch(paths.sass, ['sass']);
+    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
 });
 
 /**
@@ -125,3 +175,5 @@ gulp.task('git-check', function(done) {
     }
     done();
 });
+
+
