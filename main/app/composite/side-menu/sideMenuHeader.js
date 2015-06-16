@@ -24,8 +24,8 @@ IteSoft
             },
             template :
                 '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse" >' +
-                    '<section class="it-material-design-hamburger">' +
-                        '<button it-menu-toggle ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                    '<section class="it-material-design-hamburger nav navbar-nav">' +
+                        '<button it-menu-toggle ng-click="toggleMenu()" class="it-material-design-hamburger__icon navbar-btn">' +
                             '<span class="menu-animated it-material-design-hamburger__layer "> ' +
                             '</span>' +
                         '</button>' +
