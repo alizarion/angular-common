@@ -15,6 +15,7 @@
 <it-side-menus>
 <it-side-menu-header>
     <div class="container-fluid">
+
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
@@ -29,7 +30,7 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="navbar-collapse collapse" collapse="navCollapsed">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li ><a href="#">Link <span class="sr-only">(current)</span></a></li>
                 <li><a href="#">Link</a></li>
                 <li class="dropdown" dropdown>
                     <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
@@ -69,18 +70,17 @@
 </it-side-menu-header>
 
 <it-side-menu>
-    <ul class="nav navbar-nav nav-pills nav-stacked ">
-        <li role="presentation"><a href="#">Home</a></li>
+    <ul class="nav navbar-nav nav-pills nav-stacked list-group">
+        <li class="active" role="presentation"><a href="#"><h4><i class="fa fa-home fa-fw"></i>&nbsp; Home</h4></a></li>
         <li it-collapsed-item="" role="presentation">
-            <a href="#"><i class="fa fa-home fa-fw"></i><h4>Profile</h4></a>
-            <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated">
-                <li role="presentation" ><a href="#">Home</a></li>
-                <li role="presentation"><a href="#">Profile</a></li>
-                <li role="presentation"><a href="#">Messages</a></li>
+            <a href="#"><h4><i class="fa fa-book fa-fw"></i>&nbsp; Profile</h4></a>
+            <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
+                <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Profile</a></li>
+                <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Messages</a></li>
             </ul>
         </li>
-        <li  role="presentation"><a href="#">Messages</a>
-
+        <li role="presentation"><a href="#"><h4><i class="fa fa-cog fa-fw"></i>&nbsp; Messages</h4></a>
         </li>
 
     </ul>
@@ -214,7 +214,13 @@
     <div class="col-lg-6">
         <h2 class="header" >Raised buttons</h2>
         <div class="jumbotron">
-
+            <a href="javascript:void(0)" class="btn btn-default">Default</a>
+            <a href="javascript:void(0)" class="btn btn-primary">Primary</a>
+            <a href="javascript:void(0)" class="btn btn-success">Success</a>
+            <a href="javascript:void(0)" class="btn btn-info">Info</a>
+            <a href="javascript:void(0)" class="btn btn-warning">Warning</a>
+            <a href="javascript:void(0)" class="btn btn-danger">Danger</a>
+            <a href="javascript:void(0)" class="btn btn-link">Link</a>
             <button class="btn btn-default btn-raised">Button</button>
             <button class="btn btn-primary btn-raised">Colored</button>
             <button class="btn btn-default btn-raised" disabled="">Disabled</button>
