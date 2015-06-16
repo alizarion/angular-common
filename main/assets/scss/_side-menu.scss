@@ -5,9 +5,33 @@ $menu-bg:                         #eee !default;
 $menu-width:                      250px !default;
 $menu-header:                      50px !default;
 
+/* make sidebar nav vertical */
+
+.it-side-menu .navbar{
+  height: 100%;
+}
+
+.it-side-menu   .navbar .navbar-collapse {
+  padding: 0;
+  max-height: none;
+}
+.it-side-menu .navbar ul {
+  float: none;
+  display: block;
+}
+.it-side-menu .navbar li {
+  float: none;
+  display: block;
+}
+.it-side-menu .navbar li a {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
 .it-sub-menu > a:before {
   content: "+";
   font-size: 14px;
+  margin-top: 10px;
   float: right;
   -webkit-transform:scale(2)  rotate(90deg);
   -ms-transform: scale(2) rotate(90deg);
@@ -23,7 +47,7 @@ $menu-header:                      50px !default;
   content: "-";
   float: right;
   font-size: 14px;
-
+  margin-top: 14px;
   -webkit-transform: scale(2) rotate(180deg);
   -ms-transform: scale(2) rotate(180deg);
   -o-transform:scale(2) rotate(180deg);
@@ -34,6 +58,7 @@ $menu-header:                      50px !default;
 
 .it-sub-menu .it-sub-menu-collapsed> a:after {
   content: "+";
+  margin-top: 10px;
   -webkit-transform: scale(1);
   -ms-transform: scale(1);
   -o-transform: scale(1);
@@ -54,7 +79,7 @@ $menu-header:                      50px !default;
   overflow: hidden;
 }
 
-.menu-animated {
+.it-menu-animated {
   -webkit-transition: all $menu-animation-speed ease;
   transition: all $menu-animation-speed ease;
 }
@@ -69,15 +94,15 @@ $menu-header:                      50px !default;
 
 .it-side-menu-expanded{
   max-height: 900px;
-  margin-left: 15px;
   opacity: 1;
   -webkit-transition :  all $menu-animation-speed ease-in-out;
   transition: all $menu-animation-speed ease-in-out;
 
 }
 
-.it-sub-menu{
 
+.nav.navbar-nav.it-side-menu-expanded > li {
+  margin-left: 15px;
 }
 
 
@@ -357,7 +382,7 @@ $menu-header:                      50px !default;
 .it-material-design-hamburger__layer:before, .it-material-design-hamburger__layer:after {
   display: block;
   width: inherit;
-  height: 3px;
+  height: 2px;
   border-radius: 2px;
   position: absolute;
   background: inherit;
@@ -371,9 +396,10 @@ $menu-header:                      50px !default;
 
 .it-material-design-hamburger__layer {
   display: block;
-  width: 30px;
-  height: 3px;
-  border-radius: 2px;
+  width: 20px;
+  height: 2px;
+
+  border-radius: 1px;
   background: #ffffff;
   position: relative;
   -webkit-animation-duration: $menu-animation-speed;
