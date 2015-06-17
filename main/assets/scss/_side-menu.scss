@@ -2,7 +2,7 @@
 
 $menu-animation-speed:            300ms !default;
 $menu-bg:                         #eee !default;
-$menu-width:                      250px !default;
+$menu-width:                      260px !default;
 $menu-header:                      50px !default;
 
 /* make sidebar nav vertical */
@@ -28,10 +28,8 @@ $menu-header:                      50px !default;
   padding-bottom: 12px;
 }
 
-.it-sub-menu > a:before {
+.it-sub-menu > a > h4:before{
   content: "+";
-  font-size: 14px;
-  margin-top: 10px;
   float: right;
   -webkit-transform:scale(2)  rotate(90deg);
   -ms-transform: scale(2) rotate(90deg);
@@ -43,11 +41,9 @@ $menu-header:                      50px !default;
 }
 
 
-.it-sub-menu.toggled > a:before {
+.it-sub-menu.toggled > a > h4:before {
   content: "-";
   float: right;
-  font-size: 14px;
-  margin-top: 14px;
   -webkit-transform: scale(2) rotate(180deg);
   -ms-transform: scale(2) rotate(180deg);
   -o-transform:scale(2) rotate(180deg);
@@ -55,20 +51,6 @@ $menu-header:                      50px !default;
   -webkit-transition: all $menu-animation-speed ease;
   transition: all $menu-animation-speed ease;
 }
-
-.it-sub-menu .it-sub-menu-collapsed> a:after {
-  content: "+";
-  margin-top: 10px;
-  -webkit-transform: scale(1);
-  -ms-transform: scale(1);
-  -o-transform: scale(1);
-  transform: scale(1);
-  float: right;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
 
 .it-side-menu-group{
   top: 0;
@@ -398,7 +380,6 @@ $menu-header:                      50px !default;
   display: block;
   width: 20px;
   height: 2px;
-
   border-radius: 1px;
   background: #ffffff;
   position: relative;
