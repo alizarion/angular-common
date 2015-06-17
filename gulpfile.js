@@ -27,7 +27,7 @@ var sh = require('shelljs');
 gulp.task('build', function(callback) {
     runSequence('clean','sass','less',
         'css',
-        ['uglify','vendor','html','assets','fonts'],
+        ['uglify','vendor','html','assets','fonts','demo-js'],
         callback);
 });
 
@@ -108,6 +108,16 @@ gulp.task('uglify', function() {
         .pipe(uglify())
         .pipe(header(buildConfig.banner,{pkg:pkg}))
         .pipe(gulp.dest('dist/app'));
+});
+
+/**
+ * Concat et Minifie les fichiers de demo
+ */
+gulp.task('demo-js', function() {
+    return gulp.src('main/app/**/*.demo.js')
+        .pipe(concat('demo.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('dist'));
 });
 
 /**
