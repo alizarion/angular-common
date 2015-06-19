@@ -10,6 +10,7 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
+var footer = require('gulp-footer');
 var header = require('gulp-header');
 var ghPages = require('gulp-gh-pages');
 var clean = require('gulp-clean');
@@ -26,7 +27,7 @@ var sh = require('shelljs');
 gulp.task('build', function(callback) {
     runSequence('clean','sass','less',
         'css',
-        ['uglify','vendor','html','assets','fonts'],
+        ['uglify','vendor','html','assets','fonts','demo-js'],
         callback);
 });
 
@@ -102,9 +103,21 @@ gulp.task('fonts', function() {
 gulp.task('uglify', function() {
     return gulp.src(buildConfig.appFiles)
         .pipe(concat('app.min.js'))
+        .pipe(header(buildConfig.closureStart))
+        .pipe(footer(buildConfig.closureEnd))
         .pipe(uglify())
         .pipe(header(buildConfig.banner,{pkg:pkg}))
         .pipe(gulp.dest('dist/app'));
+});
+
+/**
+ * Concat et Minifie les fichiers de demo
+ */
+gulp.task('demo-js', function() {
+    return gulp.src('main/app/**/*.demo.js')
+        .pipe(concat('demo.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('dist'));
 });
 
 /**

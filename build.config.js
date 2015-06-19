@@ -24,6 +24,7 @@ module.exports = {
      */
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
+        '!main/app/**/*.demo.js', // Exclude demo files
         'main/app/app.module.js',
         'main/app/**/*.js'
     ],
@@ -31,11 +32,12 @@ module.exports = {
      * Liste des librairies minifié à utiliser en prod
      */
     vendorCssFiles : [
-        'main/assets/css/itesoft.css',
-        'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
-        'main/assets/css/material.css',
+        'main/assets/lib/components-font-awesome/css/font-awesome.min.css',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
-        'main/assets/lib/components-font-awesome/css/font-awesome.min.css'
+        'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
+        'main/assets/css/itesoft.css',
+        'main/assets/css/material.css'
+
 
 
     ],
