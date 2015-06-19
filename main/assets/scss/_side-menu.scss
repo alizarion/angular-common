@@ -5,12 +5,12 @@ $menu-bg:                         #eee !default;
 $menu-width:                      260px !default;
 $menu-header:                      50px !default;
 
-/* make sidebar nav vertical */
+/* make sidebar nav vertical
 
 .it-side-menu .navbar{
   height: 100%;
 }
-
+*/
 .it-side-menu   .navbar .navbar-collapse {
   padding: 0;
   max-height: none;
@@ -28,7 +28,7 @@ $menu-header:                      50px !default;
   padding-bottom: 12px;
 }
 
-.it-sub-menu > a > h4:before{
+.it-sub-menu > a > h5:before{
   content: "+";
   float: right;
   -webkit-transform:scale(2)  rotate(90deg);
@@ -41,7 +41,7 @@ $menu-header:                      50px !default;
 }
 
 
-.it-sub-menu.toggled > a > h4:before {
+.it-sub-menu.toggled > a > h5:before {
   content: "-";
   float: right;
   -webkit-transform: scale(2) rotate(180deg);
@@ -178,6 +178,7 @@ $menu-header:                      50px !default;
 
 .it-side-menu-left.it-side-menu-slide{
   left:0;
+  overflow-y: scroll;
 }
 
 .it-side-menu-right{
