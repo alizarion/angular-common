@@ -37,12 +37,12 @@ IteSoft
                     input.attr('placeholder', '').removeClass('floating-label');
                 }
                 // Check if error message is set
-                input.after('<div class="alert alert-danger" style="display:none;"></div>');
+                input.after('<small class="text-danger" style="display:none;"></small>');
                 scope.$watch('itError', function(value) {
                     var elementDiv = input[0].offsetParent.children;
                     angular.forEach(elementDiv, function(divHtml) {
                         var div = angular.element(divHtml);     
-                        if (div.hasClass('alert')) {
+                        if (div.hasClass('text-danger')) {
                             div.text(value);
                             if (value != '' && value != undefined) {
                                 div.removeClass('ng-hide');

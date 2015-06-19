@@ -2,7 +2,7 @@
 
 IteSoft
 
-    .directive('itMenuToggle', ['$animate', function($animate) {
+    .directive('itMenuToggle', ['$animate', '$rootScope', function($animate, $rootScope) {
         return  {
             restrict: 'E',
             compile: ['scope','element','attrs',function (scope, element, attrs) {
