@@ -2,8 +2,11 @@
 
 IteSoft
     .controller("$sideMenuCtrl",['$scope', function($scope){
-    $scope.showmenu=false;
-    $scope.toggleMenu = function(){
-        $scope.showmenu=($scope.showmenu) ? false : true;
-    }
-}]);
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+        }
+    }]);
