@@ -5,12 +5,15 @@ $menu-bg:                         #eee !default;
 $menu-width:                      260px !default;
 $menu-header:                      50px !default;
 
-/* make sidebar nav vertical
+/* make sidebar nav vertical*/
 
 .it-side-menu .navbar{
-  height: 100%;
+min-height : 100%;
 }
-*/
+.it-side-menu .nav .navbar-nav{
+  margin: 0;
+}
+
 .it-side-menu   .navbar .navbar-collapse {
   padding: 0;
   max-height: none;
@@ -23,7 +26,9 @@ $menu-header:                      50px !default;
   float: none;
   display: block;
 }
-.it-side-menu .navbar li a {
+
+
+.it-side-menu .navbar .navbar-nav>li>a {
   padding-top: 12px;
   padding-bottom: 12px;
 }
@@ -140,7 +145,7 @@ $menu-header:                      50px !default;
 .it-material-design-hamburger__icon {
   padding: 2.3rem 0rem;
   border-radius: 2px;
-
+  height: 60px;
   cursor: pointer;
 }
 
