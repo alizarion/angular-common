@@ -21,8 +21,8 @@
 </head>
 <body ng-controller="MainCtrl">
 <it-side-menus>
-    <it-side-menu-header>
-        <div class="container-fluid">
+<it-side-menu-header it-button-menu="showCaseData.displayMenuButton">
+    <div class="container-fluid">
 
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -77,16 +77,16 @@
 
     <it-side-menu>
     <ul class="nav navbar-nav nav-pills nav-stacked list-group">
-        <li class="active" role="presentation"><a href="#"><h4><i class="fa fa-home fa-fw"></i>&nbsp; Home</h4></a></li>
+        <li class="active" role="presentation"><a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Home</h5></a></li>
             <li it-collapsed-item="" role="presentation">
-            <a href="#"><h4><i class="fa fa-book fa-fw"></i>&nbsp; Profile</h4></a>
+            <a href="#"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Profile</h5></a>
             <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
                 <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
                 <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Profile</a></li>
                 <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp;Messages</a></li>
                    </ul>
             </li>
-        <li role="presentation"><a href="#"><h4><i class="fa fa-cog fa-fw"></i>&nbsp; Messages</h4></a>
+        <li role="presentation"><a href="#"><h5><i class="fa fa-cog fa-fw"></i>&nbsp; Messages</h5></a>
             </li>
 
         </ul>
@@ -114,9 +114,9 @@
                                 <label for="inputPassword" class="col-lg-2 control-label">Password</label>
                                 <div class="col-lg-10">
                                     <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-                                    <input it-checkbox type="checkbox" it-text="Checkbox" ng-model="user.checkbox">
+                                    <input it-checkbox type="checkbox" it-text="Checkbox" ng-model="showCaseData.displayMenuButton ">
                                     <br>
-                                    <input  it-toggle type="checkbox" it-text="Toggle button" ng-model="user.toggle">
+                                    <input  it-toggle type="checkbox" it-text="Toggle button" ng-model="showCaseData.displayMenuButton ">
                                 </div>
                             </div>
 
@@ -128,8 +128,9 @@
                             </div>
 
                             <div class="form-group">
+                                <label for="select" class="col-lg-2 control-label">Selects</label>
                                 <div class="col-lg-10">
-                                    <select it-input class="form-control floating-label" id="select" it-text="Selects" ng-model="user.select">
+                                    <select class="form-control" id="select">
                                         <option>1</option>
                                         <option>2</option>
                                         <option>3</option>
@@ -194,7 +195,7 @@
                             <input it-input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
                         </div>
                         <div class="form-group">
-                            <input it-input class="form-control floating-label" type="text" it-text="Prénom" it-error="user.name" ng-model="user.surname">
+                            <input it-input class="form-control floating-label" type="text" it-text="Prénom" ng-model="user.surname">
                         </div>
                         <div class="form-group">
                             <input it-input class="form-control floating-label" type="email" placeholder="Email" it-error="user.error" ng-model="user.email">
@@ -298,43 +299,7 @@
 
             </div>
             </div>
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card jumbotron">
-                        <h1 class="header">Toggle Button</h1>
-                        <div class="togglebutton">
-                            <input it-toggle it-text="Wi-Fi" type="checkbox" checked="">
-                        </div>
-                        <div class="togglebutton">
-                             <input it-toggle it-text="Bluetooth" type="checkbox">
-                        </div>
 
-                        <h1 class="header">Toggle Button Variations</h1>
-                        <div class="togglebutton togglebutton-material-pink">
-                           <input it-toggle it-text="Wi-Fi" type="checkbox" checked="">
-                        </div>
-                        <div class="togglebutton togglebutton-material-deep-orange">
-                            <input it-toggle it-text="Bluetooth" type="checkbox" checked="">
-                        </div>
-
-                        <style>
-                            #toggle-button h2 {
-                                font-size: 18.7199993133545px;
-                                font-weight: bold;
-                                margin-bottom: 30px;
-                                margin-top: 50px;
-                            }
-                            #toggle-button .togglebutton label {
-                                margin: 20px 10px;
-                                width: 200px;
-                            }
-                            #toggle-button .togglebutton .toggle {
-                                float: right;
-                            }
-                        </style>
-                    </div>
-                </div>
-            </div>
         </div>
       </div>
     </it-side-menu-content>

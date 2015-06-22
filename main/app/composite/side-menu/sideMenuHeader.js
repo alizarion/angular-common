@@ -15,17 +15,21 @@ IteSoft
                     .querySelector('.it-material-design-hamburger__icon'));
 
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                button.on('click', function () {
 
+                var _toggleButton = function(){
                     if (child.hasClass('it-material-design-hamburger__icon--to-arrow')) {
                         child.removeClass('it-material-design-hamburger__icon--to-arrow');
                         child.addClass('it-material-design-hamburger__icon--from-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'opened');                          
+                        $rootScope.$broadcast('it-sidemenu-state', 'opened');
                     } else {
                         child.removeClass('it-material-design-hamburger__icon--from-arrow');
                         child.addClass('it-material-design-hamburger__icon--to-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'closed');                          
+                        $rootScope.$broadcast('it-sidemenu-state', 'closed');
                     }
+                };
+
+                button.on('click', function () {
+                    _toggleButton();
                 });
 
                 if(attrs.itButtonMenu){
@@ -34,6 +38,12 @@ IteSoft
                 }
                 scope.$watch(attrs.itButtonMenu, function(newValue, oldValue) {
                     scope.itButtonMenu = newValue;
+                    console.log('itButtonMenu value change',newValue)
+                    if(newValue){
+                        _toggleButton();
+                        console.log(' sideMenuCtrl.hideSideMenu()',newValue)
+                        sideMenuCtrl.hideSideMenu();
+                    }
                 });
 
             },
