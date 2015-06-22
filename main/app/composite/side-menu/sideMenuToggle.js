@@ -5,6 +5,7 @@ IteSoft
     .directive('itMenuToggle', ['$animate', function($animate) {
         return  {
             restrict: 'E',
+            require : '^itSideMenus',
             compile: ['scope','element','attrs',function (scope, element, attrs) {
                 var child = angular.element(element[0]
                     .querySelector('.it-material-design-hamburger__layer'));
