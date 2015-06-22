@@ -8,7 +8,7 @@ $menu-header:                      50px !default;
 /* make sidebar nav vertical*/
 
 .it-side-menu .navbar{
-min-height : 100%;
+min-height : 96%;
 }
 .it-side-menu .nav .navbar-nav{
   margin: 0;
@@ -183,7 +183,7 @@ min-height : 100%;
 
 .it-side-menu-left.it-side-menu-slide{
   left:0;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .it-side-menu-right{
