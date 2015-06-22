@@ -3,19 +3,17 @@
 IteSoft
     .directive('itCheckbox',function(){
         return {
-            restrict: 'E',
+            restrict: 'A',
             transclude : true,
+            replace : true,
             link : function (scope, element, attrs ) {
-                
+                var input = angular.element(element[0]);
+                input.wrap('<div class="checkbox"></div>');
+                input.wrap('<label></label>');
+                input.after('<span class="checkbox-material"><span class="check"></span></span>&nbsp;'+scope.itText);
             },
             scope: {
-            	itModel: '=',
             	itText: '@'
-            },
-            template :
-               '<div class="checkbox"><label>'
-               +'<input type="checkbox" ng-model="itModel"/>'
-               +'<span class="checkbox-material"><span class="check"></span></span> {{ itText }}' 
-               +'</label></div>'               
+            }               
         }
 });

@@ -1,7 +1,7 @@
 'use strict';
 
 IteSoft
-    .directive('itSideMenuHeader',function(){
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
         return {
             restrict: 'E',
             require : '^itSideMenus',
@@ -20,10 +20,11 @@ IteSoft
                     if (child.hasClass('it-material-design-hamburger__icon--to-arrow')) {
                         child.removeClass('it-material-design-hamburger__icon--to-arrow');
                         child.addClass('it-material-design-hamburger__icon--from-arrow');
+                        $rootScope.$broadcast('it-sidemenu-state', 'opened');                          
                     } else {
                         child.removeClass('it-material-design-hamburger__icon--from-arrow');
                         child.addClass('it-material-design-hamburger__icon--to-arrow');
-
+                        $rootScope.$broadcast('it-sidemenu-state', 'closed');                          
                     }
                 });
 
@@ -48,4 +49,4 @@ IteSoft
                     '</div>' +
                 '</nav>'
         }
-    });
+    }]);

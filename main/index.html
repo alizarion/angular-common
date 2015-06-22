@@ -114,9 +114,9 @@
                                 <label for="inputPassword" class="col-lg-2 control-label">Password</label>
                                 <div class="col-lg-10">
                                     <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-                                    <it-checkbox it-text="Checkbox" it-model="user.checkbox"></it-checkbox>
+                                    <input it-checkbox type="checkbox" it-text="Checkbox" ng-model="user.checkbox">
                                     <br>
-                                    <it-toggle it-text="Toggle button" it-model="user.toggle"></it-toggle>
+                                    <input  it-toggle type="checkbox" it-text="Toggle button" ng-model="user.toggle">
                                 </div>
                             </div>
 
@@ -128,9 +128,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="select" class="col-lg-2 control-label">Selects</label>
                                 <div class="col-lg-10">
-                                    <select class="form-control" id="select">
+                                    <select it-input class="form-control floating-label" id="select" it-text="Selects" ng-model="user.select">
                                         <option>1</option>
                                         <option>2</option>
                                         <option>3</option>
@@ -195,7 +194,7 @@
                             <input it-input class="form-control floating-label" type="text" placeholder="Nom" ng-model="user.name">
                         </div>
                         <div class="form-group">
-                            <input it-input class="form-control floating-label" type="text" it-text="Prénom" ng-model="user.surname">
+                            <input it-input class="form-control floating-label" type="text" it-text="Prénom" it-error="user.name" ng-model="user.surname">
                         </div>
                         <div class="form-group">
                             <input it-input class="form-control floating-label" type="email" placeholder="Email" it-error="user.error" ng-model="user.email">
@@ -304,30 +303,18 @@
                     <div class="card jumbotron">
                         <h1 class="header">Toggle Button</h1>
                         <div class="togglebutton">
-                            <label>
-                                Wi-Fi
-                                <input type="checkbox" checked="">
-                            </label>
+                            <input it-toggle it-text="Wi-Fi" type="checkbox" checked="">
                         </div>
                         <div class="togglebutton">
-                            <label>
-                                Bluetooth
-                                <input type="checkbox">
-                            </label>
+                             <input it-toggle it-text="Bluetooth" type="checkbox">
                         </div>
 
                         <h1 class="header">Toggle Button Variations</h1>
                         <div class="togglebutton togglebutton-material-pink">
-                            <label>
-                                Wi-Fi
-                                <input type="checkbox" checked="">
-                            </label>
+                           <input it-toggle it-text="Wi-Fi" type="checkbox" checked="">
                         </div>
                         <div class="togglebutton togglebutton-material-deep-orange">
-                            <label>
-                                Bluetooth
-                                <input type="checkbox" checked="">
-                            </label>
+                            <input it-toggle it-text="Bluetooth" type="checkbox" checked="">
                         </div>
 
                         <style>
