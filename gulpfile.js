@@ -16,7 +16,7 @@ var ghPages = require('gulp-gh-pages');
 var clean = require('gulp-clean');
 var runSequence = require('run-sequence');
 var buildConfig = require('./build.config.js');
-
+var gulpDocs = require('gulp-ngdocs');
 var less = require('gulp-less');
 var flatten = require('gulp-flatten');
 var sh = require('shelljs');
@@ -88,10 +88,11 @@ gulp.task('css', function(done) {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('fonts', function() {
-    gulp.src(
-        'main/assets/lib/**/fonts/*'
-    )
+    gulp.src('main/assets/lib/**/fonts/*')
         .pipe(flatten())
+        .pipe(gulp.dest('./main/assets/fonts'));
+
+    gulp.src('./main/assets/fonts/**/*')
         .pipe(gulp.dest('./dist/assets/fonts'));
 });
 
@@ -108,6 +109,19 @@ gulp.task('uglify', function() {
         .pipe(uglify())
         .pipe(header(buildConfig.banner,{pkg:pkg}))
         .pipe(gulp.dest('dist/app'));
+});
+
+gulp.task('docs', function () {
+    var options = {
+        scripts: ['dist/app/app.min.js','dist/assets/lib/vendor.min.js'],
+        html5Mode: false,
+        startPage: '/api',
+        title: "Itesoft Awesome Docs",
+        titleLink: "/api"
+    };
+    return gulp.src(buildConfig.appFiles)
+        .pipe(gulpDocs.process(options))
+        .pipe(gulp.dest('./docs'));
 });
 
 /**
@@ -162,6 +176,8 @@ gulp.task('deploy', function() {
 gulp.task('watch', function() {
     gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
 });
+
+
 
 /**
  * Lance l'installation des dépendences GIT

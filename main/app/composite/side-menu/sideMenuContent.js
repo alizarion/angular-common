@@ -1,6 +1,21 @@
 'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
 
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
 IteSoft
+
     .directive('itSideMenuContent',function(){
         return {
             restrict : 'ECA',

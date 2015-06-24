@@ -8,7 +8,7 @@ $menu-header:                      50px !default;
 /* make sidebar nav vertical*/
 
 .it-side-menu .navbar{
-min-height : 96%;
+  min-height : 100%;
 }
 .it-side-menu .nav .navbar-nav{
   margin: 0;
@@ -21,6 +21,16 @@ min-height : 96%;
 .it-side-menu .navbar ul {
   float: none;
   display: block;
+}
+
+.it-side-menu .it-sidebar-inner  .navbar {
+  width: $menu-width;
+}
+
+.it-side-menu .it-sidebar-inner {
+  height: 100%;
+  overflow-y: auto;
+  width: $menu-width + 50px;
 }
 .it-side-menu .navbar li {
   float: none;

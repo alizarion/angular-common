@@ -3,16 +3,18 @@
 @import
 
   //Side menu
-"side-menu";
+"nav-tabs",
+"side-menu",
+"colors",
+"variables";
 
 html {
   padding-top : 70px;
-  overflow : hidden;
-  -ms-overflow-style: none;
-  overflow: -moz-scrollbars-none;
 }
 
-::-webkit-scrollbar {
-  display: none;
+.it-view-header hr {
+  border-top: 2px solid $primary!important;
 }
-
+.it-view-header h2 {
+  color: $primary !important;
+}
