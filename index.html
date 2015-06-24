@@ -77,15 +77,14 @@
             <li it-collapsed-item="" role="presentation">
                 <a href="#"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
                 <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
-                    <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Typography</a></li>
-                    <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Widgets</a></li>
+                    <li role="presentation" ><a  href="#/datatable"><i class="fa  fa-fw"></i>&nbsp; Normal</a></li>
+                    <li role="presentation"><a  href="#/table"><i class="fa  fa-fw"></i>&nbsp; DataTable</a></li>
                 </ul>
             </li>
             <li it-collapsed-item="" role="presentation">
                 <a href="#"><h5><i class="fa fa-book fa-fw"></i>&nbsp;Forms</h5></a>
                 <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
+                    <li role="presentation" ><a href="#/form/inputs"><i class="fa  fa-fw"></i>&nbsp; Inputs</a></li>
                     <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Typography</a></li>
                     <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Widgets</a></li>
                 </ul>
@@ -110,15 +109,16 @@
 
     <it-side-menu-content>
         <div class="container-fluid">
-            <h2>{{$root.pageTitle}}</h2>
-            <hr/>
+            <div class="it-view-header" ng-hide="false">
+                <h2>{{$root.pageTitle}}</h2>
+                <hr/>
+            </div>
             <ng-view></ng-view>
 
         </div>
 
     </it-side-menu-content>
 </it-side-menus>
-
 
 
 <!-- les librairies minifier  concaténé-->
