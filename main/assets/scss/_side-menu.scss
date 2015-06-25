@@ -103,9 +103,6 @@ $menu-header:                      50px !default;
 }
 
 
-.it-menu-content > li .it-side-menu-collapsable {
-
-}
 
 
 .it-menu-collapsable {
@@ -113,8 +110,10 @@ $menu-header:                      50px !default;
 }
 
 .it-menu-content {
-  position: absolute;
-  left: 0px;
+  position: relative;
+  margin-right :0;
+  float: right;
+  padding-left: 0px;
   overflow: auto;
   width: 100%;
   clear: both;
@@ -132,8 +131,7 @@ $menu-header:                      50px !default;
 }
 
 .it-menu-content.it-side-menu-overlay {
-  left:$menu-width;
-  width: 87%;
+  padding-left:$menu-width;
 }
 
 
@@ -184,7 +182,7 @@ $menu-header:                      50px !default;
   display:block;
   box-shadow: -1px 0 2px rgba(0,0,0,.2),1px 0 2px rgba(0,0,0,.2);
   background-color: $menu-bg;
-
+  padding-bottom: $menu-header ;
 }
 
 .it-side-menu-left{
