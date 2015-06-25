@@ -1,0 +1,107 @@
+<it-side-menus>
+    <it-side-menu-header it-button-menu="showCaseData.displayMenuButton">
+        <div class="container-fluid">
+
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Brand</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="navbar-collapse collapse" collapse="navCollapsed">
+                <ul class="nav navbar-nav">
+                    <li><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown" dropdown>
+                        <a href="" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form class="navbar-form navbar-left" role="search">
+                    <input it-input placeholder="Search" class="form-control floating-label col-lg-8" type="text" ng-model="user.search">
+                </form>
+                <button type="submit" class="btn btn-primary navbar-btn">Submit</button>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown" dropdown>
+                        <a href="#" class="dropdown-toggle" role="button" aria-expanded="false" dropdown-toggle>Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+
+    </it-side-menu-header>
+
+    <it-side-menu>
+        <ul class="nav navbar-nav nav-pills nav-stacked list-group">
+            <li class="active" role="presentation"><a href=""><h5><i class="fa fa-home fa-fw"></i>&nbsp; Home</h5></a></li>
+            <li>
+                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+
+            </li>
+            <li it-collapsed-item="" role="presentation">
+                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+                <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                    <li role="presentation" ><a  href="#/datatable"><i class="fa  fa-fw"></i>&nbsp; Normal</a></li>
+                    <li role="presentation"><a  href="#/table"><i class="fa  fa-fw"></i>&nbsp; DataTable</a></li>
+                </ul>
+            </li>
+            <li it-collapsed-item="" role="presentation">
+                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp;Forms</h5></a>
+                <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                    <li role="presentation" ><a href="#/form/inputs"><i class="fa  fa-fw"></i>&nbsp; Inputs</a></li>
+                    <li role="presentation"><a href="#/form/checkbox"><i class="fa  fa-fw"></i>&nbsp; Checkbox</a></li>
+                    <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Widgets</a></li>
+                </ul>
+            </li>
+            <li it-collapsed-item="" role="presentation">
+                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp;Charts</h5></a>
+                <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                    <li role="presentation" ><a href="#"><i class="fa  fa-fw"></i>&nbsp; Home</a></li>
+                    <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Typography</a></li>
+                    <li role="presentation"><a href="#"><i class="fa  fa-fw"></i>&nbsp; Widgets</a></li>
+                </ul>
+            </li>
+            <li role="presentation">
+                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp;Classes</h5></a>
+            </li>
+
+
+        </ul>
+
+    </it-side-menu>
+
+
+    <it-side-menu-content>
+        <div class="container-fluid">
+            <div class="it-view-header" ng-hide="false">
+                <h2>{{$root.pageTitle}}</h2>
+                <hr/>
+            </div>
+            <ng-view></ng-view>
+
+        </div>
+
+    </it-side-menu-content>
+</it-side-menus>
