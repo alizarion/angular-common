@@ -29,10 +29,8 @@
  * </it-side-menus>
  * ```
  * @example
-    <doc:example>
-    <doc:source>
-
-    <file name="demo.html">
+    <example module="itesoft">
+    <file name="index.html">
 
     <it-side-menus>
 
@@ -49,8 +47,8 @@
 
     </it-side-menus>
      </file>
- </doc:source>
- </doc:example>
+ </file>
+ </example>
  */
 IteSoft
     .directive('itSideMenus',function(){

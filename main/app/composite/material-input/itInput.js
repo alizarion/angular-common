@@ -1,5 +1,48 @@
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itInput
+ * @module itesoft
+ * @restrict ECA
+ *
+ * @description
+ * Floating labels are just like Stacked Labels,
+ * except that their labels animate, or "float" up whe
+ * n text is entered in the input.
+ *
+ *
+ * ```html
+ *   <div class="form-group">
+ *       <input it-input
+ *              class="form-control
+ *              floating-label"
+ *              type="text"
+ *              it-text="Email"
+ *              ng-model="user.email">
+ *   </div>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+            <div ng-controller="HomeCtrl">
+                <div class="form-group">
+                    <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+                </div>
+                <div class="form-group">
+                    <input it-input class="form-control floating-label" type="text" it-text="Prénom" ng-model="user.firstName">
+                </div>
+            </div>
+        </file>
+        <file name="controller.js">
+            angular.module('itesoft').controller('HomeCtrl',['$scope', function($scope) {
+                  $scope.user = {
+                      email : 'test@itesoft.com',
+                      firstName :''
+                     };
+            }]);
+        </file>
+    </example>
+ */
 IteSoft
     .directive('itInput',function(){
         return {
@@ -26,7 +69,7 @@ IteSoft
                         scope.$watch('itText', function(value) {
                             var elementDiv = input[0].offsetParent.children;
                             angular.forEach(elementDiv, function(divHtml) {
-                                var div = angular.element(divHtml);     
+                                var div = angular.element(divHtml);
                                 if (div.hasClass('floating-label')) {
                                     div.text(value);
                                 }
@@ -41,7 +84,7 @@ IteSoft
                 scope.$watch('itError', function(value) {
                     var elementDiv = input[0].offsetParent.children;
                     angular.forEach(elementDiv, function(divHtml) {
-                        var div = angular.element(divHtml);     
+                        var div = angular.element(divHtml);
                         if (div.hasClass('text-danger')) {
                             div.text(value);
                             if (value != '' && value != undefined) {
@@ -55,7 +98,7 @@ IteSoft
                             }
                         }
                     });
-                });                    
+                });
                 if (input.val() === null || input.val() == "undefined" || input.val() === "") {
                     input.addClass('empty');
                 }
