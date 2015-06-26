@@ -30,7 +30,6 @@ gulp.task('build', function(callback) {
     runSequence('clean','sass','less',
         'css',
         ['uglify','vendor','html','assets','fonts','demo-js'],
-        'docs',
         callback);
 });
 
