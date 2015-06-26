@@ -14,6 +14,7 @@
     "components-font-awesome": "~4.3.0",
     "bootstrap-material-design": "~0.3.0",
     "google-code-prettify": "~1.0.4",
-    "marked": "~0.3.3"
+    "marked": "~0.3.3",
+    "angular-sanitize": "~1.4.1"
   }
 }
