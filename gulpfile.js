@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Les dépendences du builder
  */
@@ -52,7 +51,7 @@ gulp.task('less', function () {
  *
  */
 gulp.task('clean', function () {
-    return gulp.src(['dist/assets','dist/app'],
+    return gulp.src(['dist/assets','dist/app','docs'],
         {force: true})
         .pipe(clean());
 });
@@ -106,7 +105,7 @@ gulp.task('fonts', function() {
  */
 gulp.task('uglify', function() {
     return gulp.src(buildConfig.appFiles)
-        .pipe(concat('app.min.js'))
+        .pipe(concat('lib.min.js'))
         .pipe(header(buildConfig.closureStart))
         .pipe(footer(buildConfig.closureEnd))
         .pipe(uglify())
@@ -116,8 +115,15 @@ gulp.task('uglify', function() {
 
 gulp.task('docs', function () {
     var options = {
-        scripts: ['dist/app/app.min.js','dist/assets/lib/vendor.min.js'],
+        scripts:buildConfig.vendorJavascriptFiles.concat(buildConfig.docsJavascriptDependencies),
+        styles: ['dist/assets/css/main.min.css'],
         html5Mode: false,
+        loadDefaults: {
+            angularAnimate: false,
+            angular:false,
+            marked:false,
+            prettify:false
+        },
         startPage: '/api',
         title: "Itesoft Awesome Docs",
         titleLink: "/api"

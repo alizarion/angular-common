@@ -1,5 +1,27 @@
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCheckbox
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * The checkbox is no different than the HTML checkbox input,
+ * except it's styled differently.
+ *
+ *
+ * ```html
+ *   <input it-checkbox type="checkbox" it-text="Checkbox" >
+ * ```
+ * @example
+    <example module="itesoft" >
+        <file name="index.html">
+            <div>
+                 <input it-checkbox type="checkbox" it-text="Checkbox">
+            </div>
+        </file>
+    </example>
+ */
 IteSoft
     .directive('itCheckbox',function(){
         return {
