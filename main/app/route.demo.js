@@ -1,5 +1,5 @@
 "use strict";
-angular.module('itesoft').config(['$routeProvider',
+angular.module('itesoft-showcase').config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
             when('/home', {
@@ -11,6 +11,11 @@ angular.module('itesoft').config(['$routeProvider',
                 templateUrl: 'app/view/typography/typographyView.html',
                 controller: 'HomeCtrl',
                 title : 'Typography pages'
+            }).
+            when('/form/checkbox', {
+                templateUrl: 'app/view/form/checkboxView.html',
+                controller: 'HomeCtrl',
+                title : 'Checkboxs'
             }).
             when('/datatable', {
                 templateUrl: 'app/view/table/simpleTables.html',

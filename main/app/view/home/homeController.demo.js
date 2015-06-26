@@ -1,4 +1,4 @@
-angular.module('itesoft').controller('HomeCtrl',['$scope', function($scope) {
+angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
     $scope.user = {
         email : 'test@itesoft.com'
     };

@@ -35,16 +35,29 @@ module.exports = {
         'main/assets/lib/components-font-awesome/css/font-awesome.min.css',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
+        'main/assets/lib/google-code-prettify/bin/prettify.min.css',
         'main/assets/css/itesoft.css',
         'main/assets/css/material.css'
 
 
 
     ],
+    assetsDistFiles : [
+        '!main/assets/lib/**/*.js',
+        '!main/assets/lib/**/*.html',
+        '!main/assets/lib/**/*.md',
+        '!main/assets/lib/**/*.txt',
+        '!main/assets/lib/**/*.json',
+        '!main/assets/css/**/*',
+        '!main/assets/scss/**/*.scss',
+        '!main/assets/scss/**/*.less',
+        'main/assets/**/*'
+    ],
     vendorJavascriptFiles: [
         'main/assets/lib/angularjs/angular.js',
         'main/assets/lib/angular-route/angular-route.min.js',
+        'main/assets/lib/angular-sanitize/angular-sanitize.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
-        'main/assets/lib/angular-bootstrap/ui-bootstrap.min.js'
+        'main/assets/lib/google-code-prettify/bin/prettify.min.js'
     ]
 };
