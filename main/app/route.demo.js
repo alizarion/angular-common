@@ -27,6 +27,16 @@ angular.module('itesoft').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'Form inputs'
             }).
+            when('/views/masterdetail', {
+                templateUrl: 'app/view/views/masterDetailView.html',
+                controller: 'MasterDetailController',
+                title : 'Master Detail View'
+            }).
+            when('/views/masterdetailv2', {
+                templateUrl: 'app/view/views/masterDetail2View.html',
+                controller: 'MasterDetail2Controller',
+                title : 'Master Detail View V2'
+            }).
             otherwise({
                 redirectTo: '/home',
                 title : 'Home Page'
