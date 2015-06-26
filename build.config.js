@@ -43,8 +43,13 @@ module.exports = {
     ],
     vendorJavascriptFiles: [
         'main/assets/lib/angularjs/angular.js',
-        'main/assets/lib/angular-route/angular-route.min.js',
-        'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
-        'main/assets/lib/angular-bootstrap/ui-bootstrap.min.js'
+        'main/assets/lib/angular-route/angular-route.min.js'
+    ],
+
+    docsJavascriptDependencies : [
+        'main/assets/lib/angular-animate/angular-animate.min.js',
+        'main/assets/lib/marked/lib/marked.js',
+        'main/assets/lib/google-code-prettify/bin/prettify.min.js',
+        'dist/app/lib.min.js'
     ]
 };
