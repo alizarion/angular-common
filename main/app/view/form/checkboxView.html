@@ -1,0 +1,47 @@
+<div class="jumbotron ">
+    <form class="form-horizontal">
+        <h1 class="header">Checkbox</h1>
+
+
+        <p class="hint">Notify me about updates to apps or games that I've downloaded</p>
+
+        <tabset>
+            <tab heading="Result">
+                <div class="jumbotron ">
+                    <div class="checkbox">
+                        <label>
+                            <input  type="checkbox"
+                                    ng-model="showCaseData.displayMenuButton "
+                                    class="ng-valid ng-isolate-scope ng-dirty ng-touched ng-valid-parse">
+                                        <span class="checkbox-material">
+                                            <span class="check">
+
+                                            </span>
+                                        </span>&nbsp;Checkbox</label>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="CSS">
+                <div class="jumbotron ">
+                    <pre it-prettyprint=""  class="prettyprint lang-html">
+                        <label class="toggle">
+                            <input type="checkbox">
+                            <div class="track">
+                                <div class="handle"></div>
+                            </div>
+                        </label>
+                    </pre>
+                </div>
+            </tab>
+            <tab heading="Directive">
+                <div class="jumbotron ">
+                    <pre it-prettyprint=""  class="prettyprint lang-html">
+                        <input it-checkbox type="checkbox" it-text="Checkbox" ng-model="my.model">
+                    </pre>
+                </div>
+            </tab>
+
+        </tabset>
+
+    </form>
+</div>

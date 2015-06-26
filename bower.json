@@ -13,6 +13,7 @@
     "angular-bootstrap": "~0.13.0",
     "components-font-awesome": "~4.3.0",
     "bootstrap-material-design": "~0.3.0",
+    "google-code-prettify": "~1.0.4",
     "marked": "~0.3.3"
   }
 }

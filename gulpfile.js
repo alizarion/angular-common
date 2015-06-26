@@ -20,6 +20,8 @@ var gulpDocs = require('gulp-ngdocs');
 var less = require('gulp-less');
 var flatten = require('gulp-flatten');
 var sh = require('shelljs');
+var useref = require('gulp-useref');
+var gulpif = require('gulp-if');
 
 /**
  * Execute les actions de build dans l'ordre
@@ -147,6 +149,15 @@ gulp.task('demo-js', function() {
  * et les déplace
  */
 gulp.task('vendor', function() {
+    //TODO etudier la piste useref pour la concat et min des assets
+    /** var assets = useref.assets();
+     return gulp.src('main/index.html')
+     .pipe(assets)
+     .pipe(gulpif('*.js', uglify()))
+     .pipe(gulpif('*.css', minifyCss()))
+     .pipe(assets.restore())
+     .pipe(useref())
+     .pipe(gulp.dest('dist/assets/lib/')); **/
     return gulp.src(buildConfig.vendorJavascriptFiles)
         .pipe(concat('vendor.min.js'))
         .pipe(gulp.dest('dist/assets/lib'));
@@ -167,10 +178,7 @@ gulp.task('html', function() {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('assets', function() {
-    gulp.src(['!main/assets/lib/**/*.js',
-        '!main/assets/css/**/*',
-        '!main/assets/scss/**/*.scss',
-        'main/assets/**/*'])
+    gulp.src(buildConfig.assetsDistFiles)
         // And put it in the dist folder
         .pipe(gulp.dest('dist/assets'));
 });
