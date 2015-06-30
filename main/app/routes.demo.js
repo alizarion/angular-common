@@ -15,7 +15,7 @@ angular.module('itesoft-showcase').config(['$routeProvider',
             when('/form/checkbox', {
                 templateUrl: 'app/view/form/checkboxView.html',
                 controller: 'HomeCtrl',
-                title : 'Checkboxs'
+                title : 'Checkbox / Toggle'
             }).
             when('/datatable', {
                 templateUrl: 'app/view/table/simpleTables.html',
