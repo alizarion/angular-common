@@ -33,9 +33,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="item in data" ng-click="displayDetail(item)">
-                            <td>data.code</td>
-                            <td>data.description</td>
+                        <tr ng-class="{active:currentItemWrapper.currentIndex == $index}" ng-repeat="item in data" ng-click="displayDetail(item,$index)">
+                            <td>{{item.code}}</td>
+                            <td>{{item.description}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -50,7 +50,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="btn-toolbar pull-right">
-                    <button class="btn btn-warning" title="Save"><span class="fa fa-floppy-o fa-lg"></span></button>
+                    <button class="btn btn-warning" ng-click="saveCurrent()" title="Save"><span class="fa fa-floppy-o fa-lg"></span></button>
                     <button class=" btn btn-info" title="Check"><span class="fa fa-file-code-o fa-lg"></span></button>
                     <button class="btn btn-success" title="Undo"><span class="fa fa-undo fa-lg"></span></button>
                 </div>
@@ -61,10 +61,20 @@
             <div class="col-md-12" it-fill-height additional-padding="300">
                 <form novalidate>
                     <div class="form-group">
-                        <input it-input type="text" class="form-control floating-label" it-text="Code" placeholder="Code" ng-model="currentItem.code"/>
+                        <input it-input type="text"
+                               class="form-control floating-label"
+                               it-text="Code"
+                               placeholder="Code"
+                               ng-model-options="{updateOn: 'blur'}"
+                               ng-model="currentItemWrapper.currentItem.code"/>
                     </div>
                     <div class="form-group">
-                        <input it-input type="text" class="form-control floating-label" it-text="Description" placeholder="Description"  ng-model="currentItem.description"/>
+                        <input it-input type="text"
+                               class="form-control floating-label"
+                               it-text="Description"
+                               placeholder="Description"
+                               ng-model-options="{updateOn: 'blur'}"
+                               ng-model="currentItemWrapper.currentItem.description"/>
                     </div>
                     <div class="form-group">
                         <input type="checkbox" it-toggle it-text="Active" ng-model="currentItem.enabled"/>
