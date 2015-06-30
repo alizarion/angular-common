@@ -19,7 +19,6 @@
     "gulp-flatten": "0.0.4",
     "gulp-gh-pages": "^0.5.2",
     "gulp-if": "^1.2.5",
-    "gulp-ngdocs": "^0.2.10",
     "gulp-useref": "^1.2.0",
     "gulp-util": "^2.2.14",
     "run-sequence": "^1.1.0",
