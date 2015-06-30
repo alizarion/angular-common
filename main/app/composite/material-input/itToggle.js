@@ -31,7 +31,7 @@ IteSoft
             link : function (scope, element, attrs ) {
                 var input = angular.element(element[0]);
                 input.wrap('<div class="togglebutton"></div>');
-                input.wrap('<label>'+scope.itText+'&nbsp;</label>');
+                input.wrap('<label>'+(scope.itText || '')+'&nbsp;&nbsp;</label>');
                 input.after('<span class="toggle"></span>');
             },
             scope: {

@@ -3,9 +3,9 @@
 @import
 
   //Side menu
+"colors",
 "nav-tabs",
 "side-menu",
-"colors",
 "variables",
 "view-title";
 
@@ -18,4 +18,8 @@ html {
 }
 .it-view-header h3 {
   color: $primary;
+}
+
+input::-ms-clear {
+  display: none;
 }
