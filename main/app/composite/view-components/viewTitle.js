@@ -6,6 +6,6 @@ IteSoft
             restrict: 'E',
             transclude : true,
             scope:true,
-            template : '<h3 ng-transclude></h3><hr>'
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });

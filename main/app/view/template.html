@@ -89,8 +89,8 @@
             <li it-collapsed-item="" role="presentation">
                 <a href="#"><h5><i class="fa fa-book fa-fw"></i>&nbsp;Views</h5></a>
                 <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li role="presentation" ><a href="#/views/masterdetail"><i class="fa  fa-fw"></i>&nbsp; Master Detail</a></li>
-                    <li role="presentation" ><a href="#/views/masterdetailv2"><i class="fa  fa-fw"></i>&nbsp; Master Detail V2</a></li>
+                    <li role="presentation" ><a href="#/masterdetail"><i class="fa  fa-fw"></i>&nbsp; Master Detail</a></li>
+                    <li role="presentation" ><a href="#/masterdetailv2"><i class="fa  fa-fw"></i>&nbsp; Master Detail V2</a></li>
                 </ul>
             </li>
 
@@ -101,13 +101,15 @@
 
 
     <it-side-menu-content>
+
         <div class="container-fluid">
-            <div class="it-view-header" ng-hide="false">
-                <h2>{{$root.pageTitle}}</h2>
-                <hr/>
+            <div class="row">
+                <div class="it-view-header col-md-12" ng-show="$root.pageTitle && $root.pageTitle.length > 0">
+                    <h3>{{$root.pageTitle}}</h3>
+                    <hr/>
+                </div>
             </div>
             <ng-view></ng-view>
-
         </div>
 
     </it-side-menu-content>
