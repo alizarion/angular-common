@@ -38,10 +38,8 @@ IteSoft
                 }
                 scope.$watch(attrs.itButtonMenu, function(newValue, oldValue) {
                     scope.itButtonMenu = newValue;
-                    console.log('itButtonMenu value change',newValue)
                     if(newValue){
                         _toggleButton();
-                        console.log(' sideMenuCtrl.hideSideMenu()',newValue)
                         sideMenuCtrl.hideSideMenu();
                     }
                 });

@@ -3,10 +3,13 @@
   "private": "true",
   "version": "1.0.0",
   "description": "Mise en commun de directives AngularJS",
-  "devDependencies": {},
+  "devDependencies": {
+    "angular-ui-grid": "~3.0.0-rc.22"
+  },
   "dependencies": {
     "bootstrap": "~3.3.4",
     "angularjs": "~1.4.0",
+    "ng-grid": "~2.0.14",
     "angular-route": "~1.4.0",
     "angular-touch": "~1.4.0",
     "bootstrap-ui": "~0.13.0",

@@ -26,20 +26,22 @@
             <!-- Master Content-->
             <div class="row">
                 <div class="col-md-12">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-class="{active:currentItemWrapper.currentIndex == $index}" ng-repeat="item in data" ng-click="displayDetail(item,$index)">
-                                <td>{{item.code}}</td>
-                                <td>{{item.description}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                    <div ui-grid="priorityGrid"  ui-grid-selection class="gridStyle"></div>
+                    <!--<table class="table table-striped table-hover">-->
+                        <!--<thead>-->
+                        <!--<tr>-->
+                            <!--<th>Code</th>-->
+                            <!--<th>Description</th>-->
+                        <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                        <!--<tr ng-class="{active:currentItemWrapper.currentIndex == $index}" ng-repeat="item in data" ng-click="displayDetail(item,$index)" >-->
+                            <!--<td>{{item.code}}</td>-->
+                            <!--<td>{{item.description}}</td>-->
+                        <!--</tr>-->
+                        <!--</tbody>-->
+                    <!--</table>-->
                 </div>
             </div>
         </div>
@@ -66,7 +68,6 @@
                                    class="form-control floating-label"
                                    it-text="Code"
                                    placeholder="Code"
-                                   ng-model-options="{updateOn: 'blur'}"
                                    ng-model="currentItemWrapper.currentItem.code"/>
                         </div>
                         <div class="form-group">
@@ -74,11 +75,10 @@
                                    class="form-control floating-label"
                                    it-text="Description"
                                    placeholder="Description"
-                                   ng-model-options="{updateOn: 'blur'}"
                                    ng-model="currentItemWrapper.currentItem.description"/>
                         </div>
                         <div class="form-group">
-                            <input type="checkbox" it-toggle it-text="Active" ng-model="currentItem.enabled"/>
+                            <input type="checkbox" it-toggle it-text="Active" ng-model="currentItemWrapper.currentItem.enabled"/>
                         </div>
                     </form>
                 </div>
@@ -86,3 +86,121 @@
         </div>
     </div>
 </div>
+
+
+<script type="text/ng-template" id="priorityHeaderCellTemplate.html">
+    <div class="ngHeaderSortColumn {{col.headerClass}}" ng-style="{'cursor': col.cursor}" ng-class="{ 'ngSorted': !noSortVisible }">
+        <div ng-click="col.sort($event)" ng-class="'colt' + col.index" class="ngHeaderText">{{col.displayName |
+            translate}}
+        </div>
+        <div class="ngSortButtonDown" ng-show="col.showSortButtonDown()"></div>
+        <div class="ngSortButtonUp" ng-show="col.showSortButtonUp()"></div>
+        <div class="ngSortPriority">{{col.sortPriority}}</div>
+        <div ng-class="'colt' + col.index" class="ngHeaderText">{{col.displayName | translate}}</div>
+        <div ng-class="{ ngPinnedIcon: col.pinned, ngUnPinnedIcon: !col.pinned }" ng-click="togglePin(col)" ng-show="col.pinnable"></div>
+    </div>
+    <div ng-show="col.resizable" class="ngHeaderGrip" ng-click="col.gripClick($event)" ng-mousedown="col.gripOnMouseDown($event)"></div>
+</script>
+
+<!--Mise en place du survol de la ligne ********commun avec activityView********-->
+<script type="text/ng-template" id="priorityRowTemplate.html">
+    <div ng-mouseenter="row.mouseover = true"
+         ng-mouseleave="row.mouseover = false">
+        <div ng-style="{ 'cursor': row.cursor }"
+             ng-repeat="col in renderedColumns"
+             ng-class="{ selected: row.selected, hovered: row.mouseover}"
+             ng-click="onRowClick(row,col)"
+             class="ngCell {{col.cellClass}} {{col.colIndex()}}"
+             >
+            <div class="ngVerticalBar" ng-style="{height: rowHeight}"
+                 ng-class="{ ngVerticalBarVisible: !$last }">
+            </div>
+            <div ng-cell>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="priorityFooterTemplate.html">
+    <div id="priorityFooter" ng-show="showFooter" class="ngFooterPanel"
+         ng-class="{'ui-widget-content': jqueryUITheme, 'ui-corner-bottom': jqueryUITheme}" ng-style="footerStyle()">
+        <div class="ngTotalSelectContainer">
+            <div class="ngFooterTotalItems" ng-class="{'ngNoMultiSelect': !multiSelect}">
+                <span class="ngLabel badge ">{{i18n.ngTotalItemsLabel}}  {{maxRows()}}</span>
+                <span ng-show="filterText.length > 0 && maxRows()!= totalFilteredItemsLength()"
+                      class="ngLabel badge badge-warning">{{i18n.ngShowingItemsLabel}}
+                    {{totalFilteredItemsLength()}}</span>
+                <span ng-show="multiSelect"
+                      class="ngLabel badge badge-warning">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span>
+            </div>
+            <!--
+            <div class="ngFooterSelectedItems" ng-show="multiSelect">
+                <span class="ngLabel">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span>
+            </div>
+            -->
+        </div>
+        <div class="ngPagerContainer" style="float: right; margin-top: 10px;" ng-show="enablePaging"
+             ng-class="{'ngNoMultiSelect': !multiSelect}">
+            <div style="float:left; margin-right: 10px;" class="ngRowCountPicker">
+                <span style="float: left; margin-top: 3px;" class="ngLabel">{{i18n.ngPageSizeLabel}}</span>
+                <select style="float: left;height: 27px; width: 100px" ng-model="pagingOptions.pageSize">
+                    <option ng-repeat="size in pagingOptions.pageSizes">{{size}}</option>
+                </select>
+            </div>
+            <div style="float:left; margin-right: 10px; line-height:25px;" class="ngPagerControl"
+                 style="float: left; min-width: 135px;">
+                <button class="ngPagerButton" ng-click="pageToFirst()" ng-disabled="cantPageBackward()"
+                        title="{{i18n.ngPagerFirstTitle}}">
+                    <div class="ngPagerFirstTriangle">
+                        <div class="ngPagerFirstBar"></div>
+                    </div>
+                </button>
+                <button class="ngPagerButton" ng-click="pageBackward()" ng-disabled="cantPageBackward()"
+                        title="{{i18n.ngPagerPrevTitle}}">
+                    <div class="ngPagerFirstTriangle ngPagerPrevTriangle"></div>
+                </button>
+                <input class="ngPagerCurrent" min="1" max="{{maxPages()}}" type="number"
+                       style="width:50px; height: 24px; margin-top: 1px; padding: 0 4px;"
+                       ng-model="pagingOptions.currentPage"/>
+                <button class="ngPagerButton" ng-click="pageForward()" ng-disabled="cantPageForward()"
+                        title="{{i18n.ngPagerNextTitle}}">
+                    <div class="ngPagerLastTriangle ngPagerNextTriangle"></div>
+                </button>
+                <button class="ngPagerButton" ng-click="pageToLast()" ng-disabled="cantPageToLast()"
+                        title="{{i18n.ngPagerLastTitle}}">
+                    <div class="ngPagerLastTriangle">
+                        <div class="ngPagerLastBar"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="priorityCellTemplateActivation.html">
+    <div class="ngCellText"><i ng-class="retrieveClass(row.entity['Active'])"></i></div>
+</script>
+
+<script type="text/ng-template" id="priorityCellTemplateForNameAndEdit.html">
+    <div class="ngCellText" ng-class="col.colIndex()">
+        <span ng-cell-text>{{row.getProperty(col.field)}}</span>
+        <div class="pull-right" role="group">
+            <button class="btn btn-sm itesoft-btn hidden-xs hidden-sm disabled"
+                    title="{{'ASG.PRIORITY.EDIT_BUTTON_TITLE' | translate}}"
+                    ng-class="cssClassHelper.getInGridButtonClass(row)"
+                    ng-click="editPriority(row)" ng-disabled="isEditDisabled(row)">
+                <span class="fa fa-pencil fa-lg"></span>
+            </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="checkboxCellTemplate.html">
+    <div class="ngSelectionCell">
+        <input tabindex="-1" class="ngSelectionCheckbox" type="checkbox" ng-checked="row.selected" ng-disabled="!isOnlyView()"/>
+    </div>
+</script>
+
+<script type="text/ng-template" id="checkboxHeaderTemplate.html">
+    <input class="ngSelectionHeader" type="checkbox" ng-show="multiSelect" ng-model="allSelected" ng-change="toggleSelectAll(allSelected)"  ng-disabled="!isOnlyView()"/>
+</script>
