@@ -101,13 +101,15 @@
 
 
     <it-side-menu-content>
+
         <div class="container-fluid">
-            <div class="it-view-header" ng-hide="false">
-                <h2>{{$root.pageTitle}}</h2>
-                <hr/>
+            <div class="row">
+                <div class="it-view-header col-md-12" ng-show="$root.pageTitle && $root.pageTitle.length > 0">
+                    <h3>{{$root.pageTitle}}</h3>
+                    <hr/>
+                </div>
             </div>
             <ng-view></ng-view>
-
         </div>
 
     </it-side-menu-content>
