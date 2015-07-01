@@ -38,7 +38,7 @@ angular.module('itesoft').controller('MasterDetailController',
 
 
 
-        $scope.priorityGrid = {
+        $scope.gridOptions  = {
             data: 'dataSource',
             rowHeight: 40,
             multiSelect: true,
@@ -47,14 +47,14 @@ angular.module('itesoft').controller('MasterDetailController',
             enableSelectAll :true
         };
 
-        $scope.priorityGrid.columnDefs = [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
+        $scope.gridOptions.columnDefs = [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
             { field: 'description', displayName: 'ASG.PRIORITY.ACTIVE_COLHEADER',  width: '10%', sortable:true},
             { field: 'enabledde', displayName: 'ASG.PRIORITY.DESCRIPTION_COLHEADER',   sortable:true}];
 
         $scope.dataSource = MasterDetailDataService.data;
-        console.log( $scope.dataSource);
+
         $scope.$watch('currentItemWrapper.currentItem', function(newValue,oldValue){
-            if($scope.currentItemWrapper!=null ){
+            if($scope.currentItemWrapper != null ){
                 if(!$scope.currentItemWrapper.isWatched) {
                     $scope.currentItemWrapper.isWatched = true;
                 } else {
@@ -71,7 +71,6 @@ angular.module('itesoft').controller('MasterDetailController',
                     alert('please save or undo your selection');
                     return;
                 }
-
             }
             $scope.currentItemWrapper = {
                 "currentIndex":index,
@@ -94,11 +93,12 @@ angular.module('itesoft').controller('MasterDetailController',
 
         function confirmLeavePage(e) {
             var confirmed;
-            console.log($scope.currentItemWrapper.hasChange);
-            if ($scope.currentItemWrapper.hasChange) {
-                confirmed = $window.confirm("You have unsaved edits. Do you wish to leave?");
-                if (e && !confirmed) {
-                    e.preventDefault();
+            if($scope.currentItemWrapper !=null) {
+                if ($scope.currentItemWrapper.hasChange) {
+                    confirmed = $window.confirm("You have unsaved edits. Do you wish to leave?");
+                    if (e && !confirmed) {
+                        e.preventDefault();
+                    }
                 }
             }
         }
