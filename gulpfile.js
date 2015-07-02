@@ -115,15 +115,8 @@ gulp.task('uglify', function() {
 
 gulp.task('docs', function () {
     var options = {
-        scripts:buildConfig.vendorJavascriptFiles.concat(buildConfig.docsJavascriptDependencies),
-        styles: ['dist/assets/css/main.min.css'],
         html5Mode: false,
-        loadDefaults: {
-            angularAnimate: false,
-            angular:false,
-            marked:false,
-            prettify:false
-        },
+
         startPage: '/api',
         title: "Itesoft Awesome Docs",
         titleLink: "/api"

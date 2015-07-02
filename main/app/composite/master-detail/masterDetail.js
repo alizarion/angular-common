@@ -37,6 +37,8 @@
             </it-master>
 
             <it-detail>
+                <it-detail-header>
+                </it-detail-header>
             </it-detail>
 
          </it-master-detail>

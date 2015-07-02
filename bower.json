@@ -17,6 +17,7 @@
     "components-font-awesome": "~4.3.0",
     "bootstrap-material-design": "~0.3.0",
     "google-code-prettify": "~1.0.4",
-    "angular-sanitize": "~1.4.1"
+    "angular-sanitize": "~1.4.1",
+    "angular-ui-grid": "~3.0.0-rc.22"
   }
 }

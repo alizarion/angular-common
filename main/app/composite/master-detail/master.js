@@ -49,7 +49,8 @@ IteSoft
             scope : {
                 itMasterData : '=',
                 itLang:'=',
-                itMasterDetailControl:'='
+                itMasterDetailControl:'=',
+                itLockOnChange: '='
             },
             template : '<div class="col-md-4" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
                 '<div class="jumbotron">'+
@@ -57,12 +58,13 @@ IteSoft
                 '</div>'+
                 '<div class="row">'+
                 '<div class="col-md-12">'+
-                '<div ui-grid="gridOptions"  ui-grid-selection  class="grid"></div>'+
+                '<div ui-grid="gridOptions" ui-grid-selection  class="grid">' +
+                '</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q','$window',function ($scope,$filter,$q,$window){
+            controller : ['$scope','$filter','$q',function ($scope,$filter,$q){
 
                 $scope.$parent.currentItemWrapper = null;
 
@@ -89,7 +91,7 @@ IteSoft
                 function _displayDetail(item) {
                     var deferred = $q.defer();
                     if($scope.$parent.currentItemWrapper != null){
-                        if($scope.$parent.currentItemWrapper.hasChange){
+                        if($scope.$parent.currentItemWrapper.hasChanged){
                             deferred.reject('undo or save before change');
                             return deferred.promise;
                         }
@@ -97,7 +99,7 @@ IteSoft
                     $scope.$parent.currentItemWrapper = {
                         "originalItem": item,
                         "currentItem" :angular.copy(item),
-                        "hasChange":false,
+                        "hasChanged":false,
                         "isWatched":false
                     };
                     deferred.resolve('');
@@ -105,16 +107,15 @@ IteSoft
                 }
 
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-                    if($scope.$parent.currentItemWrapper!=null ){
+                    if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
                         if(!$scope.$parent.currentItemWrapper.isWatched) {
                             $scope.$parent.currentItemWrapper.isWatched = true;
                         } else {
                             console.log('has change') ;
-                            $scope.$parent.currentItemWrapper.hasChange = true;
+                            $scope.$parent.currentItemWrapper.hasChanged = true;
                         }
                     }
                 }, true);
-
 
 
                 $scope.onRowClick = function(colRenderIndex,row){
@@ -127,11 +128,23 @@ IteSoft
 
                 };
 
+                $scope.itMasterDetailControl.selectItem =function (item){
+                    $scope.onRowClick(null,{entity:item});
+                };
+
+
                 $scope.refreshData = function() {
                     $scope.gridOptions.data =
                         $filter('filter')($scope.itMasterData,
                             $scope.filterText, undefined);
                 };
+
+                function _unlockCurrent(){
+                    if($scope.$parent.currentItemWrapper!==null){
+                        $scope.$parent.currentItemWrapper.hasChanged = false;
+                        $scope.$parent.currentItemWrapper.isWatched = false;
+                    }
+                }
 
                 $scope.itMasterDetailControl.getSelectedItems = function(){
                     return $scope.gridApi.selection.getSelectedRows();
@@ -141,29 +154,29 @@ IteSoft
                     return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
-                $scope.itMasterDetailControl.undoCurrentItem = function(){
+                $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
                     if($scope.$parent.currentItemWrapper!= null){
                         _displayDetail($scope.$parent.currentItemWrapper.originalItem)
                         $scope.$parent.currentItemWrapper.currentItem =
                             angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                        $scope.$parent.currentItemWrapper.hasChange = false;
-                        $scope.$parent.currentItemWrapper.isWatched = false;
+                        _unlockCurrent();
                     }
                 };
 
+                $scope.$on('unlockCurrentItem',function(){
+                    _unlockCurrent();
+                });
+
                 function confirmLeavePage(e) {
-                    var confirmed;
                     if($scope.$parent.currentItemWrapper!=null){
-                        if ( $scope.$parent.currentItemWrapper.hasChange ) {
+                        if ( $scope.$parent.currentItemWrapper.hasChanged ) {
                             alert("You have unsaved edits. Do you wish to leave?");
                             e.preventDefault();
                         }
                     }
                 }
 
-
                 $scope.$on("$locationChangeStart", confirmLeavePage);
-
 
             }]
 

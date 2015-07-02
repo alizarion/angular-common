@@ -23,8 +23,8 @@ IteSoft
         return {
             restrict: 'EA',
             require: '^itMaster',
-            scope:false,
-            transclude:true,
+            scope : false,
+            transclude : true,
             template :' <div class="col-md-6">'+
                             '<div class="btn-toolbar" ng-transclude>'+
 
