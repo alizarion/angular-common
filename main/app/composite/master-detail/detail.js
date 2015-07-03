@@ -47,7 +47,7 @@ IteSoft
             restrict: 'EA',
             require: '^itMasterDetail',
             transclude: true,
-            template : '<div  id="divDetail" class="col-md-8" ng-if="currentItemWrapper.currentItem">' +
+            template : '<div  id="divDetail" class="col-md-6" ng-if="currentItemWrapper.currentItem">' +
                             '<div class="jumbotron" ng-transclude>' +
                             '</div>'+
                        '</div>'
