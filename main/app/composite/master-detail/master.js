@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @ngdoc directive
- * @name itesoft.directive:itMasterDetail
+ * @name itesoft.directive:itMaster
  * @module itesoft
  * @restrict EA
  *
@@ -12,7 +12,32 @@
  * and have 2 child elements: 1 `<it-master>` for the list selectable content,
  * and `<it-detail>` that display the content of the selected item.
  *
-
+ * <table class="table">
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItem()</code></td>
+ *   <td>Method to get the selected item that appear in the detail content.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setSelectedItem(entity)</code></td>
+ *   <td>Method to define the selected item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('$locationChangeStart')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ * </table>
  *
  * ```html
  * <it-master-detail>
@@ -30,15 +55,16 @@
  * </it-master-detail>
  * ```
  * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <it-master-detail>
- <it-master>
- <it-master-header>
- </it-master-header>
- </it-master>
- </file>
- </example>
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <it-master-detail>
+                <it-master>
+                    <it-master-header>
+                    </it-master-header>
+                </it-master>
+            </it-master-detail>
+        </file>
+    </example>
  */
 IteSoft
     .directive('itMaster',function(){
@@ -52,7 +78,7 @@ IteSoft
                 itMasterDetailControl:'=',
                 itLockOnChange: '='
             },
-            template : '<div class="col-md-6" ui-i18n="{{itLang}}">'+
+            template : '<div class="col-md-4" ui-i18n="{{itLang}}">'+
                 '<div class="jumbotron">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
@@ -182,11 +208,7 @@ IteSoft
                 };
 
                 $scope.itMasterDetailControl.getCurrentItem = function(){
-                    return $scope.$parent.currentItemWrapper.currentItem;
-                };
-
-                $scope.itMasterDetailControl.getFilteredItems = function(){
-                    return $scope.gridOptions.ngGrid.filteredRows;
+                    return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
                 $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
