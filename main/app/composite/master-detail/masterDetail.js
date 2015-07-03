@@ -39,6 +39,9 @@
             <it-detail>
                 <it-detail-header>
                 </it-detail-header>
+
+                <it-detail-content>
+                </it-detail-content>
             </it-detail>
 
          </it-master-detail>

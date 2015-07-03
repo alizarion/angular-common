@@ -33,7 +33,7 @@ angular.module('itesoft')
                 "enabledde" : true
             };
             $scope.data.push(newItem);
-            $scope.masterDetails.selectItem(newItem);
+            $scope.masterDetails.setSelectItem(newItem);
 
 
         }

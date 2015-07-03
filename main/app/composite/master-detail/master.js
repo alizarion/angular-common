@@ -52,40 +52,66 @@ IteSoft
                 itMasterDetailControl:'=',
                 itLockOnChange: '='
             },
-            template : '<div class="col-md-4" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
+            template : '<div class="col-md-4" ui-i18n="{{itLang}}">'+
                 '<div class="jumbotron">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row">'+
                 '<div class="col-md-12">'+
-                '<div ui-grid="gridOptions" ui-grid-selection  class="grid">' +
+                ' <div ng-grid="gridOptions"  class="gridStyle">' +
                 '</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q',function ($scope,$filter,$q){
+            controller : ['$scope','$filter','$q', function ($scope,$filter,$q){
 
                 $scope.$parent.currentItemWrapper = null;
 
                 $scope.gridOptions  = {
+                    data: 'itMasterData',
+                    selectedItems: [],
                     rowHeight: 40,
+                    i18n: $scope.itLang,
+                    enableColumnResize: true,
                     multiSelect: true,
-                    enableSelectAll :true,
-                    enableRowSelection : true,
-                    showGridFooter: true,
-                    onRegisterApi: function(gridApi){
-                        $scope.gridApi = gridApi;
-//                        gridApi.selection.on.rowSelectionChanged($scope,function(rows){
-//                            console.log('rowSelectionChanged');
-//                            $scope.selectedItems = gridApi.selection.getSelectedRows();
-//                        });
+                    enableRowSelection: true,
+                    filterOptions: {
+                        filterText: '', useExternalFilter: false
                     },
-                    gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer">' +
-                        '<span class="ngLabel badge alert-info">{{"search.selectedItems" | t}} {{grid.selection.selectedCount}}/{{grid.renderContainers.body.visibleRowCache.length}}</span>' +
+                    showGroupPanel: true,
+                    showSelectionCheckbox: true,
+                    beforeSelectionChange: function() {
+                        if($scope.$parent.currentItemWrapper!=null) {
+                            return   !$scope.$parent.currentItemWrapper.hasChanged;
+                        }else {
+                            return true;
+                        }
+                    },
+                    showFooter: true,
+                    checkboxCellTemplate : '<div class="ngSelectionCell">'+
+                        '<input tabindex="-1" class="ngSelectionCheckbox" type="checkbox" ng-checked="row.selected" ng-disabled="hasChanged()"/>'+
                         '</div>',
-                    rowTemplate: '<div ng-click="grid.appScope.onRowClick(colRenderIndex,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
-                        '</div>'
+                    checkboxHeaderTemplate:'<input class="ngSelectionHeader" type="checkbox" ng-show="multiSelect" ng-model="allSelected" ng-change="toggleSelectAll(allSelected)"  ng-disabled="hasChanged()"/>',
+
+                    rowTemplate:'<div ng-mouseenter="row.mouseover = true" ng-mouseleave="row.mouseover = false">'+
+                        '<div ng-style="{ \'cursor\': row.cursor }" ng-repeat="col in renderedColumns"  ng-class="{ selected: row.selected, hovered: row.mouseover}"  ng-click="onRowClick(row,col)" class="ngCell {{col.cellClass}} {{col.colIndex()}}" ng-attr-id="{{\'row\'+row.rowIndex}}">'+
+                        '<div class="ngVerticalBar" ng-style="{height: rowHeight}" ng-class="{ ngVerticalBarVisible: !$last }">'+
+                        '</div>'+
+                        '<div ng-attr-id="{{\'cell-r\'+row.rowIndex+\'c\'+col.index}}" ng-cell>'+
+                        '</div>'+
+                        '</div>'+
+                        '</div>',
+                    footerTemplate : '<div id="priorityFooter" ng-show="showFooter" class="ngFooterPanel" ng-class="{\'ui-widget-content\': jqueryUITheme, \'ui-corner-bottom\': jqueryUITheme}" ng-style="footerStyle()">       <div class="ngTotalSelectContainer">           <div class="ngFooterTotalItems" ng-class="{\'ngNoMultiSelect\': !multiSelect}">               <span class="ngLabel badge ">{{i18n.ngTotalItemsLabel}}  {{maxRows()}}</span>               <span ng-show="filterText.length > 0 && maxRows()!= totalFilteredItemsLength()"                     class="ngLabel badge badge-warning">{{i18n.ngShowingItemsLabel}}                   {{totalFilteredItemsLength()}}</span>               <span ng-show="multiSelect"                       class="ngLabel badge badge-warning">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span>           </div>           <!--           <div class="ngFooterSelectedItems" ng-show="multiSelect">               <span class="ngLabel">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span>           </div>           -->       </div>       <div class="ngPagerContainer" style="float: right; margin-top: 10px;" ng-show="enablePaging"            ng-class="{\'ngNoMultiSelect\': !multiSelect}">           <div style="float:left; margin-right: 10px;" class="ngRowCountPicker">               <span style="float: left; margin-top: 3px;" class="ngLabel">{{i18n.ngPageSizeLabel}}</span>               <select style="float: left;height: 27px; width: 100px" ng-model="pagingOptions.pageSize">                   <option ng-repeat="size in pagingOptions.pageSizes">{{size}}</option>               </select>           </div>           <div style="float:left; margin-right: 10px; line-height:25px;" class="ngPagerControl"                style="float: left; min-width: 135px;">               <button class="ngPagerButton" ng-click="pageToFirst()" ng-disabled="cantPageBackward()"                       title="{{i18n.ngPagerFirstTitle}}">                   <div class="ngPagerFirstTriangle">                       <div class="ngPagerFirstBar"></div>                   </div>               </button>               <button class="ngPagerButton" ng-click="pageBackward()" ng-disabled="cantPageBackward()"                       title="{{i18n.ngPagerPrevTitle}}">                   <div class="ngPagerFirstTriangle ngPagerPrevTriangle"></div>               </button>               <input class="ngPagerCurrent" min="1" max="{{maxPages()}}" type="number"                      style="width:50px; height: 24px; margin-top: 1px; padding: 0 4px;"                      ng-model="pagingOptions.currentPage"/>               <button class="ngPagerButton" ng-click="pageForward()" ng-disabled="cantPageForward()"                       title="{{i18n.ngPagerNextTitle}}">                   <div class="ngPagerLastTriangle ngPagerNextTriangle"></div>               </button>               <button class="ngPagerButton" ng-click="pageToLast()" ng-disabled="cantPageToLast()"                       title="{{i18n.ngPagerLastTitle}}">                   <div class="ngPagerLastTriangle">                       <div class="ngPagerLastBar"></div>  </div> </button>    </div>       </div>   </div>'
+
+                };
+                $scope.toto = true;
+                $scope.hasChanged = function(){
+                    if($scope.$parent.currentItemWrapper!=null) {
+                        return   $scope.$parent.currentItemWrapper.hasChanged;
+                    }else {
+                        return false;
+                    }
                 };
 
                 function _displayDetail(item) {
@@ -111,33 +137,32 @@ IteSoft
                         if(!$scope.$parent.currentItemWrapper.isWatched) {
                             $scope.$parent.currentItemWrapper.isWatched = true;
                         } else {
-                            console.log('has change') ;
-                            $scope.$parent.currentItemWrapper.hasChanged = true;
+                            if(!angular.equals(newValue,
+                                $scope.$parent.currentItemWrapper.originalItem)){
+                                $scope.$parent.currentItemWrapper.hasChanged = true;
+                            } else {
+                                $scope.$parent.currentItemWrapper.hasChanged = false;
+                            }
                         }
                     }
                 }, true);
 
 
-                $scope.onRowClick = function(colRenderIndex,row){
-                    _displayDetail(row.entity).then(function(msg){
-                        $scope.gridApi.selection.clearSelectedRows();
-                        $scope.gridApi.selection.toggleRowSelection(row.entity);
-                    },function(msg){
-                        alert(msg);
-                    });
-
+                $scope.onRowClick = function(row,col) {
+                    //if (col.index > 0){ne fonctionne pas quand groupage
+                    if (col.colDef.index != undefined){
+                        _displayDetail(row.entity).then(function(msg){
+                            $scope.gridOptions.selectAll(false);
+                        },function(msg){
+                            alert(msg);
+                        });
+                    }
                 };
 
                 $scope.itMasterDetailControl.selectItem =function (item){
                     $scope.onRowClick(null,{entity:item});
                 };
 
-
-                $scope.refreshData = function() {
-                    $scope.gridOptions.data =
-                        $filter('filter')($scope.itMasterData,
-                            $scope.filterText, undefined);
-                };
 
                 function _unlockCurrent(){
                     if($scope.$parent.currentItemWrapper!==null){
@@ -147,7 +172,7 @@ IteSoft
                 }
 
                 $scope.itMasterDetailControl.getSelectedItems = function(){
-                    return $scope.gridApi.selection.getSelectedRows();
+                    return $scope.gridOptions.selectedItems;
                 };
 
                 $scope.itMasterDetailControl.getCurrentItem = function(){

@@ -37,7 +37,8 @@ module.exports = {
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
         'main/assets/css/itesoft.css',
-        'main/assets/css/material.css'
+        'main/assets/css/material.css',
+        'main/assets/lib/ng-grid/ng-grid.min.css'
 
 
 
@@ -54,10 +55,13 @@ module.exports = {
         'main/assets/**/*'
     ],
     vendorJavascriptFiles: [
-        'main/assets/lib/angularjs/angular.js',
+        'main/assets/lib/angular/angular.min.js',
+        'main/assets/lib/jquery/dist/jquery.min.js',
+        'main/assets/lib/ng-grid/ng-grid-2.0.14.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',
         'main/assets/lib/angular-sanitize/angular-sanitize.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js'
+
     ]
 };

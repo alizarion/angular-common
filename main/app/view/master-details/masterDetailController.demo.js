@@ -41,13 +41,11 @@ angular.module('itesoft').controller('MasterDetailController',
         $scope.gridOptions  = {
             data: 'dataSource',
             rowHeight: 40,
-            multiSelect: true,
-            enableRowSelection: true,
-            showSelectionCheckbox: true,
-            enableSelectAll :true
+            columnDefs:'columns',
+
         };
 
-        $scope.gridOptions.columnDefs = [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
+        $scope.columns = [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
             { field: 'description', displayName: 'ASG.PRIORITY.ACTIVE_COLHEADER',  width: '10%', sortable:true},
             { field: 'enabledde', displayName: 'ASG.PRIORITY.DESCRIPTION_COLHEADER',   sortable:true}];
 
