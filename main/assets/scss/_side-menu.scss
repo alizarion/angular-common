@@ -72,6 +72,7 @@ $menu-header:                      50px !default;
   right: 0;
   left: 0;
   width: 100%;
+  height: 100%;
   background-color: $menu-bg;
   overflow: hidden;
 }
@@ -403,3 +404,11 @@ $menu-header:                      50px !default;
   animation-timing-function: ease-in-out;
 }
 
+// Change hand cursor on menu item
+li.it-sub-menu:hover {
+    cursor: pointer;
+}
+
+li.it-sub-menu-collapse:hover {
+    cursor: pointer;
+}
