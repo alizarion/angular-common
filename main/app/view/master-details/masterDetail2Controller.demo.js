@@ -6,6 +6,13 @@ angular.module('itesoft')
 
         $scope.masterDetails = {};
 
+        $scope.masterDetails = {
+            columnDefs : [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
+                { field: 'description', displayName: 'ASG.PRIORITY.ACTIVE_COLHEADER',  width: '10%', sortable:true},
+                { field: 'enabledde', displayName: 'ASG.PRIORITY.DESCRIPTION_COLHEADER',   sortable:true}]
+
+        };
+
 
         function _removeItems(items,dataList){
             angular.forEach(items,function(entry){
