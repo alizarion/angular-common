@@ -25,13 +25,21 @@
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
  *   <td>Method to revert changes on the selected item.</td>
  *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
  *  <tr>
  *   <td><code>masterDetail.setSelectedItem(entity)</code></td>
  *   <td>Method to define the selected item.</td>
  *  </tr>
  *  <tr>
- *   <td><code>$scope.$broadcast('$locationChangeStart')</code></td>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
  *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem')</code></td>
+ *   <td>lock the selected item from the editing mode.</td>
  *  </tr>
  *  <tr>
  *   <td><code>$itAppScope</code></td>
@@ -78,7 +86,7 @@ IteSoft
                 itMasterDetailControl:'=',
                 itLockOnChange: '='
             },
-            template : '<div class="col-md-4" ui-i18n="{{itLang}}">'+
+            template : '<div class="col-md-6" ui-i18n="{{itLang}}">'+
                 '<div class="jumbotron">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
@@ -93,7 +101,6 @@ IteSoft
             controller : ['$scope','$filter','$q', function ($scope,$filter,$q){
 
                 $scope.$parent.currentItemWrapper = null;
-                $scope.itAppScope = $scope.$parent;
 
                 $scope.gridOptions  = {
                     data: 'itMasterData',
@@ -133,6 +140,18 @@ IteSoft
 
                 };
 
+
+
+
+                $scope.$watch('gridOptions.selectedItems',function(){
+                    if($scope.gridOptions.selectedItems.length > 1 ){
+                        $scope.$parent.currentItemWrapper = null
+                    } else if($scope.gridOptions.selectedItems.length === 1) {
+                        _displayDetail($scope.gridOptions.selectedItems[0]);
+                    };
+
+
+                },true);
 
                 $scope.gridOptions.columnDefs =
                     $scope.itMasterDetailControl.columnDefs;
@@ -195,11 +214,18 @@ IteSoft
                     $scope.onRowClick(null,{entity:item});
                 };
 
-
                 function _unlockCurrent(){
                     if($scope.$parent.currentItemWrapper!==null){
                         $scope.$parent.currentItemWrapper.hasChanged = false;
                         $scope.$parent.currentItemWrapper.isWatched = false;
+                    }
+                }
+
+                function _lockCurrent(){
+                    if($scope.$parent.currentItemWrapper!==null){
+                        $scope.$parent.currentItemWrapper.hasChanged = true;
+                        $scope.$parent.currentItemWrapper.isWatched = true;
+
                     }
                 }
 
@@ -211,9 +237,13 @@ IteSoft
                     return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
-
-                $scope.itMasterDetailControl.getFilteredItems = function(){
-                    return $scope.gridOptions.ngGrid.filteredRows;
+               $scope.itMasterDetailControl.getFilteredItems = function(){
+                    var entities = [];
+                    angular.forEach($scope.gridOptions.ngGrid.filteredRows,
+                        function(row){
+                            entities.push(row.entity);
+                        });
+                    return entities;
                 };
 
                 $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
@@ -229,6 +259,10 @@ IteSoft
                     _unlockCurrent();
                 });
 
+               $scope.$on('lockCurrentItem',function(){
+                    _lockCurrent();
+                });
+
                 function confirmLeavePage(e) {
                     if($scope.$parent.currentItemWrapper!=null){
                         if ( $scope.$parent.currentItemWrapper.hasChanged ) {
@@ -239,7 +273,7 @@ IteSoft
                 }
 
                 $scope.$on("$locationChangeStart", confirmLeavePage);
-
+                $scope.itAppScope = $scope.$parent;
             }]
 
         }

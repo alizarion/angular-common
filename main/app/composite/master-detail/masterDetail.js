@@ -53,7 +53,7 @@ IteSoft
         return {
             restrict: 'EA',
             transclude : true,
-            scope:false,
+            scope :false,
             template : '<div class="row" ng-transclude></div>'
         }
     });
