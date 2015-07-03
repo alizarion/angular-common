@@ -211,6 +211,11 @@ IteSoft
                     return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
+
+                $scope.itMasterDetailControl.getFilteredItems = function(){
+                    return $scope.gridOptions.ngGrid.filteredRows;
+                };
+
                 $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
                     if($scope.$parent.currentItemWrapper!= null){
                         _displayDetail($scope.$parent.currentItemWrapper.originalItem)
