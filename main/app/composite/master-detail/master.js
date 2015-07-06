@@ -30,7 +30,7 @@
  *   <td>Method to get displayed item after filter.</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.setSelectedItem(entity)</code></td>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
  *   <td>Method to define the selected item.</td>
  *  </tr>
  *  <tr>
