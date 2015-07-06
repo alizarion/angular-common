@@ -31,7 +31,7 @@
  *  </tr>
  *  <tr>
  *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item.</td>
+ *   <td>Method to define the selected item, return promise</td>
  *  </tr>
  *  <tr>
  *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
@@ -184,17 +184,17 @@ IteSoft
                 }
 
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-                    console.log($scope.gridOptions);
+
                     if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
                         if(!$scope.$parent.currentItemWrapper.isWatched) {
                             $scope.$parent.currentItemWrapper.isWatched = true;
-                        } else {
+                        }
                             if(!angular.equals(newValue,
                                 $scope.$parent.currentItemWrapper.originalItem)){
                                 $scope.$parent.currentItemWrapper.hasChanged = true;
                             } else {
                                 $scope.$parent.currentItemWrapper.hasChanged = false;
-                            }
+
                         }
                     }
                 }, true);
@@ -253,11 +253,27 @@ IteSoft
                  * @param entity
                  */
                 $scope.itMasterDetailControl.setCurrentItem = function(entity){
-                    $scope.gridOptions.selectAll(false)
-                    $timeout(function() {
-                        $scope.gridOptions.selectRow(
-                            $scope.itMasterData.indexOf(entity), true)
+
+                    var deferred = $q.defer();
+                    $scope.gridOptions.selectAll(false);
+                    _displayDetail(entity).then(function(){
+                        $timeout(function() {
+                            var entityIndex = $scope.itMasterData.indexOf(entity);
+                            console.log(entityIndex);
+                            if(entityIndex>0) {
+                                $scope.gridOptions.selectRow(
+                                    $scope.itMasterData.indexOf(entity), true);
+                                deferred.resolve();
+                            } else {
+                                deferred.reject();
+                            }
+
+                        });
+                    },function(){
+                        deferred.reject();
                     });
+
+                    return deferred.promise;
                 };
 
 
