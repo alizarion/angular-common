@@ -98,7 +98,7 @@ IteSoft
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q', function ($scope,$filter,$q){
+            controller : ['$scope','$filter','$q','$timeout', function ($scope,$filter,$q,$timeout){
 
                 $scope.$parent.currentItemWrapper = null;
 
@@ -117,7 +117,7 @@ IteSoft
                     showSelectionCheckbox: true,
                     beforeSelectionChange: function() {
                         if($scope.$parent.currentItemWrapper!=null) {
-                            return   !$scope.$parent.currentItemWrapper.hasChanged;
+                            return !$scope.$parent.currentItemWrapper.hasChanged;
                         }else {
                             return true;
                         }
@@ -184,6 +184,7 @@ IteSoft
                 }
 
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
+                    console.log($scope.gridOptions);
                     if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
                         if(!$scope.$parent.currentItemWrapper.isWatched) {
                             $scope.$parent.currentItemWrapper.isWatched = true;
@@ -242,9 +243,33 @@ IteSoft
                     angular.forEach($scope.gridOptions.ngGrid.filteredRows,
                         function(row){
                             entities.push(row.entity);
+                            entities.push(row.entity);
                         });
                     return entities;
                 };
+
+                /**
+                 * Method to set the current item.
+                 * @param entity
+                 */
+                $scope.itMasterDetailControl.setCurrentItem = function(entity){
+                    $scope.gridOptions.selectAll(false)
+                    $timeout(function() {
+                        $scope.gridOptions.selectRow(
+                            $scope.itMasterData.indexOf(entity), true)
+                    });
+                };
+
+
+
+                /**
+                 *
+                 * @param entity
+                 * @private
+                 */
+                function _findEntityRow(entity){
+
+                }
 
                 $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
                     if($scope.$parent.currentItemWrapper!= null){
@@ -271,6 +296,8 @@ IteSoft
                         }
                     }
                 }
+
+
 
                 $scope.$on("$locationChangeStart", confirmLeavePage);
                 $scope.itAppScope = $scope.$parent;
