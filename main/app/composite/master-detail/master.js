@@ -257,7 +257,7 @@ IteSoft
                         $timeout(function() {
                             var entityIndex = $scope.itMasterData.indexOf(entity);
                             console.log(entityIndex);
-                            if(entityIndex>0) {
+                            if(entityIndex>=0) {
                                 $scope.gridOptions.selectRow(
                                     $scope.itMasterData.indexOf(entity), true);
                                 deferred.resolve();
