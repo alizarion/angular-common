@@ -148,7 +148,7 @@ IteSoft
                         $scope.$parent.currentItemWrapper = null
                     } else if($scope.gridOptions.selectedItems.length === 1) {
                         _displayDetail($scope.gridOptions.selectedItems[0]);
-                    };
+                    }
 
 
                 },true);
@@ -186,16 +186,13 @@ IteSoft
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
 
                     if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
-                        if(!$scope.$parent.currentItemWrapper.isWatched) {
+                        if(!$scope.$parent.currentItemWrapper.isWatched)
+                        {
                             $scope.$parent.currentItemWrapper.isWatched = true;
                         }
-                            if(!angular.equals(newValue,
-                                $scope.$parent.currentItemWrapper.originalItem)){
-                                $scope.$parent.currentItemWrapper.hasChanged = true;
-                            } else {
-                                $scope.$parent.currentItemWrapper.hasChanged = false;
-
-                        }
+                            $scope.$parent.currentItemWrapper.hasChanged =
+                                !angular.equals(newValue,
+                                $scope.$parent.currentItemWrapper.originalItem);
                     }
                 }, true);
 
