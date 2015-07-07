@@ -240,7 +240,7 @@ IteSoft
                     angular.forEach($scope.gridOptions.ngGrid.filteredRows,
                         function(row){
                             entities.push(row.entity);
-                            entities.push(row.entity);
+
                         });
                     return entities;
                 };
