@@ -32,7 +32,7 @@
 }
 
 .nav-tabs > li > a:after {
-  background: white;
+  background: $warning;
 }
 .nav-tabs > li.active > a:after {
   -webkit-transform: scale(1);

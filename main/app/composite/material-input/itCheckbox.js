@@ -32,10 +32,7 @@ IteSoft
                 var input = angular.element(element[0]);
                 input.wrap('<div class="checkbox"></div>');
                 input.wrap('<label></label>');
-                input.after('<span class="checkbox-material"><span class="check"></span></span>&nbsp;'+(scope.itText || ''));
-            },
-            scope: {
-            	itText: '@'
-            }               
+                input.after('<span class="checkbox-material"><span class="check" style="width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itText || ''));
+            }
         }
 });
