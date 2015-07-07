@@ -32,15 +32,10 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'Form inputs'
             }).
-            when('/masterdetail', {
+            when('/master-detail', {
                 templateUrl: 'app/view/master-details/masterDetailView.html',
                 controller: 'MasterDetailController',
-                title : 'Master Detail View'
-            }).
-            when('/masterdetailv2', {
-                templateUrl: 'app/view/master-details/masterDetail2View.html',
-                controller: 'MasterDetail2Controller',
-                title : 'Master Detail View V2'
+                title : 'Master Detail'
             }).
             otherwise({
                 redirectTo: '/home',
