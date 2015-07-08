@@ -1,4 +1,26 @@
 "use strict";
+function ngGridLayoutPlugin () {
+    var self = this;
+    this.grid = null;
+    this.scope = null;
+    this.init = function(scope, grid, services) {
+        self.domUtilityService = services.DomUtilityService;
+        self.grid = grid;
+        self.scope = scope;
+    };
+
+    this.updateGridLayout = function () {
+        if (!self.scope.$$phase) {
+            self.scope.$apply(function(){
+                self.domUtilityService.RebuildGrid(self.scope, self.grid);
+            });
+        }
+        else {
+            // $digest or $apply already in progress
+            self.domUtilityService.RebuildGrid(self.scope, self.grid);
+        }
+    };
+}
 /**
  * @ngdoc directive
  * @name itesoft.directive:itMaster
@@ -98,9 +120,16 @@ IteSoft
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q','$timeout', function ($scope,$filter,$q,$timeout){
+            controller : ['$scope','$filter','$q','$timeout','itPopup', function ($scope,$filter,$q,$timeout,itPopup){
 
                 $scope.$parent.currentItemWrapper = null;
+
+
+                var gridLayoutPlugin = new ngGridLayoutPlugin();
+
+                $timeout(function(){
+                    gridLayoutPlugin.updateGridLayout();
+                });
 
                 $scope.gridOptions  = {
                     data: 'itMasterData',
@@ -114,6 +143,7 @@ IteSoft
                         filterText: '', useExternalFilter: false
                     },
                     showGroupPanel: true,
+                    plugins: [gridLayoutPlugin],
                     showSelectionCheckbox: true,
                     beforeSelectionChange: function() {
                         if($scope.$parent.currentItemWrapper!=null) {
@@ -184,7 +214,6 @@ IteSoft
                 }
 
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-
                     if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
                         if(!$scope.$parent.currentItemWrapper.isWatched)
                         {
@@ -203,7 +232,10 @@ IteSoft
                         _displayDetail(row.entity).then(function(msg){
                             $scope.gridOptions.selectAll(false);
                         },function(msg){
-                            alert(msg);
+                            itPopup.alert({
+                                text: $scope.itMasterDetailControl.navAlert.text ,
+                                title : $scope.itMasterDetailControl.navAlert.title
+                            });
                         });
                     }
                 };
@@ -304,7 +336,10 @@ IteSoft
                 function confirmLeavePage(e) {
                     if($scope.$parent.currentItemWrapper!=null){
                         if ( $scope.$parent.currentItemWrapper.hasChanged ) {
-                            alert("You have unsaved edits. Do you wish to leave?");
+                            itPopup.alert({
+                                text: $scope.itMasterDetailControl.navAlert.text ,
+                                title : $scope.itMasterDetailControl.navAlert.title
+                            });
                             e.preventDefault();
                         }
                     }
@@ -314,6 +349,13 @@ IteSoft
 
                 $scope.$on("$locationChangeStart", confirmLeavePage);
                 $scope.itAppScope = $scope.$parent;
+
+                $scope.itMasterDetailControl = angular.extend({navAlert:{
+                    text:'Please save or revert your pending change',
+                    title:'Unsaved changes'
+                }}, $scope.itMasterDetailControl );
+
+
             }]
 
         }

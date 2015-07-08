@@ -22,10 +22,30 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'Simple tables'
             }).
+            when('/tabs', {
+                templateUrl: 'app/view/table/tabs.html',
+                controller: 'HomeCtrl',
+                title : 'Tabs'
+            }).
+            when('/list', {
+                templateUrl: 'app/view/table/list.html',
+                controller: 'HomeCtrl',
+                title : 'List'
+            }).
             when('/table', {
                 templateUrl: 'app/view/table/dataTables.html',
                 controller: 'HomeCtrl',
                 title : 'DataTables'
+            }).
+            when('/popup/itpopup', {
+                templateUrl: 'app/view/popup/popup.html',
+                controller: 'PopupCtrl',
+                title : 'Popup'
+            }).
+            when('/form/button', {
+                templateUrl: 'app/view/form/buttons.html',
+                controller: 'PopupCtrl',
+                title : 'Button'
             }).
             when('/form/inputs', {
                 templateUrl: 'app/view/form/inputs.html',

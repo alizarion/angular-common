@@ -1,4 +1,4 @@
-angular.module('itesoft')
+angular.module('itesoft-showcase')
 
     .controller('MasterDetailController', ['$scope', function($scope) {
 
@@ -34,12 +34,11 @@ angular.module('itesoft')
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'code', displayName: 'ASG.PRIORITY.ORDER_COLHEADER',  width: '8%', sortable:true},
-                { field: 'description', displayName: 'ASG.PRIORITY.ACTIVE_COLHEADER',  width: '10%', sortable:true},
-                { field: 'enabledde', displayName: 'ASG.PRIORITY.DESCRIPTION_COLHEADER',   sortable:true}]
+            columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
+                { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
+                { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
 
         };
-
 
         function _removeItems(items,dataList){
             angular.forEach(items,function(entry){
@@ -53,7 +52,6 @@ angular.module('itesoft')
         };
 
         $scope.saveCurrentItem = function(){
-            console.log($scope.masterDetails.getCurrentItem())
             $scope.$broadcast('unlockCurrentItem');
         };
         $scope.undoChange = function(){
@@ -72,8 +70,5 @@ angular.module('itesoft')
             },function(error){
 
             });
-
-
-
         }
     }]);
