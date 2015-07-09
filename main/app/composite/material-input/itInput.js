@@ -67,6 +67,9 @@ IteSoft
                         // Else user data binding text 
                         input.after('<div class="floating-label">' +  scope.itText + '</div');
                         scope.$watch('itText', function(value) {
+                            if (!input[0].offsetParent) {
+                                return;
+                            }
                             var elementDiv = input[0].offsetParent.children;
                             angular.forEach(elementDiv, function(divHtml) {
                                 var div = angular.element(divHtml);
@@ -82,6 +85,9 @@ IteSoft
                 // Check if error message is set
                 input.after('<small class="text-danger" style="display:none;"></small>');
                 scope.$watch('itError', function(value) {
+                    if (!input[0].offsetParent) {
+                        return;
+                    }
                     var elementDiv = input[0].offsetParent.children;
                     angular.forEach(elementDiv, function(divHtml) {
                         var div = angular.element(divHtml);
