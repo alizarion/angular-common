@@ -1,5 +1,5 @@
 
-var IteSoft = angular.module('itesoft', []);
+var IteSoft = angular.module('itesoft', ['pascalprecht.translate']);
 
 
 

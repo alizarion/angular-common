@@ -19,23 +19,23 @@ IteSoft
                              '<h3>{{options.title}}</h3>'+
                          '</div>'+
                          '<div class="modal-body">'+
-                            '<p ng-bind-html="options.text"></p>'+
+                            '<p ng-bind-html="options.text | translate"></p>'+
                          '</div>'+
                          '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text}}</button>'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text | translate}}</button>'+
                          '</div>'
 
         var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3>{{options.title}}</h3>'+
+            '<h3>{{options.title | translate}}</h3>'+
             '</div>'+
             '<div class="modal-body">'+
-            '<p ng-bind-html="options.text"></p>'+
+            '<p ng-bind-html="options.text | translate"></p>'+
             '   <div class="form-group">'+
-            '<input it-input="" it-text="{{options.inputLabel}}" class="form-control floating-label" ng-model="data.response" >'+
+            '<input it-input="" it-text="{{options.inputLabel | translate}}" class="form-control floating-label" ng-model="data.response" >'+
             '</div>'+
             '</div>'+
             '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text}}</button>'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text | translate}}</button>'+
             '</div>'
 
         var itPopup = {
@@ -52,7 +52,6 @@ IteSoft
                 var result = (button.onTap || noop)(event);
                 self.responseDeferred.resolve(result);
             };
-            console.log(options.text);
 
             options =  angular.extend({
                 scope: self.scope,
@@ -97,7 +96,6 @@ IteSoft
                     text: opts.okText || 'OK',
                     type: opts.okType || 'btn-info',
                     onTap: function() {
-                        console.log('onTap');
                         return true;
                     }
                 }]
