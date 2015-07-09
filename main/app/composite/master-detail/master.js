@@ -230,7 +230,7 @@ IteSoft
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row">'+
-                '<div class="col-md-12">'+
+                '<div class="col-md-12 it-master-detail-container">'+
                 ' <div ng-grid="gridOptions"  class="it-master-detail-grid">' +
                 '</div>'+
                 '</div>'+
