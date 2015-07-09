@@ -40,6 +40,11 @@ angular.module('itesoft-showcase')
 
         };
 
+        $scope.masterDetails.navAlert = {
+            text:'BUTTON_LANG_EN',
+            title:'FOO'
+        };
+
         function _removeItems(items,dataList){
             angular.forEach(items,function(entry){
                 var index = dataList.indexOf(entry);

@@ -1,5 +1,5 @@
 
-var IteSoft = angular.module('itesoft', ['pascalprecht.translate']);
+var IteSoft = angular.module('itesoft', ['pascalprecht.translate','ngGrid']);
 
 
 

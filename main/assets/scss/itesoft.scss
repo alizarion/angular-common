@@ -14,11 +14,21 @@ html {
   padding-top : 70px;
 }
 
+html, body {
+  margin: 0;
+  height: 100%;
+  min-height: 100% !important;
+}
 .it-view-header hr {
   border-top: 2px solid $primary;
 }
 .it-view-header h3 {
   color: $primary;
+}
+
+.it-fill {
+  height: 100%;
+  min-height: 100%;
 }
 
 input::-ms-clear {

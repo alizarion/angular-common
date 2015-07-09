@@ -1,26 +1,5 @@
 "use strict";
-function ngGridLayoutPlugin () {
-    var self = this;
-    this.grid = null;
-    this.scope = null;
-    this.init = function(scope, grid, services) {
-        self.domUtilityService = services.DomUtilityService;
-        self.grid = grid;
-        self.scope = scope;
-    };
 
-    this.updateGridLayout = function () {
-        if (!self.scope.$$phase) {
-            self.scope.$apply(function(){
-                self.domUtilityService.RebuildGrid(self.scope, self.grid);
-            });
-        }
-        else {
-            // $digest or $apply already in progress
-            self.domUtilityService.RebuildGrid(self.scope, self.grid);
-        }
-    };
-}
 /**
  * @ngdoc directive
  * @name itesoft.directive:itMaster
@@ -225,11 +204,11 @@ IteSoft
                 itMasterDetailControl:'=',
                 itLockOnChange: '='
             },
-            template : '<div class="col-md-6" ui-i18n="{{itLang}}">'+
-                '<div class="jumbotron">'+
+            template : '<div class="col-md-6 " ui-i18n="{{itLang}}">'+
+                '<div class="jumbotron ">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
-                '<div class="row">'+
+                '<div class="row " style="clear: both;">'+
                 '<div class="col-md-12 it-master-detail-container">'+
                 ' <div ng-grid="gridOptions"  class="it-master-detail-grid">' +
                 '</div>'+
@@ -237,15 +216,13 @@ IteSoft
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q','$timeout','itPopup', function ($scope,$filter,$q,$timeout,itPopup){
+            controller : ['$scope','$filter','$q','$timeout','itPopup','itNgGridPlugins', function ($scope,$filter,$q,$timeout,itPopup,itNgGridPlugins){
 
                 $scope.$parent.currentItemWrapper = null;
 
-
-                var gridLayoutPlugin = new ngGridLayoutPlugin();
-
+                var evalLayout = new itNgGridPlugins.fullHeight();
                 $timeout(function(){
-                    gridLayoutPlugin.updateGridLayout();
+                    evalLayout.updateGridLayout();
                 });
 
                 $scope.gridOptions  = {
@@ -260,7 +237,7 @@ IteSoft
                         filterText: '', useExternalFilter: false
                     },
                     showGroupPanel: true,
-                    plugins: [gridLayoutPlugin],
+
                     showSelectionCheckbox: true,
                     beforeSelectionChange: function() {
                         if($scope.$parent.currentItemWrapper!=null) {
@@ -283,8 +260,8 @@ IteSoft
                         '</div>'+
                         '</div>'+
                         '</div>',
-                    footerTemplate : '<div id="priorityFooter" ng-show="showFooter" class="ngFooterPanel" ng-class="{\'ui-widget-content\': jqueryUITheme, \'ui-corner-bottom\': jqueryUITheme}" ng-style="footerStyle()"> <div class="ngTotalSelectContainer"> <div class="ngFooterTotalItems" ng-class="{\'ngNoMultiSelect\': !multiSelect}"> <span class="ngLabel badge ">{{i18n.ngTotalItemsLabel}}  {{maxRows()}}</span> <span ng-show="filterText.length > 0 && maxRows()!= totalFilteredItemsLength()" class="ngLabel badge badge-warning">{{i18n.ngShowingItemsLabel}}  {{totalFilteredItemsLength()}}</span> <span ng-show="multiSelect" class="ngLabel badge badge-warning">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span> </div></div> <div class="ngPagerContainer" style="float: right; margin-top: 10px;" ng-show="enablePaging" ng-class="{\'ngNoMultiSelect\': !multiSelect}"><div style="float:left; margin-right: 10px;" class="ngRowCountPicker">               <span style="float: left; margin-top: 3px;" class="ngLabel">{{i18n.ngPageSizeLabel}}</span><select style="float: left;height: 27px; width: 100px" ng-model="pagingOptions.pageSize">                   <option ng-repeat="size in pagingOptions.pageSizes">{{size}}</option>               </select>           </div>           <div style="float:left; margin-right: 10px; line-height:25px;" class="ngPagerControl"                style="float: left; min-width: 135px;">               <button class="ngPagerButton" ng-click="pageToFirst()" ng-disabled="cantPageBackward()" title="{{i18n.ngPagerFirstTitle}}"> <div class="ngPagerFirstTriangle"> <div class="ngPagerFirstBar"></div> </div></button>  <button class="ngPagerButton" ng-click="pageBackward()" ng-disabled="cantPageBackward()"  title="{{i18n.ngPagerPrevTitle}}">  <div class="ngPagerFirstTriangle ngPagerPrevTriangle"></div>  </button>  <input class="ngPagerCurrent" min="1" max="{{maxPages()}}" type="number"  style="width:50px; height: 24px; margin-top: 1px; padding: 0 4px;"  ng-model="pagingOptions.currentPage"/> <button class="ngPagerButton" ng-click="pageForward()" ng-disabled="cantPageForward()"   title="{{i18n.ngPagerNextTitle}}">  <div class="ngPagerLastTriangle ngPagerNextTriangle"></div> </button> <button class="ngPagerButton" ng-click="pageToLast()" ng-disabled="cantPageToLast()" title="{{i18n.ngPagerLastTitle}}"> <div class="ngPagerLastTriangle">  <div class="ngPagerLastBar"></div>  </div> </button> </div> </div> </div>'
-
+                    footerTemplate : '<div id="priorityFooter" ng-show="showFooter" class="ngFooterPanel" ng-class="{\'ui-widget-content\': jqueryUITheme, \'ui-corner-bottom\': jqueryUITheme}" ng-style="footerStyle()"> <div class="ngTotalSelectContainer"> <div class="ngFooterTotalItems" ng-class="{\'ngNoMultiSelect\': !multiSelect}"> <span class="ngLabel badge ">{{i18n.ngTotalItemsLabel}}  {{maxRows()}}</span> <span ng-show="filterText.length > 0 && maxRows()!= totalFilteredItemsLength()" class="ngLabel badge badge-warning">{{i18n.ngShowingItemsLabel}}  {{totalFilteredItemsLength()}}</span> <span ng-show="multiSelect" class="ngLabel badge badge-warning">{{i18n.ngSelectedItemsLabel}} {{selectedItems.length}}</span> </div></div> <div class="ngPagerContainer" style="float: right; margin-top: 10px;" ng-show="enablePaging" ng-class="{\'ngNoMultiSelect\': !multiSelect}"><div style="float:left; margin-right: 10px;" class="ngRowCountPicker">               <span style="float: left; margin-top: 3px;" class="ngLabel">{{i18n.ngPageSizeLabel}}</span><select style="float: left;height: 27px; width: 100px" ng-model="pagingOptions.pageSize">                   <option ng-repeat="size in pagingOptions.pageSizes">{{size}}</option>               </select>           </div>           <div style="float:left; margin-right: 10px; line-height:25px;" class="ngPagerControl"                style="float: left; min-width: 135px;">               <button class="ngPagerButton" ng-click="pageToFirst()" ng-disabled="cantPageBackward()" title="{{i18n.ngPagerFirstTitle}}"> <div class="ngPagerFirstTriangle"> <div class="ngPagerFirstBar"></div> </div></button>  <button class="ngPagerButton" ng-click="pageBackward()" ng-disabled="cantPageBackward()"  title="{{i18n.ngPagerPrevTitle}}">  <div class="ngPagerFirstTriangle ngPagerPrevTriangle"></div>  </button>  <input class="ngPagerCurrent" min="1" max="{{maxPages()}}" type="number"  style="width:50px; height: 24px; margin-top: 1px; padding: 0 4px;"  ng-model="pagingOptions.currentPage"/> <button class="ngPagerButton" ng-click="pageForward()" ng-disabled="cantPageForward()"   title="{{i18n.ngPagerNextTitle}}">  <div class="ngPagerLastTriangle ngPagerNextTriangle"></div> </button> <button class="ngPagerButton" ng-click="pageToLast()" ng-disabled="cantPageToLast()" title="{{i18n.ngPagerLastTitle}}"> <div class="ngPagerLastTriangle">  <div class="ngPagerLastBar"></div>  </div> </button> </div> </div> </div>',
+                    plugins: [evalLayout]
                 };
 
 
