@@ -16,7 +16,7 @@ IteSoft
     .factory('itPopup',['$modal','$rootScope','$q',function($modal,$rootScope,$q){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3>{{options.title}}</h3>'+
+                             '<h3>{{options.title | translate}}</h3>'+
                          '</div>'+
                          '<div class="modal-body">'+
                             '<p ng-bind-html="options.text | translate"></p>'+
@@ -56,7 +56,8 @@ IteSoft
             options =  angular.extend({
                 scope: self.scope,
                 template : MODAL_TPLS,
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                controller :['$scope' ,'$modalInstance','$translate',function($scope, $modalInstance,$translate) {
+                    $translate.refresh();
                     $scope.data={};
                     $scope.itButtonAction= function(button, event) {
                         var todo = (button.onTap || noop)(event);
