@@ -281,7 +281,8 @@ IteSoft
                     } else if($scope.gridOptions.selectedItems.length === 1) {
                         _displayDetail($scope.gridOptions.selectedItems[0]);
                     } else {
-                        _displayDetail(null);
+                        _displayDetail(null
+                        );
                     }
 
 
@@ -431,7 +432,7 @@ IteSoft
 
 
                 $scope.itMasterDetailControl.fillHeight = function(){
-                    evalLayout.updateGridLayout();
+                    evalLayout.fillHeight();
                 };
 
                 $scope.$on('unlockCurrentItem',function(){

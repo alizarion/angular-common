@@ -61,6 +61,7 @@ angular.module('itesoft-showcase')
         };
         $scope.undoChange = function(){
             $scope.masterDetails.undoChangeCurrentItem();
+            $scope.masterDetails.fillHeight();
         };
 
         $scope.addNewItem = function(){

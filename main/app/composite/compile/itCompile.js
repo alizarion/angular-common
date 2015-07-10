@@ -9,8 +9,6 @@ IteSoft
                     function (value) {
                         element.html(value);
                         $compile(element.contents())(scope);
-
- //fdsfsd
                     }
                 );
             };

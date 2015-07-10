@@ -133,8 +133,10 @@ function ngGridFullHeight(stopContainerClassName) {
         if (!event) {
             self.pluginGridEvents();
         }
-        //console.log(footerHeight,height,fullHeight);
+
         self.grid.$viewport.css('height', height );
        // self.grid.$canvas.css('height', height);
     };
+
+    this.fillHeight =gridHeightToFull;
 }

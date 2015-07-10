@@ -2,10 +2,20 @@
 angular.module('itesoft-showcase').config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
-            when('/home', {
-                templateUrl: 'app/view/home/homeView.html',
+            when('/side-menus', {
+                templateUrl: 'app/view/side-menu/sideMenusView.html',
                 controller: 'HomeCtrl',
-                title : 'Home Page'
+                title : 'Side menus'
+            }).
+            when('/nav-active', {
+                templateUrl: 'app/view/side-menu/navActiveView.html',
+                controller: 'HomeCtrl',
+                title : 'Navigation active'
+            }).
+            when('/collapsed-tem', {
+                templateUrl: 'app/view/side-menu/collapsedItemView.html',
+                controller: 'HomeCtrl',
+                title : 'Collapsed menu'
             }).
             when('/typo', {
                 templateUrl: 'app/view/typography/typographyView.html',
@@ -17,6 +27,7 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'Checkbox / Toggle'
             }).
+
             when('/datatable', {
                 templateUrl: 'app/view/table/simpleTables.html',
                 controller: 'HomeCtrl',
@@ -37,9 +48,14 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'DataTables'
             }).
-            when('/popup/itpopup', {
-                templateUrl: 'app/view/popup/popup.html',
+            when('/services/itpopup', {
+                templateUrl: 'app/view/services/popupView.html',
                 controller: 'PopupCtrl',
+                title : 'Popup'
+            }).
+            when('/services/it-compile', {
+                templateUrl: 'app/view/services/itCompileView.html',
+                controller: 'itCompileCtrl',
                 title : 'Popup'
             }).
             when('/form/button', {
@@ -58,7 +74,7 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 title : 'Master Detail'
             }).
             otherwise({
-                redirectTo: '/home',
-                title : 'Home Page'
+                redirectTo: '/side-menus',
+                title : 'SideMenus '
             });
     }]);
