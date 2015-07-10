@@ -280,6 +280,8 @@ IteSoft
                         $scope.$parent.currentItemWrapper = null
                     } else if($scope.gridOptions.selectedItems.length === 1) {
                         _displayDetail($scope.gridOptions.selectedItems[0]);
+                    } else {
+                        _displayDetail(null);
                     }
 
 
