@@ -48,10 +48,9 @@ IteSoft
             require: '^itDetail',
             transclude: true,
             scope:false,
-            template : '<div class="row">' +
-                '           <div class="col-md-12">'+
-                                '<form novalidate ng-transclude>'+
-                                '</form>'+
+            template : '<div class="row it-fill">' +
+                '           <div class="col-md-12  it-fill" ng-transclude>'+
+
                             '</div>'+
                        '</div>'
 

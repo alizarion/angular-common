@@ -31,6 +31,11 @@
  *   <td>Method to get displayed item after filter.</td>
  *  </tr>
  *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
  *   <td>Method to define the selected item, return promise</td>
  *  </tr>
@@ -221,9 +226,9 @@ IteSoft
                 $scope.$parent.currentItemWrapper = null;
 
                 var evalLayout = new  ngGridFullHeight();
-                $timeout(function(){
+               $timeout(function(){
                     evalLayout.updateGridLayout();
-                });
+               });
 
                 $scope.gridOptions  = {
                     data: 'itMasterData',
@@ -265,7 +270,10 @@ IteSoft
                 };
 
 
-
+//                $scope.$watch('itMasterData',function(){
+//                    evalLayout.updateGridLayout();
+//
+//                },true);
 
                 $scope.$watch('gridOptions.selectedItems',function(){
                     if($scope.gridOptions.selectedItems.length > 1 ){
@@ -417,6 +425,11 @@ IteSoft
                             angular.copy($scope.$parent.currentItemWrapper.originalItem);
                         _unlockCurrent();
                     }
+                };
+
+
+                $scope.itMasterDetailControl.fillHeight = function(){
+                    evalLayout.updateGridLayout();
                 };
 
                 $scope.$on('unlockCurrentItem',function(){
