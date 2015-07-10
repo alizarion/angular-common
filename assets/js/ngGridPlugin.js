@@ -13,9 +13,12 @@ function ngGridFullHeight(stopContainerClassName) {
     this.groupingWatch = null;
     this.gridHeight = 0;
     function _updateGridLayout() {
-        self.scope.$evalAsync(function(){
-            self.domUtilityService.RebuildGrid(self.scope, self.grid);
-        });
+        if (self.scope != null) {
+
+            self.scope.$evalAsync(function () {
+                self.domUtilityService.RebuildGrid(self.scope, self.grid);
+            });
+        }
     }
 
     this.updateGridLayout =_updateGridLayout;
@@ -109,13 +112,16 @@ function ngGridFullHeight(stopContainerClassName) {
     var gridHeightToFull = function (event) {
 
         var margin = 20;
+        if(self.grid == null){
+            return;
+        }
         var gridId = self.grid.gridId;
         if (document.getElementsByClassName(gridId)[0] === undefined) {
             return;
         }
         var ng_grid = angular.element(document.getElementsByClassName(gridId))[0];
         //TODO fix margin on dist
-       // margin = self.computeMargin(ng_grid, directions.bottom);
+        // margin = self.computeMargin(ng_grid, directions.bottom);
         //margin = isNaN(margin) ? 0 : margin;
         var grid_container = ng_grid.getBoundingClientRect();
         var fullHeight =  window.innerHeight;
@@ -129,5 +135,8 @@ function ngGridFullHeight(stopContainerClassName) {
         }
 
         self.grid.$viewport.css('height', height );
+       // self.grid.$canvas.css('height', height);
     };
+
+    this.fillHeight =gridHeightToFull;
 }
