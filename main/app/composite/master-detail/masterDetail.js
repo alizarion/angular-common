@@ -54,6 +54,6 @@ IteSoft
             restrict: 'EA',
             transclude : true,
             scope :false,
-            template : '<div class="container-fluid it-fill"><div class="row it-fill" ng-transclude></div></div>'
+            template : '<div class="it-fill"><div class="row it-fill" ng-transclude></div></div>'
         }
     });
