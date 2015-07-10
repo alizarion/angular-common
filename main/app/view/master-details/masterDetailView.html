@@ -147,6 +147,7 @@
                 <div class="jumbotron ">
                     <pre it-prettyprint=""  class="prettyprint lang-html">
 angular.module('itesoft-showcase')
+
     .controller('MasterDetailController', ['$scope', function($scope) {
 
         $scope.data =
@@ -187,6 +188,11 @@ angular.module('itesoft-showcase')
 
         };
 
+        $scope.masterDetails.navAlert = {
+            text:'{{\'BUTTON_LANG_EN\' | translate}}',
+            title:'{{\'FOO\' | translate}}'
+        };
+
         function _removeItems(items,dataList){
             angular.forEach(items,function(entry){
                 var index = dataList.indexOf(entry);
@@ -219,6 +225,7 @@ angular.module('itesoft-showcase')
             });
         }
     }]);
+
                         </pre>
                 </div>
             </tab>

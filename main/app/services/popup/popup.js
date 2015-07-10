@@ -16,27 +16,28 @@ IteSoft
     .factory('itPopup',['$modal','$rootScope','$q',function($modal,$rootScope,$q){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3>{{options.title | translate}}</h3>'+
+                             '<h3 it-compile="options.title"></h3>'+
                          '</div>'+
                          '<div class="modal-body">'+
-                            '<p ng-bind-html="options.text | translate"></p>'+
+                            '<p it-compile="options.text"></p>'+
                          '</div>'+
                          '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text | translate}}</button>'+
-                         '</div>'
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text}}</button>'+
+                         '</div>';
 
         var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3>{{options.title | translate}}</h3>'+
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
             '</div>'+
             '<div class="modal-body">'+
-            '<p ng-bind-html="options.text | translate"></p>'+
+            '<p it-compile="options.text"></p>'+
             '   <div class="form-group">'+
-            '<input it-input="" it-text="{{options.inputLabel | translate}}" class="form-control floating-label" ng-model="data.response" >'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
             '</div>'+
             '</div>'+
             '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text | translate}}</button>'+
-            '</div>'
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)" it-compile="button.text"></button>'+
+            '</div>';
 
         var itPopup = {
             alert : _showAlert,
@@ -56,8 +57,7 @@ IteSoft
             options =  angular.extend({
                 scope: self.scope,
                 template : MODAL_TPLS,
-                controller :['$scope' ,'$modalInstance','$translate',function($scope, $modalInstance,$translate) {
-                    $translate.refresh();
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
                     $scope.data={};
                     $scope.itButtonAction= function(button, event) {
                         var todo = (button.onTap || noop)(event);

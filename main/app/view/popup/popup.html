@@ -52,8 +52,8 @@ angular.module('itesoft-showcase')
 
         $scope.showAlert = function(){
             var alertPopup = itPopup.alert({
-                title: 'Don\'t eat that!',
-                text: 'It might taste good'
+                title: '{{\'POPUP_TITLE\' | translate}}',
+                text: '{{\'POPUP_CONTENT\' | translate}}'
             });
             alertPopup.then(function() {
                alert('alert callback');
@@ -62,8 +62,8 @@ angular.module('itesoft-showcase')
 
         $scope.showConfirm = function(){
             var confirmPopup = itPopup.confirm({
-                title: 'Don\'t eat that!',
-                text: 'It might taste good'
+                title: '{{\'POPUP_TITLE\' | translate}}',
+                text: '{{\'POPUP_CONTENT\' | translate}}'
             });
             confirmPopup.then(function(res) {
                 alert('confirm validate');
@@ -74,9 +74,10 @@ angular.module('itesoft-showcase')
 
         $scope.showPrompt = function(){
             var promptPopup = itPopup.prompt({
-                title: 'Don\'t eat that!',
-                text: 'It might taste good',
-                inputLabel : 'Put your value here!!'
+                title: '{{\'POPUP_TITLE\' | translate}}',
+                text: '{{\'POPUP_CONTENT\' | translate}}',
+                inputLabel : '{{\'POPUP_LABEL\' | translate}}',
+                inputType: 'password'
             });
             promptPopup.then(function(data) {
                 alert('prompt validate with value ' + data.response);

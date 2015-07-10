@@ -5,7 +5,11 @@ angular.module('itesoft-showcase',['itesoft','ngRoute','ui.bootstrap','ngSanitiz
             TITLE: 'Hallo',
             FOO: 'Dies ist ein Paragraph.',
             BUTTON_LANG_EN: 'englisch',
-            BUTTON_LANG_DE: 'deutsch'
+            BUTTON_LANG_DE: 'deutsch',
+            POPUP_TITLE: 'Don\'t eat that!',
+            POPUP_CONTENT : 'It might taste good',
+            POPUP_LABEL : 'Put your value here!!'
+
         });
         $translateProvider.preferredLanguage('en');
         $translateProvider.useSanitizeValueStrategy('sanitize');

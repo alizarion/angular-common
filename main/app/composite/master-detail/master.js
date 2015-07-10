@@ -216,11 +216,11 @@ IteSoft
                 '</div>'+
                 '</div>'+
                 '</div>',
-            controller : ['$scope','$filter','$q','$timeout','itPopup','itNgGridPlugins', function ($scope,$filter,$q,$timeout,itPopup,itNgGridPlugins){
+            controller : ['$scope','$filter','$q','$timeout','itPopup', function ($scope,$filter,$q,$timeout,itPopup){
 
                 $scope.$parent.currentItemWrapper = null;
 
-                var evalLayout = new itNgGridPlugins.fullHeight();
+                var evalLayout = new  ngGridFullHeight();
                 $timeout(function(){
                     evalLayout.updateGridLayout();
                 });

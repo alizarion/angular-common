@@ -41,8 +41,8 @@ angular.module('itesoft-showcase')
         };
 
         $scope.masterDetails.navAlert = {
-            text:'BUTTON_LANG_EN',
-            title:'FOO'
+            text:'{{\'BUTTON_LANG_EN\' | translate}}',
+            title:'{{\'FOO\' | translate}}'
         };
 
         function _removeItems(items,dataList){

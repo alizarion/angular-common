@@ -25,6 +25,7 @@ module.exports = {
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
         '!main/app/**/*.demo.js', // Exclude demo files
+        'main/assets/js/ngGridPlugin.js',
         'main/app/app.module.js',
         'main/app/**/*.js'
     ],
