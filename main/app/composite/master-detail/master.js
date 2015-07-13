@@ -280,9 +280,9 @@ IteSoft
                         $scope.$parent.currentItemWrapper = null
                     } else if($scope.gridOptions.selectedItems.length === 1) {
                         _displayDetail($scope.gridOptions.selectedItems[0]);
-                    } else {
-                        _displayDetail(null
-                        );
+                    }
+                    else if($scope.gridOptions.selectedItems.length === 0) {
+                      $scope.$parent.currentItemWrapper = null;
                     }
 
 
@@ -409,8 +409,6 @@ IteSoft
 
                     return deferred.promise;
                 };
-
-
 
                 /**
                  *
