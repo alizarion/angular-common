@@ -40,7 +40,7 @@
  *   <td>Method to define the selected item, return promise</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.scrollToEntity(entity)</code></td>
+ *   <td><code>masterDetail.scrollToItem(itel)</code></td>
  *   <td>Method to scroll to the entity row.</td>
  *  </tr>
  *  <tr>
@@ -227,6 +227,24 @@ IteSoft
                 '</div>',
             controller : ['$scope','$filter','$q','$timeout','itPopup', function ($scope,$filter,$q,$timeout,itPopup){
 
+                function ItemWrapper(item){
+                    this.originalItem = item;
+                    this.currentItem = angular.copy(item);
+                    this.hasChanged = false;
+                    this.isWatched = false;
+                    this.unlockOnEquals = true;
+                }
+
+                ItemWrapper.prototype.unlockCurrent = function(){
+                    this.hasChanged = false;
+                    this.isWatched = false;
+                };
+
+                ItemWrapper.prototype.lockCurrent = function(autoUnlock){
+                    this.hasChanged = true;
+                    this.isWatched = true;
+                    this.unlockOnEquals = !autoUnlock;
+                };
 
 
                 $scope.$parent.currentItemWrapper = null;
@@ -248,10 +266,9 @@ IteSoft
                         filterText: '', useExternalFilter: false
                     },
                     showGroupPanel: true,
-
                     showSelectionCheckbox: true,
                     beforeSelectionChange: function() {
-                        if($scope.$parent.currentItemWrapper!=null) {
+                        if($scope.$parent.currentItemWrapper != null) {
                             return !$scope.$parent.currentItemWrapper.hasChanged;
                         }else {
                             return true;
@@ -316,13 +333,7 @@ IteSoft
                             return deferred.promise;
                         }
                     }
-                    $scope.$parent.currentItemWrapper = {
-                        "originalItem": item,
-                        "currentItem" :angular.copy(item),
-                        "hasChanged": false,
-                        "isWatched": false,
-                        "unlockOnEquals": true
-                    };
+                    $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
                     deferred.resolve('');
                     return deferred.promise;
                 }
@@ -343,7 +354,6 @@ IteSoft
                     }
                 }, true);
 
-
                 $scope.onRowClick = function(row,col) {
                     //if (col.index > 0){ne fonctionne pas quand groupage
                     if (col.colDef.index != undefined){
@@ -358,37 +368,42 @@ IteSoft
                     }
                 };
 
-                $scope.itMasterDetailControl.selectItem =function (item){
-                    $scope.onRowClick(null,{entity:item});
-                };
+//                /**
+//                 * Method to select an item.
+//                 * @param item to select.
+//                 */
+//                $scope.itMasterDetailControl.selectItem =function (item){
+//                    $scope.onRowClick(null,{entity:item});
+//                };
 
-                $scope.itMasterDetailControl.scrollToEntity =function (entity){
+                /**
+                 * Method to scroll to specific item.
+                 * @param entity item to scroll to.
+                 */
+                $scope.itMasterDetailControl.scrollToItem =function (entity){
                     _scrollToEntity(entity);
                 };
 
-                function _unlockCurrent(){
-                    if($scope.$parent.currentItemWrapper!==null){
-                        $scope.$parent.currentItemWrapper.hasChanged = false;
-                        $scope.$parent.currentItemWrapper.isWatched = false;
-                    }
-                }
-
-                function _lockCurrent(autoUnlock){
-                    if($scope.$parent.currentItemWrapper!==null){
-                        $scope.$parent.currentItemWrapper.hasChanged = true;
-                        $scope.$parent.currentItemWrapper.isWatched = true;
-                        $scope.$parent.currentItemWrapper.unlockOnEquals = !autoUnlock;
-                    }
-                }
-
+                /**
+                 * Method to get Selected items.
+                 * @returns {Array} of selected items
+                 */
                 $scope.itMasterDetailControl.getSelectedItems = function(){
                     return $scope.gridOptions.selectedItems;
                 };
 
+                /**
+                 * Method to get Current item.
+                 * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                 */
                 $scope.itMasterDetailControl.getCurrentItem = function(){
                     return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
+                /**
+                 * Method to get filtered items.
+                 * @returns {Array} of filtered items.
+                 */
                 $scope.itMasterDetailControl.getFilteredItems = function(){
                     var entities = [];
                     angular.forEach($scope.gridOptions.ngGrid.filteredRows,
@@ -399,9 +414,11 @@ IteSoft
                     return entities;
                 };
 
+
                 /**
-                 * Method to set the current item.
-                 * @param entity
+                 * Method to select the current Item.
+                 * @param entity item to select.
+                 * @returns {deferred.promise|*} success if the item is found.
                  */
                 $scope.itMasterDetailControl.setCurrentItem = function(entity){
 
@@ -422,19 +439,12 @@ IteSoft
                     },function(){
                         deferred.reject();
                     });
-
                     return deferred.promise;
                 };
 
                 /**
-                 *
-                 * @param entity
-                 * @private
+                 * Method to undo changes on the current item.
                  */
-                function _findEntityRow(entity){
-
-                }
-
                 $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
                     if($scope.$parent.currentItemWrapper!= null){
                         _displayDetail($scope.$parent.currentItemWrapper.originalItem)
@@ -444,23 +454,30 @@ IteSoft
                     }
                 };
 
-
+                /**
+                 * Method to fill windows height to the master part.
+                 */
                 $scope.itMasterDetailControl.fillHeight = function(){
                     evalLayout.fillHeight();
                 };
 
+
+                /**
+                 * Handler to unlock the current item.
+                 */
                 $scope.$on('unlockCurrentItem',function(){
                     $timeout(function(){
-                        _unlockCurrent();
+                        $scope.$parent.currentItemWrapper.unlockCurrent();
                     });
                 });
 
+                /**
+                 * Handler to lock the current item.
+                 */
                 $scope.$on('lockCurrentItem',function(unlockOnEquals){
-
                     $timeout(function(){
-                        _lockCurrent(unlockOnEquals);
+                        $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
                     });
-
                 });
 
                 function confirmLeavePage(e) {
@@ -478,6 +495,7 @@ IteSoft
 
 
                 $scope.$on("$locationChangeStart", confirmLeavePage);
+
                 $scope.itAppScope = $scope.$parent;
 
                 $scope.itMasterDetailControl = angular.extend({navAlert:{
