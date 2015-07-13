@@ -72,7 +72,7 @@ angular.module('itesoft-showcase')
             };
             $scope.data.push(newItem);
             $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                $scope.$broadcast('lockCurrentItem');
+                $scope.$broadcast('lockCurrentItem',false);
             },function(error){
 
             });

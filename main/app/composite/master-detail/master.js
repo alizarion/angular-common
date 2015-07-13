@@ -40,12 +40,16 @@
  *   <td>Method to define the selected item, return promise</td>
  *  </tr>
  *  <tr>
+ *   <td><code>masterDetail.scrollToEntity(entity)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
  *   <td>unlock the selected item from the editing mode.</td>
  *  </tr>
  *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem')</code></td>
- *   <td>lock the selected item from the editing mode.</td>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
  *  </tr>
  *  <tr>
  *   <td><code>$itAppScope</code></td>
@@ -69,133 +73,133 @@
  * </it-master-detail>
  * ```
  * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-                 <it-master-detail >
-                 <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
-                 <it-master-header it-search-placeholder="Recherche" >
-                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-                 </it-master-header>
-                 </it-master>
-                 <it-detail>
-                 <it-detail-header>
-                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-                 <span class="fa fa-floppy-o fa-lg"></span>
-                 </button>
-                 <button class=" btn btn-info" title="Check">
-                 <span class="fa fa-file-code-o fa-lg"></span>
-                 </button>
-                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-                 <span class="fa fa-undo fa-lg"></span>
-                 </button>
+     <example module="itesoft-showcase">
+         <file name="index.html">
+             <it-master-detail >
+             <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
+             <it-master-header it-search-placeholder="Recherche" >
+             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+             <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+             <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+             <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+             </it-master-header>
+             </it-master>
+             <it-detail>
+             <it-detail-header>
+             <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+             <span class="fa fa-floppy-o fa-lg"></span>
+             </button>
+             <button class=" btn btn-info" title="Check">
+             <span class="fa fa-file-code-o fa-lg"></span>
+             </button>
+             <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+             <span class="fa fa-undo fa-lg"></span>
+             </button>
 
-                 </it-detail-header>
-                 <it-detail-content>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                 it-text="code"
-                 ng-model="currentItemWrapper.currentItem.code"
-                 name=""
-                 ng-required="true"/>
-                 </div>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                 it-text="description"
-                 ng-model="currentItemWrapper.currentItem.description" name=""/>
-                 </div>
-                 <div class="form-group">
-                 <input type="checkbox"
-                 it-toggle
-                 ng-model="currentItemWrapper.currentItem.enabledde"
-                 it-text="tete"/>
-                 </div>
-                 </it-detail-content>
-                 </it-detail>
-                 </it-master-detail>
-        </file>
-         <file name="controller.js">
-             angular.module('itesoft-showcase')
+             </it-detail-header>
+             <it-detail-content>
+             <div class="form-group">
+             <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+             it-text="code"
+             ng-model="currentItemWrapper.currentItem.code"
+             name=""
+             ng-required="true"/>
+             </div>
+             <div class="form-group">
+             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+             it-text="description"
+             ng-model="currentItemWrapper.currentItem.description" name=""/>
+             </div>
+             <div class="form-group">
+             <input type="checkbox"
+             it-toggle
+             ng-model="currentItemWrapper.currentItem.enabledde"
+             it-text="tete"/>
+             </div>
+             </it-detail-content>
+             </it-detail>
+             </it-master-detail>
+         </file>
+     <file name="controller.js">
+     angular.module('itesoft-showcase')
 
-             .controller('MasterDetailController', ['$scope', function($scope) {
+     .controller('MasterDetailController', ['$scope', function($scope) {
 
-                    $scope.data =
-                       [
-                            {
-                                "code" : "Code 1",
-                                "description": "Description 1",
-                                "enabledde" : true
-                            },
-                            {
-                                "code" : "Code 2",
-                                "description": "Description 2",
-                                "enabledde" : false
-                            },
-                            {
-                                "code" : "Code 3",
-                                "description": "Description 3",
-                                "enabledde" : true
-                            },
-                            {
-                                "code" : "Code 4",
-                                "description": "Description 4",
-                                "enabledde" : false
-                            },
-                            {
-                                "code" : "Code 5",
-                                "description": "Description 5",
-                                "enabledde" : true
-                            }
-                        ];
+                        $scope.data =
+                           [
+                                {
+                                    "code" : "Code 1",
+                                    "description": "Description 1",
+                                    "enabledde" : true
+                                },
+                                {
+                                    "code" : "Code 2",
+                                    "description": "Description 2",
+                                    "enabledde" : false
+                                },
+                                {
+                                    "code" : "Code 3",
+                                    "description": "Description 3",
+                                    "enabledde" : true
+                                },
+                                {
+                                    "code" : "Code 4",
+                                    "description": "Description 4",
+                                    "enabledde" : false
+                                },
+                                {
+                                    "code" : "Code 5",
+                                    "description": "Description 5",
+                                    "enabledde" : true
+                                }
+                            ];
 
-                    $scope.masterDetails = {};
+                        $scope.masterDetails = {};
 
-                    $scope.masterDetails = {
-                        columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
-                            { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
-                            { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+                        $scope.masterDetails = {
+                            columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
+                                { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
+                                { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
 
-                    };
-
-                    function _removeItems(items,dataList){
-                        angular.forEach(items,function(entry){
-                            var index = dataList.indexOf(entry);
-                            dataList.splice(index, 1);
-                        })
-                    }
-
-                    $scope.deleteSelectedItems = function(){
-                        _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                    };
-
-                    $scope.saveCurrentItem = function(){
-                        $scope.$broadcast('unlockCurrentItem');
-                    };
-                    $scope.undoChange = function(){
-                        $scope.masterDetails.undoChangeCurrentItem();
-                    };
-
-                    $scope.addNewItem = function(){
-                        var newItem =  {
-                            "code" : "Code " + ($scope.data.length+1) ,
-                            "description": "Description " + ($scope.data.length+1),
-                            "enabledde" : true
                         };
-                        $scope.data.push(newItem);
-                        $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                            $scope.$broadcast('lockCurrentItem');
-                        },function(error){
 
-                        });
-                    }
-                }]);
+                        function _removeItems(items,dataList){
+                            angular.forEach(items,function(entry){
+                                var index = dataList.indexOf(entry);
+                                dataList.splice(index, 1);
+                            })
+                        }
 
-           </file>
-            <file src="test.css" >
-            </file>
-    </example>
+                        $scope.deleteSelectedItems = function(){
+                            _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+                        };
+
+                        $scope.saveCurrentItem = function(){
+                            $scope.$broadcast('unlockCurrentItem');
+                        };
+                        $scope.undoChange = function(){
+                            $scope.masterDetails.undoChangeCurrentItem();
+                        };
+
+                        $scope.addNewItem = function(){
+                            var newItem =  {
+                                "code" : "Code " + ($scope.data.length+1) ,
+                                "description": "Description " + ($scope.data.length+1),
+                                "enabledde" : true
+                            };
+                            $scope.data.push(newItem);
+                            $scope.masterDetails.setCurrentItem(newItem).then(function(success){
+                                $scope.$broadcast('lockCurrentItem');
+                            },function(error){
+
+                            });
+                        }
+                    }]);
+
+     </file>
+     <file src="test.css" >
+     </file>
+     </example>
  */
 IteSoft
     .directive('itMaster',function(){
@@ -223,12 +227,14 @@ IteSoft
                 '</div>',
             controller : ['$scope','$filter','$q','$timeout','itPopup', function ($scope,$filter,$q,$timeout,itPopup){
 
+
+
                 $scope.$parent.currentItemWrapper = null;
 
                 var evalLayout = new  ngGridFullHeight();
-               $timeout(function(){
+                $timeout(function(){
                     evalLayout.updateGridLayout();
-               });
+                });
 
                 $scope.gridOptions  = {
                     data: 'itMasterData',
@@ -269,33 +275,35 @@ IteSoft
                     plugins: [evalLayout]
                 };
 
-
-//                $scope.$watch('itMasterData',function(){
-//                    evalLayout.updateGridLayout();
-//
-//                },true);
-
                 $scope.$watch('gridOptions.selectedItems',function(){
+
                     if($scope.gridOptions.selectedItems.length > 1 ){
                         $scope.$parent.currentItemWrapper = null
                     } else if($scope.gridOptions.selectedItems.length === 1) {
                         _displayDetail($scope.gridOptions.selectedItems[0]);
+                        _scrollToEntity($scope.gridOptions.selectedItems[0]);
+
                     }
                     else if($scope.gridOptions.selectedItems.length === 0) {
-                      $scope.$parent.currentItemWrapper = null;
+                        $scope.$parent.currentItemWrapper = null;
                     }
 
-
                 },true);
+
+
+                 function _scrollToEntity(entity){
+                     var rowIndex = $scope.gridOptions.ngGrid.data.indexOf($scope.gridOptions.selectedItems[0]);
+                     $scope.gridOptions.ngGrid.$viewport.scrollTop(rowIndex * $scope.gridOptions.rowHeight);
+                }
 
                 $scope.gridOptions.columnDefs =
                     $scope.itMasterDetailControl.columnDefs;
 
 
                 $scope.hasChanged = function(){
-                    if($scope.$parent.currentItemWrapper!=null) {
-                        return   $scope.$parent.currentItemWrapper.hasChanged;
-                    }else {
+                    if($scope.$parent.currentItemWrapper != null){
+                        return $scope.$parent.currentItemWrapper.hasChanged;
+                    } else {
                         return false;
                     }
                 };
@@ -311,22 +319,27 @@ IteSoft
                     $scope.$parent.currentItemWrapper = {
                         "originalItem": item,
                         "currentItem" :angular.copy(item),
-                        "hasChanged":false,
-                        "isWatched":false
+                        "hasChanged": false,
+                        "isWatched": false,
+                        "unlockOnEquals": true
                     };
                     deferred.resolve('');
                     return deferred.promise;
                 }
 
                 $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-                    if($scope.$parent.currentItemWrapper!=null && $scope.itLockOnChange ){
+                    if($scope.$parent.currentItemWrapper != null && $scope.itLockOnChange ){
                         if(!$scope.$parent.currentItemWrapper.isWatched)
                         {
                             $scope.$parent.currentItemWrapper.isWatched = true;
                         }
-                            $scope.$parent.currentItemWrapper.hasChanged =
-                                !angular.equals(newValue,
+                        if($scope.$parent.currentItemWrapper.unlockOnEquals){
+                        $scope.$parent.currentItemWrapper.hasChanged =
+                            !angular.equals(newValue,
                                 $scope.$parent.currentItemWrapper.originalItem);
+                        } else {
+                            $scope.$parent.currentItemWrapper.hasChanged = true;
+                        }
                     }
                 }, true);
 
@@ -349,6 +362,10 @@ IteSoft
                     $scope.onRowClick(null,{entity:item});
                 };
 
+                $scope.itMasterDetailControl.scrollToEntity =function (entity){
+                    _scrollToEntity(entity);
+                };
+
                 function _unlockCurrent(){
                     if($scope.$parent.currentItemWrapper!==null){
                         $scope.$parent.currentItemWrapper.hasChanged = false;
@@ -356,12 +373,11 @@ IteSoft
                     }
                 }
 
-                function _lockCurrent(){
-                    console.log($scope.$parent.currentItemWrapper);
+                function _lockCurrent(autoUnlock){
                     if($scope.$parent.currentItemWrapper!==null){
                         $scope.$parent.currentItemWrapper.hasChanged = true;
                         $scope.$parent.currentItemWrapper.isWatched = true;
-
+                        $scope.$parent.currentItemWrapper.unlockOnEquals = !autoUnlock;
                     }
                 }
 
@@ -373,7 +389,7 @@ IteSoft
                     return   $scope.$parent.currentItemWrapper.currentItem;
                 };
 
-               $scope.itMasterDetailControl.getFilteredItems = function(){
+                $scope.itMasterDetailControl.getFilteredItems = function(){
                     var entities = [];
                     angular.forEach($scope.gridOptions.ngGrid.filteredRows,
                         function(row){
@@ -439,11 +455,11 @@ IteSoft
                     });
                 });
 
-               $scope.$on('lockCurrentItem',function(){
+                $scope.$on('lockCurrentItem',function(unlockOnEquals){
 
-                   $timeout(function(){
-                       _lockCurrent();
-                   });
+                    $timeout(function(){
+                        _lockCurrent(unlockOnEquals);
+                    });
 
                 });
 
