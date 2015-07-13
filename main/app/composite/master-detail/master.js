@@ -357,6 +357,7 @@ IteSoft
                 }
 
                 function _lockCurrent(){
+                    console.log($scope.$parent.currentItemWrapper);
                     if($scope.$parent.currentItemWrapper!==null){
                         $scope.$parent.currentItemWrapper.hasChanged = true;
                         $scope.$parent.currentItemWrapper.isWatched = true;
@@ -393,7 +394,6 @@ IteSoft
                     _displayDetail(entity).then(function(){
                         $timeout(function() {
                             var entityIndex = $scope.itMasterData.indexOf(entity);
-                            console.log(entityIndex);
                             if(entityIndex>=0) {
                                 $scope.gridOptions.selectRow(
                                     $scope.itMasterData.indexOf(entity), true);
@@ -434,11 +434,17 @@ IteSoft
                 };
 
                 $scope.$on('unlockCurrentItem',function(){
-                    _unlockCurrent();
+                    $timeout(function(){
+                        _unlockCurrent();
+                    });
                 });
 
                $scope.$on('lockCurrentItem',function(){
-                    _lockCurrent();
+
+                   $timeout(function(){
+                       _lockCurrent();
+                   });
+
                 });
 
                 function confirmLeavePage(e) {
