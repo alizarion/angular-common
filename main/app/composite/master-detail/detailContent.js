@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @ngdoc directive
- * @name itesoft.directive:itDetail
+ * @name itesoft.directive:itDetailContent
  * @module itesoft
  * @restrict EA
  *

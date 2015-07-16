@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @ngdoc directive
- * @name itesoft.directive:itDetail
+ * @name itesoft:itDetail
  * @module itesoft
  * @restrict EA
  *
@@ -16,16 +16,13 @@
  * ```html
  * <it-master-detail>
  *   <!-- Master Content content -->
- *
  *   <it-master>
  *       <it-master-header>
  *       </it-master-header>
  *   </it-master>
- *
  *   <!-- menu -->
  *   <it-detail>
  *   </it-detail>
- *
  * </it-master-detail>
  * ```
  * @example
