@@ -397,9 +397,18 @@ IteSoft
                 /**
                  * Method to get Current item.
                  * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                 * @deprecated
                  */
                 $scope.itMasterDetailControl.getCurrentItem = function(){
                     return   $scope.$parent.currentItemWrapper.currentItem;
+                };
+
+                /**
+                 * Method to get Current item.
+                 * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                 */
+                $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
+                    return   $scope.$parent.currentItemWrapper;
                 };
 
                 /**

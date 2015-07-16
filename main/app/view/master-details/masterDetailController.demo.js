@@ -76,5 +76,13 @@ angular.module('itesoft-showcase')
             },function(error){
 
             });
+        };
+
+        $scope.hasChanged = function(){
+            if($scope.masterDetails.getCurrentItemWrapper() != null){
+                return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
+            } else {
+                return false;
+            }
         }
     }]);
