@@ -117,7 +117,11 @@ gulp.task('docs', function () {
     var options = {
         html5Mode: false,
         styles:['./dist/assets/css/main.min.css'],
-        scripts:['./dist/app/lib.min.js','./dist/assets/lib/vendor.min.js'],
+        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/lib.min.js'],
+        loadDefaults: {
+            angular:false,
+            angularAnimate: false
+        },
         startPage: '/api',
         title: "Itesoft Awesome Docs",
         titleLink: "/api"

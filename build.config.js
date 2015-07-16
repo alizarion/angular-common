@@ -58,6 +58,7 @@ module.exports = {
     vendorJavascriptFiles: [
         'main/assets/lib/angular/angular.min.js',
         'main/assets/lib/jquery/dist/jquery.min.js',
+        'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
         'main/assets/lib/ng-grid/ng-grid-2.0.14.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',
