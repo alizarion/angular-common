@@ -105,15 +105,16 @@ IteSoft
 
         function _showConfirm(opts){
             return _showPopup(angular.extend({
-                buttons: [{
-                    text: opts.cancelText || 'Cancel',
-                    type: opts.cancelType || '',
-                    onTap: function() { return false; }
-                }, {
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() { return true; }
-                }]
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
             }, opts || {}));
         }
 
@@ -129,17 +130,19 @@ IteSoft
             return _showPopup(angular.extend({
                 template : MODAL_TPLS_PROMT,
                 inputLabel : opts.inputLabel || '',
-                buttons: [{
-                    text: opts.cancelText || 'Cancel',
-                    type: opts.cancelType || '',
-                    onTap: function() {}
-                }, {
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
             }, opts || {}));
         }
         return itPopup;

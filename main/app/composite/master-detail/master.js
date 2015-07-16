@@ -309,8 +309,10 @@ IteSoft
 
 
                  function _scrollToEntity(entity){
-                     var rowIndex = $scope.gridOptions.ngGrid.data.indexOf($scope.gridOptions.selectedItems[0]);
-                     $scope.gridOptions.ngGrid.$viewport.scrollTop(rowIndex * $scope.gridOptions.rowHeight);
+                     if(!_isEntityDisplayed(entity)) {
+                         var rowIndex = $scope.gridOptions.ngGrid.data.indexOf(entity);
+                         $scope.gridOptions.ngGrid.$viewport.scrollTop(rowIndex * $scope.gridOptions.rowHeight);
+                     }
                 }
 
                 $scope.gridOptions.columnDefs =
@@ -368,13 +370,13 @@ IteSoft
                     }
                 };
 
-//                /**
-//                 * Method to select an item.
-//                 * @param item to select.
-//                 */
-//                $scope.itMasterDetailControl.selectItem =function (item){
-//                    $scope.onRowClick(null,{entity:item});
-//                };
+                function _isEntityDisplayed(entity){
+                    var rowIndex = $scope.gridOptions.ngGrid.data.indexOf(entity);
+                    var scrollTop  = $scope.gridOptions.ngGrid.$viewport.scrollTop();
+                    var height =  $scope.gridOptions.ngGrid.$viewport.height();
+                    return !!($scope.gridOptions.rowHeight * rowIndex > scrollTop &&
+                        $scope.gridOptions.rowHeight * rowIndex < height + scrollTop);
+               }
 
                 /**
                  * Method to scroll to specific item.
@@ -450,7 +452,7 @@ IteSoft
                         _displayDetail($scope.$parent.currentItemWrapper.originalItem)
                         $scope.$parent.currentItemWrapper.currentItem =
                             angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                        _unlockCurrent();
+                        $scope.$parent.currentItemWrapper.unlockCurrent();
                     }
                 };
 
