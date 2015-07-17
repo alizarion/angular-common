@@ -126,9 +126,11 @@ gulp.task('docs', function () {
         title: "Itesoft Awesome Docs",
         titleLink: "/api"
     };
-    return gulp.src(buildConfig.appFiles)
+    gulp.src(buildConfig.appFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest('./docs'));
+    return  gulp.src('./main/assets/fonts/**/*')
+        .pipe(gulp.dest('./docs/css/dist/assets/fonts'));
 });
 
 /**

@@ -1,5 +1,5 @@
 
-var IteSoft = angular.module('itesoft', ['ngSanitize','ngGrid']);
+var IteSoft = angular.module('itesoft', ['ngSanitize','ngGrid','ui.bootstrap']);
 
 
 
