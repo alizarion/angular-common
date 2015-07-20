@@ -80,7 +80,7 @@ IteSoft
                             '<p it-compile="options.text"></p>'+
                          '</div>'+
                          '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)">{{button.text}}</button>'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)" it-compile="button.text"></button>'+
                          '</div>';
 
         var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
