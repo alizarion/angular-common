@@ -24,7 +24,7 @@
     </example>
  */
 IteSoft
-    .directive('itToggle',function(){
+    .directive('itToggle',['$compile',function($compile){
         return {
             restrict: 'A',
             transclude : true,
@@ -33,10 +33,17 @@ IteSoft
                 input.wrap('<div class="togglebutton"></div>');
                 input.wrap('<label>'+(scope.itText || '')+'&nbsp;&nbsp;</label>');
                 input.after('<span class="toggle"></span>');
+                scope.$watch('itText', function(value) {
+                    var label = angular.element(input.context.parentNode);
+                    if (label) {
+                        var labelText = angular.element(label.get(0).firstChild);
+                        labelText.get(0).textContent = value+'  ';
+                    }
+                });
             },
             scope: {
             	itModel: '=',
             	itText: '@'
             }
         }
-});
+}]);
