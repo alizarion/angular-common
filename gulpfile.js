@@ -159,6 +159,7 @@ gulp.task('vendor', function() {
      .pipe(gulp.dest('dist/assets/lib/')); **/
     return gulp.src(buildConfig.vendorJavascriptFiles)
         .pipe(concat('vendor.min.js'))
+
         .pipe(gulp.dest('dist/assets/lib'));
 });
 
