@@ -25,7 +25,6 @@ module.exports = {
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
         '!main/app/**/*.demo.js', // Exclude demo files
-        'main/assets/js/ngGridPlugin.js',
         'main/app/app.module.js',
         'main/app/**/*.js'
     ],
@@ -39,7 +38,7 @@ module.exports = {
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
         'main/assets/css/itesoft.css',
         'main/assets/css/material.css',
-        'main/assets/lib/ng-grid/ng-grid.min.css'
+        'main/assets/lib/angular-ui-grid/ui-grid.css'
 
 
 
@@ -60,11 +59,11 @@ module.exports = {
         'main/assets/lib/jquery/dist/jquery.min.js',
         'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
-        'main/assets/lib/ng-grid/ng-grid-2.0.14.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',
         'main/assets/lib/angular-sanitize/angular-sanitize.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
-        'main/assets/lib/google-code-prettify/bin/prettify.min.js'
+        'main/assets/lib/google-code-prettify/bin/prettify.min.js',
+        'main/assets/lib/angular-ui-grid/ui-grid.min.js'
 
     ]
 };

@@ -1,6 +1,6 @@
 angular.module('itesoft-showcase')
 
-    .controller('MasterDetailController', ['$scope', function($scope) {
+    .controller('MasterDetailController', ['$scope','$translate', function($scope,$translate) {
 
         $scope.data =
            [
@@ -34,7 +34,7 @@ angular.module('itesoft-showcase')
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
+            columnDefs : [{ field: 'code', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', sortable:true},
                 { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
                 { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
 
@@ -46,6 +46,8 @@ angular.module('itesoft-showcase')
         };
 
         function _removeItems(items,dataList){
+            console.log(items);
+            console.log('item drop');
             angular.forEach(items,function(entry){
                 var index = dataList.indexOf(entry);
                 dataList.splice(index, 1);
@@ -53,7 +55,9 @@ angular.module('itesoft-showcase')
         }
 
         $scope.deleteSelectedItems = function(){
-            _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+            console.log($scope.masterDetails);
+            var items =$scope.masterDetails.getSelectedItems();
+            _removeItems(items, $scope.data);
         };
 
         $scope.saveCurrentItem = function(){

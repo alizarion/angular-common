@@ -35,7 +35,7 @@ IteSoft
                                 '<form>'+
                                     '<div class="form-group has-feedback" >'+
                                         '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                                        '<input it-input class="form-control floating-label" type="text" ng-model="$parent.gridOptions.filterOptions.filterText" class="form-control floating-label" it-text="{{itSearchPlaceholder}}"/>'+
+                                        '<input it-input class="form-control floating-label" type="text" ng-model="$parent.filterText" class="form-control floating-label" it-text="{{itSearchPlaceholder}}"/>'+
                                     '</div>'+
                                 '</form>'+
                             '</div>'+
