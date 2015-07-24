@@ -293,13 +293,9 @@ IteSoft
                             $scope.gridApi = gridApi;
                             $timeout(function(){
                                 $scope.itMasterDetailControl.setCurrentItem($scope.itMasterData[0]);
-                                _fitToBottom();
                             });
 
-//                        gridApi.selection.on.rowSelectionChanged($scope,function(rows){
-//                            console.log('rowSelectionChanged');
-//                            $scope.selectedItems = gridApi.selection.getSelectedRows();
-//                        });
+
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
@@ -310,16 +306,8 @@ IteSoft
                             '</div>'
                     };
 
-                    var w = angular.element($window);
-                    w.bind('resize', function () {
-                        _fitToBottom();
-                    });
 
 
-                    function _fitToBottom(){
-
-                        console.log('resize')
-                    }
 
 
                     $scope.gridOptions.columnDefs =
@@ -356,7 +344,6 @@ IteSoft
 
                     $scope.onRowClick = function(row,col) {
                         //if (col.index > 0){ne fonctionne pas quand groupage
-                        console.log(row.providedHeaderCellTemplate);
                         if (col.entity != undefined &&
                             (row.providedHeaderCellTemplate != 'ui-grid/selectionHeaderCell'&&
                                 typeof row.providedHeaderCellTemplate != 'undefined' ) ){
@@ -373,21 +360,6 @@ IteSoft
                     };
 
 
-//                    $scope.$watch('grid.selection',function(){
-//                        console.log('ongrid.selection.selectedCount ');
-//                        if($scope.gridApi.selection.getSelectedRows() > 1 ){
-//                            $scope.$parent.currentItemWrapper = null
-//                        } else if($scope.gridApi.selection.getSelectedRows() === 1) {
-//                            _displayDetail($scope.gridOptions.selectedItems[0]);
-////                            _scrollToEntity($scope.gridOptions.selectedItems[0]);
-//
-//                        }
-//                        else if($scope.gridApi.selection.getSelectedRows() === 0) {
-//                            $scope.$parent.currentItemWrapper = null;
-//                        }
-//
-//                    },true);
-
                     function _scrollToEntity(entity){
                         $scope.gridApi.core.scrollTo(entity);
                     }
@@ -397,12 +369,10 @@ IteSoft
                     };
 
                     $scope.$watch('$scope.filterText',function(){
-                        console.log('$scope.$parent.filterTex');
                         $scope.refreshData();
                     });
 
                     $scope.refreshData = function() {
-                        console.log($scope.gridApi.renderContainers);
                         $scope.gridOptions.data = $filter('filter')($scope.itMasterData, $scope.filterText, undefined);
                     };
 
@@ -617,7 +587,6 @@ IteSoft
                         var footerHeight = footerElement ? footerElement.getBoundingClientRect().height : 0;
                         var height = gridHeight - footerHeight - 40  ;
                         if (newGridHeight !== prevGridHeight || newGridWidth !== prevGridWidth) {
-                            console.log(height);
                             uiGridCtrl.grid.gridHeight = height;
                             uiGridCtrl.grid.gridWidth = newGridWidth;
                             $scope.$apply(function () {
