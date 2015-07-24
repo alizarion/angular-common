@@ -36,7 +36,7 @@ angular.module('itesoft-showcase')
         $scope.masterDetails = {
             columnDefs : [{ field: 'code', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', sortable:true},
                 { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
-                { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+                { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  sortable:false}]
 
         };
 
@@ -81,6 +81,10 @@ angular.module('itesoft-showcase')
 
             });
         };
+        $scope.retrieveClass = function(activation) {
+            return 'fa fa-circle-o';
+        };
+
 
         $scope.hasChanged = function(){
             if($scope.masterDetails.getCurrentItemWrapper() != null){

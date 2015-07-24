@@ -51,7 +51,7 @@
  *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
  *  </tr>
  *  <tr>
- *   <td><code>$itAppScope</code></td>
+ *   <td><code>grid.appScope.itAppScope</code></td>
  *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
  *  </tr>
  * </table>
@@ -528,6 +528,8 @@ IteSoft
                         }
                     }
                     $scope.itAppScope = $scope.$parent;
+                    $scope.myDiv = 'ttt';
+
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
                         text:'Please save or revert your pending change',

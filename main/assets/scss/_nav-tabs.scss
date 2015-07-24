@@ -35,11 +35,17 @@
   background: $primary;
 }
 
+
 .nav-tabs > li.active > a:after {
   -webkit-transform: scale(1);
   -ms-transform: scale(1);
   -o-transform: scale(1);
   transform: scale(1);
+
+}
+
+.nav.nav-tabs > li.active > a {
+  font-weight: bold;
 }
 
 *:before, *:after {

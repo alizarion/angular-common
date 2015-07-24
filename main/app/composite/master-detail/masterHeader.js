@@ -42,7 +42,6 @@ IteSoft
                         '</div>',
             link : function (scope, element, attrs ) {
                 scope.placeholderText = attrs.itSearchPlaceholder;
-                console.log(scope.placeholderText);
             }
         }
 
