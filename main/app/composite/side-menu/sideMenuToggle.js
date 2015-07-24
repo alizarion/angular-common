@@ -20,6 +20,7 @@ IteSoft
                 var child = angular.element(element[0]
                     .querySelector('.it-material-design-hamburger__layer'));
 
+
                 element.on('click', function () {
                     if (child.hasClass('it-material-design-hamburger__icon--to-arrow')) {
                         $animate.removeClass(child,

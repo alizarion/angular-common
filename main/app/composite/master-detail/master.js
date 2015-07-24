@@ -123,7 +123,7 @@
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase')
- .controller('MasterDetailController', ['$scope', function($scope) {
+        .controller('MasterDetailController', ['$scope', function($scope) {
 
                     $scope.data =
                        [
@@ -209,7 +209,6 @@
                         }
                     }
                 }]);
-
  </file>
  <file src="test.css" >
  </file>
@@ -280,8 +279,20 @@ IteSoft
                         this.unlockOnEquals = !autoUnlock;
                     };
 
-
                     $scope.$parent.currentItemWrapper = null;
+
+                    function _selectionChangedHandler(){
+                        if($scope.gridApi.selection.getSelectedRows().length > 1 ){
+                            $scope.$parent.currentItemWrapper = null
+                        } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
+                            _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
+                            _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
+
+                        }
+                        else if($scope.gridApi.selection.getSelectedRows().length === 0) {
+                            $scope.$parent.currentItemWrapper = null;
+                        }
+                    }
 
                     $scope.gridOptions  = {
                         rowHeight: 40,
@@ -294,8 +305,7 @@ IteSoft
                             $timeout(function(){
                                 $scope.itMasterDetailControl.setCurrentItem($scope.itMasterData[0]);
                             });
-
-
+                            $scope.gridApi.selection.on.rowSelectionChanged($scope, _selectionChangedHandler);
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
@@ -305,10 +315,6 @@ IteSoft
                         rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
                             '</div>'
                     };
-
-
-
-
 
                     $scope.gridOptions.columnDefs =
                         $scope.itMasterDetailControl.columnDefs;
@@ -325,6 +331,7 @@ IteSoft
                         deferred.resolve('');
                         return deferred.promise;
                     }
+
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
                         if($scope.$parent.currentItemWrapper != null && $scope.itLockOnChange ){
@@ -382,7 +389,6 @@ IteSoft
                             $scope.$parent.currentItemWrapper.isWatched = false;
                         }
                     }
-
 
                     $scope.itMasterDetailControl.getCurrentItem = function(){
                         return   $scope.$parent.currentItemWrapper.currentItem;
@@ -521,8 +527,7 @@ IteSoft
                             }
                         }
                     }
-
-                    $scope.$on("$locationChangeStart", confirmLeavePage);
+                    $scope.itAppScope = $scope.$parent;
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
                         text:'Please save or revert your pending change',
@@ -571,8 +576,6 @@ IteSoft
                     prevGridHeight = gridUtil.elementHeight($elm);
                     prevGridWidth = gridUtil.elementWidth($elm);
                 }
-
-
                 var resizeTimeoutId;
                 function startTimeout() {
                     clearTimeout(resizeTimeoutId);

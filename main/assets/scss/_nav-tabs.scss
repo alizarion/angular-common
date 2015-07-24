@@ -10,12 +10,12 @@
   transition-duration: 250ms;
   font-weight: 500;
 }
-.nav-tabs > li.active > a {
-  font-weight: bold !important;
-}
+
+
+
 .nav-tabs > li > a:after {
   content: "";
-  height: 2px;
+  height: 3px;
   position: absolute;
   width: 100%;
   left: 0;
@@ -32,16 +32,19 @@
 }
 
 .nav-tabs > li > a:after {
-  background: $warning;
+  background: $primary;
 }
+
 .nav-tabs > li.active > a:after {
   -webkit-transform: scale(1);
   -ms-transform: scale(1);
   -o-transform: scale(1);
   transform: scale(1);
 }
+
 *:before, *:after {
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }

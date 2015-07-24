@@ -13,7 +13,7 @@ angular.module('itesoft-showcase',['itesoft','ngRoute','ui.bootstrap','ngSanitiz
         $translateProvider.preferredLanguage('en');
         $translateProvider.useSanitizeValueStrategy('sanitize');
 }]).config(['$compileProvider', function ($compileProvider) {
-            $compileProvider.debugInfoEnabled(false);
+           // $compileProvider.debugInfoEnabled(false);
 
     }])
 .run(['$rootScope', '$route', function($rootScope, $route) {

@@ -303,8 +303,6 @@ IteSoft
                     }
                 }
 
-
-
                 $scope.$on("$locationChangeStart", confirmLeavePage);
 
                 $scope.itAppScope = $scope.$parent;
