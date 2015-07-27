@@ -230,9 +230,9 @@ IteSoft
                 '<div class="jumbotron ">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
-                '<div class="row " style="clear: both;">'+
+                '<div class="row" >'+
                 '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection  it-master-detail-auto-resize  class="it-master-detail-grid">' +
+                '<div ui-grid="gridOptions" ui-grid-selection  it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
                 '</div>'+
                 '</div>'+
                 '</div>'+
@@ -244,21 +244,30 @@ IteSoft
                 '$timeout',
                 'itPopup',
                 '$templateCache',
-                '$window',
                 function ($scope,
                           $filter,
                           $q,
                           $timeout,
                           itPopup,
-                          $templateCache,
-                          $window){
+                          $templateCache){
 
-//                    $templateCache.put('ui-grid/selectionSelectAllButtons',
-//                        "<input type=\"checkbox\" width=\"10px\"   ng-disabled=\"grid.appScope.$parent.currentItemWrapper.hasChanged\" height=\"10px\"  ng-checked='grid.selection.selectAll'  ng-click=\"headerButtonClick($event)\">"
-//                    );
-//                    $templateCache.put('ui-grid/selectionRowHeaderButtons',
-//                        "<input  type=\"checkbox\" width=\"10px\" ng-disabled=\"grid.appScope.$parent.currentItemWrapper.hasChanged\" height=\"10px\" ng-checked='row.isSelected'   ng-click=\"selectButtonClick(row, $event)\">"
-//                    );
+                    $templateCache.put('ui-grid/uiGridHeaderCell', '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
+                        '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
+                        '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
+                        '<span ui-grid-visible="col.sort.direction" ' +
+                        'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
+                        '</span> </div> <div class="ui-grid-column-menu-button " ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                        'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
+                        ' </div> <div ui-grid-filter></div> </div>');
+
+                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
+                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" ng-click="selectButtonClick(row, $event)">' +
+                        '<input type="checkbox" tabindex="-1" ng-click="selectButtonClick(row, $event)"' +
+                        ' ng-checked="row.isSelected">  </div>');
+
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="headerButtonClick($event)">' +
+                        '<input type="checkbox" ' +
+                        ' ng-change="headerButtonClick($event)" ng-model="grid.selection.selectAll"></div>')
 
                     function ItemWrapper(item){
                         this.originalItem = item;
@@ -577,22 +586,23 @@ IteSoft
                 function getDimensions() {
                     prevGridHeight = gridUtil.elementHeight($elm);
                     prevGridWidth = gridUtil.elementWidth($elm);
+                    angular.element(document.getElementsByClassName('it-master-detail-grid')).css('height','');
+
                 }
                 var resizeTimeoutId;
                 function startTimeout() {
                     clearTimeout(resizeTimeoutId);
                     resizeTimeoutId = setTimeout(function () {
-                        var newGridHeight = gridUtil.elementHeight($elm);
                         var newGridWidth = gridUtil.elementWidth($elm);
-                        var ng_grid = angular.element(document.getElementsByClassName('ui-grid'))[0];
+                        var ng_grid = angular.element(document.getElementsByClassName('it-master-detail-grid'))[0];
                         var grid_container = ng_grid.getBoundingClientRect();
                         var fullHeight =  window.innerHeight;
                         var gridHeight = fullHeight - grid_container.top;
-                        var footerElement = angular.element(document.getElementsByClassName('ui-grid')[0].getElementsByClassName("ngFooterPanel"))[0];
+                        var footerElement = angular.element(document.getElementsByClassName('it-master-detail-grid')[0].getElementsByClassName("ngFooterPanel"))[0];
                         var footerHeight = footerElement ? footerElement.getBoundingClientRect().height : 0;
-                        var height = gridHeight - footerHeight - 40  ;
+                        var newGridHeight = gridHeight - footerHeight - 40  ;
                         if (newGridHeight !== prevGridHeight || newGridWidth !== prevGridWidth) {
-                            uiGridCtrl.grid.gridHeight = height;
+                            uiGridCtrl.grid.gridHeight = newGridHeight;
                             uiGridCtrl.grid.gridWidth = newGridWidth;
                             $scope.$apply(function () {
                                 uiGridCtrl.grid.refresh()

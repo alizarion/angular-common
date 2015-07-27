@@ -2,17 +2,18 @@ angular.module('itesoft-showcase')
 
     .controller('MasterDetailController', ['$scope','Comments', function($scope,Comments) {
         $scope.data = [];
-        $scope.data =  Comments.query();
+        $scope.data =  Comments.query().$promise.then(function(datas){
+            $scope.data = datas;
+        });
 
 
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', sortable:true},
-                { field: 'email', displayName: 'Email ',  width: '10%', sortable:true},
-                { field: 'body', displayName: 'Comments body',  width: '30%', sortable:true},
-                { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  sortable:false}]
-
+            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:false},
+                { field: 'email', displayName: 'Email ',  width: '10%', enableSorting:true,enableColumnMenu:false},
+                { field: 'body', displayName: 'Comments body',  width: '30%', enableSorting:true,enableColumnMenu:false},
+                { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:false}]
         };
 
         $scope.masterDetails.navAlert = {
@@ -21,8 +22,6 @@ angular.module('itesoft-showcase')
         };
 
         function _removeItems(items,dataList){
-            console.log(items);
-            console.log('item drop');
             angular.forEach(items,function(entry){
                 var index = dataList.indexOf(entry);
                 dataList.splice(index, 1);
