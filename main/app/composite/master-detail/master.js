@@ -311,10 +311,7 @@ IteSoft
                         enableMinHeightCheck :true,
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
-                            $timeout(function(){
-                                $scope.itMasterDetailControl.setCurrentItem($scope.itMasterData[0]);
-                            });
-                            $scope.gridApi.selection.on.rowSelectionChanged($scope, _selectionChangedHandler);
+
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +

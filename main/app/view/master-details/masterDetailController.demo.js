@@ -2,8 +2,11 @@ angular.module('itesoft-showcase')
 
     .controller('MasterDetailController', ['$scope','Comments', function($scope,Comments) {
         $scope.data = [];
-        $scope.data =  Comments.query().$promise.then(function(datas){
+
+
+        Comments.query().$promise.then(function(datas){
             $scope.data = datas;
+            $scope.masterDetails.setCurrentItem(datas[0]);
         });
 
 
@@ -55,7 +58,7 @@ angular.module('itesoft-showcase')
 
             });
         };
-        $scope.retrieveClass = function(activation) {
+        $scope.retrieveClass = function() {
             return 'fa fa-circle-o';
         };
 
