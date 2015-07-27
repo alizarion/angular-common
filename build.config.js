@@ -60,6 +60,7 @@ module.exports = {
         'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',
+        'main/assets/lib/angular-resource/angular-resource.min.js',
         'main/assets/lib/angular-sanitize/angular-sanitize.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',

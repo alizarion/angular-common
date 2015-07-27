@@ -1,41 +1,16 @@
 angular.module('itesoft-showcase')
 
-    .controller('MasterDetailController', ['$scope','$translate', function($scope,$translate) {
+    .controller('MasterDetailController', ['$scope','Comments', function($scope,Comments) {
+        $scope.data = [];
+        $scope.data =  Comments.query();
 
-        $scope.data =
-           [
-                {
-                    "code" : "Code 1",
-                    "description": "Description 1",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 2",
-                    "description": "Description 2",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 3",
-                    "description": "Description 3",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 4",
-                    "description": "Description 4",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 5",
-                    "description": "Description 5",
-                    "enabledde" : true
-                }
-            ];
 
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'code', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', sortable:true},
-                { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
+            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', sortable:true},
+                { field: 'email', displayName: 'Email ',  width: '10%', sortable:true},
+                { field: 'body', displayName: 'Comments body',  width: '30%', sortable:true},
                 { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  sortable:false}]
 
         };
