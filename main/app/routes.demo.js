@@ -73,6 +73,11 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'MasterDetailController',
                 title : 'Master Detail'
             }).
+            when('/widget/itloader', {
+                templateUrl: 'app/view/widget/loaderView.html',
+                controller: 'LoaderDemoController',
+                title : 'it-loader'
+            }).
             otherwise({
                 redirectTo: '/side-menus',
                 title : 'SideMenus '

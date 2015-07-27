@@ -5,6 +5,10 @@ $menu-bg:                         #eee !default;
 $menu-width:                      260px !default;
 $menu-header:                      50px !default;
 
+
+.it-side-menu  .navbar .navbar-nav>.active>a, .navbar .navbar-nav>.active>a:focus, .navbar .navbar-nav>.active>a:hover{
+  border-left: $primary 4px solid;
+}
 /* make sidebar nav vertical*/
 
 .it-side-menu .navbar{
@@ -39,33 +43,15 @@ $menu-header:                      50px !default;
 
 
 .it-side-menu .navbar .navbar-nav>li>a {
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-
-.it-sub-menu > a > h5:before{
-  content: "+";
-  float: right;
-  -webkit-transform:scale(2)  rotate(90deg);
-  -ms-transform: scale(2) rotate(90deg);
-  -o-transform: scale(2) rotate(90deg);
-  transform: scale(2) rotate(90deg);
-  -webkit-transition: all $menu-animation-speed ease;
-  transition: all $menu-animation-speed ease;
-
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 
-.it-sub-menu.toggled > a > h5:before {
-  content: "-";
-  float: right;
-  -webkit-transform: scale(2) rotate(180deg);
-  -ms-transform: scale(2) rotate(180deg);
-  -o-transform:scale(2) rotate(180deg);
-  transform:  scale(2) rotate(180deg);
-  -webkit-transition: all $menu-animation-speed ease;
-  transition: all $menu-animation-speed ease;
+.it-side-menu h5{
+  font-weight: bold;
 }
+
 
 .it-side-menu-group{
   top: 0;

@@ -110,7 +110,7 @@ function ngGridFullHeight(stopContainerClassName) {
     };
 
     var gridHeightToFull = function (event) {
-
+        console.log('gridHeightToFull');
         var margin = 0;
         if(self.grid == null){
             return;

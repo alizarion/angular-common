@@ -80,7 +80,7 @@ gulp.task('css', function(done) {
             keepSpecialComments: 0
         }))
         .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest('./dist/assets/css'))
+        .pipe(gulp.dest('./dist/assets/fonts'))
         .on('end', done);
 });
 
@@ -90,7 +90,12 @@ gulp.task('css', function(done) {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('fonts', function() {
-    gulp.src('main/assets/lib/**/fonts/*')
+    gulp.src(['main/assets/lib/**/*.eot',
+        'main/assets/lib/**/*.svg',
+        'main/assets/lib/**/*.ttf',
+        'main/assets/lib/**/*.otf',
+        'main/assets/lib/**/*.woff',
+        'main/assets/lib/**/*.woff2'])
         .pipe(flatten())
         .pipe(gulp.dest('./main/assets/fonts'));
 
@@ -159,6 +164,7 @@ gulp.task('vendor', function() {
      .pipe(gulp.dest('dist/assets/lib/')); **/
     return gulp.src(buildConfig.vendorJavascriptFiles)
         .pipe(concat('vendor.min.js'))
+
         .pipe(gulp.dest('dist/assets/lib'));
 });
 

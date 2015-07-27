@@ -2,13 +2,25 @@
 
 IteSoft
 
-    .directive('itMenuToggle', ['$animate', '$rootScope', function($animate, $rootScope) {
+    .directive('itMenuToggle', ['$animate',
+        '$rootScope',
+        '$window',
+        function($animate,
+                 $rootScope,
+                 $window) {
         return  {
             restrict: 'E',
             require : '^itSideMenus',
-            compile: ['scope','element','attrs',function (scope, element, attrs) {
+            compile: ['scope',
+                'element',
+                'attrs',
+                function (scope,
+                          element,
+                          attrs) {
                 var child = angular.element(element[0]
                     .querySelector('.it-material-design-hamburger__layer'));
+
+
                 element.on('click', function () {
                     if (child.hasClass('it-material-design-hamburger__icon--to-arrow')) {
                         $animate.removeClass(child,

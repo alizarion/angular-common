@@ -48,7 +48,7 @@ angular.module('itesoft-showcase')
 
 
         /**
-         * Customizing popup button
+         * Customizing popup button example.
          */
         $scope.showCustomConfirm = function(){
             var confirmPopup = itPopup.confirm({

@@ -41,8 +41,7 @@ IteSoft
                           return String(str).replace(/[&<>"'\/]/g, function (s) {
                               return entityMap[s];
                           });
-                      };
-                   console.log($sanitize());
+                      }
                     element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
 
                 };

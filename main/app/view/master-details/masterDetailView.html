@@ -46,7 +46,6 @@
 
         <tabset>
             <tab heading="Result" disable="hasChanged()">
-                <div class="table-responsive">
                     <it-master-detail >
                         <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
                             <it-master-header it-search-placeholder="Recherche" >
@@ -71,16 +70,21 @@
                             </it-detail-header>
                             <it-detail-content>
                                 <div class="form-group">
-                                    <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                           it-text="code"
-                                           ng-model="currentItemWrapper.currentItem.code"
+                                    <input it-input type="text" class="form-control floating-label"
+                                           it-text="Name"
+                                           ng-model="currentItemWrapper.currentItem.name"
                                            name=""
                                            ng-required="true"/>
                                 </div>
                                 <div class="form-group">
-                                    <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                           it-text="description"
-                                           ng-model="currentItemWrapper.currentItem.description" name=""/>
+                                    <input it-input type="text" class="form-control floating-label"
+                                           it-text="Email"
+                                           ng-model="currentItemWrapper.currentItem.email" name=""/>
+                                </div>
+                                <div class="form-group">
+                                    <input it-input type="text" class="form-control floating-label"
+                                           it-text="Body"
+                                           ng-model="currentItemWrapper.currentItem.body" name=""/>
                                 </div>
                                 <div class="form-group">
                                     <input type="checkbox"
@@ -91,8 +95,9 @@
                             </it-detail-content>
                         </it-detail>
                     </it-master-detail>
-                </div>
-
+                <script type="text/ng-template" id="cellTemplate.html">
+                    <div class="ngCellText"><i ng-class="grid.appScope.itAppScope.retrieveClass(row.entity['Active'])"></i></div>
+                </script>
             </tab>
             <tab heading="html"  disable="hasChanged()">
                     <pre it-prettyprint=""  class="prettyprint  lang-html">
@@ -141,6 +146,9 @@
         </it-detail-content>
     </it-detail>
 </it-master-detail>
+<script type="text/ng-template" id="cellTemplate.html">
+    <div class="ngCellText"><i ng-class="grid.appScope.itAppScope.retrieveClass(row.entity['Active'])"></i></div>
+</script>
                     </pre>
             </tab>
             <tab heading="Controller" disable="hasChanged()">
@@ -148,44 +156,23 @@
                     <pre it-prettyprint=""  class="prettyprint lang-html">
 angular.module('itesoft-showcase')
 
-    .controller('MasterDetailController', ['$scope', function($scope) {
+    .controller('MasterDetailController', ['$scope','Comments', function($scope,Comments) {
+        $scope.data = [];
 
-        $scope.data =
-           [
-                {
-                    "code" : "Code 1",
-                    "description": "Description 1",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 2",
-                    "description": "Description 2",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 3",
-                    "description": "Description 3",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 4",
-                    "description": "Description 4",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 5",
-                    "description": "Description 5",
-                    "enabledde" : true
-                }
-            ];
+
+        Comments.query().$promise.then(function(datas){
+            $scope.data = datas;
+            $scope.masterDetails.setCurrentItem(datas[0]);
+        });
+
 
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
-                { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
-                { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
+            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:false},
+                { field: 'email', displayName: 'Email ',  width: '10%', enableSorting:true,enableColumnMenu:false},
+                { field: 'body', displayName: 'Comments body',  width: '30%', enableSorting:true,enableColumnMenu:true},
+                { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
         };
 
         $scope.masterDetails.navAlert = {
@@ -201,7 +188,9 @@ angular.module('itesoft-showcase')
         }
 
         $scope.deleteSelectedItems = function(){
-            _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+            console.log($scope.masterDetails);
+            var items =$scope.masterDetails.getSelectedItems();
+            _removeItems(items, $scope.data);
         };
 
         $scope.saveCurrentItem = function(){
@@ -225,6 +214,10 @@ angular.module('itesoft-showcase')
 
             });
         };
+        $scope.retrieveClass = function() {
+            return 'fa fa-circle-o';
+        };
+
 
         $scope.hasChanged = function(){
             if($scope.masterDetails.getCurrentItemWrapper() != null){
@@ -234,6 +227,7 @@ angular.module('itesoft-showcase')
             }
         }
     }]);
+
 
                         </pre>
                 </div>

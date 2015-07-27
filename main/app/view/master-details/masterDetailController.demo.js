@@ -1,43 +1,22 @@
 angular.module('itesoft-showcase')
 
-    .controller('MasterDetailController', ['$scope', function($scope) {
+    .controller('MasterDetailController', ['$scope','Comments', function($scope,Comments) {
+        $scope.data = [];
 
-        $scope.data =
-           [
-                {
-                    "code" : "Code 1",
-                    "description": "Description 1",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 2",
-                    "description": "Description 2",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 3",
-                    "description": "Description 3",
-                    "enabledde" : true
-                },
-                {
-                    "code" : "Code 4",
-                    "description": "Description 4",
-                    "enabledde" : false
-                },
-                {
-                    "code" : "Code 5",
-                    "description": "Description 5",
-                    "enabledde" : true
-                }
-            ];
+
+        Comments.query().$promise.then(function(datas){
+            $scope.data = datas;
+            $scope.masterDetails.setCurrentItem(datas[0]);
+        });
+
 
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
-                { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
-                { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
+            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:false},
+                { field: 'email', displayName: 'Email ',  width: '10%', enableSorting:true,enableColumnMenu:false},
+                { field: 'body', displayName: 'Comments body',  width: '30%', enableSorting:true,enableColumnMenu:true},
+                { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
         };
 
         $scope.masterDetails.navAlert = {
@@ -53,7 +32,9 @@ angular.module('itesoft-showcase')
         }
 
         $scope.deleteSelectedItems = function(){
-            _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+            console.log($scope.masterDetails);
+            var items =$scope.masterDetails.getSelectedItems();
+            _removeItems(items, $scope.data);
         };
 
         $scope.saveCurrentItem = function(){
@@ -77,6 +58,10 @@ angular.module('itesoft-showcase')
 
             });
         };
+        $scope.retrieveClass = function() {
+            return 'fa fa-circle-o';
+        };
+
 
         $scope.hasChanged = function(){
             if($scope.masterDetails.getCurrentItemWrapper() != null){
