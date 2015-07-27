@@ -7,12 +7,21 @@
  *
  * @description
  * Simple loading spinner that handle http request.
- *
+ * *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>$scope.$on('it_loader_show')</code></td>
+ *   <td>event triggered when a XMLHttpRequest start.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$on('it_loader_hide')</code></td>
+ *   <td>event triggered on the en of the  XMLHttpRequest.</td>
+ *  </tr>
+ *  </table>
  **/
 IteSoft.factory('itHttpLoaderInterceptor'
     ,['$q',
         '$rootScope',
-        '$log',
         function ($q, $rootScope) {
 
             var numLoadings = 0;
