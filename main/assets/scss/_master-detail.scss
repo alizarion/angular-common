@@ -10,4 +10,27 @@ it-master .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell{
 }
 
 
+it-master .ui-grid-column-menu-button {
+  position: absolute;
+  right: 2px;
+  top: 3px;
+}
 
+
+it-master .ui-grid-column-menu-button .fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: 9px;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+}
+
+it-master  div.ui-grid-cell .it-master-detail-row-select  input[type="checkbox"]{
+  margin-left: 3px;
+}
+
+it-master  .it-master-detail-select-all-header {
+  margin-left: 3px;
+}
