@@ -1,5 +1,16 @@
 // change Page Title based on the routers
-angular.module('itesoft-showcase',['itesoft','ngRoute','ngResource','ui.bootstrap','ngSanitize','ui.grid','ui.grid.selection','ui.grid.autoResize','pascalprecht.translate','ui.grid.moveColumns'])
+angular.module('itesoft-showcase',[
+    'itesoft',
+    'ngRoute',
+    'ngResource',
+    'ui.bootstrap',
+    'ngSanitize',
+    'ui.grid',
+    'ui.grid.selection',
+    'ui.grid.autoResize',
+    'pascalprecht.translate',
+    'ui.grid.moveColumns'
+])
     .config(['$translateProvider', function ($translateProvider) {
         $translateProvider.translations('en', {
             TITLE: 'Hallo',

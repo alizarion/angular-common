@@ -256,7 +256,7 @@ IteSoft
                         '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
                         '<span ui-grid-visible="col.sort.direction" ' +
                         'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
-                        '</span> </div> <div class="ui-grid-column-menu-button " ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                        '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
                         'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
                         ' </div> <div ui-grid-filter></div> </div>');
 
