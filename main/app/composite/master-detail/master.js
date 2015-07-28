@@ -232,7 +232,7 @@ IteSoft
                 '</div>'+
                 '<div class="row" >'+
                 '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
                 '</div>'+
                 '</div>'+
                 '</div>'+
