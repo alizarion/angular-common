@@ -13,7 +13,7 @@ angular.module('itesoft-showcase')
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:false},
+            columnDefs : [{ field: 'name', displayName: 'BUTTON_LANG_EN', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:true,enableGrouping:false},
                 { field: 'email', displayName: 'Email ',  width: '10%', enableSorting:true,enableColumnMenu:false},
                 { field: 'body', displayName: 'Comments body',  width: '30%', enableSorting:true,enableColumnMenu:true},
                 { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
@@ -60,6 +60,10 @@ angular.module('itesoft-showcase')
         };
         $scope.retrieveClass = function() {
             return 'fa fa-circle-o';
+        };
+
+        $scope.logFilteredItems = function(){
+            console.log($scope.masterDetails.getFilteredItems());
         };
 
 

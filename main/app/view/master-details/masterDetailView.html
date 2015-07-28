@@ -51,7 +51,7 @@
                             <it-master-header it-search-placeholder="Recherche" >
                                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
                                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                                <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+                                <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" ng-click="logFilteredItems()" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
                                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
                             </it-master-header>
                         </it-master>

@@ -232,7 +232,7 @@ IteSoft
                 '</div>'+
                 '<div class="row" >'+
                 '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection  it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-grouping it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
                 '</div>'+
                 '</div>'+
                 '</div>'+
@@ -454,7 +454,12 @@ IteSoft
          * @returns {Array} of filtered items.
          */
         $scope.itMasterDetailControl.getFilteredItems = function(){
-            return $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
+            var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
+            var entities  = [];
+            angular.forEach(rows,function(row){
+                entities.push(row.entity);
+            });
+            return entities;
         };
 
 
