@@ -1,4 +1,3 @@
-
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.grid',
@@ -6,6 +5,3 @@ var IteSoft = angular.module('itesoft', [
     'ui.bootstrap.modal',
     'ui.grid.resizeColumns'
 ]);
-
-
-
