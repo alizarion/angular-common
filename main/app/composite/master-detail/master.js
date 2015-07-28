@@ -309,6 +309,7 @@ IteSoft
                         enableSelectAll: true,
                         showGridFooter: true,
                         enableMinHeightCheck :true,
+                        enableColumnResizing: true,
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
 
