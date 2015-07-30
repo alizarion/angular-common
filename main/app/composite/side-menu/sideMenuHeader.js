@@ -16,8 +16,9 @@ IteSoft
 
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
 
-                var _toggleButton = function(){
-                    if (child.hasClass('it-material-design-hamburger__icon--to-arrow')) {
+                scope.$watch('showmenu',function(newValue,oldValue){
+                    if(newValue!=oldValue ){
+                    if (!newValue) {
                         child.removeClass('it-material-design-hamburger__icon--to-arrow');
                         child.addClass('it-material-design-hamburger__icon--from-arrow');
                         $rootScope.$broadcast('it-sidemenu-state', 'opened');
@@ -26,11 +27,9 @@ IteSoft
                         child.addClass('it-material-design-hamburger__icon--to-arrow');
                         $rootScope.$broadcast('it-sidemenu-state', 'closed');
                     }
-                };
+                    }
+                },true);
 
-                button.on('click', function () {
-                    _toggleButton();
-                });
 
                 if(attrs.itButtonMenu){
                     scope.itButtonMenu = scope.$eval(attrs.itButtonMenu);
@@ -39,8 +38,8 @@ IteSoft
                 scope.$watch(attrs.itButtonMenu, function(newValue, oldValue) {
                     scope.itButtonMenu = newValue;
                     if(newValue){
-                        _toggleButton();
                         sideMenuCtrl.hideSideMenu();
+                        _toggleButton();
                     }
                 });
 
@@ -48,7 +47,7 @@ IteSoft
             template :
                 '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
                     '<section class="it-material-design-hamburger" ng-hide="itButtonMenu">' +
-                        '<button it-menu-toggle ng-click="toggleMenu()" class="it-material-design-hamburger__icon  ">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon  ">' +
                             '<span class="menu-animated it-material-design-hamburger__layer  "> ' +
                             '</span>' +
                         '</button>' +
