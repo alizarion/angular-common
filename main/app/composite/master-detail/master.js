@@ -397,7 +397,7 @@ IteSoft
                     });
 
                     $scope.refreshData = function() {
-                        $scope.gridOptions.data = $filter('filter')($scope.itMasterData, $scope.filterText, undefined);
+                        $scope.gridOptions.data = $filter('itUIGridGlobalFilter')($scope.itMasterData, $scope.gridOptions, $scope.filterText);
                     };
 
                     function _unlockCurrent(){
@@ -575,7 +575,9 @@ IteSoft
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < grid.columnDefs.length; j++) {
                     var dataItem = data[i];
+
                     var fieldName = grid.columnDefs[j].field;
+
                     var renderedData = dataItem[fieldName];
                     // apply cell filter
                     if (grid.columnDefs[j].cellFilter) {
@@ -583,9 +585,11 @@ IteSoft
                         renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
                     }
                     //as soon as search term is found, add to match and move to next dataItem
-                    if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
-                        matches.push(dataItem);
-                        break;
+                    if(typeof renderedData !== 'undefined' &&renderedData != null){
+                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
+                            matches.push(dataItem);
+                            break;
+                        }
                     }
                 }
             }
