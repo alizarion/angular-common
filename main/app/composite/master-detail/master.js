@@ -348,8 +348,9 @@ IteSoft
 
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-//                        _selectionChangedHandler();
-                        if($scope.$parent.currentItemWrapper != null && $scope.itLockOnChange ){
+
+                        if($scope.$parent.currentItemWrapper != null
+                            && $scope.itLockOnChange ){
                             if(!$scope.$parent.currentItemWrapper.isWatched)
                             {
                                 $scope.$parent.currentItemWrapper.isWatched = true;
@@ -358,14 +359,11 @@ IteSoft
                                 $scope.$parent.currentItemWrapper.hasChanged =
                                     !angular.equals(newValue,
                                         $scope.$parent.currentItemWrapper.originalItem);
-                            } else {
+                            } else   {
                                 $scope.$parent.currentItemWrapper.hasChanged = true;
                             }
                         }
-                        $scope.$applyAsync(function(){
-                            _selectionChangedHandler();
 
-                        })
                     }, true);
 
                     $scope.onRowClick = function(row,col) {
@@ -403,10 +401,13 @@ IteSoft
                     };
 
                     function _unlockCurrent(){
-                        if($scope.$parent.currentItemWrapper!==null){
-                            $scope.$parent.currentItemWrapper.hasChanged = false;
-                            $scope.$parent.currentItemWrapper.isWatched = false;
-                        }
+                        $scope.$applyAsync(function(){
+                            if($scope.$parent.currentItemWrapper!==null){
+                                $scope.$parent.currentItemWrapper.hasChanged = false;
+                                $scope.$parent.currentItemWrapper.isWatched = false;
+                            }
+                        });
+
                     }
 
                     $scope.itMasterDetailControl.getCurrentItem = function(){
