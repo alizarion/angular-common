@@ -34,3 +34,13 @@ html, body {
 input::-ms-clear {
   display: none;
 }
+
+.ui-grid-empty-watermark {
+  position: absolute;
+  top : 80px;
+  opacity: 0.25;
+  font-size: 3em;
+  width: 100%;
+  text-align: center;
+  z-index: 1000;
+}

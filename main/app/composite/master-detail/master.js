@@ -224,7 +224,8 @@ IteSoft
                 itMasterData : '=',
                 itLang:'=',
                 itMasterDetailControl:'=',
-                itLockOnChange: '='
+                itLockOnChange: '=',
+                itNotData: '@'
             },
             template : '<div class="col-md-6" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
                 '<div class="jumbotron ">'+
@@ -233,6 +234,7 @@ IteSoft
                 '<div class="row" >'+
                 '<div class="col-md-12 it-master-detail-container">'+
                 '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
+                '<div class="ui-grid-empty-watermark" ng-show="!gridOptions.data.length" >{{itNotData}}</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
