@@ -305,7 +305,7 @@ IteSoft
 
 
                     $scope.gridOptions  = {
-                        rowHeight: 40,
+                        rowHeight: 30,
                         multiSelect: true,
                         enableSelectAll: true,
                         showGridFooter: true,
