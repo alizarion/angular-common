@@ -44,10 +44,13 @@ IteSoft
             restrict: 'EA',
             require: '^itMasterDetail',
             transclude: true,
-            scope :false,
-            template : '<div   class="col-md-6 it-fill" ng-if="currentItemWrapper.currentItem">' +
-                            '<div class="jumbotron it-fill" ng-transclude>' +
-                            '</div>'+
-                       '</div>'
+            scope: false,
+            template: '<div   class="col-md-6 it-fill" ng-if="currentItemWrapper.currentItem">' +
+                '<div class="jumbotron it-fill" ng-transclude>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-md-6 it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
+                '</div>'
         }
     });
