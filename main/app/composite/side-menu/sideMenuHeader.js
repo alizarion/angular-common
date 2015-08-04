@@ -31,22 +31,21 @@ IteSoft
                 },true);
 
 
-                if(attrs.itButtonMenu){
-                    scope.itButtonMenu = scope.$eval(attrs.itButtonMenu);
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
 
                 }
-                scope.$watch(attrs.itButtonMenu, function(newValue, oldValue) {
-                    scope.itButtonMenu = newValue;
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
                     if(newValue){
                         sideMenuCtrl.hideSideMenu();
-                        _toggleButton();
                     }
                 });
 
             },
             template :
                 '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itButtonMenu">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
                         '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon  ">' +
                             '<span class="menu-animated it-material-design-hamburger__layer  "> ' +
                             '</span>' +
