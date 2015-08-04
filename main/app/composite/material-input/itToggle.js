@@ -31,18 +31,24 @@ IteSoft
             link : function (scope, element, attrs ) {
                 var input = angular.element(element[0]);
                 input.wrap('<div class="togglebutton"></div>');
-                input.wrap('<label>'+(scope.itText || '')+'&nbsp;&nbsp;</label>');
-                input.after('<span class="toggle"></span>');
-                scope.$watch('itText', function(value) {
-                    var label = angular.element(input.context.parentNode);
-                    if (label) {
-                        var labelText = angular.element(label.get(0).firstChild);
-                        labelText.get(0).textContent = value+'  ';
-                    }
-                });
+                if (scope.itText == undefined) {
+                    input.wrap('<label>&nbsp;&nbsp;</label>');
+                    input.after('<span class="toggle"></span>');
+                } else {
+                    input.wrap('<label>'+(scope.itText || '')+'&nbsp;&nbsp;</label>');
+                    input.after('<span class="toggle"></span>');
+                    scope.$watch('itText', function(value) {
+                        if ((value) && (input.context)) {
+                            var label = angular.element(input.context.parentNode);
+                            if ((label) && (attrs.itText)) {
+                                var labelText = angular.element(label.get(0).firstChild);
+                                labelText.get(0).textContent = value+'  ';
+                            }
+                        }
+                    });
+                }
             },
             scope: {
-            	itModel: '=',
             	itText: '@'
             }
         }
