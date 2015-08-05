@@ -45,13 +45,20 @@
         <tabset>
             <tab heading="Result">
                 <div class="jumbotron ">
-                    <div it-toggle  it-text="Toggle" it-model="my.model"></div>
-                    <div it-toggle it-model="my.model"></div>
+                    <input it-toggle type="checkbox" it-text="Toggle" ng-model="my.model"></input>
+                    <input it-toggle type="checkbox" ng-model="my.model"></input>
                 </div>
             </tab>
             <tab heading="CSS">
                 <div class="jumbotron ">
-                    TODO
+                    <pre it-prettyprint=""  class="prettyprint lang-html">
+                        <div class="togglebutton">
+                            <label>Toggle&nbsp;&nbsp;
+                                <input type="checkbox"/>
+                                    <span class="toggle"></span>
+                            </label>
+                        </div>
+                    </pre>
                 </div>
             </tab>
             <tab heading="Directive">
