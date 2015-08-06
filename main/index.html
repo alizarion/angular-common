@@ -4,20 +4,21 @@
     <meta charset="utf-8" />
     <title>Demo</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-
-    <link rel='stylesheet' type='text/css' href='assets/css/itesoft.css' />
     <link rel='stylesheet' type='text/css' href='assets/lib/bootstrap/dist/css/bootstrap.min.css' />
-
-    <link rel='stylesheet' type='text/css' href='assets/css/material.css' />
     <link rel='stylesheet' type='text/css' href='assets/lib/components-font-awesome/css/font-awesome.min.css' />
-
-    <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
 
     <link rel='stylesheet' type='text/css' href='assets/lib/angular-bootstrap/ui-bootstrap-csp.css' />
     <link rel='stylesheet' type='text/css' href='assets/lib/google-code-prettify/bin/prettify.min.css' />
+    <link rel="stylesheet" href="assets/lib/angular-ui-grid/ui-grid.css" />
+    <link rel='stylesheet' type='text/css' href='assets/css/material.css' />
+
+    <link rel='stylesheet' type='text/css' href='assets/css/itesoft.css' />
+
+
+    <!--link rel='stylesheet' type='text/css' href='lib/bootstrap-material-design/dist/css/ripples.css' /-->
+
 
     <!--link rel='stylesheet' type='text/css' href='assets/lib/ng-grid/ng-grid.min.css' /-->
-    <link rel="stylesheet" href="assets/lib/angular-ui-grid/ui-grid.css" />
 </head>
 <body>
 <div class="it-fill" ng-include="'app/view/template.html'">
@@ -27,11 +28,11 @@
 
 <script src="assets/lib/jquery/dist/jquery.min.js"></script>
 <script src="assets/lib/angular/angular.min.js"></script>
-<script src="assets/lib/angular-animate/angular-animate.min.js"></script>
+<script src="assets/lib/angular-animate/angular-animate.js"></script>
 <script src="assets/lib/angular-resource/angular-resource.min.js"></script>
-
 <script src="assets/js/ngGridPlugin.js"></script>
 <script src="assets/lib/google-code-prettify/bin/prettify.min.js"></script>
+<script src="assets/lib/angular-media-queries/match-media.js"></script>
 <script src="assets/lib/angular-sanitize/angular-sanitize.min.js"></script>
 
 <script src="assets/lib/angular-route/angular-route.min.js"></script>
@@ -64,6 +65,9 @@
 <script src="app/composite/side-menu/sideMenuContent.js"></script>
 <script src="app/composite/side-menu/collapsedItem.js"></script>
 
+<script src="app/composite/resize/itBottomGlue.js"></script>
+
+
 <script src="app/composite/master-detail/masterDetail.js"></script>
 <script src="app/composite/master-detail/master.js"></script>
 <script src="app/composite/master-detail/masterHeader.js"></script>
@@ -83,6 +87,8 @@
 <script src="app/app.demo.js"></script>
 <script src="app/view/side-menu/homeController.demo.js"></script>
 <script src="app/view/services/popupController.demo.js"></script>
+<script src="app/view/master-details/masterDetailResponsiveController.demo.js"></script>
+
 <script src="app/view/services/itCompileController.demo.js"></script>
 <script src="app/view/resources/commentResources.demo.js"></script>
 <script src="app/view/resources/photoResources.demo.js"></script>

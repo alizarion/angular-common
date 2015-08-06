@@ -13,8 +13,8 @@ module.exports = {
         ' * Copyright 2015 itesoft.\n' +
         ' * http://itesoft.com/\n' +
         ' *\n' +
-        ' * ProductionManager, v<%= pkg.version %>\n' +
-        ' * A powerful production manager.*/\n' ,
+        ' * Angular-common, v<%= pkg.version %>\n' +
+        ' *Itesoft common Angularjs libs.*/\n' ,
 
     closureStart: '(function() {\n',
     closureEnd: '\n})();',
@@ -64,7 +64,8 @@ module.exports = {
         'main/assets/lib/angular-sanitize/angular-sanitize.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
-        'main/assets/lib/angular-ui-grid/ui-grid.min.js'
+        'main/assets/lib/angular-ui-grid/ui-grid.min.js',
+        'main/assets/lib/angular-media-queries/match-media.js'
 
     ]
 };

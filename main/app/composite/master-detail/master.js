@@ -228,15 +228,13 @@ IteSoft
                 itNotDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div class="col-md-6" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
-                '<div class="jumbotron ">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row" >'+
                 '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid ">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNotDataMsg}}</div>'+
-                '</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
@@ -247,21 +245,16 @@ IteSoft
                 '$timeout',
                 'itPopup',
                 '$templateCache',
+                '$route',
                 function ($scope,
                           $filter,
                           $q,
                           $timeout,
                           itPopup,
-                          $templateCache){
+                          $templateCache,
+                          $route){
 
-                    $templateCache.put('ui-grid/uiGridHeaderCell', '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
-                        '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
-                        '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
-                        '<span ui-grid-visible="col.sort.direction" ' +
-                        'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
-                        '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
-                        'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
-                        ' </div> <div ui-grid-filter></div> </div>');
+
 
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
                         ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" ng-click="grid.appScope.onRowClick(col,row)">' +
@@ -270,7 +263,7 @@ IteSoft
 
                     $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="grid.appScope.$parent.currentItemWrapper.hasChanged ? \'return false\':headerButtonClick($event)">' +
                         '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" ng-model="grid.selection.selectAll"></div>')
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" ng-model="grid.selection.selectAll"></div>');
 
                     function ItemWrapper(item){
                         this.originalItem = item;
@@ -333,9 +326,22 @@ IteSoft
                         rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
                             '</div>'
                     };
-
+                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
+                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
+                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
+                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
+                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
+                                '<span ui-grid-visible="col.sort.direction" ' +
+                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
+                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
+                                ' </div> <div ui-grid-filter></div> </div>';
+                        },true)
+                    }
                     $scope.gridOptions.columnDefs =
                         $scope.itMasterDetailControl.columnDefs;
+
+
 
                     function _displayDetail(item) {
                         var deferred = $q.defer();
@@ -376,8 +382,12 @@ IteSoft
                             _displayDetail(col.entity).then(function(msg){
                                 if(row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell'){
                                     $scope.gridApi.selection.clearSelectedRows();
+                                    if( $scope.$parent.$parent.mobile){
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
                                 }
                                 $scope.gridApi.selection.toggleRowSelection(col.entity);
+
                             },function(msg){
                                 itPopup.alert({
                                     text: $scope.itMasterDetailControl.navAlert.text ,
@@ -495,6 +505,9 @@ IteSoft
 //                                        $scope.itMasterData.indexOf(entity), true);
                                     $scope.gridApi.selection.selectRow(entity);
                                     _scrollToEntity(entity);
+                                    if( $scope.$parent.$parent.mobile){
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
                                     deferred.resolve();
                                 } else {
                                     deferred.reject();
@@ -557,7 +570,13 @@ IteSoft
                         }
                     }
                     $scope.itAppScope = $scope.$parent;
-                    $scope.myDiv = 'ttt';
+
+                    $scope.itAppScope.$navAlert = {};
+
+                    $scope.itAppScope.$navAlert.text =
+                        $scope.itMasterDetailControl.navAlert.text;
+                    $scope.itAppScope.$navAlert.title =
+                        $scope.itMasterDetailControl.navAlert.title;
 
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{

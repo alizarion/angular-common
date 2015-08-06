@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Mise en commun de directives AngularJS",
   "dependencies": {
+    "angular-animate": "^1.4.3",
     "gulp": "^3.5.6",
     "gulp-concat": "^2.2.0",
     "gulp-footer": "^1.0.5",

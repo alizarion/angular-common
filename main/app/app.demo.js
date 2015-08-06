@@ -9,7 +9,10 @@ angular.module('itesoft-showcase',[
     'ui.grid.selection',
     'ui.grid.autoResize',
     'pascalprecht.translate',
-    'ui.grid.moveColumns'
+    'ui.grid.moveColumns',
+    'matchMedia',
+    'ngAnimate'
+
 ])
     .config(['$translateProvider', function ($translateProvider) {
         $translateProvider.translations('en', {

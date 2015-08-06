@@ -25,15 +25,15 @@ IteSoft
             require: '^itMaster',
             scope : false,
             transclude : true,
-            template :' <div class="col-md-6">'+
+            template :' <div class="it-md-header col-xs-12 col-md-8">'+
                             '<div class="btn-toolbar" ng-transclude>'+
 
                             '</div>'+
                        '</div>'+
-                       '<div class="col-md-6 pull-right">'+
+                       '<div class="col-xs-12 col-md-4 pull-right">'+
                             '<div>'+
                                 '<form>'+
-                                    '<div class="form-group has-feedback" >'+
+                                    '<div class="form-group has-feedback it-master-header-search-group" >'+
                                         '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
                                         '<input  it-input class="form-control floating-label" type="text" ng-model="$parent.filterText" class="form-control floating-label"  it-text="{{placeholderText}}"/>'+
                                     '</div>'+

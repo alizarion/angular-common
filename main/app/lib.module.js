@@ -3,5 +3,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid',
     'ui.bootstrap.tabs',
     'ui.bootstrap.modal',
-    'ui.grid.resizeColumns'
+    'ui.grid.resizeColumns',
+    'ngAnimate'
 ]);

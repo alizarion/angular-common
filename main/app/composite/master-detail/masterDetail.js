@@ -216,11 +216,62 @@
      </example>
  */
 IteSoft
-    .directive('itMasterDetail',function(){
+    .directive('itMasterDetail',['itPopup',function(itPopup){
         return {
             restrict: 'EA',
             transclude : true,
-            scope :false,
-            template : '<div class="it-fill"><div class="row it-fill" ng-transclude></div></div>'
+            scope :true,
+            template : '<div it-bottom-glue="" class="it-master-detail-container it-fill jumbotron "><div class=" row " ng-transclude></div></div>',
+            controller : [
+                '$scope',
+                'screenSize',
+                function(
+                    $scope,
+                    screenSize
+                    )
+                {
+                    $scope.activeState = 'master';
+                    $scope.desktop = screenSize.on('md, lg', function(match){
+                        $scope.desktop = match;
+
+                    });
+
+                    $scope.mobile = screenSize.on('xs, sm', function(match){
+                        $scope.mobile = match;
+                    });
+
+                    $scope.goToDetail = function(){
+                        $scope.activeState = 'detail';
+                    };
+
+                    $scope.$watch('mobile',function(){
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            $scope.activeState = 'detail';
+                        } else {
+                            $scope.activeState = 'master';
+                        }
+                    });
+
+                    $scope.goToMaster = function(){
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged){
+                                itPopup.alert({
+                                    text:  $scope.$$childHead.$navAlert.text ,
+                                    title :  $scope.$$childHead.$navAlert.title
+                                });
+                            } else {
+                                $scope.activeState = 'master';
+
+                            }
+                        } else {
+                            $scope.activeState = 'master';
+                        }
+
+                    };
+                }]
         }
-    });
+    }]);

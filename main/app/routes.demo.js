@@ -68,6 +68,11 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'HomeCtrl',
                 title : 'Form inputs'
             }).
+            when('/responsive-master-detail', {
+                templateUrl: 'app/view/master-details/responsiveMasterDetailView.html',
+                controller: 'MasterDetailResponsiveController',
+                title : 'Master Detail responsive'
+            }).
             when('/master-detail', {
                 templateUrl: 'app/view/master-details/masterDetailView.html',
                 controller: 'MasterDetailController',

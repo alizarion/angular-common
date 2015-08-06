@@ -39,18 +39,24 @@
     </example>
  */
 IteSoft
-    .directive('itDetail',function() {
+    .directive('itDetail',[function() {
         return {
             restrict: 'EA',
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: '<div   class="col-md-6 it-fill" ng-if="currentItemWrapper.currentItem">' +
-                '<div class="jumbotron it-fill" ng-transclude>' +
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem" class="it-master-detail-slide-left col-md-6" >' +
+                '<a href="" ng-if="$parent.$parent.mobile" ng-click="$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left"> ' +
+                '<span  class="menu-animated it-material-design-hamburger__layer it-material-design-hamburger__icon--to-arrow"> ' +
+                '</span>' +
+                ' </a>'+
+
+                '<div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
-                '<div class="col-md-6 it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-6 it-fill" ng-if="!currentItemWrapper.currentItem">' +
                 '<div class="it-watermark" >{{$itNoDetail}}</div>' +
                 '</div>'
+
         }
-    });
+    }]);
