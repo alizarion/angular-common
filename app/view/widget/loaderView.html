@@ -2,7 +2,7 @@
 
 
 
-<div class="jumbotron ">
+<div it-bottom-glue="" class="jumbotron ">
     <form class="form-horizontal">
         <h2 class="header">itLoader</h2>
 
@@ -15,24 +15,7 @@
                     <div class="bs-component">
                         <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
                         <it-loader></it-loader>
-                        <table class="table table-striped table-hover ">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>title</th>
-                                <th>url</th>
-                                <th>image</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="data in datas">
-                                <td>{{data.id}}</td>
-                                <td>{{data.title}}</td>
-                                <td>{{data.url}}</td>
-                                <td><img ng-src="{{data.thumbnailUrl}}" alt=""/>{{data.body}}</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div ui-grid="gridOptions"></div>
                         <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
                 </div>
             </tab>
