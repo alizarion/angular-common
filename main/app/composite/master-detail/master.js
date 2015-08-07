@@ -210,7 +210,7 @@
                                 }
                             }]);
      </file>
-     <file src="test.css" >
+     <file src="test.css">
      </file>
  </example>
  */
