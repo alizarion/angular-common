@@ -228,12 +228,12 @@ IteSoft
                 itNotDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
-                '<div class="row" >'+
-                '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid ">' +
+                '<div class="row it-master-grid it-fill" >'+
+                '<div class="col-md-12 it-master-detail-container it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns   ui-grid-move-columns class="it-master-detail-grid it-fill">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNotDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -246,13 +246,15 @@ IteSoft
                 'itPopup',
                 '$templateCache',
                 '$route',
+                '$window',
                 function ($scope,
                           $filter,
                           $q,
                           $timeout,
                           itPopup,
                           $templateCache,
-                          $route){
+                          $route,
+                          $window){
 
 
 
@@ -573,10 +575,13 @@ IteSoft
 
                     $scope.itAppScope.$navAlert = {};
 
-                    $scope.itAppScope.$navAlert.text =
-                        $scope.itMasterDetailControl.navAlert.text;
-                    $scope.itAppScope.$navAlert.title =
-                        $scope.itMasterDetailControl.navAlert.title;
+                    $scope.itAppScope.$navAlert.text = $scope.itMasterDetailControl.navAlert.text;
+                    $scope.itAppScope.$navAlert.title = $scope.itMasterDetailControl.navAlert.title;
+
+                    var w = angular.element($window);
+                    w.bind('resize', function () {
+                        $scope.gridApi.core.handleWindowResize();
+                    });
 
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
@@ -584,6 +589,7 @@ IteSoft
                         title:'Unsaved changes'
                     }}, $scope.itMasterDetailControl );
                 }]
+
 
         }
     }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {

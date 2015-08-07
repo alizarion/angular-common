@@ -10,7 +10,6 @@ angular.module('itesoft-showcase',[
     'ui.grid.autoResize',
     'pascalprecht.translate',
     'ui.grid.moveColumns',
-    'matchMedia',
     'ngAnimate'
 
 ])

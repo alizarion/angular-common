@@ -216,12 +216,12 @@
      </example>
  */
 IteSoft
-    .directive('itMasterDetail',['itPopup',function(itPopup){
+    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
         return {
             restrict: 'EA',
             transclude : true,
             scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container it-fill jumbotron "><div class=" row " ng-transclude></div></div>',
+            template : '<div it-bottom-glue="" class="it-master-detail-container it-fill jumbotron "><div class="it-fill row " ng-transclude></div></div>',
             controller : [
                 '$scope',
                 'screenSize',
@@ -265,10 +265,17 @@ IteSoft
                                 });
                             } else {
                                 $scope.activeState = 'master';
+                                $timeout(function(){
+                                    $window.dispatchEvent(new Event('resize'));
+                                },300)
 
                             }
                         } else {
                             $scope.activeState = 'master';
+                            $timeout(function(){
+                                $window.dispatchEvent(new Event('resize'));
+                            },300)
+
                         }
 
                     };

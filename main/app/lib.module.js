@@ -4,5 +4,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.bootstrap.tabs',
     'ui.bootstrap.modal',
     'ui.grid.resizeColumns',
-    'ngAnimate'
+    'ngAnimate',
+    'matchMedia'
 ]);
