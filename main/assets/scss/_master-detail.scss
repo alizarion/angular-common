@@ -1,9 +1,35 @@
 $slide-speed : 230ms;
 
 it-master-detail .it-master-detail-container {
-  overflow-x: hidden;
+  overflow: hidden;
   padding-top: 0 !important;
   margin-top: 0 !important;
+  min-height: 300px;
+}
+
+it-master-detail .it-md-header{
+  height: 56px;
+  max-height: 56px;
+  overflow-y: hidden;
+  overflow-x:auto;
+  display: block;
+  position: relative;
+}
+
+it-master-header .btn-toolbar{
+   display: flex;
+ }
+
+
+it-detail-header {
+  height: 56px;
+  max-height: 56px;
+
+}
+
+
+it-detail-header .col-md-10 .btn-toolbar {
+  display: flex;
 }
 
 it-detail-header .fluid-container{
