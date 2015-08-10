@@ -225,7 +225,7 @@ IteSoft
                 itLang:'=',
                 itMasterDetailControl:'=',
                 itLockOnChange: '=',
-                itNotDataMsg: '@',
+                itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
             template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
@@ -234,7 +234,7 @@ IteSoft
                 '<div class="row it-master-grid it-fill" >'+
                 '<div class="col-md-12 it-master-detail-container it-fill">'+
                 '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns   ui-grid-move-columns class="it-master-detail-grid it-fill">' +
-                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNotDataMsg}}</div>'+
+                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
@@ -302,6 +302,10 @@ IteSoft
                     }
                     $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
 
                     $scope.gridOptions  = {
                         rowHeight: 30,
@@ -584,6 +588,7 @@ IteSoft
                         $scope.gridApi.core.handleWindowResize();
                     });
 
+                    $scope.itMasterDetailControl.initState = true;
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
                         text:'Please save or revert your pending change',
