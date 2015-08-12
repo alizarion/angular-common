@@ -5,7 +5,9 @@ Author : Selim Bensenouci
 ##Quoi que c'est?
 
 Mise en commun de directives AngularJS   
-[demo](http://alizarion.github.io/angular-common/)
+[demo](http://alizarion.github.io/angular-common/dist/)
+[documentation](http://alizarion.github.io/angular-common/docs/#/api)
+
 
 ##Installation
 
