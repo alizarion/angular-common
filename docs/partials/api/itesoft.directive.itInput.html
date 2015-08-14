@@ -1,0 +1,60 @@
+<h1><code ng:non-bindable="">itInput</code>
+<div><span class="hint">directive in module <code ng:non-bindable="">itesoft</code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itinput-page"><p>Floating labels are just like Stacked Labels,
+except that their labels animate, or &quot;float&quot; up whe
+n text is entered in the input.</p>
+<pre><code class="lang-html">  &lt;div class=&quot;form-group&quot;&gt;
+      &lt;input it-input
+             class=&quot;form-control
+             floating-label&quot;
+             type=&quot;text&quot;
+             it-text=&quot;Email&quot;
+             ng-model=&quot;user.email&quot;&gt;
+  &lt;/div&gt;
+</code></pre>
+</div></div>
+<h2 id="usage">Usage</h2>
+<div class="usage">as element:<pre class="prettyprint linenums">&lt;it-input&gt;
+&lt;/it-input&gt;</pre>
+as attribute<pre class="prettyprint linenums">&lt;ANY it-input&gt;
+   ...
+&lt;/ANY&gt;</pre>
+as class<pre class="prettyprint linenums">&lt;ANY class="it-input"&gt;
+   ...
+&lt;/ANY&gt;</pre>
+</div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="itesoft-directive-page itesoft-directive-itinput-page"><h4 id="example_source">Source</h4>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-5" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-5" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-5">
+    <div ng-controller="HomeCtrl">
+        <div class="form-group">
+            <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+        </div>
+        <div class="form-group">
+            <input it-input class="form-control floating-label" type="text" it-text="Prénom" ng-model="user.firstName">
+        </div>
+    </div>
+</script>
+</div>
+<div class="tab-pane" title="controller.js">
+<pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
+<script type="text/ng-template" id="controller.js">
+    angular.module('itesoft').controller('HomeCtrl',['$scope', function($scope) {
+          $scope.user = {
+              email : 'test@itesoft.com',
+              firstName :''
+             };
+    }]);
+</script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-5" ng-eval-javascript="controller.js"></div>
+</div></div>
+</div>
