@@ -72,13 +72,13 @@ it-master-header .fuild-container{
   right: 0;
 }
 
-it-detail-content .row {
+it-detail-content > .row {
   height: 100%;
 
   padding-top: 80px;
 }
 
-it-detail-content  .row .col-md-12{
+it-detail-content > .row .col-md-12{
   overflow-y: auto;
   padding-top: 20px;
 }
