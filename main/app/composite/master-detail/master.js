@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @ngdoc directive
- * @name itesoft.directive:masterDetail
+ * @name itesoft.directive:itMaster
  * @module itesoft
  * @restrict EA
  *
@@ -18,8 +18,8 @@
  *   <td>Method to get selected items in the master grid.</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.getCurrentItem()</code></td>
- *   <td>Method to get the selected item that appear in the detail content.</td>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
  *  </tr>
  *  <tr>
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
@@ -39,7 +39,7 @@
  *   <td>Method to define the selected item, return promise</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.scrollToItem(itel)</code></td>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
  *   <td>Method to scroll to the entity row.</td>
  *  </tr>
  *  <tr>

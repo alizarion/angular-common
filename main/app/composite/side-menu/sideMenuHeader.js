@@ -1,5 +1,18 @@
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ *
+ * @description
+ * A container for a side menu header.
+ *
+ * @usage
+ * <it-side-menu-header it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
 IteSoft
     .directive('itSideMenuHeader',['$rootScope',function($rootScope){
         return {

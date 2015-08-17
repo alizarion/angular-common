@@ -1,5 +1,28 @@
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ *
+ * @description
+ * directive for toggle submenu.
+ *
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
 IteSoft
     .directive('itCollapsedItem', function() {
         return  {

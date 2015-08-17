@@ -49,21 +49,21 @@
                     <it-master-detail >
                         <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{ masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : ''}}" it-master-detail-control="masterDetails"  it-lock-on-change="true">
                             <it-master-header it-search-placeholder="Recherche" >
-                                <button class="btn" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-                                <button class="btn" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                                <button class="btn" ng-disabled="currentItemWrapper.hasChanged" ng-click="logFilteredItems()" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-                                <button class="btn" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+                                <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+                                <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+                                <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" ng-click="logFilteredItems()" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+                                <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
                             </it-master-header>
                         </it-master>
                         <it-detail>
                             <it-detail-header>
-                                <button class="btn" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+                                <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
                                     <span class="fa fa-floppy-o fa-lg"></span>
                                 </button>
-                                <button class=" btn" title="Check">
+                                <button class="btn btn-primary" title="Check">
                                     <span class="fa fa-file-code-o fa-lg"></span>
                                 </button>
-                                <button class="btn" title="Undo" ng-click="undoChange()">
+                                <button class="btn btn-success" title="Undo" ng-click="undoChange()">
                                     <span class="fa fa-undo fa-lg"></span>
                                 </button>
 
