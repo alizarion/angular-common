@@ -38,6 +38,7 @@ angular.module('itesoft-showcase')
         };
 
         $scope.saveCurrentItem = function(){
+            $scope.data[$scope.masterDetails.getCurrentItemWrapper().index]  = $scope.masterDetails.getCurrentItemWrapper().currentItem;
             $scope.$broadcast('unlockCurrentItem');
         };
         $scope.undoChange = function(){
