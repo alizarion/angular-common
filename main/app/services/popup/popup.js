@@ -11,7 +11,7 @@
  * prompt(), and confirm() functions that users are used to,
  * in addition to allowing popups with completely custom content and look.
  * @example
-     <example module="itesoft-showcase" >
+     <example module="itesoft" >
          <file name="index.html">
             <div ng-controller="PopupCtrl">
              <button class="btn btn-info" ng-click="showAlert()">
@@ -26,7 +26,7 @@
             </div>
          </file>
         <file name="Controller.js">
-                 angular.module('itesoft-showcase',['itesoft'])
+                 angular.module('itesoft')
                  .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
 
                         $scope.showAlert = function(){

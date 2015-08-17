@@ -186,9 +186,12 @@
                                                 _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
                                             };
 
+
                                             $scope.saveCurrentItem = function(){
-                                                $scope.$broadcast('unlockCurrentItem');
-                                            };
+                                                    $scope.data[$scope.masterDetails.getCurrentItemWrapper().index]  = $scope.masterDetails.getCurrentItemWrapper().currentItem;
+                                                    $scope.$broadcast('unlockCurrentItem');
+                                                };
+
                                             $scope.undoChange = function(){
                                                 $scope.masterDetails.undoChangeCurrentItem();
                                                 $scope.masterDetails.fillHeight();

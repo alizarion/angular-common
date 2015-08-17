@@ -266,11 +266,17 @@ IteSoft
                         ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" ng-model="grid.selection.selectAll"></div>');
 
                     function ItemWrapper(item){
-                        this.originalItem = item;
-                        this.currentItem = angular.copy(item);
-                        this.hasChanged = false;
-                        this.isWatched = false;
-                        this.unlockOnEquals = true;
+                        var _self = this;
+                        angular.forEach($scope.itMasterData,function(entry,index){
+                            if(angular.equals(entry,item)) {
+                                _self.index = index;
+                            }
+                        });
+                        _self.originalItem = item;
+                        _self.currentItem = angular.copy(item);
+                        _self.hasChanged = false;
+                        _self.isWatched = false;
+                        _self.unlockOnEquals = true;
                     }
 
                     ItemWrapper.prototype.unlockCurrent = function(){

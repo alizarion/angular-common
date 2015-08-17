@@ -4,6 +4,7 @@ var IteSoft = angular.module('itesoft', [
     'ngAnimate',
     'matchMedia',
     'ui.grid',
+    'ngRoute',
     'pascalprecht.translate',
     'ui.grid.selection',
     'ui.grid.autoResize',
