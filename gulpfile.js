@@ -121,7 +121,7 @@ gulp.task('uglify', function() {
 gulp.task('docs', function () {
     var options = {
         html5Mode: false,
-        styles:['./dist/assets/css/main.min.css'],
+        styles:['./dist/assets/fonts/main.min.css'],
         scripts:['./dist/assets/lib/vendor.min.js','./dist/app/lib.min.js'],
         loadDefaults: {
             angular:false,
@@ -189,8 +189,10 @@ gulp.task('assets', function() {
 });
 
 
+
+
 gulp.task('deploy', function() {
-    return gulp.src('./dist/**/*')
+    return gulp.src(['!./node_modules/**/*','!./main/**/*','./**/*'])
         .pipe(ghPages());
 });
 
