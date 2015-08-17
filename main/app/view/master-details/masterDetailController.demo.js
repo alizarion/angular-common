@@ -13,9 +13,9 @@ angular.module('itesoft-showcase')
         $scope.masterDetails = {};
 
         $scope.masterDetails = {
-            columnDefs : [{ field: 'name', displayName: 'Column 1', headerCellFilter:'translate', width: '20%', enableSorting:false,enableColumnMenu:true,enableGrouping:false},
-                { field: 'email', displayName: 'Email ',  width: '10%', enableSorting:true,enableColumnMenu:false},
-                { field: 'body', displayName: 'Comments body',  width: '30%', enableSorting:true,enableColumnMenu:true},
+            columnDefs : [{ field: 'name', displayName: 'Column 1', headerCellFilter:'translate', enableSorting:false,enableColumnMenu:true,enableGrouping:false},
+                { field: 'email', displayName: 'Email ',   enableSorting:true,enableColumnMenu:false},
+                { field: 'body', displayName: 'Comments body',  enableSorting:true,enableColumnMenu:true},
                 { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
         };
 

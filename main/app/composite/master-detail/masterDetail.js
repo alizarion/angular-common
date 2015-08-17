@@ -164,8 +164,8 @@
                                             $scope.masterDetails = {};
 
                                             $scope.masterDetails = {
-                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
-                                                    { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
+                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
+                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
                                                     { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
 
                                             };
