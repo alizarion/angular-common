@@ -1,8 +1,11 @@
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
+    'ui.bootstrap',
+    'ngAnimate',
+    'matchMedia',
     'ui.grid',
-    'ui.bootstrap.tabs',
-    'ui.bootstrap.modal',
-    'ui.grid.resizeColumns',
-    'ngAnimate'
+    'pascalprecht.translate',
+    'ui.grid.selection',
+    'ui.grid.autoResize',
+    'ui.grid.moveColumns'
 ]);

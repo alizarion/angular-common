@@ -45,12 +45,7 @@ IteSoft
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem" class="it-master-detail-slide-left col-md-6" >' +
-                '<a href="" ng-if="$parent.$parent.mobile" ng-click="$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left"> ' +
-                '<span  class="menu-animated it-material-design-hamburger__layer it-material-design-hamburger__icon--to-arrow"> ' +
-                '</span>' +
-                ' </a>'+
-
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-6 it-fill" >' +
                 '<div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +

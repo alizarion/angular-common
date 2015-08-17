@@ -1,6 +1,86 @@
-$slide-speed : 300ms;
-.it-master-detail-container{
-  overflow-x: hidden;
+$slide-speed : 230ms;
+
+it-master-detail .it-master-detail-container {
+  overflow: hidden;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  min-height: 300px;
+}
+
+it-master-detail .it-md-header{
+  height: 56px;
+  max-height: 56px;
+  overflow-y: hidden;
+  overflow-x:auto;
+  display: block;
+  position: relative;
+}
+
+it-master-header .btn-toolbar{
+   display: flex;
+ }
+
+
+it-detail-header {
+  height: 56px;
+  max-height: 56px;
+
+}
+
+
+it-detail-header .col-md-10 .btn-toolbar {
+  display: flex;
+}
+
+it-detail-header .fluid-container{
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+it-master-detail .it-md-header {
+  background-color :#f2f2f2 !important;
+}
+
+it-detail .it-md-header {
+  margin-bottom: 15px;
+}
+
+it-detail-header .it-md-header {
+  z-index: 10;
+}
+
+it-detail-header .it-material-design-hamburger__icon{
+  height: auto;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+it-detail-header .it-material-design-hamburger__icon--to-arrow{
+  -webkit-animation-delay: $slide-speed; /* Chrome, Safari, Opera */
+  animation-delay: $slide-speed;
+}
+
+it-master .it-master-grid{
+  padding-top: 95px;
+}
+
+it-master-header .fuild-container{
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+it-detail-content .row {
+  height: 100%;
+
+  padding-top: 80px;
+}
+
+it-detail-content  .row .col-md-12{
+  overflow-y: auto;
+  padding-top: 20px;
 }
 
 it-master .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell{
@@ -54,7 +134,7 @@ it-master  .it-master-select-all-header {
   transition: $slide-speed  cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
 }
 
- .it-master-detail-slide-left.ng-hide-remove {
+.it-master-detail-slide-left.ng-hide-remove {
   left: 100%;
 
 }
@@ -76,7 +156,6 @@ it-master  .it-master-select-all-header {
 .it-master-detail-slide-left .it-material-design-hamburger__layer{
   background:#afafaf !important;
 }
-
 
 
 
@@ -136,6 +215,10 @@ it-master .ui-grid-cell-contents{
 
 it-master .ui-grid-row:nth-child(odd) .ui-grid-cell {
   background-color: #f2f2f2 !important;
+}
+
+it-master .ui-grid-row .ui-grid-cell {
+  cursor: pointer;
 }
 
 it-master .ui-grid-icon-angle-down{

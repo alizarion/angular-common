@@ -3,22 +3,14 @@ angular.module('itesoft-showcase',[
     'itesoft',
     'ngRoute',
     'ngResource',
-    'ui.bootstrap',
     'ngSanitize',
-    'ui.grid',
-    'ui.grid.selection',
-    'ui.grid.autoResize',
-    'pascalprecht.translate',
-    'ui.grid.moveColumns',
-    'matchMedia',
-    'ngAnimate'
-
+    'pascalprecht.translate'
 ])
     .config(['$translateProvider', function ($translateProvider) {
         $translateProvider.translations('en', {
             TITLE: 'Hallo',
-            FOO: 'Dies ist ein Paragraph.',
-            BUTTON_LANG_EN: 'englisch',
+            FOO: 'Modification en cours.',
+            BUTTON_LANG_EN: 'merci de sauvegarder',
             BUTTON_LANG_DE: 'deutsch',
             POPUP_TITLE: 'Don\'t eat that!',
             POPUP_CONTENT : 'It might taste good',
@@ -35,3 +27,4 @@ angular.module('itesoft-showcase',[
             $rootScope.pageTitle = $route.current.title;
         });
     }]);
+

@@ -11,7 +11,7 @@
  * prompt(), and confirm() functions that users are used to,
  * in addition to allowing popups with completely custom content and look.
  * @example
-     <example module="itesoft-showcase" deps="vendor.min.js,lib.min.js">
+     <example module="itesoft-showcase" >
          <file name="index.html">
             <div ng-controller="PopupCtrl">
              <button class="btn btn-info" ng-click="showAlert()">
@@ -26,13 +26,13 @@
             </div>
          </file>
         <file name="Controller.js">
-                 angular.module('itesoft-showcase',['itesoft','ui.bootstrap'])
+                 angular.module('itesoft-showcase',['itesoft'])
                  .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
 
                         $scope.showAlert = function(){
                             var alertPopup = itPopup.alert({
-                                title: '{{\'POPUP_TITLE\' | translate}}',
-                                text: '{{\'POPUP_CONTENT\' | translate}}'
+                                title: '{{'POPUP_TITLE' | translate}}',
+                                text: '{{'POPUP_CONTENT' | translate}}'
                             });
                             alertPopup.then(function() {
                                alert('alert callback');
@@ -41,8 +41,8 @@
 
                         $scope.showConfirm = function(){
                             var confirmPopup = itPopup.confirm({
-                                title: '{{\'POPUP_TITLE\' | translate}}',
-                                text: '{{\'POPUP_CONTENT\' | translate}}'
+                                title: '{{'POPUP_TITLE' | translate}}',
+                                text: '{{'POPUP_CONTENT' | translate}}'
                             });
                             confirmPopup.then(function(res) {
                                 alert('confirm validate');
@@ -53,9 +53,9 @@
 
                         $scope.showPrompt = function(){
                             var promptPopup = itPopup.prompt({
-                                title: '{{\'POPUP_TITLE\' | translate}}',
-                                text: '{{\'POPUP_CONTENT\' | translate}}',
-                                inputLabel : '{{\'POPUP_LABEL\' | translate}}',
+                                title: '{{'POPUP_TITLE' | translate}}',
+                                text: '{{'POPUP_CONTENT' | translate}}',
+                                inputLabel : '{{'POPUP_LABEL' | translate}}',
                                 inputType: 'password'
                             });
                             promptPopup.then(function(data) {

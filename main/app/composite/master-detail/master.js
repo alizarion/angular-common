@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @ngdoc directive
- * @name itesoft.directive:masterDetail
+ * @name itesoft.directive:itMaster
  * @module itesoft
  * @restrict EA
  *
@@ -18,8 +18,8 @@
  *   <td>Method to get selected items in the master grid.</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.getCurrentItem()</code></td>
- *   <td>Method to get the selected item that appear in the detail content.</td>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
  *  </tr>
  *  <tr>
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
@@ -39,7 +39,7 @@
  *   <td>Method to define the selected item, return promise</td>
  *  </tr>
  *  <tr>
- *   <td><code>masterDetail.scrollToItem(itel)</code></td>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
  *   <td>Method to scroll to the entity row.</td>
  *  </tr>
  *  <tr>
@@ -210,7 +210,7 @@
                                 }
                             }]);
      </file>
-     <file src="test.css" >
+     <file src="test.css">
      </file>
  </example>
  */
@@ -225,16 +225,16 @@ IteSoft
                 itLang:'=',
                 itMasterDetailControl:'=',
                 itLockOnChange: '=',
-                itNotDataMsg: '@',
+                itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
-                '<div class="row" >'+
-                '<div class="col-md-12 it-master-detail-container">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns it-master-detail-auto-resize  ui-grid-move-columns class="it-master-detail-grid ">' +
-                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNotDataMsg}}</div>'+
+                '<div class="row it-master-grid it-fill" >'+
+                '<div class="col-md-12 it-master-detail-container it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns   ui-grid-move-columns class="it-master-detail-grid it-fill">' +
+                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
                 '</div>'+
@@ -246,13 +246,15 @@ IteSoft
                 'itPopup',
                 '$templateCache',
                 '$route',
+                '$window',
                 function ($scope,
                           $filter,
                           $q,
                           $timeout,
                           itPopup,
                           $templateCache,
-                          $route){
+                          $route,
+                          $window){
 
 
 
@@ -300,6 +302,10 @@ IteSoft
                     }
                     $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
 
                     $scope.gridOptions  = {
                         rowHeight: 30,
@@ -313,10 +319,11 @@ IteSoft
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
                             gridApi.selection.on.rowSelectionChanged($scope,function(row){
-
                                 _selectionChangedHandler();
                             });
-
+                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
+                                _selectionChangedHandler();
+                            })
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
@@ -573,17 +580,22 @@ IteSoft
 
                     $scope.itAppScope.$navAlert = {};
 
-                    $scope.itAppScope.$navAlert.text =
-                        $scope.itMasterDetailControl.navAlert.text;
-                    $scope.itAppScope.$navAlert.title =
-                        $scope.itMasterDetailControl.navAlert.title;
+                    $scope.itAppScope.$navAlert.text = $scope.itMasterDetailControl.navAlert.text;
+                    $scope.itAppScope.$navAlert.title = $scope.itMasterDetailControl.navAlert.title;
 
+                    var w = angular.element($window);
+                    w.bind('resize', function () {
+                        $scope.gridApi.core.handleWindowResize();
+                    });
+
+                    $scope.itMasterDetailControl.initState = true;
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
                         text:'Please save or revert your pending change',
                         title:'Unsaved changes'
                     }}, $scope.itMasterDetailControl );
                 }]
+
 
         }
     }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
