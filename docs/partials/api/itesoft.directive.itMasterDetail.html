@@ -8,7 +8,13 @@
 <p>To use master details directive, add an <code>&lt;it-master-detail&gt;</code> parent element. This will encompass all master details content,
 and have 2 child elements: 1 <code>&lt;it-master&gt;</code> for the list selectable content,
 and <code>&lt;it-detail&gt;</code> that display the content of the selected item.</p>
+<p>You MUST pass an empty object  <it-master it-master-detail-control="myMasterDetailControl"></it-master>
+this object will</p>
 <table class="table">
+ <tr>
+  <td><code>masterDetail.navAlert = { <br/> text: &#39;my forbidden navigation text &#39;, <br/> title : &#39;forbidden navigation title&#39;  <br/>}</code></td>
+  <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ </tr>
  <tr>
   <td><code>masterDetail.getSelectedItems()</code></td>
   <td>Method to get selected items in the master grid.</td>
@@ -76,9 +82,9 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itmasterdetail-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js controller.js" source-edit-html="index.html-3" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-3" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-3" ng-html-wrap-loaded="itesoft-showcase angular.js controller.js"></pre>
+<pre class="prettyprint linenums" ng-set-text="index.html-3" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
 <script type="text/ng-template" id="index.html-3">
         <div ng-controller="MasterDetailController">
             <it-master-detail >
@@ -106,21 +112,21 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
             <it-detail-content>
             <div class="form-group">
             <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-            it-text="code"
-            ng-model="currentItemWrapper.currentItem.code"
-            name=""
-            ng-required="true"/>
+                it-text="code"
+                ng-model="currentItemWrapper.currentItem.code"
+                name=""
+                ng-required="true"/>
             </div>
             <div class="form-group">
             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-            it-text="description"
-            ng-model="currentItemWrapper.currentItem.description" name=""/>
+                it-text="description"
+                ng-model="currentItemWrapper.currentItem.description" name=""/>
             </div>
             <div class="form-group">
             <input type="checkbox"
-            it-toggle
-            ng-model="currentItemWrapper.currentItem.enabledde"
-            it-text="tete"/>
+                it-toggle
+                ng-model="currentItemWrapper.currentItem.enabledde"
+                it-text="tete"/>
             </div>
             </it-detail-content>
             </it-detail>
@@ -131,7 +137,7 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
 <div class="tab-pane" title="controller.js">
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
-        angular.module('itesoft-showcase')
+        angular.module('itesoft')
         .controller('MasterDetailController', ['$scope', function($scope) {
 
                                        $scope.data =
@@ -221,6 +227,6 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
     </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-3" ng-eval-javascript="controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-3" ng-eval-javascript="controller.js"></div>
 </div></div>
 </div>

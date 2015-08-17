@@ -20,7 +20,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-popup"&gt;
 &lt;/ANY&gt;</pre>
 </div>
 <h2 id="example">Example</h2>
-<div class="example"><div class="itesoft-directive-page itesoft-directive-itpopup-page"><example module="itesoft-showcase" >
+<div class="example"><div class="itesoft-directive-page itesoft-directive-itpopup-page"><example module="itesoft" >
  <file name="index.html">
     <div ng-controller="PopupCtrl">
      <button class="btn btn-info" ng-click="showAlert()">
@@ -35,7 +35,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-popup"&gt;
     </div>
  </file>
 <file name="Controller.js">
-         angular.module(&#39;itesoft-showcase&#39;,[&#39;itesoft&#39;])
+         angular.module(&#39;itesoft&#39;)
          .controller(&#39;PopupCtrl&#39;,[&#39;$scope&#39;,&#39;itPopup&#39;, function($scope,itPopup) {
 
                 $scope.showAlert = function(){
