@@ -256,8 +256,6 @@ IteSoft
                           $route,
                           $window){
 
-
-
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
                         ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" ng-click="grid.appScope.onRowClick(col,row)">' +
                         '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" tabindex="-1" ng-click="grid.appScope.onRowClick(col,row)"' +

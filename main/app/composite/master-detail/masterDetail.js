@@ -12,7 +12,14 @@
  * and have 2 child elements: 1 `<it-master>` for the list selectable content,
  * and `<it-detail>` that display the content of the selected item.
  *
+ * You MUST pass an empty object  <it-master it-master-detail-control="myMasterDetailControl"></it-master>
+ * this object will
+ *
  * <table class="table">
+ *  <tr>
+ *   <td><code>masterDetail.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
+ *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ *  </tr>
  *  <tr>
  *   <td><code>masterDetail.getSelectedItems()</code></td>
  *   <td>Method to get selected items in the master grid.</td>
@@ -72,11 +79,11 @@
  * </it-master-detail>
  * ```
  * @example
-     <example module="itesoft-showcase">
+     <example module="itesoft">
          <file name="index.html">
              <div ng-controller="MasterDetailController">
                  <it-master-detail >
-                 <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
+                    <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
                  <it-master-header it-search-placeholder="Recherche" >
                  <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
                  <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
@@ -100,21 +107,21 @@
                  <it-detail-content>
                  <div class="form-group">
                  <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                 it-text="code"
-                 ng-model="currentItemWrapper.currentItem.code"
-                 name=""
-                 ng-required="true"/>
+                     it-text="code"
+                     ng-model="currentItemWrapper.currentItem.code"
+                     name=""
+                     ng-required="true"/>
                  </div>
                  <div class="form-group">
                  <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                 it-text="description"
-                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                     it-text="description"
+                     ng-model="currentItemWrapper.currentItem.description" name=""/>
                  </div>
                  <div class="form-group">
                  <input type="checkbox"
-                 it-toggle
-                 ng-model="currentItemWrapper.currentItem.enabledde"
-                 it-text="tete"/>
+                     it-toggle
+                     ng-model="currentItemWrapper.currentItem.enabledde"
+                     it-text="tete"/>
                  </div>
                  </it-detail-content>
                  </it-detail>
@@ -122,7 +129,7 @@
              </div>
          </file>
          <file name="controller.js">
-             angular.module('itesoft-showcase')
+             angular.module('itesoft')
              .controller('MasterDetailController', ['$scope', function($scope) {
 
                                             $scope.data =
