@@ -219,6 +219,7 @@ IteSoft
         return {
             restrict : 'EA',
             require : '^itMasterDetail',
+            priority : -1,
             transclude : true,
             scope : {
                 itMasterData : '=',
@@ -465,7 +466,14 @@ IteSoft
                      * @returns {Array} of selected items
                      */
                     $scope.itMasterDetailControl.getSelectedItems = function(){
-                        return $scope.gridApi.selection.getSelectedRows();
+                        if(typeof $scope.gridApi !== 'undefined' ) {
+                            if (typeof $scope.gridApi.selection.getSelectedRows() === 'function') {
+                                return $scope.gridApi.selection.getSelectedRows();
+                            }
+                        } else  {
+                            return [];
+                        }
+
                     };
 
                     /**
