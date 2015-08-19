@@ -79,6 +79,11 @@ angular.module('itesoft-showcase').config(['$routeProvider',
                 controller: 'LoaderDemoController',
                 title : 'it-loader'
             }).
+            when('/widget/itBottomGlue', {
+                templateUrl: 'app/view/widget/itBottomGlueView.html',
+                controller: 'BottomGlueController',
+                title : 'it-bottom-glue'
+            }).
             otherwise({
                 redirectTo: '/side-menus',
                 title : 'SideMenus '
