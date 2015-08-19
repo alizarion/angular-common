@@ -1,0 +1,81 @@
+<h1><code ng:non-bindable="">itPopup</code>
+<div><span class="hint">directive in module <code ng:non-bindable="">itesoft</code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itpopup-page"><p>The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+The popup system has support for more flexible versions of the built in alert(),
+prompt(), and confirm() functions that users are used to,
+in addition to allowing popups with completely custom content and look.</p>
+</div></div>
+<h2 id="usage">Usage</h2>
+<div class="usage">as element:<pre class="prettyprint linenums">&lt;it-popup&gt;
+&lt;/it-popup&gt;</pre>
+as attribute<pre class="prettyprint linenums">&lt;ANY it-popup&gt;
+   ...
+&lt;/ANY&gt;</pre>
+as class<pre class="prettyprint linenums">&lt;ANY class="it-popup"&gt;
+   ...
+&lt;/ANY&gt;</pre>
+</div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="itesoft-directive-page itesoft-directive-itpopup-page"><example module="itesoft" >
+ <file name="index.html">
+    <div ng-controller="PopupCtrl">
+     <button class="btn btn-info" ng-click="showAlert()">
+     Alert
+     </button>
+     <button class="btn btn-danger" ng-click="showConfirm()">
+     Confirm
+     </button>
+     <button class="btn btn-warning" ng-click="showPrompt()">
+     Prompt
+     </button>
+    </div>
+ </file>
+<file name="Controller.js">
+         angular.module(&#39;itesoft&#39;)
+         .controller(&#39;PopupCtrl&#39;,[&#39;$scope&#39;,&#39;itPopup&#39;, function($scope,itPopup) {
+
+                $scope.showAlert = function(){
+                    var alertPopup = itPopup.alert({
+                        title: &#39;{{&#39;POPUP_TITLE&#39; | translate}}&#39;,
+                        text: &#39;{{&#39;POPUP_CONTENT&#39; | translate}}&#39;
+                    });
+                    alertPopup.then(function() {
+                       alert(&#39;alert callback&#39;);
+                    });
+                };
+
+                $scope.showConfirm = function(){
+                    var confirmPopup = itPopup.confirm({
+                        title: &#39;{{&#39;POPUP_TITLE&#39; | translate}}&#39;,
+                        text: &#39;{{&#39;POPUP_CONTENT&#39; | translate}}&#39;
+                    });
+                    confirmPopup.then(function(res) {
+                        alert(&#39;confirm validate&#39;);
+                    },function(){
+                        alert(&#39;confirm canceled&#39;);
+                    });
+                };
+
+                $scope.showPrompt = function(){
+                    var promptPopup = itPopup.prompt({
+                        title: &#39;{{&#39;POPUP_TITLE&#39; | translate}}&#39;,
+                        text: &#39;{{&#39;POPUP_CONTENT&#39; | translate}}&#39;,
+                        inputLabel : &#39;{{&#39;POPUP_LABEL&#39; | translate}}&#39;,
+                        inputType: &#39;password&#39;
+                    });
+                    promptPopup.then(function(data) {
+                        alert(&#39;prompt validate with value &#39; + data.response);
+                    },function(){
+                        alert(&#39;prompt canceled&#39;);
+                    });
+                };
+
+            }]);
+</file>
+</example>
+</div></div>
+</div>
