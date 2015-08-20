@@ -467,7 +467,7 @@ IteSoft
                      */
                     $scope.itMasterDetailControl.getSelectedItems = function(){
                         if(typeof $scope.gridApi !== 'undefined' ) {
-                            if (typeof $scope.gridApi.selection.getSelectedRows() === 'function') {
+                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
                                 return $scope.gridApi.selection.getSelectedRows();
                             }
                         } else  {
