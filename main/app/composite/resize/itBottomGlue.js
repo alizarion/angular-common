@@ -5,7 +5,6 @@ IteSoft
 
 
         function _onWindowsResize () {
-            var newValue = { 'h': $window.innerHeight, 'w': $window.innerWidth };
             var currentElement = element[0];
             var elementToResize = angular.element(element)[0];
             var marginBottom = 0;
@@ -19,20 +18,21 @@ IteSoft
                 var pbottom = parseInt(computedStyles['padding-bottom'], 10);
                 var ptop = parseInt(computedStyles['padding-top'], 10);
                 var mtop = parseInt(computedStyles['margin-top'], 10);
-
-                  marginTop = !isNaN(mtop)? mtop : 0;
+                marginTop += !isNaN(mtop)? mtop : 0;
                 marginBottom += !isNaN(mbottom) ? mbottom : 0;
                 paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop = !isNaN(ptop)? ptop : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
                 currentElement = currentElement.parentElement;
             }
-            var curentElementStyles = $window.getComputedStyle( element[0]);
 
-
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
 
             var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', (newValue.h -
-                elementToResizeContainer.top )- (marginBottom)+ 'px' );
+            element.css('height', (angular.element(window).height()
+                - elementToResizeContainer.top -marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
             element.css('overflow-y', 'auto');
         }
 
