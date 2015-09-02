@@ -330,7 +330,6 @@ IteSoft
                             gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
                                 _selectionChangedHandler();
                             });
-                            $scope.gridApi.grid.registerRowsProcessor( $scope.rowGlobalFilter, 200 );
 
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
@@ -351,7 +350,9 @@ IteSoft
                         ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
                         renderableRows.forEach( function( row ) {
                             var match = false;
+                            console.log($scope.gridApi.grid.rows)
                             renderableEntities.forEach(function(entity){
+
                                 if(angular.equals(row.entity,entity)){
                                     match  = true;
                                 }
@@ -448,12 +449,27 @@ IteSoft
                         $scope.refreshData();
                     },true);
 
+                    /**
+                     * Method to filter rows
+                     */
                     $scope.refreshData = function() {
-                        $scope.gridApi.grid.refresh();
+                        var renderableEntities = $filter('itUIGridGlobalFilter')
+                        ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
+                       angular.forEach($scope.gridApi.grid.rows, function( row ) {
+                            var match = false;
+                            renderableEntities.forEach(function(entity){
 
+                                if(angular.equals(row.entity,entity)){
+                                    match  = true;
+                                }
+                            });
+                            if ( !match ){
+                                $scope.gridApi.core.setRowInvisible(row);
+                            } else {
+                                $scope.gridApi.core.clearRowInvisible(row);
+                            }
+                        });
                     };
-
-
 
 
                     function _unlockCurrent(){
