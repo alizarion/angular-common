@@ -234,7 +234,7 @@ IteSoft
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
                 '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns   ui-grid-move-columns class="it-master-detail-grid it-fill">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize  ui-grid-move-columns class="it-master-detail-grid it-fill">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+

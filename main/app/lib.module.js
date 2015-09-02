@@ -8,5 +8,6 @@ var IteSoft = angular.module('itesoft', [
     'pascalprecht.translate',
     'ui.grid.selection',
     'ui.grid.autoResize',
+    'ui.grid.resizeColumns',
     'ui.grid.moveColumns'
 ]);
