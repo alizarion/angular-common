@@ -350,7 +350,6 @@ IteSoft
                         ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
                         renderableRows.forEach( function( row ) {
                             var match = false;
-                            console.log($scope.gridApi.grid.rows)
                             renderableEntities.forEach(function(entity){
 
                                 if(angular.equals(row.entity,entity)){
