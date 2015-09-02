@@ -29,7 +29,7 @@ IteSoft
             var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
 
             var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', (angular.element(window).height()
+            element.css('height', ($window.innerHeight
                 - elementToResizeContainer.top -marginBottom -
                 (paddingBottom - elementPaddingBottom)
                 + 'px' ));
