@@ -229,7 +229,7 @@ IteSoft
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ng-open="refreshData()" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
@@ -314,6 +314,7 @@ IteSoft
 
                     $scope.gridOptions  = {
                         rowHeight: 30,
+                        data:$scope.itMasterData ,
                         multiSelect: true,
                         enableSelectAll: true,
                         showGridFooter: true,
@@ -328,7 +329,9 @@ IteSoft
                             });
                             gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
                                 _selectionChangedHandler();
-                            })
+                            });
+                            $scope.gridApi.grid.registerRowsProcessor( $scope.rowGlobalFilter, 200 );
+
                         },
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
@@ -338,6 +341,29 @@ IteSoft
                         rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
                             '</div>'
                     };
+
+                    $scope.$watch('itMasterData',function(){
+                        $scope.gridOptions.data = $scope.itMasterData;
+                    },true);
+
+                    $scope.rowGlobalFilter = function(renderableRows){
+                        var renderableEntities = $filter('itUIGridGlobalFilter')
+                        ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
+                        renderableRows.forEach( function( row ) {
+                            var match = false;
+                            renderableEntities.forEach(function(entity){
+                                if(angular.equals(row.entity,entity)){
+                                    match  = true;
+                                }
+                            });
+                            if ( !match ){
+                                row.visible = false;
+                            }
+                        });
+                        return renderableRows;
+                    };
+
+
                     if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
                         angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
                             columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
@@ -418,13 +444,17 @@ IteSoft
                         $scope.onRowClick(null,{entity:item});
                     };
 
-                    $scope.$watch('$scope.filterText',function(){
+                    $scope.$watch('filterText',function(){
                         $scope.refreshData();
-                    });
+                    },true);
 
                     $scope.refreshData = function() {
-                        $scope.gridOptions.data = $filter('itUIGridGlobalFilter')($scope.itMasterData, $scope.gridOptions, $scope.filterText);
+                        $scope.gridApi.grid.refresh();
+
                     };
+
+
+
 
                     function _unlockCurrent(){
                         $scope.$applyAsync(function(){
@@ -470,10 +500,8 @@ IteSoft
                             if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
                                 return $scope.gridApi.selection.getSelectedRows();
                             }
-                        } else  {
-                            return [];
                         }
-
+                        return [];
                     };
 
                     /**
@@ -643,53 +671,4 @@ IteSoft
             scope.$destroy();
             return matches;
         };
-    }] )
-    .directive('itMasterDetailAutoResize', ['$timeout', 'gridUtil', function ($timeout, gridUtil) {
-        return {
-            require: 'uiGrid',
-            scope: false,
-            link: function ($scope, $elm, $attrs, uiGridCtrl) {
-                var prevGridWidth, prevGridHeight;
-
-                function getDimensions() {
-                    prevGridHeight = gridUtil.elementHeight($elm);
-                    prevGridWidth = gridUtil.elementWidth($elm);
-                    angular.element(document.getElementsByClassName('it-master-detail-grid')).css('height','');
-
-                }
-                var resizeTimeoutId;
-                function startTimeout() {
-                    clearTimeout(resizeTimeoutId);
-                    resizeTimeoutId = setTimeout(function () {
-                        var newGridWidth = gridUtil.elementWidth($elm);
-                        var ng_grid = angular.element(document.getElementsByClassName('it-master-detail-grid'))[0];
-                        var grid_container = ng_grid.getBoundingClientRect();
-                        var fullHeight =  window.innerHeight;
-                        var gridHeight = fullHeight - grid_container.top;
-                        var footerElement = angular.element(document.getElementsByClassName('it-master-detail-grid')[0].getElementsByClassName("ngFooterPanel"))[0];
-                        var footerHeight = footerElement ? footerElement.getBoundingClientRect().height : 0;
-                        var newGridHeight = gridHeight - footerHeight - 40  ;
-                        if (newGridHeight !== prevGridHeight || newGridWidth !== prevGridWidth) {
-                            uiGridCtrl.grid.gridHeight = newGridHeight;
-                            uiGridCtrl.grid.gridWidth = newGridWidth;
-                            $scope.$apply(function () {
-                                uiGridCtrl.grid.refresh()
-                                    .then(function () {
-                                        getDimensions();
-                                        startTimeout();
-                                    });
-                            });
-                        }
-                        else {
-                            startTimeout();
-                        }
-                    }, 250);
-                }
-                startTimeout();
-
-                $scope.$on('$destroy', function() {
-                    clearTimeout(resizeTimeoutId);
-                });
-            }
-        };
-    }]);
+    }] );
