@@ -12,8 +12,12 @@ and <code>&lt;it-detail&gt;</code> that display the content of the selected item
 this object will</p>
 <table class="table">
  <tr>
-  <td><code>masterDetail.navAlert = { <br/> text: &#39;my forbidden navigation text &#39;, <br/> title : &#39;forbidden navigation title&#39;  <br/>}</code></td>
+  <td><code>myMasterDetailControl.navAlert = { <br/> text: &#39;my forbidden navigation text &#39;, <br/> title : &#39;forbidden navigation title&#39;  <br/>}</code></td>
   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ </tr>
+ <tr>
+  <td><code>myMasterDetailControl.disableMultiSelect  = true | false</td>
+  <td>Disable | Enable  multiple row selection for entire grid .</td>
  </tr>
  <tr>
   <td><code>masterDetail.getSelectedItems()</code></td>
@@ -178,6 +182,7 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
 
                                        };
 
+                                        $scope.masterDetails.disableMultiSelect = false;
                                        $scope.masterDetails.navAlert = {
                                            text:'{{\'BUTTON_LANG_EN\' | translate}}',
                                            title:'{{\'FOO\' | translate}}'
