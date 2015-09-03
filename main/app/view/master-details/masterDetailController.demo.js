@@ -19,6 +19,8 @@ angular.module('itesoft-showcase')
                 { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
         };
 
+        $scope.masterDetails.disableMultiSelect = false;
+
         $scope.masterDetails.navAlert = {
             text:'{{\'BUTTON_LANG_EN\' | translate}}',
             title:'{{\'FOO\' | translate}}'

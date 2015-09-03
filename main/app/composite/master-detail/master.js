@@ -248,6 +248,7 @@ IteSoft
                 '$templateCache',
                 '$route',
                 '$window',
+                'uiGridConstants',
                 function ($scope,
                           $filter,
                           $q,
@@ -255,7 +256,8 @@ IteSoft
                           itPopup,
                           $templateCache,
                           $route,
-                          $window){
+                          $window,
+                          uiGridConstants){
 
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
                         ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" ng-click="grid.appScope.onRowClick(col,row)">' +
@@ -311,13 +313,16 @@ IteSoft
                         $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
                     });
-
                     $scope.gridOptions  = {
                         rowHeight: 30,
                         data:$scope.itMasterData ,
-                        multiSelect: true,
-                        enableSelectAll: true,
-                        showGridFooter: true,
+                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
+                        modifierKeysToMultiSelect :!$scope.itMasterDetailControl.disableMultiSelect,
+                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
+                        enableRowSelection:true ,
+                        noUnselect:true,
+                            showGridFooter: true,
                         enableMinHeightCheck :true,
                         enableColumnResizing: true,
                         enableHorizontalScrollbar : 0,
@@ -344,6 +349,7 @@ IteSoft
                     $scope.$watch('itMasterData',function(){
                         $scope.gridOptions.data = $scope.itMasterData;
                     },true);
+
 
                     $scope.rowGlobalFilter = function(renderableRows){
                         var renderableEntities = $filter('itUIGridGlobalFilter')

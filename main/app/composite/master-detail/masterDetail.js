@@ -17,8 +17,12 @@
  *
  * <table class="table">
  *  <tr>
- *   <td><code>masterDetail.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
+ *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
  *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</td>
+ *   <td>Disable | Enable  multiple row selection for entire grid .</td>
  *  </tr>
  *  <tr>
  *   <td><code>masterDetail.getSelectedItems()</code></td>
@@ -170,6 +174,7 @@
 
                                             };
 
+                                             $scope.masterDetails.disableMultiSelect = false;
                                             $scope.masterDetails.navAlert = {
                                                 text:'{{\'BUTTON_LANG_EN\' | translate}}',
                                                 title:'{{\'FOO\' | translate}}'
