@@ -25,7 +25,7 @@ IteSoft
             require: '^itMaster',
             scope : false,
             transclude : true,
-            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-fill it-md-header col-xs-12 col-md-12">'+
+            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
                                 '<div class="btn-toolbar it-fill" ng-transclude>'+
                                 '</div>'+
                             '</div>'+
