@@ -4,4 +4,11 @@ angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($sc
     };
     $scope.showCaseData = {};
     $scope.showCaseData.displayMenuButton = false;
+
+    $scope.signIn = function(form) {
+        if(form.$valid) {
+            console.log('Sign-In', $scope.user.username);
+
+        }
+    };
 }]);

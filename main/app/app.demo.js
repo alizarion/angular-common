@@ -4,7 +4,8 @@ angular.module('itesoft-showcase',[
     'ngRoute',
     'ngResource',
     'ngSanitize',
-    'pascalprecht.translate'
+    'pascalprecht.translate',
+    'ngMessages'
 ])
     .config(['$translateProvider', function ($translateProvider) {
         $translateProvider.translations('en', {
