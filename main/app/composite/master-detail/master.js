@@ -73,57 +73,57 @@
  * ```
  * @example
  <example module="itesoft-showcase">
-         <file name="index.html">
-             <div ng-controller="MasterDetailController">
-             <it-master-detail >
-             <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
-             <it-master-header it-search-placeholder="Recherche" >
-             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-             <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-             <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-             <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-             </it-master-header>
-             </it-master>
-             <it-detail>
-             <it-detail-header>
-             <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-             <span class="fa fa-floppy-o fa-lg"></span>
-             </button>
-             <button class=" btn btn-info" title="Check">
-             <span class="fa fa-file-code-o fa-lg"></span>
-             </button>
-             <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-             <span class="fa fa-undo fa-lg"></span>
-             </button>
+ <file name="index.html">
+ <div ng-controller="MasterDetailController">
+ <it-master-detail >
+ <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
+ <it-master-header it-search-placeholder="Recherche" >
+ <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+ <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+ <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+ <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+ </it-master-header>
+ </it-master>
+ <it-detail>
+ <it-detail-header>
+ <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+ <span class="fa fa-floppy-o fa-lg"></span>
+ </button>
+ <button class=" btn btn-info" title="Check">
+ <span class="fa fa-file-code-o fa-lg"></span>
+ </button>
+ <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+ <span class="fa fa-undo fa-lg"></span>
+ </button>
 
-             </it-detail-header>
-             <it-detail-content>
-             <div class="form-group">
-             <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-             it-text="code"
-             ng-model="currentItemWrapper.currentItem.code"
-             name=""
-             ng-required="true"/>
-             </div>
-             <div class="form-group">
-             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-             it-text="description"
-             ng-model="currentItemWrapper.currentItem.description" name=""/>
-             </div>
-             <div class="form-group">
-             <input type="checkbox"
-             it-toggle
-             ng-model="currentItemWrapper.currentItem.enabledde"
-             it-text="tete"/>
-             </div>
-             </it-detail-content>
-             </it-detail>
-             </it-master-detail>
-             </div>
-         </file>
-         <file name="controller.js">
-             angular.module('itesoft-showcase')
-             .controller('MasterDetailController', ['$scope', function($scope) {
+ </it-detail-header>
+ <it-detail-content>
+ <div class="form-group">
+ <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+ it-text="code"
+ ng-model="currentItemWrapper.currentItem.code"
+ name=""
+ ng-required="true"/>
+ </div>
+ <div class="form-group">
+ <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+ it-text="description"
+ ng-model="currentItemWrapper.currentItem.description" name=""/>
+ </div>
+ <div class="form-group">
+ <input type="checkbox"
+ it-toggle
+ ng-model="currentItemWrapper.currentItem.enabledde"
+ it-text="tete"/>
+ </div>
+ </it-detail-content>
+ </it-detail>
+ </it-master-detail>
+ </div>
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase')
+ .controller('MasterDetailController', ['$scope', function($scope) {
 
                                 $scope.data =
                                    [
@@ -209,9 +209,9 @@
                                     }
                                 }
                             }]);
-     </file>
-     <file src="test.css">
-     </file>
+ </file>
+ <file src="test.css">
+ </file>
  </example>
  */
 IteSoft
@@ -306,8 +306,8 @@ IteSoft
                                 $scope.$parent.currentItemWrapper = null;
                             }
                         }else {
-                            _displayDetail(row.entity);
-                            _scrollToEntity(row.entity);
+//                            _displayDetail(row.entity);
+//                            _scrollToEntity(row.entity);
                         }
                     }
 
@@ -323,9 +323,7 @@ IteSoft
                         data : $scope.itMasterData,
                         multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
                         enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
-//                        modifierKeysToMultiSelect :!$scope.itMasterDetailControl.disableMultiSelect,
-                       enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
-                     //  enableRowSelection:true ,
+                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
                         showGridFooter: true,
                         enableMinHeightCheck :true,
                         enableColumnResizing: true,
@@ -351,10 +349,7 @@ IteSoft
                     };
 
                     $scope.$watch('itMasterData',function(){
-                        if($scope.gridOptions.data.length !== $scope.itMasterData.length ){
-                            $scope.gridOptions.data = $scope.itMasterData;
-
-                        }
+                        $scope.gridOptions.data = $scope.itMasterData;
                         if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
                             $scope.$parent.currentItemWrapper = null;
                         } else {
@@ -418,23 +413,23 @@ IteSoft
                     }, true);
 
                     $scope.onRowClick = function(row,col) {
-                            if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
-                                _displayDetail(col.entity).then(function (msg) {
-                                    if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
-                                        $scope.gridApi.selection.clearSelectedRows();
-                                        if ($scope.$parent.$parent.mobile) {
-                                            $scope.$parent.$parent.goToDetail();
-                                        }
+                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
+                            _displayDetail(col.entity).then(function (msg) {
+                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
+                                    $scope.gridApi.selection.clearSelectedRows();
+                                    if ($scope.$parent.$parent.mobile) {
+                                        $scope.$parent.$parent.goToDetail();
                                     }
-                                    $scope.gridApi.selection.toggleRowSelection(col.entity);
-                                }, function (msg) {
-                                    itPopup.alert({
-                                        text: $scope.itMasterDetailControl.navAlert.text,
-                                        title: $scope.itMasterDetailControl.navAlert.title
-                                    });
-                                    $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
+                                }
+                                $scope.gridApi.selection.toggleRowSelection(col.entity);
+                            }, function (msg) {
+                                itPopup.alert({
+                                    text: $scope.itMasterDetailControl.navAlert.text,
+                                    title: $scope.itMasterDetailControl.navAlert.title
                                 });
-                            }
+                                $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
+                            });
+                        }
                     };
 
 
@@ -456,7 +451,7 @@ IteSoft
                     $scope.refreshData = function() {
                         var renderableEntities = $filter('itUIGridGlobalFilter')
                         ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
-                       angular.forEach($scope.gridApi.grid.rows, function( row ) {
+                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
                             var match = false;
                             renderableEntities.forEach(function(entity){
 

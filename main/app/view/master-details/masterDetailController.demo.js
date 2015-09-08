@@ -41,9 +41,12 @@ angular.module('itesoft-showcase')
 
         $scope.saveCurrentItem = function(){
 
-            angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+            angular.copy( $scope.masterDetails
+                .getCurrentItemWrapper().currentItem,
+                $scope.data[$scope.masterDetails.getCurrentItemWrapper().index]);
             $scope.$broadcast('unlockCurrentItem');
         };
+
         $scope.undoChange = function(){
             $scope.masterDetails.undoChangeCurrentItem();
             $scope.masterDetails.fillHeight();
@@ -70,12 +73,12 @@ angular.module('itesoft-showcase')
             console.log($scope.masterDetails.getFilteredItems());
         };
 
-
         $scope.hasChanged = function(){
             if($scope.masterDetails.getCurrentItemWrapper() != null){
                 return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
             } else {
                 return false;
             }
-        }
+        };
+
     }]);
