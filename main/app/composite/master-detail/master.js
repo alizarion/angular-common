@@ -248,7 +248,6 @@ IteSoft
                 '$templateCache',
                 '$route',
                 '$window',
-                'uiGridConstants',
                 function ($scope,
                           $filter,
                           $q,
@@ -256,12 +255,11 @@ IteSoft
                           itPopup,
                           $templateCache,
                           $route,
-                          $window,
-                          uiGridConstants){
+                          $window){
 
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
-                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" ng-click="grid.appScope.onRowClick(col,row)">' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" tabindex="-1" ng-click="grid.appScope.onRowClick(col,row)"' +
+                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" tabindex="-1" ' +
                         ' ng-checked="row.isSelected"></div>');
 
                     $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="grid.appScope.$parent.currentItemWrapper.hasChanged ? \'return false\':headerButtonClick($event)">' +
@@ -271,6 +269,7 @@ IteSoft
                     function ItemWrapper(item){
                         var _self = this;
                         angular.forEach($scope.itMasterData,function(entry,index){
+
                             if(angular.equals(entry,item)) {
                                 _self.index = index;
                             }
@@ -295,34 +294,39 @@ IteSoft
 
                     $scope.$parent.currentItemWrapper = null;
 
-                    function _selectionChangedHandler(){
-                        if($scope.gridApi.selection.getSelectedRows().length > 1 ){
-                            $scope.$parent.currentItemWrapper = null
-                        } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
-                            _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
-                            _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
-
-                        }
-                        else if($scope.gridApi.selection.getSelectedRows().length === 0) {
-                            $scope.$parent.currentItemWrapper = null;
+                    function _selectionChangedHandler(row){
+                        if(!$scope.itMasterDetailControl.disableMultiSelect){
+                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
+                                $scope.$parent.currentItemWrapper = null;
+                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
+                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
+                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
+                            }
+                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }else {
+                            _displayDetail(row.entity);
+                            _scrollToEntity(row.entity);
                         }
                     }
+
                     $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
                     $scope.$watch('itNoDetailMsg',function(){
                         $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
                     });
+
                     $scope.gridOptions  = {
                         rowHeight: 30,
-                        data:$scope.itMasterData ,
+                        data : $scope.itMasterData,
                         multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
                         enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
-                        modifierKeysToMultiSelect :!$scope.itMasterDetailControl.disableMultiSelect,
-                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
-                        enableRowSelection:true ,
-                        noUnselect:true,
-                            showGridFooter: true,
+//                        modifierKeysToMultiSelect :!$scope.itMasterDetailControl.disableMultiSelect,
+                       enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
+                     //  enableRowSelection:true ,
+                        showGridFooter: true,
                         enableMinHeightCheck :true,
                         enableColumnResizing: true,
                         enableHorizontalScrollbar : 0,
@@ -330,10 +334,10 @@ IteSoft
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
                             gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                _selectionChangedHandler();
+                                _selectionChangedHandler(row);
                             });
                             gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                _selectionChangedHandler();
+                                _selectionChangedHandler(row);
                             });
 
                         },
@@ -347,27 +351,22 @@ IteSoft
                     };
 
                     $scope.$watch('itMasterData',function(){
-                        $scope.gridOptions.data = $scope.itMasterData;
-                    },true);
+                        if($scope.gridOptions.data.length !== $scope.itMasterData.length ){
+                            $scope.gridOptions.data = $scope.itMasterData;
 
-
-                    $scope.rowGlobalFilter = function(renderableRows){
-                        var renderableEntities = $filter('itUIGridGlobalFilter')
-                        ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
-                        renderableRows.forEach( function( row ) {
-                            var match = false;
-                            renderableEntities.forEach(function(entity){
-
-                                if(angular.equals(row.entity,entity)){
-                                    match  = true;
-                                }
-                            });
-                            if ( !match ){
-                                row.visible = false;
+                        }
+                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
+                            $scope.$parent.currentItemWrapper = null;
+                        } else {
+                            if( $scope.itMasterData.length === 0){
+                                $scope.$parent.currentItemWrapper = null;
                             }
-                        });
-                        return renderableRows;
-                    };
+                        }
+
+                        $scope.$applyAsync(function(){
+                            $scope.refreshData();
+                        })
+                    },true);
 
 
                     if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
@@ -384,7 +383,6 @@ IteSoft
                     }
                     $scope.gridOptions.columnDefs =
                         $scope.itMasterDetailControl.columnDefs;
-
 
 
                     function _displayDetail(item) {
@@ -417,28 +415,26 @@ IteSoft
                                 $scope.$parent.currentItemWrapper.hasChanged = true;
                             }
                         }
-
                     }, true);
 
                     $scope.onRowClick = function(row,col) {
-
-                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined'){
-                            _displayDetail(col.entity).then(function(msg){
-                                if(row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell'){
-                                    $scope.gridApi.selection.clearSelectedRows();
-                                    if( $scope.$parent.$parent.mobile){
-                                        $scope.$parent.$parent.goToDetail();
+                            if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
+                                _displayDetail(col.entity).then(function (msg) {
+                                    if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
+                                        $scope.gridApi.selection.clearSelectedRows();
+                                        if ($scope.$parent.$parent.mobile) {
+                                            $scope.$parent.$parent.goToDetail();
+                                        }
                                     }
-                                }
-                                $scope.gridApi.selection.toggleRowSelection(col.entity);
-
-                            },function(msg){
-                                itPopup.alert({
-                                    text: $scope.itMasterDetailControl.navAlert.text ,
-                                    title : $scope.itMasterDetailControl.navAlert.title
+                                    $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                }, function (msg) {
+                                    itPopup.alert({
+                                        text: $scope.itMasterDetailControl.navAlert.text,
+                                        title: $scope.itMasterDetailControl.navAlert.title
+                                    });
+                                    $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
                                 });
-                            });
-                        }
+                            }
                     };
 
 
@@ -569,8 +565,7 @@ IteSoft
                             $timeout(function() {
                                 var entityIndex = $scope.itMasterData.indexOf(entity);
                                 if(entityIndex>=0) {
-//                                    $scope.gridOptions.selectRow(
-//                                        $scope.itMasterData.indexOf(entity), true);
+
                                     $scope.gridApi.selection.selectRow(entity);
                                     _scrollToEntity(entity);
                                     if( $scope.$parent.$parent.mobile){
@@ -667,6 +662,7 @@ IteSoft
                 return data;
             }
             query = query.toLowerCase();
+
             var scope = $rootScope.$new(true);
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < grid.columnDefs.length; j++) {
@@ -681,7 +677,7 @@ IteSoft
                         renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
                     }
                     //as soon as search term is found, add to match and move to next dataItem
-                    if(typeof renderedData !== 'undefined' &&renderedData != null){
+                    if(typeof renderedData !== 'undefined' && renderedData != null){
                         if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
                             matches.push(dataItem);
                             break;

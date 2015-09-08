@@ -71,7 +71,7 @@
  */
 
 IteSoft
-    .factory('itPopup',['$modal','$rootScope','$q',function($modal,$rootScope,$q){
+    .factory('itPopup',['$modal','$modalStack','$rootScope','$q',function($modal,$modalStack,$rootScope,$q){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
                              '<h3 it-compile="options.title"></h3>'+
@@ -142,6 +142,7 @@ IteSoft
         }
 
         function _showPopup(options){
+            $modalStack.dismissAll();
             var popup = _createPopup(options);
             var popupPromise =  $modal.open(popup.options).result;
 
@@ -149,6 +150,8 @@ IteSoft
         }
 
         function _showAlert(opts){
+            $modalStack.dismissAll();
+
             return _showPopup(angular.extend({
 
                 buttons: [{
@@ -162,6 +165,8 @@ IteSoft
         }
 
         function _showConfirm(opts){
+            $modalStack.dismissAll();
+
             return _showPopup(angular.extend({
                 buttons: [
                     {
@@ -177,6 +182,8 @@ IteSoft
         }
 
         function _showPromt(opts){
+            $modalStack.dismissAll();
+
             var scope = $rootScope.$new(true);
             scope.data = {};
             var text = '';

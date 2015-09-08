@@ -7,6 +7,14 @@ it-master-detail .it-master-detail-container {
   min-height: 300px;
 }
 
+it-master-header .it-master-filter {
+  width: 50%;
+  float: right;
+  margin-right: 15px;
+}
+
+
+
 it-master-detail .it-md-header{
   height: 56px;
   max-height: 56px;
@@ -63,7 +71,7 @@ it-detail-header .it-material-design-hamburger__icon--to-arrow{
 }
 
 it-master .it-master-grid{
-  padding-top: 95px;
+  padding-top: 115px;
 }
 
 it-master-header .fuild-container{

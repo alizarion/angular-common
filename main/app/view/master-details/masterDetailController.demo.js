@@ -4,9 +4,9 @@ angular.module('itesoft-showcase')
         $scope.data = [];
 
 
-        Comments.query().$promise.then(function(datas){
+          Comments.query().$promise.then(function(datas){
             $scope.data = datas;
-            $scope.masterDetails.setCurrentItem(datas[0]);
+            $scope.masterDetails.setCurrentItem($scope.data[0]);
         });
 
 
@@ -19,7 +19,7 @@ angular.module('itesoft-showcase')
                 { field: 'enabledde', displayName: 'My value 3', cellTemplate:'cellTemplate.html',  enableSorting:false,enableColumnMenu:true}]
         };
 
-        $scope.masterDetails.disableMultiSelect = false;
+        $scope.masterDetails.disableMultiSelect = true;
 
         $scope.masterDetails.navAlert = {
             text:'{{\'BUTTON_LANG_EN\' | translate}}',
@@ -40,8 +40,8 @@ angular.module('itesoft-showcase')
         };
 
         $scope.saveCurrentItem = function(){
-            $scope.data[$scope.masterDetails.getCurrentItemWrapper().index] =
-                $scope.masterDetails.getCurrentItemWrapper().currentItem;
+
+            angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
             $scope.$broadcast('unlockCurrentItem');
         };
         $scope.undoChange = function(){

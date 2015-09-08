@@ -268,6 +268,20 @@ IteSoft
                         }
                     });
 
+                    $scope.$watch('$$childHead.currentItemWrapper',function() {
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
+                                ||  $scope.$$childHead.currentItemWrapper === null )){
+                            $scope.activeState = 'master';
+                        } else {
+                            if($scope.mobile &&
+                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
+                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
+                                $scope.activeState = 'master';
+                            }
+                        }
+                    });
+
                     $scope.goToMaster = function(){
                         if($scope.mobile &&
                             (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'

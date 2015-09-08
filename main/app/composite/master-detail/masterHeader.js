@@ -32,9 +32,9 @@ IteSoft
                             '<div class="col-xs-12 col-md-12 pull-right">'+
                                 '<div>'+
                                     '<form>'+
-                                        '<div class="form-group has-feedback it-master-header-search-group" >'+
+                                        '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-6 pull-right" >'+
                                             '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                                            '<input  it-input class="form-control floating-label" type="text" ng-model="$parent.filterText" class="form-control floating-label"  it-text="{{placeholderText}}"/>'+
+                                            '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
                                         '</div>'+
                                     '</form>'+
                                 '</div>'+
