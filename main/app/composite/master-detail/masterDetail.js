@@ -193,7 +193,8 @@
 
 
                                             $scope.saveCurrentItem = function(){
-                                                    $scope.data[$scope.masterDetails.getCurrentItemWrapper().index]  = $scope.masterDetails.getCurrentItemWrapper().currentItem;
+                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+
                                                     $scope.$broadcast('unlockCurrentItem');
                                                 };
 
