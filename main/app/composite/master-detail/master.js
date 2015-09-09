@@ -358,9 +358,9 @@ IteSoft
                             }
                         }
 
-                        $scope.$applyAsync(function(){
-                            $scope.refreshData();
-                        })
+//                        $scope.$applyAsync(function(){
+                        $scope.refreshData();
+//                        })
                     },true);
 
 
@@ -423,10 +423,7 @@ IteSoft
                                 }
                                 $scope.gridApi.selection.toggleRowSelection(col.entity);
                             }, function (msg) {
-                                itPopup.alert({
-                                    text: $scope.itMasterDetailControl.navAlert.text,
-                                    title: $scope.itMasterDetailControl.navAlert.title
-                                });
+                                itPopup.alert($scope.itMasterDetailControl.navAlert);
                                 $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
                             });
                         }
@@ -619,20 +616,16 @@ IteSoft
                     function confirmLeavePage(e) {
                         if($scope.$parent.currentItemWrapper!=null){
                             if ( $scope.$parent.currentItemWrapper.hasChanged ) {
-                                itPopup.alert({
-                                    text: $scope.itMasterDetailControl.navAlert.text ,
-                                    title : $scope.itMasterDetailControl.navAlert.title
-                                });
+                                itPopup.confirm( $scope.itMasterDetailControl.navAlert);
                                 e.preventDefault();
                             }
                         }
                     }
                     $scope.itAppScope = $scope.$parent;
 
-                    $scope.itAppScope.$navAlert = {};
+                    //  $scope.itAppScope.$navAlert = {};
 
-                    $scope.itAppScope.$navAlert.text = $scope.itMasterDetailControl.navAlert.text;
-                    $scope.itAppScope.$navAlert.title = $scope.itMasterDetailControl.navAlert.title;
+                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
 
                     var w = angular.element($window);
                     w.bind('resize', function () {
@@ -643,7 +636,15 @@ IteSoft
                     $scope.$on("$locationChangeStart", confirmLeavePage);
                     $scope.itMasterDetailControl = angular.extend({navAlert:{
                         text:'Please save or revert your pending change',
-                        title:'Unsaved changes'
+                        title:'Unsaved changes',
+                        buttons: [
+                            {
+                                text: 'OK',
+                                type: 'btn-info',
+                                onTap: function () {
+                                    return false;
+                                }
+                            }]
                     }}, $scope.itMasterDetailControl );
                 }]
 
