@@ -86,10 +86,10 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itmasterdetail-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-5" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-3" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-5" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
-<script type="text/ng-template" id="index.html-5">
+<pre class="prettyprint linenums" ng-set-text="index.html-3" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-3">
         <div ng-controller="MasterDetailController">
             <it-master-detail >
                <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
@@ -185,7 +185,35 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
                                         $scope.masterDetails.disableMultiSelect = false;
                                        $scope.masterDetails.navAlert = {
                                            text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                           title:'{{\'FOO\' | translate}}'
+                                           title:'{{\'FOO\' | translate}}',
+                                           buttons: [
+                                                   {
+                                                       text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                       type:  'btn-warning',
+                                                       onTap: function() {
+                                                           $scope.saveCurrentItem();
+                                                           return true;
+                                                       }
+                                                   },
+                                                   {
+                                                       text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                       type: 'btn-primary',
+                                                       onTap: function () {
+                                                           $scope.saveCurrentItem();
+                                                           return true;
+
+                                                       }
+                                                   },
+                                                   {
+                                                       text: '<span class="fa fa-undo fa-lg"></span>',
+                                                       type: 'btn-success',
+                                                       onTap: function () {
+                                                           $scope.undoChange();
+                                                           return true;
+
+                                                       }
+                                                   }
+                                               ]
                                        };
 
                                        function _removeItems(items,dataList){
@@ -236,6 +264,6 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
     </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-5" ng-eval-javascript="controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-3" ng-eval-javascript="controller.js"></div>
 </div></div>
 </div>
