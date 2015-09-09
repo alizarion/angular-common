@@ -177,7 +177,35 @@
                                              $scope.masterDetails.disableMultiSelect = false;
                                             $scope.masterDetails.navAlert = {
                                                 text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                                title:'{{\'FOO\' | translate}}'
+                                                title:'{{\'FOO\' | translate}}',
+                                                buttons: [
+                                                        {
+                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                            type:  'btn-warning',
+                                                            onTap: function() {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                            type: 'btn-primary',
+                                                            onTap: function () {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span class="fa fa-undo fa-lg"></span>',
+                                                            type: 'btn-success',
+                                                            onTap: function () {
+                                                                $scope.undoChange();
+                                                                return true;
+
+                                                            }
+                                                        }
+                                                    ]
                                             };
 
                                             function _removeItems(items,dataList){
@@ -288,10 +316,7 @@ IteSoft
                             (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
                                 &&  $scope.$$childHead.currentItemWrapper != null )){
                             if($scope.$$childHead.currentItemWrapper.hasChanged){
-                                itPopup.alert({
-                                    text:  $scope.$$childHead.$navAlert.text ,
-                                    title :  $scope.$$childHead.$navAlert.title
-                                });
+                                itPopup.alert(  $scope.$$childHead.$navAlert);
                             } else {
                                 $scope.activeState = 'master';
                                 $timeout(function(){
