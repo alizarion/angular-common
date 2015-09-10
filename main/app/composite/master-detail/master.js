@@ -386,9 +386,9 @@ IteSoft
                             }
                         }
 
-//                        $scope.$applyAsync(function(){
-                        $scope.refreshData();
-//                        })
+                        $scope.$applyAsync(function(){
+                            $scope.refreshData();
+                        })
                     },true);
 
 
