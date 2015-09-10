@@ -1,6 +1,8 @@
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
-    'ui.bootstrap',
+    'ui.bootstrap.tabs',
+    'ui.bootstrap.modal',
+    'ui.bootstrap.tpls',
     'ngAnimate',
     'matchMedia',
     'ui.grid',
