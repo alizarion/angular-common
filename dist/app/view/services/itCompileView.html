@@ -1,0 +1,46 @@
+
+
+
+
+<div class="jumbotron ">
+    <form class="form-horizontal">
+        <h2 class="header">itCompile Service</h2>
+
+
+        <p class="hint">This service Compile this pure</p>
+
+        <tabset>
+            <tab heading="Result">
+                <div class="jumbotron ">
+                    <div it-compile="pleaseCompileThis"></div>
+                </div>
+            </tab>
+            <tab heading="html">
+                <div class="jumbotron ">
+                    <pre it-prettyprint=""  class="prettyprint lang-html">
+ <div it-compile="pleaseCompileThis"></div>
+                    </pre>
+                </div>
+            </tab>
+            <tab heading="Controller">
+                <div class="jumbotron ">
+                    <pre it-prettyprint=""  class="prettyprint lang-html">
+angular.module('itesoft-showcase')
+    .controller('itCompileCtrl',['$scope', function($scope) {
+
+        $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+            'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+            ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+            ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+        $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+    }]);
+                    </pre>
+                </div>
+            </tab>
+        </tabset>
+
+    </form>
+</div>
+
+
