@@ -9,6 +9,22 @@ img.AngularJS-small {
   margin:0 2px 0 0;
 }
 
+.breadcrumb>li+li:before {
+    content: none;
+}
+.breadcrumb>li+li:after {
+    content: none;
+}
+
+.menu-search {
+    margin-top: 15px;
+    color: white ! important;
+}
+
+.menu-search .form-control{
+    color: white ! important;
+}
+
 .breadcrumb {
   padding-top: 6px;
   padding-bottom: 0;
