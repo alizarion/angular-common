@@ -1,3 +1,6 @@
+/**
+ *
+ */
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.bootstrap.tabs',

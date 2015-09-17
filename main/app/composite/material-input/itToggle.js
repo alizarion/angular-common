@@ -11,13 +11,15 @@
  *
  *
  * ```html
- *    <input  it-toggle type="checkbox" it-text="Toggle button" >
+ *     <input  it-toggle type="checkbox" it-label="Toggle button">
  * ```
+ *
+ *
  * @example
     <example module="itesoft">
         <file name="index.html">
             <div>
-                <input  it-toggle type="checkbox" it-text="Toggle button">
+                <input  it-toggle type="checkbox" ng-model="data" it-label="Toggle button">
             </div>
         </file>
 
@@ -31,16 +33,17 @@ IteSoft
             link : function (scope, element, attrs ) {
                 var input = angular.element(element[0]);
                 input.wrap('<div class="togglebutton"></div>');
-                if (scope.itText == undefined) {
-                    input.wrap('<label>&nbsp;&nbsp;</label>');
+                if (scope.itLabel == undefined) {
+                    input.wrap('<label></label>');
                     input.after('<span class="toggle"></span>');
                 } else {
-                    input.wrap('<label>'+(scope.itText || '')+'&nbsp;&nbsp;</label>');
-                    input.after('<span class="toggle"></span>');
-                    scope.$watch('itText', function(value) {
+                    input.wrap('<label></label>');
+                    input.after('<span class="toggle"></span><span>'+(scope.itLabel || '')+'</span>');
+
+                    scope.$watch('itLabel', function(value) {
                         if ((value) && (input.context)) {
                             var label = angular.element(input.context.parentNode);
-                            if ((label) && (attrs.itText)) {
+                            if ((label) && (attrs.itLabel)) {
                                 var labelText = angular.element(label.get(0).firstChild);
                                 labelText.get(0).textContent = value+'  ';
                             }
@@ -49,7 +52,7 @@ IteSoft
                 }
             },
             scope: {
-            	itText: '@'
+                itLabel: '@'
             }
         }
 }]);

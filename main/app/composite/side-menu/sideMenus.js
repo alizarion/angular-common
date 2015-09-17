@@ -17,12 +17,18 @@
  *
  * ```html
  * <it-side-menus>
+ *
+ *  <it-side-menu-header it-button-menu="true">
+ *  </it-side-menu-header>
+ *
  *   <!-- Center content -->
  *
  *   <it-side-menu-content>
  *   </it-side-menu-content>
  *
  *   <!-- menu -->
+ *
+ *
  *   <it-side-menu >
  *   </it-side-menu>
  *
@@ -30,25 +36,42 @@
  * ```
  * @example
     <example module="itesoft">
-    <file name="index.html">
+        <file name="index.html">
 
-    <it-side-menus>
+         <it-side-menus>
+             <it-side-menu-header it-button-menu="true">
 
-     <it-side-menu-header>
-     </it-side-menu-header>
 
-    <!-- Center content -->
-    <it-side-menu-content>
-    </it-side-menu-content>
+             </it-side-menu-header>
 
-    <!-- menu -->
-    <it-side-menu >
-    </it-side-menu>
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
 
-    </it-side-menus>
-     </file>
- </file>
- </example>
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
  */
 IteSoft
     .directive('itSideMenus',function(){

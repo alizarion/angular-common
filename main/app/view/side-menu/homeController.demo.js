@@ -6,6 +6,7 @@ angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($sc
     $scope.showCaseData.displayMenuButton = false;
 
     $scope.signIn = function(form) {
+        console.log( $scope);
         if(form.$valid) {
             console.log('Sign-In', $scope.user.username);
 

@@ -6,12 +6,12 @@
  * @restrict EA
  *
  * @description
- * A container element for master-detail main content.
+ * Most important part of master-detail component, that
  *
- * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
- * and have 2 child elements: 1 `<it-master>` for the list selectable content,
- * and `<it-detail>` that display the content of the selected item.
- *
+ * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
  * <table class="table">
  *  <tr>
  *   <td><code>masterDetail.getSelectedItems()</code></td>
@@ -71,176 +71,7 @@
  *
  * </it-master-detail>
  * ```
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="MasterDetailController">
- <it-master-detail >
- <it-master it-master-data="data" it-lang="'fr'" it-master-detail-control="masterDetails" it-lock-on-change="true" it-en>
- <it-master-header it-search-placeholder="Recherche" >
- <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
- <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
- <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
- <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
- </it-master-header>
- </it-master>
- <it-detail>
- <it-detail-header>
- <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
- <span class="fa fa-floppy-o fa-lg"></span>
- </button>
- <button class=" btn btn-info" title="Check">
- <span class="fa fa-file-code-o fa-lg"></span>
- </button>
- <button class="btn btn-success" title="Undo" ng-click="undoChange()">
- <span class="fa fa-undo fa-lg"></span>
- </button>
-
- </it-detail-header>
- <it-detail-content>
- <div class="form-group">
- <input it-input type="text" class="form-control floating-label" id="priorityDescription"
- it-text="code"
- ng-model="currentItemWrapper.currentItem.code"
- name=""
- ng-required="true"/>
- </div>
- <div class="form-group">
- <input it-input type="text" class="form-control floating-label" id="priorityCategory"
- it-text="description"
- ng-model="currentItemWrapper.currentItem.description" name=""/>
- </div>
- <div class="form-group">
- <input type="checkbox"
- it-toggle
- ng-model="currentItemWrapper.currentItem.enabledde"
- it-text="tete"/>
- </div>
- </it-detail-content>
- </it-detail>
- </it-master-detail>
- </div>
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase')
- .controller('MasterDetailController', ['$scope', function($scope) {
-
-                                $scope.data =
-                                   [
-                                        {
-                                            "code" : "Code 1",
-                                            "description": "Description 1",
-                                            "enabledde" : true
-                                        },
-                                        {
-                                            "code" : "Code 2",
-                                            "description": "Description 2",
-                                            "enabledde" : false
-                                        },
-                                        {
-                                            "code" : "Code 3",
-                                            "description": "Description 3",
-                                            "enabledde" : true
-                                        },
-                                        {
-                                            "code" : "Code 4",
-                                            "description": "Description 4",
-                                            "enabledde" : false
-                                        },
-                                        {
-                                            "code" : "Code 5",
-                                            "description": "Description 5",
-                                            "enabledde" : true
-                                        }
-                                    ];
-
-                                $scope.masterDetails = {};
-
-                                $scope.masterDetails = {
-                                    columnDefs : [{ field: 'code', displayName: 'My value 1',  width: '8%', sortable:true},
-                                        { field: 'description', displayName: 'My value 2',  width: '10%', sortable:true},
-                                        { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
-                                };
-
-                                $scope.masterDetails.navAlert = {
-                                    text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                    title:'{{\'FOO\' | translate}}',
-                                    buttons : buttons: [
-                                        {
-                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
-                                            type:  'btn-warning',
-                                            onTap: function() {
-                                                $scope.saveCurrentItem();
-                                                return true;
-                                            }
-                                        },
-                                        {
-                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
-                                            type: 'btn-primary',
-                                            onTap: function () {
-                                                $scope.saveCurrentItem();
-                                                return true;
-
-                                            }
-                                        },
-                                        {
-                                            text: '<span class="fa fa-undo fa-lg"></span>',
-                                            type: 'btn-success',
-                                            onTap: function () {
-                                                $scope.undoChange();
-                                                return true;
-
-                                            }
-                                        }
-                                    ]
-                                };
-
-                                function _removeItems(items,dataList){
-                                    angular.forEach(items,function(entry){
-                                        var index = dataList.indexOf(entry);
-                                        dataList.splice(index, 1);
-                                    })
-                                }
-
-                                $scope.deleteSelectedItems = function(){
-                                    _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                                };
-
-                                $scope.saveCurrentItem = function(){
-                                    $scope.$broadcast('unlockCurrentItem');
-                                };
-                                $scope.undoChange = function(){
-                                    $scope.masterDetails.undoChangeCurrentItem();
-                                    $scope.masterDetails.fillHeight();
-                                };
-
-                                $scope.addNewItem = function(){
-                                    var newItem =  {
-                                        "code" : "Code " + ($scope.data.length+1) ,
-                                        "description": "Description " + ($scope.data.length+1),
-                                        "enabledde" : true
-                                    };
-                                    $scope.data.push(newItem);
-                                    $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                                        $scope.$broadcast('lockCurrentItem',false);
-                                    },function(error){
-
-                                    });
-                                };
-
-                                $scope.hasChanged = function(){
-                                    if($scope.masterDetails.getCurrentItemWrapper() != null){
-                                        return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
-                                    } else {
-                                        return false;
-                                    }
-                                }
-                            }]);
- </file>
- <file src="test.css">
- </file>
- </example>
+ *
  */
 IteSoft
     .directive('itMaster',function(){
@@ -262,7 +93,7 @@ IteSoft
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
                 '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize  ui-grid-move-columns class="it-master-detail-grid it-fill">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -320,6 +151,8 @@ IteSoft
                         this.unlockOnEquals = !autoUnlock;
                     };
 
+
+
                     $scope.$parent.currentItemWrapper = null;
 
                     function _selectionChangedHandler(row){
@@ -341,10 +174,6 @@ IteSoft
 
                     $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
 
-                    $scope.$watch('itNoDetailMsg',function(){
-                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-                    });
 
                     $scope.gridOptions  = {
                         rowHeight: 40,
@@ -376,22 +205,6 @@ IteSoft
                             '</div>'
                     };
 
-                    $scope.$watch('itMasterData',function(){
-                        $scope.gridOptions.data = $scope.itMasterData;
-                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
-                            $scope.$parent.currentItemWrapper = null;
-                        } else {
-                            if( $scope.itMasterData.length === 0){
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }
-
-                        $scope.$applyAsync(function(){
-                            $scope.refreshData();
-                        })
-                    },true);
-
-
                     if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
                         angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
                             columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
@@ -404,9 +217,9 @@ IteSoft
                                 ' </div> <div ui-grid-filter></div> </div>';
                         },true)
                     }
+
                     $scope.gridOptions.columnDefs =
                         $scope.itMasterDetailControl.columnDefs;
-
 
                     function _displayDetail(item) {
                         var deferred = $q.defer();
@@ -420,25 +233,6 @@ IteSoft
                         deferred.resolve('');
                         return deferred.promise;
                     }
-
-
-                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-
-                        if($scope.$parent.currentItemWrapper != null
-                            && $scope.itLockOnChange ){
-                            if(!$scope.$parent.currentItemWrapper.isWatched)
-                            {
-                                $scope.$parent.currentItemWrapper.isWatched = true;
-                            }
-                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
-                                $scope.$parent.currentItemWrapper.hasChanged =
-                                    !angular.equals(newValue,
-                                        $scope.$parent.currentItemWrapper.originalItem);
-                            } else   {
-                                $scope.$parent.currentItemWrapper.hasChanged = true;
-                            }
-                        }
-                    }, true);
 
                     $scope.onRowClick = function(row,col) {
                         if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
@@ -466,16 +260,13 @@ IteSoft
                         $scope.onRowClick(null,{entity:item});
                     };
 
-                    $scope.$watch('filterText',function(){
-                        $scope.refreshData();
-                    },true);
-
                     /**
                      * Method to filter rows
                      */
                     $scope.refreshData = function() {
                         var renderableEntities = $filter('itUIGridGlobalFilter')
-                        ($scope.itMasterData, $scope.gridOptions, $scope.filterText);
+                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
+
                         angular.forEach($scope.gridApi.grid.rows, function( row ) {
                             var match = false;
                             renderableEntities.forEach(function(entity){
@@ -488,6 +279,7 @@ IteSoft
                                 $scope.gridApi.core.setRowInvisible(row);
                             } else {
                                 $scope.gridApi.core.clearRowInvisible(row);
+                                console.log('clearRowInvisible')
                             }
                         });
                     };
@@ -674,6 +466,68 @@ IteSoft
                                 }
                             }]
                     }}, $scope.itMasterDetailControl );
+
+
+                    /*  watchers */
+                    $scope.$watch('itLang',function(){
+                        $scope.gridApi.grid.refresh();
+                    });
+
+                    $scope.$watch('itMasterData',function(){
+                        $scope.gridOptions.data = [];
+                        $scope.itMasterData.forEach(function(entry){
+                            $scope.gridOptions.data.push(entry);
+                        });
+
+                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
+                            $scope.$parent.currentItemWrapper = null;
+                        } else {
+                            if( $scope.itMasterData.length === 0){
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }
+                        console.log('_scrollToEntity');
+                        $scope.gridApi.grid.refresh();
+                        if($scope.itMasterDetailControl !== null){
+                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
+                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
+
+                                $scope.$applyAsync(function(){
+                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
+                                });
+                            }
+                        }
+                        $scope.refreshData();
+
+                    },true);
+
+
+                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
+
+                        if($scope.$parent.currentItemWrapper != null
+                            && $scope.itLockOnChange ){
+                            if(!$scope.$parent.currentItemWrapper.isWatched)
+                            {
+                                $scope.$parent.currentItemWrapper.isWatched = true;
+                            }
+                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
+                                $scope.$parent.currentItemWrapper.hasChanged =
+                                    !angular.equals(newValue,
+                                        $scope.$parent.currentItemWrapper.originalItem);
+                            } else   {
+                                $scope.$parent.currentItemWrapper.hasChanged = true;
+                            }
+                        }
+                    }, true);
+
+                    $scope.$watch('filterText',function(){
+                        $scope.refreshData();
+                    },true);
+
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
                 }]
 
 

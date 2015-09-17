@@ -8,9 +8,9 @@
  * @description
  * A container element for detail part of the master-detail main content.
  *
- * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
- * and have 2 child elements: 1 `<it-master>` for the list selectable content,
- * and `<it-detail>` that display the content of the selected item.
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
  *
  *
  * ```html
@@ -24,22 +24,15 @@
  *
  *   <!-- menu -->
  *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
  *   </it-detail>
  *
  * </it-master-detail>
  * ```
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <it-master-detail>
- <it-master>
- <it-master-header>
- </it-master-header>
- </it-master>
- <it-detail>
- </it-detail>
- </file>
- </example>
  */
 IteSoft
     .directive('itDetailContent',function() {

@@ -93,10 +93,20 @@
                                                  ng-minlength="5"
                                                  ng-maxlength="25"
                                                  placeholder="Nom" ng-model="name">
+
                                         <div class="form-errors" ng-messages="signinForm.userName.$error" style="color: red;">
+                                            {{errorMessages}}
                                             <div class="form-error" ng-message="required">This field is required.</div>
                                             <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
                                             <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+                                        </div>
+
+                                        <div ng-messages="" role="alert">
+                                            <div ng-message="required">You did not enter your email address</div>
+                                            <div ng-repeat="errorMessage in errorMessages">
+                                                <!-- use ng-message-exp for a message whose key is given by an expression -->
+                                                <div ng-message-exp="errorMessage.type">{{ errorMessage.text }}</div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -106,7 +116,7 @@
                                     <div class="form-group">
                                         <input it-input class="form-control floating-label"  type="email" placeholder="Email" it-error="user.error" ng-model="user.email">
                                     </div>
-                                    <button class="btn btn-primary" type="submit">submit</button>
+                                    <button ng-disabled="!signinForm.$valid" class="btn btn-primary" type="submit">submit</button>
                                 </form>
                             </div>
                         </div>

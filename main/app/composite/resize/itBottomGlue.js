@@ -1,8 +1,33 @@
 'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGue
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
 IteSoft
     .directive('itBottomGlue', ['$window',  function ($window) {
     return function (scope, element) {
-
 
         function _onWindowsResize () {
             var currentElement = element[0];

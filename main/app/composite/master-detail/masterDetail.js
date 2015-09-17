@@ -12,7 +12,7 @@
  * and have 2 child elements: 1 `<it-master>` for the list selectable content,
  * and `<it-detail>` that display the content of the selected item.
  *
- * You MUST pass an empty object  <it-master it-master-detail-control="myMasterDetailControl"></it-master>
+ * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
  * this object will
  *
  * <table class="table">
@@ -21,7 +21,7 @@
  *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
  *  </tr>
  *  <tr>
- *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</td>
+ *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
  *   <td>Disable | Enable  multiple row selection for entire grid .</td>
  *  </tr>
  *  <tr>
@@ -83,7 +83,7 @@
  * </it-master-detail>
  * ```
  * @example
-     <example module="itesoft">
+    <example module="itesoft">
          <file name="index.html">
              <div ng-controller="MasterDetailController">
                  <it-master-detail >
@@ -134,7 +134,7 @@
          </file>
          <file name="controller.js">
              angular.module('itesoft')
-             .controller('MasterDetailController', ['$scope', function($scope) {
+              .controller('MasterDetailController', ['$scope', function($scope) {
 
                                             $scope.data =
                                                [
@@ -253,10 +253,10 @@
                                                 }
                                             }
                                         }]);
-         </file>
+          </file>
          <file src="test.css">
          </file>
- </example>
+    </example>
  */
 IteSoft
     .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){

@@ -1,0 +1,32 @@
+@ngdoc overview
+
+ @name itesoft
+ @module itesoft
+ @name API Reference
+ @description
+
+# AngularJS API Docs
+
+##Quoi que c'est?
+
+Mise en commun de directives AngularJS
+[demo and documentation](http://alizarion.github.io/angular-common/)
+
+
+##Prérequis
+Git en version < 2.5.0 (pour la compatibilité avec le plugin gulp-ghpages)
+
+##Installation
+
+                git clone https://github.com/alizarion/angular-common.git
+                npm install
+                bower install
+
+
+
+##Build
+
+               gulp build
+##Mise à jour du showroom
+
+                gulp deploy

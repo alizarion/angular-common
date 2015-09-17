@@ -53,11 +53,7 @@ angular.module('itesoft-showcase')
         };
 
         $scope.addNewItem = function(){
-            var newItem =  {
-                "code" : "Code " + ($scope.data.length+1) ,
-                "description": "Description " + ($scope.data.length+1),
-                "enabledde" : true
-            };
+            var newItem =  {};
             $scope.data.push(newItem);
             $scope.masterDetails.setCurrentItem(newItem).then(function(success){
                 $scope.$broadcast('lockCurrentItem',false);

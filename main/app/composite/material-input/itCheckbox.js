@@ -10,14 +10,11 @@
  * except it's styled differently.
  *
  *
- * ```html
- *   <input it-checkbox type="checkbox" it-text="Checkbox" >
- * ```
  * @example
-    <example module="itesoft" >
+    <example module="itesoft">
         <file name="index.html">
             <div>
-                 <input it-checkbox type="checkbox" it-text="Checkbox">
+                 <input it-checkbox type="checkbox" it-label="Checkbox">
             </div>
         </file>
     </example>
@@ -32,7 +29,7 @@ IteSoft
                 var input = angular.element(element[0]);
                 input.wrap('<div class="checkbox"></div>');
                 input.wrap('<label></label>');
-                input.after('<span class="checkbox-material"><span class="check" style="width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itText || ''));
+                input.after('<span class="checkbox-material"><span class="check" style="margin-right:16px;width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itLabel || ''));
             }
         }
 });

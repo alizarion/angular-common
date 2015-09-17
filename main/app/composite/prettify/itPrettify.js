@@ -13,6 +13,20 @@
  * @usage
  * <it-prettyprint>
  * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
  */
 IteSoft
     .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {

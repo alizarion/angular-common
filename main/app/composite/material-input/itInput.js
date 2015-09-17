@@ -12,35 +12,61 @@
  *
  *
  * ```html
- *   <div class="form-group">
+ *   <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
  *       <input it-input
- *              class="form-control
- *              floating-label"
+ *              class="form-control floating-label"
  *              type="text"
+ *              name="Email"
+ *              ng-minlength="5"
+ *              ng-maxlength="10"
+ *              required=""
  *              it-text="Email"
  *              ng-model="user.email">
- *   </div>
+ *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
+         *            <div class="form-error" ng-message="required">This field is required.</div>
+         *            <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+         *            <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+ *             </div>
+ *   </form>
  * ```
  * @example
-    <example module="itesoft">
+    <example module="itesoft-showcase">
         <file name="index.html">
             <div ng-controller="HomeCtrl">
+               <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
                 <div class="form-group">
-                    <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+                        <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
                 </div>
                 <div class="form-group">
-                    <input it-input class="form-control floating-label" type="text" it-text="Prénom" ng-model="user.firstName">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-text="Prénom" name="Prenom" ng-model="user.firstName">
                 </div>
+                  <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
+                      <div class="form-error" ng-message="required">This field is required.</div>
+                      <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+                      <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+                  </div>
+                  <button class="btn btn-primary" type="submit">submit</button>
+               </form>
             </div>
         </file>
+         <file name="Module.js">
+         angular.module('itesoft-showcase',['ngMessages','itesoft']);
+         </file>
         <file name="controller.js">
-            angular.module('itesoft').controller('HomeCtrl',['$scope', function($scope) {
+            angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
                   $scope.user = {
                       email : 'test@itesoft.com',
                       firstName :''
                      };
+
+                  $scope.submit = function(form){
+                       if(form.$valid){
+                         console.log('submit');
+                       }
+                  }
             }]);
         </file>
+
     </example>
  */
 IteSoft

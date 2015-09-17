@@ -6,17 +6,30 @@
  * @restrict EA
  *
  * @description
- * A container element for detail header.
+ * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
  *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-
-            <it-detail-header>
-            </it-detail-header>
-
-        </file>
-    </example>
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
  */
 IteSoft
     .directive('itDetailHeader',function() {

@@ -6,17 +6,32 @@
  * @restrict EA
  *
  * @description
- * A container element for master-detail header.
+ * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
+ * can contain the action buttons of selected items.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
  *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-
-            <it-master-header>
-            </it-master-header>
-
-        </file>
-    </example>
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
  */
 IteSoft
     .directive('itMasterHeader',function() {
