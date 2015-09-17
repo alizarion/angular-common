@@ -4,7 +4,30 @@
 </div>
 </h1>
 <div><h2 id="description">Description</h2>
-<div class="description"><div class="itesoft-directive-page itesoft-directive-itmasterheader-page"><p>A container element for master-detail header.</p>
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itmasterheader-page"><p>A container element for master headers, MUST be include in <a href="#/api/itesoft.directive:itMaster"><code>&lt;it-master&gt;</code></a>,
+can contain the action buttons of selected items.
+for more information see <a href="#/api/itesoft.directive:itMasterDetail"><code>&lt;it-master-detail&gt;</code></a>.</p>
+<pre><code class="lang-html">&lt;it-master-detail&gt;
+  &lt;!-- Master Content content --&gt;
+
+  &lt;it-master&gt;
+      &lt;it-master-header&gt;
+            &lt;button class=&quot;btn btn-primary&quot; title=&quot;Add&quot; ng-disabled=&quot;currentItemWrapper.hasChanged&quot; ng-click=&quot;myAction()&quot;&gt;&lt;span class=&quot;fa fa-plus fa-lg&quot;&gt;&lt;/span&gt;&lt;/button&gt;
+      &lt;/it-master-header&gt;
+  &lt;/it-master&gt;
+
+  &lt;!-- menu --&gt;
+  &lt;it-detail&gt;
+       &lt;it-detail-header&gt;
+
+      &lt;/it-detail-header&gt;
+
+      &lt;it-detail-content&gt;
+      &lt;/it-detail-content&gt;
+  &lt;/it-detail&gt;
+
+&lt;/it-master-detail&gt;
+</code></pre>
 </div></div>
 <h2 id="usage">Usage</h2>
 <div class="usage">as element:<pre class="prettyprint linenums">&lt;it-master-header&gt;
@@ -13,19 +36,4 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-header&gt;
    ...
 &lt;/ANY&gt;</pre>
 </div>
-<h2 id="example">Example</h2>
-<div class="example"><div class="itesoft-directive-page itesoft-directive-itmasterheader-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js" source-edit-html="index.html-4" source-edit-css="" source-edit-js="" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
-<div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-4" ng-html-wrap-loaded="itesoft-showcase angular.js"></pre>
-<script type="text/ng-template" id="index.html-4">
-
-    <it-master-header>
-    </it-master-header>
-
-</script>
-</div>
-</div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-4" ng-eval-javascript=""></div>
-</div></div>
 </div>

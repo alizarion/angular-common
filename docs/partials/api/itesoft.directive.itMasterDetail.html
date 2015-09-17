@@ -8,7 +8,7 @@
 <p>To use master details directive, add an <code>&lt;it-master-detail&gt;</code> parent element. This will encompass all master details content,
 and have 2 child elements: 1 <code>&lt;it-master&gt;</code> for the list selectable content,
 and <code>&lt;it-detail&gt;</code> that display the content of the selected item.</p>
-<p>You MUST pass an empty object  <it-master it-master-detail-control="myMasterDetailControl"></it-master>
+<p>You MUST pass an empty object  <code>&lt;it-master it-master-detail-control=&quot;myMasterDetailControl&quot;&gt;&lt;/it-master&gt;</code>
 this object will</p>
 <table class="table">
  <tr>
@@ -16,7 +16,7 @@ this object will</p>
   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
  </tr>
  <tr>
-  <td><code>myMasterDetailControl.disableMultiSelect  = true | false</td>
+  <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
   <td>Disable | Enable  multiple row selection for entire grid .</td>
  </tr>
  <tr>
@@ -86,184 +86,184 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-master-detail&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itmasterdetail-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-3" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-1" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-3" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
-<script type="text/ng-template" id="index.html-3">
-        <div ng-controller="MasterDetailController">
-            <it-master-detail >
-               <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
-            <it-master-header it-search-placeholder="Recherche" >
-            <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-            <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-            <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-            <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-            </it-master-header>
-            </it-master>
-            <it-detail>
-            <it-detail-header>
-            <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-            <span class="fa fa-floppy-o fa-lg"></span>
-            </button>
-            <button class=" btn btn-info" title="Check">
-            <span class="fa fa-file-code-o fa-lg"></span>
-            </button>
-            <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-            <span class="fa fa-undo fa-lg"></span>
-            </button>
+<pre class="prettyprint linenums" ng-set-text="index.html-1" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-1">
+    <div ng-controller="MasterDetailController">
+        <it-master-detail >
+           <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+        <it-master-header it-search-placeholder="Recherche" >
+        <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+        <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+        <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+        <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+        </it-master-header>
+        </it-master>
+        <it-detail>
+        <it-detail-header>
+        <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+        <span class="fa fa-floppy-o fa-lg"></span>
+        </button>
+        <button class=" btn btn-info" title="Check">
+        <span class="fa fa-file-code-o fa-lg"></span>
+        </button>
+        <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+        <span class="fa fa-undo fa-lg"></span>
+        </button>
 
-            </it-detail-header>
-            <it-detail-content>
-            <div class="form-group">
-            <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                it-text="code"
-                ng-model="currentItemWrapper.currentItem.code"
-                name=""
-                ng-required="true"/>
-            </div>
-            <div class="form-group">
-            <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                it-text="description"
-                ng-model="currentItemWrapper.currentItem.description" name=""/>
-            </div>
-            <div class="form-group">
-            <input type="checkbox"
-                it-toggle
-                ng-model="currentItemWrapper.currentItem.enabledde"
-                it-text="tete"/>
-            </div>
-            </it-detail-content>
-            </it-detail>
-            </it-master-detail>
+        </it-detail-header>
+        <it-detail-content>
+        <div class="form-group">
+        <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+            it-text="code"
+            ng-model="currentItemWrapper.currentItem.code"
+            name=""
+            ng-required="true"/>
         </div>
-    </script>
+        <div class="form-group">
+        <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+            it-text="description"
+            ng-model="currentItemWrapper.currentItem.description" name=""/>
+        </div>
+        <div class="form-group">
+        <input type="checkbox"
+            it-toggle
+            ng-model="currentItemWrapper.currentItem.enabledde"
+            it-text="tete"/>
+        </div>
+        </it-detail-content>
+        </it-detail>
+        </it-master-detail>
+    </div>
+</script>
 </div>
 <div class="tab-pane" title="controller.js">
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
-        angular.module('itesoft')
-        .controller('MasterDetailController', ['$scope', function($scope) {
+    angular.module('itesoft')
+     .controller('MasterDetailController', ['$scope', function($scope) {
 
-                                       $scope.data =
-                                          [
-                                               {
-                                                   "code" : "Code 1",
-                                                   "description": "Description 1",
-                                                   "enabledde" : true
-                                               },
-                                               {
-                                                   "code" : "Code 2",
-                                                   "description": "Description 2",
-                                                   "enabledde" : false
-                                               },
-                                               {
-                                                   "code" : "Code 3",
-                                                   "description": "Description 3",
-                                                   "enabledde" : true
-                                               },
-                                               {
-                                                   "code" : "Code 4",
-                                                   "description": "Description 4",
-                                                   "enabledde" : false
-                                               },
-                                               {
-                                                   "code" : "Code 5",
-                                                   "description": "Description 5",
-                                                   "enabledde" : true
-                                               }
-                                           ];
-
-                                       $scope.masterDetails = {};
-
-                                       $scope.masterDetails = {
-                                           columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
-                                               { field: 'description', displayName: 'My value 2',  sortable:true},
-                                               { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
-                                       };
-
-                                        $scope.masterDetails.disableMultiSelect = false;
-                                       $scope.masterDetails.navAlert = {
-                                           text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                           title:'{{\'FOO\' | translate}}',
-                                           buttons: [
-                                                   {
-                                                       text:  '<span class="fa fa-floppy-o fa-lg"></span>',
-                                                       type:  'btn-warning',
-                                                       onTap: function() {
-                                                           $scope.saveCurrentItem();
-                                                           return true;
-                                                       }
-                                                   },
-                                                   {
-                                                       text: '<span  class="fa fa-file-code-o fa-lg"></span>',
-                                                       type: 'btn-primary',
-                                                       onTap: function () {
-                                                           $scope.saveCurrentItem();
-                                                           return true;
-
-                                                       }
-                                                   },
-                                                   {
-                                                       text: '<span class="fa fa-undo fa-lg"></span>',
-                                                       type: 'btn-success',
-                                                       onTap: function () {
-                                                           $scope.undoChange();
-                                                           return true;
-
-                                                       }
-                                                   }
-                                               ]
-                                       };
-
-                                       function _removeItems(items,dataList){
-                                           angular.forEach(items,function(entry){
-                                               var index = dataList.indexOf(entry);
-                                               dataList.splice(index, 1);
-                                           })
-                                       }
-
-                                       $scope.deleteSelectedItems = function(){
-                                           _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                                       };
-
-
-                                       $scope.saveCurrentItem = function(){
-                                              angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
-
-                                               $scope.$broadcast('unlockCurrentItem');
-                                           };
-
-                                       $scope.undoChange = function(){
-                                           $scope.masterDetails.undoChangeCurrentItem();
-                                           $scope.masterDetails.fillHeight();
-                                       };
-
-                                       $scope.addNewItem = function(){
-                                           var newItem =  {
-                                               "code" : "Code " + ($scope.data.length+1) ,
-                                               "description": "Description " + ($scope.data.length+1),
+                                   $scope.data =
+                                      [
+                                           {
+                                               "code" : "Code 1",
+                                               "description": "Description 1",
                                                "enabledde" : true
-                                           };
-                                           $scope.data.push(newItem);
-                                           $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                                               $scope.$broadcast('lockCurrentItem',false);
-                                           },function(error){
+                                           },
+                                           {
+                                               "code" : "Code 2",
+                                               "description": "Description 2",
+                                               "enabledde" : false
+                                           },
+                                           {
+                                               "code" : "Code 3",
+                                               "description": "Description 3",
+                                               "enabledde" : true
+                                           },
+                                           {
+                                               "code" : "Code 4",
+                                               "description": "Description 4",
+                                               "enabledde" : false
+                                           },
+                                           {
+                                               "code" : "Code 5",
+                                               "description": "Description 5",
+                                               "enabledde" : true
+                                           }
+                                       ];
 
-                                           });
+                                   $scope.masterDetails = {};
+
+                                   $scope.masterDetails = {
+                                       columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
+                                           { field: 'description', displayName: 'My value 2',  sortable:true},
+                                           { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+
+                                   };
+
+                                    $scope.masterDetails.disableMultiSelect = false;
+                                   $scope.masterDetails.navAlert = {
+                                       text:'{{\'BUTTON_LANG_EN\' | translate}}',
+                                       title:'{{\'FOO\' | translate}}',
+                                       buttons: [
+                                               {
+                                                   text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                   type:  'btn-warning',
+                                                   onTap: function() {
+                                                       $scope.saveCurrentItem();
+                                                       return true;
+                                                   }
+                                               },
+                                               {
+                                                   text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                   type: 'btn-primary',
+                                                   onTap: function () {
+                                                       $scope.saveCurrentItem();
+                                                       return true;
+
+                                                   }
+                                               },
+                                               {
+                                                   text: '<span class="fa fa-undo fa-lg"></span>',
+                                                   type: 'btn-success',
+                                                   onTap: function () {
+                                                       $scope.undoChange();
+                                                       return true;
+
+                                                   }
+                                               }
+                                           ]
+                                   };
+
+                                   function _removeItems(items,dataList){
+                                       angular.forEach(items,function(entry){
+                                           var index = dataList.indexOf(entry);
+                                           dataList.splice(index, 1);
+                                       })
+                                   }
+
+                                   $scope.deleteSelectedItems = function(){
+                                       _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+                                   };
+
+
+                                   $scope.saveCurrentItem = function(){
+                                          angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+
+                                           $scope.$broadcast('unlockCurrentItem');
                                        };
 
-                                       $scope.hasChanged = function(){
-                                           if($scope.masterDetails.getCurrentItemWrapper() != null){
-                                               return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
-                                           } else {
-                                               return false;
-                                           }
+                                   $scope.undoChange = function(){
+                                       $scope.masterDetails.undoChangeCurrentItem();
+                                       $scope.masterDetails.fillHeight();
+                                   };
+
+                                   $scope.addNewItem = function(){
+                                       var newItem =  {
+                                           "code" : "Code " + ($scope.data.length+1) ,
+                                           "description": "Description " + ($scope.data.length+1),
+                                           "enabledde" : true
+                                       };
+                                       $scope.data.push(newItem);
+                                       $scope.masterDetails.setCurrentItem(newItem).then(function(success){
+                                           $scope.$broadcast('lockCurrentItem',false);
+                                       },function(error){
+
+                                       });
+                                   };
+
+                                   $scope.hasChanged = function(){
+                                       if($scope.masterDetails.getCurrentItemWrapper() != null){
+                                           return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
+                                       } else {
+                                           return false;
                                        }
-                                   }]);
-    </script>
+                                   }
+                               }]);
+ </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-3" ng-eval-javascript="controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-1" ng-eval-javascript="controller.js"></div>
 </div></div>
 </div>

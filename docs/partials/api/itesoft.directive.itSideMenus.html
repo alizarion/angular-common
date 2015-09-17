@@ -10,12 +10,18 @@ to be toggled by dragging the main content area side to side.</p>
 side menu, and have at least 2 child elements: 1 <code>&lt;it-side-menu-content&gt;</code> for the center content,
 and <code>&lt;it-side-menu&gt;</code> directives</p>
 <pre><code class="lang-html">&lt;it-side-menus&gt;
+
+ &lt;it-side-menu-header it-button-menu=&quot;true&quot;&gt;
+ &lt;/it-side-menu-header&gt;
+
   &lt;!-- Center content --&gt;
 
   &lt;it-side-menu-content&gt;
   &lt;/it-side-menu-content&gt;
 
   &lt;!-- menu --&gt;
+
+
   &lt;it-side-menu &gt;
   &lt;/it-side-menu&gt;
 
@@ -39,23 +45,41 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-side-menus"&gt;
 <pre class="prettyprint linenums" ng-set-text="index.html-7" ng-html-wrap-loaded="itesoft angular.js"></pre>
 <script type="text/ng-template" id="index.html-7">
 
-<it-side-menus>
+     <it-side-menus>
+         <it-side-menu-header it-button-menu="true">
 
- <it-side-menu-header>
- </it-side-menu-header>
 
-<!-- Center content -->
-<it-side-menu-content>
-</it-side-menu-content>
+         </it-side-menu-header>
 
-<!-- menu -->
-<it-side-menu >
-</it-side-menu>
+         <it-side-menu>
+                 <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
 
-</it-side-menus>
- </script>
+
+                 <li it-collapsed-item=""   >
+                 <a href=""><h7 id="example_source_menu">Menu</h7></a>
+                 <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                 <li >
+                 <a href="#/widget/itloader">SubMenu1</a>
+                 </li>
+                 <li >
+                 <a href="#/widget/itBottomGlue">SubMenu2</a>
+                 </li>
+                 </ul>
+                 </li>
+                 </ul>
+          </it-side-menu>
+
+
+         <it-side-menu-content>
+
+             <h3 id="example_see-on-plunker">See on Plunker !</h3>
+
+         </it-side-menu-content>
+     </it-side-menus>
+
+</script>
 </div>
-</div><h4 id="example_demo">Demo</h4>
+</div><h4 id="example_see-on-plunker_demo">Demo</h4>
 <div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-7" ng-eval-javascript=""></div>
 </div></div>
 </div>

@@ -129,8 +129,9 @@ gulp.task('docs', function () {
         },
         startPage: '/api',
         title: "Itesoft Awesome Docs",
-        titleLink: "/api"
+        titleLink: "#/api"
     };
+    buildConfig.appFiles.push('main/app/**/*.ngdoc');
     gulp.src(buildConfig.appFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest('./docs'));

@@ -5,12 +5,30 @@ NG_DOCS={
   "pages": [
     {
       "section": "api",
+      "id": "index",
+      "shortName": "API Reference",
+      "type": "overview",
+      "moduleName": "itesoft",
+      "shortDescription": "AngularJS API Docs",
+      "keywords": "angularjs api avec bower build clone commun compatibilit de deploy directives docs documentation du en est git github gulp gulp-ghpages https install installation io itesoft jour la le mise npm overview plugin pr quoi reference showroom version"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itBottomGue",
+      "shortName": "itBottomGue",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple directive to fill height.",
+      "keywords": "api background-color blue bottom class component directive fill height html it-bottom-glue itesoft jumbotron module red resize simple style window yellow"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itCheckbox",
       "shortName": "itCheckbox",
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The checkbox is no different than the HTML checkbox input,",
-      "keywords": "api checkbox differently directive html input it-checkbox it-text itesoft module styled type"
+      "keywords": "api checkbox differently directive html input it-checkbox it-label itesoft module styled type"
     },
     {
       "section": "api",
@@ -18,8 +36,26 @@ NG_DOCS={
       "shortName": "itCollapsedItem",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "directive for toggle submenu.",
-      "keywords": "api class directive href it-collapsed-item it-menu-animated itesoft nav nav-pills nav-stacked navbar-nav sidemenus submenu title toggle"
+      "shortDescription": "Directive to collapse grouped item in &lt;it-side-menu&gt;.",
+      "keywords": "alt api class collapse directive gif grouped href it-collapsed-item it-menu-animated item itesoft nav nav-pills nav-stacked navbar-nav sidemenus src title"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itCompile",
+      "shortName": "itCompile",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "This directive can evaluate and transclude an expression in a scope context.",
+      "keywords": "$scope adipisci adipisicing alias amet angular api architecto blanditiis class compile consectetur context controller delectus democontroller deserunt dicta directive dolor doloribus ea elit evaluate expression function html ipsum it-compile itesoft js jumbotron laudantium libero lorem magni module molestiae ng-controller nisi odio officia officiis perferendis pleasecompilethis possimus quaerat quibusdam repudiandae result scope simpletext sit transclude"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itDetail",
+      "shortName": "itDetail",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "A container element for detail part of the master-detail main content.",
+      "keywords": "add api child container content detail details directive display ea element elements encompass html item itesoft list main master master-detail menu parent selectable selected"
     },
     {
       "section": "api",
@@ -28,7 +64,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A container element for detail part of the master-detail main content.",
-      "keywords": "add api child container content detail details directive display ea element elements encompass html item itesoft itesoft-showcase list main master master-detail menu module parent selectable selected"
+      "keywords": "add api child container content detail details directive display ea element elements encompass html item itesoft list main master master-detail menu parent selectable selected"
     },
     {
       "section": "api",
@@ -36,8 +72,8 @@ NG_DOCS={
       "shortName": "itDetailHeader",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "A container element for detail header.",
-      "keywords": "api container detail directive ea element header html itesoft itesoft-showcase module"
+      "shortDescription": "A container element for detail header, MUST be include in &lt;it-detail&gt; .",
+      "keywords": "add api btn btn-primary class container content currentitemwrapper detail directive ea element fa fa-lg fa-plus haschanged header html include itesoft master menu myaction ng-click ng-disabled title"
     },
     {
       "section": "api",
@@ -46,7 +82,16 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "Floating labels are just like Stacked Labels,",
-      "keywords": "$scope angular animate api class controller directive eca email entered firstname float floating floating-label form-control form-group function homectrl html input it-input it-text itesoft js labels module ng-controller ng-model pr stacked test text type user whe"
+      "keywords": "$error $scope $valid angular animate api btn btn-primary characters class color console controller directive eca email entered field firstname float floating floating-label form-control form-error form-errors form-group function homectrl html input it-input it-text itesoft itesoft-showcase js labels log maxlength minlength module myform ng-controller ng-maxlength ng-message ng-messages ng-minlength ng-model ng-submit ngmessages novalidate pr prenom red required stacked style submit test text type user whe"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itLoader",
+      "shortName": "itLoader",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple loading spinner that handle http request pending.",
+      "keywords": "$promise $resource $scope alt angular api body bs-component btn btn-primary btn-xs class controller data datas directive display ea factory function handle html http itesoft itesoft-showcase js jumbotron loaderdemocontroller loading loadmoredata module ng-click ng-controller ng-repeat ng-src ngresource null pending photos photosservice query request return simple spinner style table table-hover table-striped thumbnailurl title typicode url"
     },
     {
       "section": "api",
@@ -54,8 +99,8 @@ NG_DOCS={
       "shortName": "itMaster",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "A container element for master-detail main content.",
-      "keywords": "$broadcast $scope _removeitems add addnewitem angular api application appscope attributes auto binding btn btn-danger btn-info btn-primary btn-success btn-warning button_lang_en buttons changed changes check checkbox child class code columndefs container content context controller css currentitem currentitemwrapper data datalist default define delete deleteselecteditems description detail details directive display displayed displayname ea editing element elements enabledde encompass entity equals fa fa-chevron-down fa-chevron-up fa-file-code-o fa-floppy-o fa-lg fa-plus fa-trash fa-undo false field fillheight filter floating-label foo foreach form-control form-group fr function getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html indexof it-en it-input it-lang it-lock-on-change it-master-data it-master-detail-control it-search-placeholder it-text it-toggle itappscope item items itesoft itesoft-showcase js length list lockcurrentitem main master master-detail masterdetailcontroller masterdetails menu mode module navalert newitem ng-click ng-controller ng-disabled ng-model ng-required null ontap original parent prioritycategory prioritydescription promise push recherche refresh return revert row save savecurrentitem scope scroll scrolltoitem selectable selected set setcurrentitem sortable splice src table template test tete text title translate true type undo undochange undochangecurrentitem unlock unlockcurrentitem unlockonequals var width wrapper"
+      "shortDescription": "Most important part of master-detail component, that",
+      "keywords": "$broadcast $scope add api application appscope attributes auto binding changed changes child class component content context currentitem default define detail details directive display displayed ea editing element elements encompass entity equals false fillheight filter getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html itappscope item items itesoft list lockcurrentitem master master-detail menu mode original parent promise refresh return revert row scope scroll scrolltoitem selectable selected set setcurrentitem table template true undochangecurrentitem unlock unlockcurrentitem unlockonequals wrapper"
     },
     {
       "section": "api",
@@ -72,17 +117,17 @@ NG_DOCS={
       "shortName": "itMasterHeader",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "A container element for master-detail header.",
-      "keywords": "api container directive ea element header html itesoft itesoft-showcase master-detail module"
+      "shortDescription": "A container element for master headers, MUST be include in &lt;it-master&gt;,",
+      "keywords": "action add api btn btn-primary buttons class container content currentitemwrapper directive ea element fa fa-lg fa-plus haschanged headers html include items itesoft master menu myaction ng-click ng-disabled selected title"
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itPopup",
-      "shortName": "itPopup",
+      "id": "itesoft.directive:itNavActive",
+      "shortName": "itNavActive",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.",
-      "keywords": "$scope addition alert alertpopup allowing allows angular api btn btn-danger btn-info btn-warning built callback canceled class completely confirm confirmpopup content continue controller creating custom data directive eca flexible function functions html inputlabel inputtype itesoft itpopup js module ng-click ng-controller order password popup popup_content popup_label popup_title popupctrl popups programmatically prompt promptpopup require respond response service showalert showconfirm showing showprompt support system text title translate user users validate var versions windows"
+      "shortDescription": "Directive to set active view css class on side menu item &lt;it-side-menu&gt;.",
+      "keywords": "active alt api class content css directive fa fa-book fa-fw fa-home gif href html it-nav-active item itesoft jumborton list-group menu nav nav-pills nav-stacked navbar-nav ng-scope set side src tables typography view"
     },
     {
       "section": "api",
@@ -91,7 +136,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A container for display source code in browser with syntax highlighting.",
-      "keywords": "api browser code container directive display ea highlighting itesoft source syntax"
+      "keywords": "api browser checkbox class code container directive display ea handle highlighting html it-prettyprint itesoft lang-html module prettyprint source syntax toggle track type"
     },
     {
       "section": "api",
@@ -127,7 +172,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A container element for side menu(s) and the main content. Allows the left and/or right side menu",
-      "keywords": "add allows api area center child container content directive directives dragging eca element elements encompass html itesoft left main menu menus module parent side toggled"
+      "keywords": "active add allows api area center child class container content directive directives dragging eca element elements encompass href html it-button-menu it-collapsed-item it-menu-animated it-nav-active itesoft left list-group main menu menus module nav nav-pills nav-stacked navbar-nav parent plunker side toggled true"
     },
     {
       "section": "api",
@@ -136,25 +181,16 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
-      "keywords": "allows animated api binds boolean button checkbox directive dragging html it-text it-toggle itesoft model module nub switch toggle type"
+      "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
     },
     {
       "section": "api",
-      "id": "itesoft:itDetail",
-      "shortName": "itDetail",
-      "type": "directive",
+      "id": "itesoft.service:itPopup",
+      "shortName": "itPopup",
+      "type": "service",
       "moduleName": "itesoft",
-      "shortDescription": "A container element for detail part of the master-detail main content.",
-      "keywords": "add api child container content detail details directive display ea element elements encompass html item itesoft itesoft-showcase list main master master-detail menu module parent selectable selected"
-    },
-    {
-      "section": "api",
-      "id": "itesoft:itLoader",
-      "shortName": "itLoader",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "Simple loading spinner that handle http request.",
-      "keywords": "api directive ea handle http itesoft loading request simple spinner"
+      "shortDescription": "The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.",
+      "keywords": "$modal $modalstack $q $rootscope $scope addition alert alertpopup allowing allows angular api btn btn-danger btn-info btn-warning built button buttons callback cancel canceled class completely confirm confirmpopup content continue controller creating custom data false flexible function functions html inputlabel inputtype itesoft itpopup js module ng-click ng-controller ontap order password popup popup_content popup_label popup_title popupctrl popups programmatically prompt promptpopup reject require resolve respond response return service showalert showconfirm showcustomconfirm showing showprompt support system text third titi title toto translate true type user users validate var versions windows"
     }
   ],
   "apis": {
@@ -182,7 +218,7 @@ NG_DOCS={
       "angularAnimate": false,
       "marked": true
     },
-    "titleLink": "/api"
+    "titleLink": "#/api"
   },
   "html5Mode": false,
   "editExample": true,

@@ -27,6 +27,7 @@ module.exports = {
         '!main/app/**/*.demo.js', // Exclude demo files
         'main/app/app.module.js',
         'main/app/**/*.js'
+
     ],
     /**
      * Liste des librairies minifié à utiliser en prod
