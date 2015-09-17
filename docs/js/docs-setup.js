@@ -10,7 +10,7 @@ NG_DOCS={
       "type": "overview",
       "moduleName": "itesoft",
       "shortDescription": "AngularJS API Docs",
-      "keywords": "angularjs api avec bower build clone commun compatibilit de deploy directives docs documentation du en est git github gulp gulp-ghpages https install installation io itesoft jour la le mise npm overview plugin pr quoi reference showroom version"
+      "keywords": "angularjs api avec bower build clone commun compatibilit de deploy directives docs documentation dqsdq du en est git github gulp gulp-ghpages https install installation io itesoft jour la le mise npm overview plugin pr quoi reference showroom version"
     },
     {
       "section": "api",
