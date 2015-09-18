@@ -279,7 +279,6 @@ IteSoft
                                 $scope.gridApi.core.setRowInvisible(row);
                             } else {
                                 $scope.gridApi.core.clearRowInvisible(row);
-                                console.log('clearRowInvisible')
                             }
                         });
                     };
@@ -486,7 +485,6 @@ IteSoft
                                 $scope.$parent.currentItemWrapper = null;
                             }
                         }
-                        console.log('_scrollToEntity');
                         $scope.gridApi.grid.refresh();
                         if($scope.itMasterDetailControl !== null){
                             if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
@@ -541,14 +539,28 @@ IteSoft
             }
             query = query.toLowerCase();
 
+            function _deepFind(obj, path) {
+                var paths = path.split('.')
+                    , current = obj
+                    , i;
+
+                for (i = 0; i < paths.length; ++i) {
+                    if (current[paths[i]] == undefined) {
+                        return undefined;
+                    } else {
+                        current = current[paths[i]];
+                    }
+                }
+                return current;
+            }
+
             var scope = $rootScope.$new(true);
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < grid.columnDefs.length; j++) {
                     var dataItem = data[i];
 
                     var fieldName = grid.columnDefs[j].field;
-
-                    var renderedData = dataItem[fieldName];
+                    var renderedData = _deepFind(dataItem,fieldName);
                     // apply cell filter
                     if (grid.columnDefs[j].cellFilter) {
                         scope.value = renderedData;
