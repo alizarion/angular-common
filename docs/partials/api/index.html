@@ -4,18 +4,157 @@
 </h1>
 <div><div class="api-reference-page"><h2 id="angularjs-api-docs" id="angularjs-api-docs">AngularJS API Docs</h2>
 <h3 id="quoi-que-c-est-" id="angularjs-api-docs_quoi-que-cest">Quoi que c&#39;est?</h3>
-<p>Mise en commun de directives AngularJS
-<a href="http://alizarion.github.io/angular-common/">demo and documentation</a>
-dqsfds</p>
+<p>L&#39;objectif de cette librairie est la mise en commun des composants(génériques)
+AngularJS developpé par Itesoft afin de capitaliser au
+mieux le travail effectuer par les differentes equipes.</p>
+<p><a href="http://alizarion.github.io/angular-common/">demo and documentation</a></p>
 <h3 id="pr-requis" id="angularjs-api-docs_prérequis">Prérequis</h3>
-<p>Installer git avec prise en charge du prompt windows.
-dsdqs dqsddkjkd fdfdqfdsf sdqs</p>
+<p>git avec prise en charge du prompt windows, et npm.</p>
 <h3 id="installation" id="angularjs-api-docs_installation">Installation</h3>
 <pre><code>            git clone https://github.com/alizarion/angular-common.git
             npm install
             bower install
 </code></pre><h3 id="build" id="angularjs-api-docs_build">Build</h3>
 <pre><code>           gulp build
-</code></pre><h3 id="mise-jour-du-showroom" id="angularjs-api-docs_mise-à-jour-du-showroom">Mise à jour du showroom</h3>
-<pre><code>            gulp deploy
-</code></pre></div></div>
+</code></pre><h3 id="mise-jour-du-showcase" id="angularjs-api-docs_mise-à-jour-du-showcase">Mise à jour du showcase</h3>
+<p>la documentation et les example du showcase sont automatiquement généré à partir de la ngDoc associé aux composants
+il est de ce fait important de correctement documenter vos composants afin qu&#39;ils soient compréhensible et maintenable,
+un composant mal documenté ne sera jamais utilisé.</p>
+<p>la ngDoc permet d&#39;exposer des exemples de votre composant via l&#39;annotation @example, ce dernier sera inclu dans le showcase et un lien permet de le tester sous plunker</p>
+<p>une fois votre composant testé documenté et commité, il convient de mettre à jour la <a href="http://alizarion.github.io/angular-common/">documentation</a> pour se faire :</p>
+<pre><code>            gulp build
+            gulp docs
+            gulp deploy
+</code></pre><h3 id="structure-du-projet" id="angularjs-api-docs_structure-du-projet">Structure du projet</h3>
+<p>pour mieux s&#39;y retrouvé, le project est structuré de la façon suivante.</p>
+<pre><code>                 .
+                 |--- docs(ne pas commité, généré automatiquement par la commande gulp docs)
+                 |
+                 |--- dist(ne pas commité, généré automatiquement par la commande gulp build)
+                 |
+                 |--- main
+                 |    |--- index.html
+                 |    |--- app
+                 |    |    |
+                 |    |    |--- composite
+                 |    |    |    |
+                 |    |    |    |--- directive1
+                 |    |    |    |    |--- directive1.js
+                 |    |    |    |    |--- directive1ChildDirective.js
+                 |    |    |    |    |--- directive1Service.js
+                 |    |    |    |--- directive2
+                 |    |    |    |    |--- directive2.js
+                 |    |    |    |    |--- directive2ChildDirective.js
+                 |    |    |    |    |--- directive2Filter.js
+                 |    |    |    |    |--- directive2Doc.ngdoc
+                 |    |    |    |
+                 |    |    |    |--- directive3
+                 |    |    |         |--- directive3.js
+                 |    |    |
+                 |    |    |--- services
+                 |    |         |
+                 |    |         |--- service1
+                 |    |         |    |--- service1.js
+                 |    |         |    |--- service1.ngdoc
+                 |    |         |
+                 |    |         |--- service2
+                 |    |              |--- service2.js
+                 |    |
+                 |    |--- assets
+                 |          |--- css (vide, les fichiers seront généré par l&#39;interpretation des fichiers less et sass)
+                 |          |--- fonts
+                 |          |--- img
+                 |          |--- js
+                 |          |--- less (material bootstrap less files)
+                 |          |--- lib (librairies installé par bower)
+                 |          |--- scss
+                 |              |
+                 |              |--- _directive2.scss
+                 |              |--- _directive1.scss
+                 |              |--- _directive3.scss
+                 |              |--- itesoft.scss
+                 |
+                 |
+                 |--- .bowererrc (configuration bower)
+                 |--- bower.json (dépendances du projet)
+                 |--- build.config.js (fichier de configuration du build)
+                 |--- gulpfile.js
+                 |--- package.js (dépendances de l&#39;environnement de développement)
+</code></pre><p>en régle générale :
+les nouveau composant de type directive, sont créé dans le repertoire composite.
+les nouveau composant de type service, sont créé dans le repertoire service.
+les le css rattaché au composant doit etre dans un fichier sass portant le nom du composant.</p>
+<h2 id="bonnes-pratiques-angularjs" id="bonnes-pratiques-angularjs">Bonnes pratiques AngularJS</h2>
+<p><a href="https://github.com/mgechev/angularjs-style-guide/blob/master/README-fr-fr.md">source</a></p>
+<h3 id="en-g-n-ral" id="bonnes-pratiques-angularjs_en-général">En général</h3>
+<ul>
+<li>Utiliser:<ul>
+<li><code>$timeout</code> au lieu de <code>setTimeout</code></li>
+<li><code>$interval</code> au lieu de <code>setInterval</code></li>
+<li><code>$window</code> au lieu de <code>window</code></li>
+<li><code>$document</code> au lieu de <code>document</code></li>
+<li><code>$http</code> au lieu de <code>$.ajax</code>
+Cela rendra vos tests plus facile et, dans certains cas, évitera les comportements inattendus</li>
+</ul>
+</li>
+</ul>
+<h2 id="controllers" id="controllers">Controllers</h2>
+<ul>
+<li>The naming of the controller is done using the controller&#39;s</li>
+<li>Les contrôleurs sont nommés en UpperCamelCase [Controller.js].</li>
+<li>The naming of the controller is done using the controller&#39;s functionality (for example shopping cart, homepage, admin panel) and the substring <code>Controller</code> in the end.</li>
+<li>Controllers are plain javascript so they will be named UpperCamelCase (<code>HomePageController</code>, <code>ShoppingCartController</code>, <code>AdminPanelController</code>, etc.).</li>
+</ul>
+<h2 id="directives" id="directives">Directives</h2>
+<ul>
+<li>Name your directives with lowerCamelCase.</li>
+<li>Name your directive files with lowerCamelCase[Directive.js].</li>
+<li>Use <code>scope</code> instead of <code>$scope</code> in your link function. In the compile, post/pre link functions you have already defined arguments which will be passed when the function is invoked, you won&#39;t be able to change them using DI. This style is also used in AngularJS&#39;s source code.</li>
+<li>Use <code>pm</code> prefixe for your directives to prevent name collisions with third-party libraries, and end with <code>Directive.js</code>  ex :  <code>pmDropdownDirective.js</code></li>
+<li>Do not use <code>ng</code>, <code>ui</code> or <code>it</code> prefixes since they are reserved for AngularJS and AngularJS UI and itesoft-angular-common.</li>
+<li>DOM manipulations must be done only through directives.</li>
+<li>Create an isolated scope when you develop reusable components.</li>
+<li>Use directives as attributes or elements instead of comments or classes, this will make your code more readable.</li>
+<li>Use <code>scope.$on(&#39;$destroy&#39;, fn)</code> for cleaning up. This is especially useful when you&#39;re wrapping third-party plugins as directives.</li>
+</ul>
+<h2 id="filters" id="filters">Filters</h2>
+<ul>
+<li>Name your filters with lowerCamelCase.</li>
+<li>Name your filter  files  with lowerCamelCase[Filter.js].</li>
+<li>Make your filters as light as possible. They are called often during the <code>$digest</code> loop so creating a slow filter will slow down your app.</li>
+<li>Do a single thing in your filters, keep them coherent. More complex manipulations can be achieved by piping existing filters.</li>
+</ul>
+<h2 id="services" id="services">Services</h2>
+<ul>
+<li>Name your service files with lowerCamelCase[Service.js].</li>
+<li><p>Use camelCase to name your services.</p>
+<ul>
+<li><p>UpperCamelCase (PascalCase) for naming your services, used as constructor functions i.e.:</p>
+<pre><code>            function MainCtrl($scope, User) {
+              $scope.user = new User(&#39;foo&#39;, 42);
+            }
+
+            module.controller(&#39;MainCtrl&#39;, MainCtrl);
+
+            function User(name, age) {
+              this.name = name;
+              this.age = age;
+            }
+
+            module.factory(&#39;User&#39;, function () {
+              return User;
+            });
+</code></pre></li>
+<li><p>lowerCamelCase for all other services.</p>
+</li>
+</ul>
+</li>
+<li><p>Encapsulate all the business logic in services. Prefer using it as your <code>model</code>.</p>
+</li>
+</ul>
+<h3 id="c-est-bien-beau-mais-par-ou-commencer-" id="services_cest-bien-beau,-mais-par-ou-commencer">C&#39;est bien beau, mais par ou commencer ???!!!</h3>
+<ul>
+<li>récupérer le projet :
+git clone</li>
+</ul>
+</div></div>
