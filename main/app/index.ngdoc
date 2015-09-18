@@ -8,13 +8,14 @@
 # AngularJS API Docs
 
 ##Quoi que c'est?
+L'objectif de cette librairie est la mise en commun des composants(génériques)
+AngularJS developpé par Itesoft afin de capitaliser au
+mieux le travail effectuer par les differentes equipes.
 
-Mise en commun de directives AngularJS
 [demo and documentation](http://alizarion.github.io/angular-common/)
 
-
 ##Prérequis
-Git en version < 2.5.0 (pour la compatibilité avec le plugin gulp-ghpages)
+git avec prise en charge du prompt windows, et npm.
 
 ##Installation
 
@@ -22,11 +23,158 @@ Git en version < 2.5.0 (pour la compatibilité avec le plugin gulp-ghpages)
                 npm install
                 bower install
 
-
-
 ##Build
 
                gulp build
-##Mise à jour du showroom
 
+##Mise à jour du showcase
+
+la documentation et les example du showcase sont automatiquement généré à partir de la ngDoc associé aux composants
+il est de ce fait important de correctement documenter vos composants afin qu'ils soient compréhensible et maintenable,
+un composant mal documenté ne sera jamais utilisé.
+
+la ngDoc permet d'exposer des exemples de votre composant via l'annotation @example, ce dernier sera inclu dans le showcase et un lien permet de le tester sous plunker
+
+une fois votre composant testé documenté et commité, il convient de mettre à jour la [documentation](http://alizarion.github.io/angular-common/) pour se faire :
+
+                gulp build
+                gulp docs
                 gulp deploy
+
+
+
+## Structure du projet
+
+pour mieux s'y retrouvé, le project est structuré de la façon suivante.
+
+                     .
+                     |--- docs(ne pas commité, généré automatiquement par la commande gulp docs)
+                     |
+                     |--- dist(ne pas commité, généré automatiquement par la commande gulp build)
+                     |
+                     |--- main
+                     |    |--- index.html
+                     |    |--- app
+                     |    |    |
+                     |    |    |--- composite
+                     |    |    |    |
+                     |    |    |    |--- directive1
+                     |    |    |    |    |--- directive1.js
+                     |    |    |    |    |--- directive1ChildDirective.js
+                     |    |    |    |    |--- directive1Service.js
+                     |    |    |    |--- directive2
+                     |    |    |    |    |--- directive2.js
+                     |    |    |    |    |--- directive2ChildDirective.js
+                     |    |    |    |    |--- directive2Filter.js
+                     |    |    |    |    |--- directive2Doc.ngdoc
+                     |    |    |    |
+                     |    |    |    |--- directive3
+                     |    |    |         |--- directive3.js
+                     |    |    |
+                     |    |    |--- services
+                     |    |         |
+                     |    |         |--- service1
+                     |    |         |    |--- service1.js
+                     |    |         |    |--- service1.ngdoc
+                     |    |         |
+                     |    |         |--- service2
+                     |    |              |--- service2.js
+                     |    |
+                     |    |--- assets
+                     |          |--- css (vide, les fichiers seront généré par l'interpretation des fichiers less et sass)
+                     |          |--- fonts
+                     |          |--- img
+                     |          |--- js
+                     |          |--- less (material bootstrap less files)
+                     |          |--- lib (librairies installé par bower)
+                     |          |--- scss
+                     |              |
+                     |              |--- _directive2.scss
+                     |              |--- _directive1.scss
+                     |              |--- _directive3.scss
+                     |              |--- itesoft.scss
+                     |
+                     |
+                     |--- .bowererrc (configuration bower)
+                     |--- bower.json (dépendances du projet)
+                     |--- build.config.js (fichier de configuration du build)
+                     |--- gulpfile.js
+                     |--- package.js (dépendances de l'environnement de développement)
+
+
+
+en régle générale :
+les nouveau composant de type directive, sont créé dans le repertoire composite.
+les nouveau composant de type service, sont créé dans le repertoire service.
+les le css rattaché au composant doit etre dans un fichier sass portant le nom du composant.
+
+
+#Bonnes pratiques AngularJS
+
+[source](https://github.com/mgechev/angularjs-style-guide/blob/master/README-fr-fr.md)
+
+
+## En général
+
+* Utiliser:
+    * `$timeout` au lieu de `setTimeout`
+    * `$interval` au lieu de `setInterval`
+    * `$window` au lieu de `window`
+    * `$document` au lieu de `document`
+    * `$http` au lieu de `$.ajax`
+Cela rendra vos tests plus facile et, dans certains cas, évitera les comportements inattendus
+
+# Controllers
+* The naming of the controller is done using the controller's
+* Les contrôleurs sont nommés en UpperCamelCase [Controller.js].
+* The naming of the controller is done using the controller's functionality (for example shopping cart, homepage, admin panel) and the substring `Controller` in the end.
+* Controllers are plain javascript so they will be named UpperCamelCase (`HomePageController`, `ShoppingCartController`, `AdminPanelController`, etc.).
+
+# Directives
+
+* Name your directives with lowerCamelCase.
+* Name your directive files with lowerCamelCase[Directive.js].
+* Use `scope` instead of `$scope` in your link function. In the compile, post/pre link functions you have already defined arguments which will be passed when the function is invoked, you won't be able to change them using DI. This style is also used in AngularJS's source code.
+* Use `pm` prefixe for your directives to prevent name collisions with third-party libraries, and end with `Directive.js`  ex :  `pmDropdownDirective.js`
+* Do not use `ng`, `ui` or `it` prefixes since they are reserved for AngularJS and AngularJS UI and itesoft-angular-common.
+* DOM manipulations must be done only through directives.
+* Create an isolated scope when you develop reusable components.
+* Use directives as attributes or elements instead of comments or classes, this will make your code more readable.
+* Use `scope.$on('$destroy', fn)` for cleaning up. This is especially useful when you're wrapping third-party plugins as directives.
+
+# Filters
+
+* Name your filters with lowerCamelCase.
+* Name your filter  files  with lowerCamelCase[Filter.js].
+* Make your filters as light as possible. They are called often during the `$digest` loop so creating a slow filter will slow down your app.
+* Do a single thing in your filters, keep them coherent. More complex manipulations can be achieved by piping existing filters.
+
+# Services
+* Name your service files with lowerCamelCase[Service.js].
+* Use camelCase to name your services.
+  * UpperCamelCase (PascalCase) for naming your services, used as constructor functions i.e.:
+
+                    function MainCtrl($scope, User) {
+                      $scope.user = new User('foo', 42);
+                    }
+
+                    module.controller('MainCtrl', MainCtrl);
+
+                    function User(name, age) {
+                      this.name = name;
+                      this.age = age;
+                    }
+
+                    module.factory('User', function () {
+                      return User;
+                    });
+
+  * lowerCamelCase for all other services.
+
+* Encapsulate all the business logic in services. Prefer using it as your `model`.
+
+
+## C'est bien beau, mais par ou commencer ???!!!
+
+* récupérer le projet :
+git clone
