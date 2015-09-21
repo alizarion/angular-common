@@ -13,7 +13,7 @@ Cette librairie a pour objectif la mise en commun des composants (génériques) 
 [demo and documentation](http://alizarion.github.io/angular-common/)
 
 ##Prérequis
-(git)[(npm)[https://www.npmjs.com/package/npm]] avec prise en charge du prompt sous windows, et (npm)[https://www.npmjs.com/package/npm].
+[git](https://git-scm.com/downloads) [npm]([https://www.npmjs.com/package/npm) avec prise en charge du prompt sous windows et [npm](https://www.npmjs.com/package/npm).
 
 ##Installation
 
@@ -150,7 +150,7 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
 # Services
 * Name your service files with lowerCamelCase[Service.js].
 * Use camelCase to name your services.
-  * UpperCamelCase (PascalCase) for naming your services, used as constructor functions i.e.:
+* UpperCamelCase (PascalCase) for naming your services, used as constructor functions i.e.:
 
                     function MainCtrl($scope, User) {
                       $scope.user = new User('foo', 42);
@@ -188,27 +188,8 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
 * générer la dist
             gulp build
 
-* générer le showcase à partir de la documentation de votre composant
+* générer le showcase à partir de la documentation de vos composants
             gulp docs
 
 * il ne reste plus qu'à déployer le showcase généré à partir de votre documentation
             gulp deploy
-
-
-
-
-    Bonjour à tous !
-
-
-    Vous trouverez ci-joint le lien vers le nouveau showcase.
-
-    Ce dernier contient en page d'accueil la procédure d'ajout de nouveaux composants.
-
-    Cette dernière vous permettra d'ajouter, de maintenir et de faire évoluer les composants de la librairie.
-
-    Tous les composants sont documentés et généralement accompagnés d'un exemple testable sur plunker.
-
-
-    Cordialement,
-
-    Selim Bensenouci
