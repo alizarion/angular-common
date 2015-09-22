@@ -68,5 +68,6 @@ module.exports = {
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
         'main/assets/lib/angular-media-queries/match-media.js'
+
     ]
 };

@@ -4,10 +4,11 @@
 </h1>
 <div><div class="api-reference-page"><h2 id="angularjs-api-docs" id="angularjs-api-docs">AngularJS API Docs</h2>
 <h3 id="quoi-que-c-est-" id="angularjs-api-docs_quoi-que-cest">Quoi que c&#39;est ?</h3>
-<p>Cette librairie a pour objectif la mise en commun des composants (génériques) AngularJS développés par Itesoft, afin de capitaliser au mieux le travail effectué par les différentes équipes.</p>
+<p>Cette librairie a pour objectif la mise en commun des composants (génériques) AngularJS développés par Itesoft, afin de capitaliser au mieux le travail accompli par les différentes équipes.</p>
 <p><a href="http://alizarion.github.io/angular-common/">demo and documentation</a></p>
 <h3 id="pr-requis" id="angularjs-api-docs_prérequis">Prérequis</h3>
-<p>(git)[(npm)[<a href="https://www.npmjs.com/package/npm">https://www.npmjs.com/package/npm</a>]] avec prise en charge du prompt sous windows, et (npm)[<a href="https://www.npmjs.com/package/npm">https://www.npmjs.com/package/npm</a>].</p>
+<p><a href="https://git-scm.com/downloads">git</a> avec prise en charge du prompt sous windows.
+<a href="https://www.npmjs.com/package/npm">npm</a>.</p>
 <h3 id="installation" id="angularjs-api-docs_installation">Installation</h3>
 <pre><code>            git clone https://github.com/alizarion/angular-common.git
             npm install
@@ -148,6 +149,13 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
 <li><p>Encapsulate all the business logic in services. Prefer using it as your <code>model</code>.</p>
 </li>
 </ul>
+<h3 id="le-css-less-sass" id="services_le-css,-less,-sass">Le CSS, LESS, SASS</h3>
+<p>le CSS de d&#39;angular-common surcharge celui material bootstrap qui lui-même surcharge celui de bootstrap</p>
+<p>l&#39;idée initiale est d&#39;utiliser bootstrap comme base du templating css, surchargeable par des styles itesoft, le parti pris actuel étant le material design , le theme material bootstrap à été utiliser pour surcharger bootstrap.</p>
+<h3 id="cr-ation-d-un-nouveau-composant" id="services_création-dun-nouveau-composant">Création d&#39;un nouveau composant</h3>
+<p>La création d&#39;un nouveau composant implique la création d&#39;une nouvelle branche git (portant le nom de votre composant),
+ dans laquelle vous allez commiter pendant la phase de développement.</p>
+<p>une fois le composant validé et testé, merger la branche avec master.</p>
 <h3 id="c-est-bien-beau-mais-par-o-commencer-" id="services_cest-bien-beau,-mais-par-où-commencer">C&#39;est bien beau, mais par où commencer ???!!!</h3>
 <ul>
 <li><p>récupérer le projet :</p>
@@ -165,7 +173,7 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
 <li><p>générer la dist</p>
 <pre><code>      gulp build
 </code></pre></li>
-<li><p>générer le showcase à partir de la documentation de votre composant</p>
+<li><p>générer le showcase à partir de la documentation de vos composants</p>
 <pre><code>      gulp docs
 </code></pre></li>
 <li><p>il ne reste plus qu&#39;à déployer le showcase généré à partir de votre documentation</p>

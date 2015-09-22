@@ -10,7 +10,7 @@ NG_DOCS={
       "type": "overview",
       "moduleName": "itesoft",
       "shortDescription": "AngularJS API Docs",
-      "keywords": "$destroy $digest $document $http $interval $on $scope $timeout $window _directive1 _directive2 _directive3 achieved admin adminpanelcontroller afin age ajax angularjs annotation api app arguments assets associ attributes au automatiquement aux avant avec beau bien bonnes bootstrap bower bowererrc build business called camelcase capitaliser cart cas ce cela certains cette change charge classes cleaning clone code coherent collisions commande commencer comments commit commiter commun compile complex components comportements composant composants composite config configuration contenant contr controller controllers convient correctement cr create creating css dans de defined deploy derni des develop di diff directive directive1 directive1childdirective directive1service directive2 directive2childdirective directive2doc directive2filter directive3 directives dist docs document documentation documenter doit dom du effectu elements en encapsulate environnement est example exemple exemples existing exposer fa faciles factory faire fait fichier fichiers files filter filters fn fois fonts foo function functionality functions git github gulp gulp-ngdoc gulpfile homepage homepagecontroller html https il ils img inattendus inclus install installation interpr interpretation invoked io isolated itesoft itesoft-angular-common jamais javascript jour js json la le les lib librairie libraries lien lieu light link logic loop lowercamelcase main mainctrl maintenables mais mal manipulations md mettre mieux mise model module named naming ne ng ngdoc nom nomm nouveaux npm npmjs objectif overview package panel par partir pas passed pensez permet permettra piping plain plugin plugins plunker pm pmdropdowndirective portant post pour pr pratiques prefer prefixe prefixes prevent prise projet prompt qu quoi rappel readable reference rendra reserved reste retrouver return reusable sass scope scss se sera seront service service1 service2 services setinterval settimeout shopping shoppingcartcontroller showcase single slow soient son sont source sous structur structure style substring suivante test tester tests thing third-party travail type ui une uppercamelcase user utilis utilisation utiliser vos votre window windows won wrapping"
+      "keywords": "$destroy $digest $document $http $interval $on $scope $timeout $window _directive1 _directive2 _directive3 accompli achieved actuel admin adminpanelcontroller afin age ajax allez angular-common angularjs annotation api app arguments assets associ attributes au automatiquement aux avant avec base beau bien bonnes bootstrap bower bowererrc branche build business called camelcase capitaliser cart cas ce cela celui certains cette change charge classes cleaning clone code coherent collisions commande comme commencer comments commit commiter commun compile complex components comportements composant composants composite config configuration contenant contr controller controllers convient correctement cr create creating css dans de defined deploy derni des design develop di diff directive directive1 directive1childdirective directive1service directive2 directive2childdirective directive2doc directive2filter directive3 directives dist docs document documentation documenter doit dom du elements en encapsulate environnement est example exemple exemples existing exposer fa faciles factory faire fait fichier fichiers files filter filters fn fois fonts foo function functionality functions git github gulp gulp-ngdoc gulpfile homepage homepagecontroller html https il ils img implique inattendus inclus initiale install installation interpr interpretation invoked io isolated itesoft itesoft-angular-common jamais javascript jour js json la laquelle le les lib librairie libraries lien lieu light link logic loop lowercamelcase lui-m main mainctrl maintenables mais mal manipulations master material md merger mettre mieux mise model module named naming ne ng ngdoc nom nomm nouveau nouveaux nouvelle npm npmjs objectif overview package panel par parti partir pas passed pendant pensez permet permettra phase piping plain plugin plugins plunker pm pmdropdowndirective portant post pour pr pratiques prefer prefixe prefixes prevent pris prise projet prompt qu qui quoi rappel readable reference rendra reserved reste retrouver return reusable sass scope scss se sera seront service service1 service2 services setinterval settimeout shopping shoppingcartcontroller showcase single slow soient son sont source sous structur structure style styles substring suivante surcharge surchargeable surcharger templating test tester tests theme thing third-party travail type ui une uppercamelcase user utilis utilisation utiliser valid vos votre vous window windows won wrapping"
     },
     {
       "section": "api",
@@ -185,6 +185,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.filter:itUnicode",
+      "shortName": "itUnicode",
+      "type": "filter",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple filter that escape string to unicode.",
+      "keywords": "$scope angular api controller ea escape filter function html itesoft itunicode js module mycontroller ng-bind-html ng-controller simple string stringtoescape unicode"
+    },
+    {
+      "section": "api",
       "id": "itesoft.service:itPopup",
       "shortName": "itPopup",
       "type": "service",
@@ -202,7 +211,7 @@ NG_DOCS={
     "scripts": [
       "js/marked.js",
       "js/dist/assets/lib/vendor.min.js",
-      "js/dist/app/lib.min.js"
+      "js/dist/app/itesoft-debug.js"
     ],
     "styles": [
       "css/dist/assets/fonts/main.min.css"
@@ -226,7 +235,7 @@ NG_DOCS={
   "scripts": [
     "js/marked.js",
     "js/dist/assets/lib/vendor.min.js",
-    "js/dist/app/lib.min.js"
+    "js/dist/app/itesoft-debug.js"
   ],
   "styles": [
     "css/dist/assets/fonts/main.min.css"

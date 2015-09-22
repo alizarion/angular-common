@@ -29,7 +29,7 @@ var gulpif = require('gulp-if');
 gulp.task('build', function(callback) {
     runSequence('clean','sass','less',
         'css',
-        ['uglify','vendor','html','assets','fonts','demo-js'],
+        ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js'],
         callback);
 });
 
@@ -118,11 +118,25 @@ gulp.task('uglify', function() {
         .pipe(gulp.dest('dist/app'));
 });
 
+
+
+/**
+ * Concat et Minifie le Javascript applicatif
+ */
+gulp.task('uglify-debug', function() {
+    return gulp.src(buildConfig.appFiles)
+        .pipe(concat('itesoft-debug.js'))
+//        .pipe(header(buildConfig.closureStart))
+//        .pipe(footer(buildConfig.closureEnd))
+//        .pipe(header(buildConfig.banner,{pkg:pkg}))
+        .pipe(gulp.dest('dist/app'));
+});
+
 gulp.task('docs', function () {
     var options = {
         html5Mode: false,
         styles:['./dist/assets/fonts/main.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/lib.min.js'],
+        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft-debug.js'],
         loadDefaults: {
             angular:false,
             angularAnimate: false
@@ -131,8 +145,9 @@ gulp.task('docs', function () {
         title: "Itesoft Awesome Docs",
         titleLink: "#/api"
     };
-    buildConfig.appFiles.push('main/app/**/*.ngdoc');
-    gulp.src(buildConfig.appFiles)
+    var docFiles = buildConfig.appFiles.slice();
+    docFiles.push('main/app/**/*.ngdoc');
+    gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest('./docs'));
     return  gulp.src('./main/assets/fonts/**/*')
@@ -145,7 +160,7 @@ gulp.task('docs', function () {
 gulp.task('demo-js', function() {
     return gulp.src('main/app/**/*.demo.js')
         .pipe(concat('demo.min.js'))
-        .pipe(uglify())
+        .pipe(uglify({outSourceMap:'lib.min.map'}))
         .pipe(gulp.dest('dist'));
 });
 
@@ -204,6 +219,22 @@ gulp.task('watch', function() {
     gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
 });
 
+/**
+ * Obsérve les modification des scss et compile en css
+ */
+gulp.task('watch', function() {
+    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
+    gulp.watch(['./main/app/**/*.ngdoc'], ['docs']);
+    gulp.watch(['./main/app/**/*.js'], ['debug']);
+});
+
+/**
+ * Execute les actions de build dans l'ordre
+ */
+gulp.task('debug', function(callback) {
+    runSequence('uglify-debug','docs',
+        callback);
+});
 
 
 /**
