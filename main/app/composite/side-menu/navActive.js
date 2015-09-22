@@ -10,7 +10,7 @@
  * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
  *
  *  <div class="jumborton ng-scope">
- *    <img src="../main/assets/img/nav-active.gif" alt="">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
  *  </div>
  *
  * ```html

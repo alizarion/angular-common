@@ -9,7 +9,7 @@
  * @description
  * Directive to collapse grouped item in {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
  *
- * <img src="../main/assets/img/collapsed-item.gif" alt="">
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
  * @usage
  *  <li>
  *  </li>
