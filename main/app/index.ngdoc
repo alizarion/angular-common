@@ -8,12 +8,13 @@
 # AngularJS API Docs
 
 ##Quoi que c'est ?
-Cette librairie a pour objectif la mise en commun des composants (génériques) AngularJS développés par Itesoft, afin de capitaliser au mieux le travail effectué par les différentes équipes.
+Cette librairie a pour objectif la mise en commun des composants (génériques) AngularJS développés par Itesoft, afin de capitaliser au mieux le travail accompli par les différentes équipes.
 
 [demo and documentation](http://alizarion.github.io/angular-common/)
 
 ##Prérequis
-[git](https://git-scm.com/downloads) [npm]([https://www.npmjs.com/package/npm) avec prise en charge du prompt sous windows et [npm](https://www.npmjs.com/package/npm).
+[git](https://git-scm.com/downloads) avec prise en charge du prompt sous windows.
+[npm](https://www.npmjs.com/package/npm).
 
 ##Installation
 
@@ -170,6 +171,20 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
   * lowerCamelCase for all other services.
 
 * Encapsulate all the business logic in services. Prefer using it as your `model`.
+
+##Le CSS, LESS, SASS
+
+le CSS de d'angular-common surcharge celui material bootstrap qui lui-même surcharge celui de bootstrap
+
+l'idée initiale est d'utiliser bootstrap comme base du templating css, surchargeable par des styles itesoft, le parti pris actuel étant le material design , le theme material bootstrap à été utiliser pour surcharger bootstrap.
+
+
+##Création d'un nouveau composant
+
+La création d'un nouveau composant implique la création d'une nouvelle branche git (portant le nom de votre composant),
+ dans laquelle vous allez commiter pendant la phase de développement.
+
+une fois le composant validé et testé, merger la branche avec master.
 
 
 ## C'est bien beau, mais par où commencer ???!!!
