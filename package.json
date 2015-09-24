@@ -21,8 +21,16 @@
     "gulp-flatten": "0.0.4",
     "gulp-gh-pages": "^0.5.2",
     "gulp-if": "^1.2.5",
+    "gulp-jasmine": "^2.1.0",
+    "gulp-karma": "0.0.4",
     "gulp-useref": "^1.2.0",
     "gulp-util": "^2.2.14",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.10",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "karma-spec-reporter": "0.0.20",
+    "phantomjs": "^1.9.18",
     "run-sequence": "^1.1.0",
     "shelljs": "^0.3.0"
   }
