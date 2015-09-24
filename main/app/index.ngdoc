@@ -13,8 +13,27 @@ Cette librairie a pour objectif la mise en commun des composants (génériques) 
 [demo and documentation](http://alizarion.github.io/angular-common/)
 
 ##Prérequis
+
 [git](https://git-scm.com/downloads) avec prise en charge du prompt sous windows.
+
 [npm](https://www.npmjs.com/package/npm).
+
+installer bower en globale :
+
+            npm install bower -g
+
+
+
+##Comment l'intégrer dans mon projet?
+
+Un template permettant de demarrer rapidement un nouveau projet est disponible [ICI](https://github.com/alizarion/angular-common-quickstart).
+
+        git clone https://github.com/alizarion/angular-common-quickstart
+        cd angular-common-quickstart
+        npm install
+        bower install
+
+
 
 ##Installation
 

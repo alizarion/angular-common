@@ -23,6 +23,7 @@ var sh = require('shelljs');
 var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
 var karma = require('gulp-karma');
+var serve = require('gulp-serve');
 
 /**
  * Execute les actions de build dans l'ordre
@@ -260,6 +261,7 @@ gulp.task('debug', function(callback) {
         callback);
 });
 
+gulp.task('serve', serve('docs'));
 
 /**
  * Lance l'installation des dépendences GIT
