@@ -237,7 +237,7 @@ gulp.task('test', function() {
     var allVendorFiles = buildConfig.vendorJavascriptFiles.slice();
     allVendorFiles.push('./main/assets/lib/angular-mocks/angular-mocks.js');
     var allAppFiles = buildConfig.appFiles.slice();
-    allAppFiles = _removeValueFromArray(allAppFiles,'!./main/app/**/*.Test.js');
+    allAppFiles = _removeValueFromArray(allAppFiles,'!main/app/**/*Test.js');
     var testFiles = allVendorFiles.concat(allAppFiles);
 
     return gulp.src(testFiles)
