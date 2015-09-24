@@ -211,7 +211,7 @@ NG_DOCS={
     "scripts": [
       "js/marked.js",
       "js/dist/assets/lib/vendor.min.js",
-      "js/dist/app/itesoft-debug.js"
+      "js/dist/app/itesoft.debug.js"
     ],
     "styles": [
       "css/dist/assets/fonts/main.min.css"
@@ -235,7 +235,7 @@ NG_DOCS={
   "scripts": [
     "js/marked.js",
     "js/dist/assets/lib/vendor.min.js",
-    "js/dist/app/itesoft-debug.js"
+    "js/dist/app/itesoft.debug.js"
   ],
   "styles": [
     "css/dist/assets/fonts/main.min.css"

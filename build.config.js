@@ -24,7 +24,6 @@ module.exports = {
      */
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
-        '!main/app/**/*.demo.js', // Exclude demo files
         'main/app/app.module.js',
         'main/app/**/*.js'
 
@@ -57,7 +56,6 @@ module.exports = {
     ],
     vendorJavascriptFiles: [
         'main/assets/lib/angular/angular.min.js',
-        'main/assets/lib/jquery/dist/jquery.min.js',
         'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',

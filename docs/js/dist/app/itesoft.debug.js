@@ -18,53 +18,52 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
  * @module itesoft
  * @restrict EA
  *
  * @description
- * Simple filter that escape string to unicode.
- *
+ * This directive can evaluate and transclude an expression in a scope context.
  *
  * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
              </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
 
-         </file>
-    </example>
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
  */
 IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
                     }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
+                );
+            };
+        }]);
+    }]);
 
 "use strict";
 
@@ -1629,23 +1628,79 @@ IteSoft
         };
     }]);
 'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGue
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
 IteSoft
-    .directive('itSidePanel', ['FilterViewService', function (FilterViewService) {
-        function _link(scope) {
-            scope.filterViewService = FilterViewService;
+    .directive('itBottomGlue', ['$window',  function ($window) {
+    return function (scope, element) {
+
+        function _onWindowsResize () {
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - elementToResizeContainer.top -marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
         }
-        return {
-            scope: {
-                changeHandler: '&clear'
-            },
-            link: _link,
-            restrict: 'AE',
-            transclude: true,
-            template: '<div class="side-panel panel-filters animate-show" ng-class="{\'side-panel-show\': filterViewService.getShowFilter() && filterViewService.needFilters}"> </div> <div class="side-panel-top panel-filters vertical-text animate-show" ng-class="{\'side-panel-right\':filterViewService.getShowFilter() && filterViewService.needFilters,\'side-panel-right-collapse\':!filterViewService.getShowFilter() && filterViewService.needFilters}" ng-click="filterViewService.setShowFilter()"> <span class="fa fa-search"></span> </div> <div class="side-panel-top panel-refresh animate-show" ng-class="{\'side-panel-right-collapse\': filterViewService.needRefresh}" ng-click="filterViewService.setRefresh(!filterViewService.isRefreshAutoActive)"> <span class="fa-stack"> <i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':filterViewService.filterOptions.autoRefresh && filterViewService.isRefreshAutoActive,\'\':!filterViewService.isRefreshAutoActive || !filterViewService.filterOptions.autoRefresh }"> </i> <i class="fa fa-ban fa-stack-2x text-danger" ng-show="!filterViewService.filterOptions.autoRefresh"> </i> </span> </div>'
-        };
-    }]);
 
+        scope.$applyAsync(function(){
+            _onWindowsResize();
+            var w = angular.element($window);
+            w.bind('resize', function () {
+                _onWindowsResize();
+            });
+        })
 
+    };
+
+}]);
 'use strict';
 /**
  * @ngdoc directive
@@ -2011,6 +2066,24 @@ IteSoft
         }
 });
 'use strict';
+IteSoft
+    .directive('itSidePanel', ['FilterViewService', function (FilterViewService) {
+        function _link(scope) {
+            scope.filterViewService = FilterViewService;
+        }
+        return {
+            scope: {
+                changeHandler: '&clear'
+            },
+            link: _link,
+            restrict: 'AE',
+            transclude: true,
+            template: '<div class="side-panel panel-filters animate-show" ng-class="{\'side-panel-show\': filterViewService.getShowFilter() && filterViewService.needFilters}"> </div> <div class="side-panel-top panel-filters vertical-text animate-show" ng-class="{\'side-panel-right\':filterViewService.getShowFilter() && filterViewService.needFilters,\'side-panel-right-collapse\':!filterViewService.getShowFilter() && filterViewService.needFilters}" ng-click="filterViewService.setShowFilter()"> <span class="fa fa-search"></span> </div> <div class="side-panel-top panel-refresh animate-show" ng-class="{\'side-panel-right-collapse\': filterViewService.needRefresh}" ng-click="filterViewService.setRefresh(!filterViewService.isRefreshAutoActive)"> <span class="fa-stack"> <i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':filterViewService.filterOptions.autoRefresh && filterViewService.isRefreshAutoActive,\'\':!filterViewService.isRefreshAutoActive || !filterViewService.filterOptions.autoRefresh }"> </i> <i class="fa fa-ban fa-stack-2x text-danger" ng-show="!filterViewService.filterOptions.autoRefresh"> </i> </span> </div>'
+        };
+    }]);
+
+
+'use strict';
 
 IteSoft
     .directive('itFillHeight', ['$window', '$document', function($window, $document) {
@@ -2123,6 +2196,76 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+describe('itesoft.filter:itUnicode Test', function () {
+    var $filter;
+    // load the service's module
+    beforeEach(module('itesoft'));
+
+
+
+    beforeEach(inject(function(_$filter_){
+        $filter = _$filter_;
+    }));
+
+    /**
+     * @description
+     * Sample test case to check if the service is injected properly
+     * */
+    it('"itesoft" should be converted to html unicode', function () {
+        var itUnicode = $filter('itUnicode');
+        expect(itUnicode('itesoft')=='&#x0069;&#x0074;&#x0065;&#x0073;&#x006F;&#x0066;&#x0074;').toBe(true);
+    });
+});
 
 'use strict';
 /**
@@ -2407,125 +2550,3 @@ IteSoft
         }
         return itPopup;
     }]);
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- *
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGue
- * @module itesoft
- * @restrict A
- *
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window',  function ($window) {
-    return function (scope, element) {
-
-        function _onWindowsResize () {
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - elementToResizeContainer.top -marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        scope.$applyAsync(function(){
-            _onWindowsResize();
-            var w = angular.element($window);
-            w.bind('resize', function () {
-                _onWindowsResize();
-            });
-        })
-
-    };
-
-}]);
