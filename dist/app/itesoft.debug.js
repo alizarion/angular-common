@@ -2001,7 +2001,7 @@ IteSoft
  * ```html
  * <it-side-menus>
  *
- *  <it-side-menu-header it-button-menu="true">
+ *  <it-side-menu-header it-hide-button-menu="true">
  *  </it-side-menu-header>
  *
  *   <!-- Center content -->
