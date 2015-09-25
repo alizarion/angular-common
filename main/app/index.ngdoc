@@ -24,7 +24,7 @@ installer bower en globale :
 
 
 
-##Comment l'intégrer dans mon projet?
+##Comment l'intégrer dans mon projet ?
 
 Un template permettant de demarrer rapidement un nouveau projet est disponible [ICI](https://github.com/alizarion/angular-common-quickstart).
 
@@ -122,10 +122,10 @@ Pour mieux s'y retrouver, le projet est structuré de la façon suivante.
 
 
 En règle générale :
+
 les nouveaux composants de type directive, sont créés dans le répertoire composite.
 les nouveaux composants de type service, sont créés dans le répertoire service.
 Le css des composants doit être dans un fichier sass portant le nom du composant.
-
 
 #Rappel des bonnes pratiques AngularJS
 
@@ -206,24 +206,74 @@ La création d'un nouveau composant implique la création d'une nouvelle branche
 une fois le composant validé et testé, merger la branche avec master.
 
 
-## C'est bien beau, mais par où commencer ???!!!
+## Comment participer ???!!!
 
-* récupérer le projet :
-            git clone
+                   __feature branch ______O <--  feature branch
+                  /                   \
+                 /                     \
+        ________O______develop__________O___________________________ <-- dev branch
+       /                                       \
+      /                                         \
+     /___________________master__________________0__________________ <-- release branch
+                                          release
 
-* écrire et tester votre composant
+* récupérer la branche develop du projet :
+            git clone https://github.com/alizarion/angular-common.git
 
-* rédiger la ngDoc contenant l'exemple d'utilisation de la documentation via l'annotation @example
+### Pour un hotfix
+* créer une branch pour votre hotfix à partir de develop.
 
-" avant de commiter, pensez à tester votre documentation et son exemple dans le showcase en le générant via la commande gulp docs"
+            git checkout -b master-detail-hotfix develop
 
-* commiter le composant
+* corriger, tester et commiter le correctif.
+
+            git commit -a -m "Correctif du bug blablab ..."
+
+* remerger avec la branch develop :
+
+                git checkout develop
+                git merge --no-ff master-detail-hotfix
+                git tag -a master-detail-hotfix
+
+* suppression de la branch
+                git branch -d master-detail-hotfix
+
+* push de develop
+               git push origin develop
+
+### Pour une nouvelle feature.
+
+* créer une nouvelle branch pour votre feature à partir de develop :
+
+            git checkout -b myfeature develop
+
+* rédiger la ngDoc contenant l'exemple d'utilisation de la documentation via l'annotation @example, le watch met à jour autatiquement le showcase.
+            gulp watch
+
+* commitez
+            git commit -a -m "Ma super feature"
+
+* et mergez avec develop
+
+            git checkout develop
+            git merge --no-ff myfeature
+
+* suppression de la branch
+
+            git branch -d myfeature
 
 * générer la dist
+
             gulp build
 
-* générer le showcase à partir de la documentation de vos composants
+* push de develop
+
+               git push origin develop
+
+* générer le showcase à partir de la documentation
+
             gulp docs
 
 * il ne reste plus qu'à déployer le showcase généré à partir de votre documentation
+
             gulp deploy
