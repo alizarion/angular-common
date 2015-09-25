@@ -10,7 +10,7 @@ NG_DOCS={
       "type": "overview",
       "moduleName": "itesoft",
       "shortDescription": "AngularJS API Docs",
-      "keywords": "$destroy $digest $document $http $interval $on $scope $timeout $window _directive1 _directive2 _directive3 accompli achieved actuel admin adminpanelcontroller afin age ajax allez angular-common angularjs annotation api app arguments assets associ attributes au automatiquement aux avant avec base beau bien bonnes bootstrap bower bowererrc branche build business called camelcase capitaliser cart cas ce cela celui certains cette change charge classes cleaning clone code coherent collisions commande comme commencer comments commit commiter commun compile complex components comportements composant composants composite config configuration contenant contr controller controllers convient correctement cr create creating css dans de defined deploy derni des design develop di diff directive directive1 directive1childdirective directive1service directive2 directive2childdirective directive2doc directive2filter directive3 directives dist docs document documentation documenter doit dom du elements en encapsulate environnement est example exemple exemples existing exposer fa faciles factory faire fait fichier fichiers files filter filters fn fois fonts foo function functionality functions git github gulp gulp-ngdoc gulpfile homepage homepagecontroller html https il ils img implique inattendus inclus initiale install installation interpr interpretation invoked io isolated itesoft itesoft-angular-common jamais javascript jour js json la laquelle le les lib librairie libraries lien lieu light link logic loop lowercamelcase lui-m main mainctrl maintenables mais mal manipulations master material md merger mettre mieux mise model module named naming ne ng ngdoc nom nomm nouveau nouveaux nouvelle npm npmjs objectif overview package panel par parti partir pas passed pendant pensez permet permettra phase piping plain plugin plugins plunker pm pmdropdowndirective portant post pour pr pratiques prefer prefixe prefixes prevent pris prise projet prompt qu qui quoi rappel readable reference rendra reserved reste retrouver return reusable sass scope scss se sera seront service service1 service2 services setinterval settimeout shopping shoppingcartcontroller showcase single slow soient son sont source sous structur structure style styles substring suivante surcharge surchargeable surcharger templating test tester tests theme thing third-party travail type ui une uppercamelcase user utilis utilisation utiliser valid vos votre vous window windows won wrapping"
+      "keywords": "$destroy $digest $document $http $interval $on $scope $timeout $window ________o______develop__________o___________________________ ______o __feature _directive1 _directive2 _directive3 accompli achieved actuel admin adminpanelcontroller afin age ajax allez angular-common angular-common-quickstart angularjs annotation api app arguments assets associ attributes au autatiquement automatiquement aux avec base blablab bonnes bootstrap bower bowererrc branch branche bug build business called camelcase capitaliser cart cas cd ce cela celui certains cette change charge checkout classes cleaning clone code coherent collisions commande comme comment comments commit commiter commitez commun compile complex components comportements composant composants composite config configuration contenant contr controller controllers convient correctement correctif corriger cr create creating css dans de defined demarrer deploy derni des design dev develop di diff directive directive1 directive1childdirective directive1service directive2 directive2childdirective directive2doc directive2filter directive3 directives disponible dist docs document documentation documenter doit dom du elements en encapsulate environnement est example exemple exemples existing exposer fa faciles factory faire fait feature fichier fichiers files filter filters fn fois fonts foo function functionality functions git github globale gulp gulp-ngdoc gulpfile homepage homepagecontroller hotfix html https il ils img implique inattendus inclus initiale install installation installer int interpr interpretation invoked io isolated itesoft itesoft-angular-common jamais javascript jour js json la laquelle le les lib librairie libraries lien lieu light link logic loop lowercamelcase lui-m ma main mainctrl maintenables mal manipulations master master-detail-hotfix material md merge merger mergez met mettre mieux mise model module mon myfeature named naming ne ng ngdoc nom nomm nouveau nouveaux nouvelle npm npmjs objectif origin overview package panel par parti participer partir pas passed pendant permet permettant permettra phase piping plain plugin plugins plunker pm pmdropdowndirective portant post pour pr pratiques prefer prefixe prefixes prevent pris prise projet prompt push qu qui quoi rapidement rappel readable reference release remerger rendra reserved reste retrouver return reusable sass scope scss se sera seront service service1 service2 services setinterval settimeout shopping shoppingcartcontroller showcase single slow soient sont source sous structur structure style styles substring suivante super suppression surcharge surchargeable surcharger tag template templating test tester tests theme thing third-party travail type ui une uppercamelcase user utilis utilisation utiliser valid vos votre vous watch window windows won wrapping"
     },
     {
       "section": "api",
@@ -181,7 +181,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A container element for side menu(s) and the main content. Allows the left and/or right side menu",
-      "keywords": "active add allows api area center child class container content directive directives dragging eca element elements encompass href html it-button-menu it-collapsed-item it-menu-animated it-nav-active itesoft left list-group main menu menus module nav nav-pills nav-stacked navbar-nav parent plunker side toggled true"
+      "keywords": "active add allows api area center child class container content directive directives dragging eca element elements encompass href html it-button-menu it-collapsed-item it-hide-button-menu it-menu-animated it-nav-active itesoft left list-group main menu menus module nav nav-pills nav-stacked navbar-nav parent plunker side toggled true"
     },
     {
       "section": "api",
@@ -220,7 +220,7 @@ NG_DOCS={
     "scripts": [
       "js/marked.js",
       "js/dist/assets/lib/vendor.min.js",
-      "js/dist/app/itesoft-debug.js"
+      "js/dist/app/itesoft.debug.js"
     ],
     "styles": [
       "css/dist/assets/fonts/main.min.css"
@@ -244,7 +244,7 @@ NG_DOCS={
   "scripts": [
     "js/marked.js",
     "js/dist/assets/lib/vendor.min.js",
-    "js/dist/app/itesoft-debug.js"
+    "js/dist/app/itesoft.debug.js"
   ],
   "styles": [
     "css/dist/assets/fonts/main.min.css"
