@@ -10,8 +10,19 @@
  * A container for a side menu header.
  * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}
  *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
  * @usage
- * <it-side-menu-header it-hide-button-menu="true | false">
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
  * </it-side-menu-header>
  */
 IteSoft
@@ -29,21 +40,21 @@ IteSoft
                     .querySelector('.it-material-design-hamburger__icon'));
 
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
-
-                scope.$watch('showmenu',function(newValue,oldValue){
-                    if(newValue!=oldValue ){
-                    if (!newValue) {
-                        child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                        child.addClass('it-material-design-hamburger__icon--from-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                    } else {
-                        child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                        child.addClass('it-material-design-hamburger__icon--to-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                    }
-                    }
-                },true);
-
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
 
                 if(attrs.itHideButtonMenu){
                     scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);

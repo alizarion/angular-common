@@ -22,8 +22,6 @@ installer bower en globale :
 
             npm install bower -g
 
-
-
 ##Comment l'intégrer dans mon projet ?
 
 Un template permettant de demarrer rapidement un nouveau projet est disponible [ICI](https://github.com/alizarion/angular-common-quickstart).
@@ -44,22 +42,6 @@ Un template permettant de demarrer rapidement un nouveau projet est disponible [
 ##Build
 
                gulp build
-
-##Mise à jour du showcase
-
-La documentation et les exemples du showcase sont automatiquement générés à partir de la ngDoc associée aux composants,
-il est de ce fait important de correctement documenter vos composants afin qu'ils soient
-réutilisables et maintenables. Un composant mal documenté ne sera jamais utilisé.
-
-La ngDoc permet d'exposer des exemples de votre composant via l'annotation @example. Cette dernière, une fois interprétée par le plugin gulp-ngDoc, sera inclus dans le showcase et un lien permettra de la tester sous plunker
-
-Une fois votre composant testé, documenté et commité, il convient de mettre à jour la [documentation](http://alizarion.github.io/angular-common/) pour se faire :
-
-                gulp build
-                gulp docs
-                gulp deploy
-
-
 
 ## Structure du projet
 
@@ -127,12 +109,157 @@ les nouveaux composants de type directive, sont créés dans le répertoire comp
 les nouveaux composants de type service, sont créés dans le répertoire service.
 Le css des composants doit être dans un fichier sass portant le nom du composant.
 
+##Le CSS, LESS, SASS
+
+le CSS de d'angular-common surcharge celui material bootstrap qui lui-même surcharge celui de bootstrap
+
+l'idée initiale est d'utiliser bootstrap comme base du templating css, surchargeable par des styles itesoft, le parti pris actuel étant le material design , le theme material bootstrap à été utiliser pour surcharger bootstrap.
+
+
+##Création d'un nouveau composant
+
+La création d'un nouveau composant implique la création d'une nouvelle branche git (portant le nom de votre composant),
+ dans laquelle vous allez commiter pendant la phase de développement.
+
+une fois le composant validé et testé, merger la branche avec master.
+
+
+# Comment participer ???!!!
+
+
+La documentation et les exemples du showcase sont automatiquement générés à partir de la ngDoc associée aux composants,
+il est de ce fait important de correctement documenter vos composants afin qu'ils soient
+réutilisables et maintenables. Un composant mal documenté ne sera jamais utilisé.
+
+La ngDoc permet d'exposer des exemples de votre composant via l'annotation @example. Cette dernière, une fois interprétée par le plugin gulp-ngDoc, sera inclus dans le showcase et un lien permettra de la tester sous plunker.
+Une fois votre composant testé, documenté et commité, il convient de mettre à jour la [documentation](http://alizarion.github.io/angular-common/) pour se faire :
+
+                gulp build  <-- génération de la dist
+                gulp docs   <-- génération du showcase
+                gulp deploy <-- publication du showcase sur github https://github.com/alizarion/angular-common/tree/gh-pages
+
+## Utilisation des branches sur github.
+
+                   __feature branch ______O <--  feature branch
+                  /                   \
+                 /                     \
+        ________O______develop__________O___________________________ <-- dev branch
+       /                                       \
+      /                                         \
+     /___________________master__________________0__________________ <-- release branch
+                                          release
+
+* branch master : réservé uniquement aux releases.
+* branch develop : branche de développement.
+* branch feature : à chaque nouvelle feature, créer une nouvelle branche à partir de "develop" portant le nom de la feature.
+
+
+
+
+## Pour un hotfix
+* récupérer la branche develop du projet :
+            git clone https://github.com/alizarion/angular-common.git
+
+* créer une branch pour votre hotfix à partir de develop.
+
+            git checkout -b master-detail-hotfix develop
+
+* corriger, tester et commiter le correctif.
+
+            git commit -a -m "Correctif du bug blablab ..."
+
+* remerger avec la branch develop :
+
+                git checkout develop
+                git merge --no-ff master-detail-hotfix
+                git tag -a master-detail-hotfix
+
+* suppression de la branch
+                git branch -d master-detail-hotfix
+
+* push de develop
+               git push origin develop
+
+## Pour une nouvelle feature.
+* récupérer la branche develop du projet :
+            git clone https://github.com/alizarion/angular-common.git
+
+* créer une nouvelle branch pour votre feature à partir de develop :
+
+               git checkout -b myfeature develop
+
+
+                              ___ myfeature _ <--  feature branch
+                             /
+                            /
+                   ________O______develop_______
+                  /
+                 /
+                /___________________master_______
+
+
+
+* rédiger la ngDoc contenant l'exemple d'utilisation de la documentation via l'annotation @example, le watch met à jour autatiquement le showcase.
+            gulp watch
+
+* commitez
+            git commit -a -m "Ma super feature"
+
+                              ___ myfeature _o__ <--  commit sur branch feature
+                             /
+                            /
+                   ________O______develop_______
+                  /
+                 /
+                /___________________master_______
+
+
+* et mergez avec develop
+
+            git checkout develop
+            git merge --no-ff myfeature
+
+                              ___ myfeature _o______
+                             /                 \
+                            /                   \
+                   ________O______develop________o__ <--  merge myfeature avec develop
+                  /
+                 /
+                /___________________master__________
+
+* suppression de la branch
+
+            git branch -d myfeature
+
+                              ___ myfeature _o_______o <--  suppression branch myfeature
+                             /                 \
+                            /                   \
+                   ________O______develop________o___
+                  /
+                 /
+                /___________________master___________
+
+* générer la dist
+
+            gulp build
+
+* push de develop
+
+               git push origin develop
+
+* générer le showcase à partir de la documentation
+
+            gulp docs
+
+* il ne reste plus qu'à déployer le showcase généré à partir de votre documentation
+
+            gulp deploy
+
+
+
 #Rappel des bonnes pratiques AngularJS
 
-[source](https://github.com/mgechev/angularjs-style-guide/blob/master/README-fr-fr.md)
-
-
-## En général
+[source](https://github.com/alizarion/angularjs-style-guide/blob/master/README-fr-fr.md)
 
 * Utiliser:
     * `$timeout` au lieu de `setTimeout`
@@ -190,90 +317,3 @@ Cela rendra vos tests plus faciles et, dans certains cas, évitera les comportem
   * lowerCamelCase for all other services.
 
 * Encapsulate all the business logic in services. Prefer using it as your `model`.
-
-##Le CSS, LESS, SASS
-
-le CSS de d'angular-common surcharge celui material bootstrap qui lui-même surcharge celui de bootstrap
-
-l'idée initiale est d'utiliser bootstrap comme base du templating css, surchargeable par des styles itesoft, le parti pris actuel étant le material design , le theme material bootstrap à été utiliser pour surcharger bootstrap.
-
-
-##Création d'un nouveau composant
-
-La création d'un nouveau composant implique la création d'une nouvelle branche git (portant le nom de votre composant),
- dans laquelle vous allez commiter pendant la phase de développement.
-
-une fois le composant validé et testé, merger la branche avec master.
-
-
-## Comment participer ???!!!
-
-                   __feature branch ______O <--  feature branch
-                  /                   \
-                 /                     \
-        ________O______develop__________O___________________________ <-- dev branch
-       /                                       \
-      /                                         \
-     /___________________master__________________0__________________ <-- release branch
-                                          release
-
-* récupérer la branche develop du projet :
-            git clone https://github.com/alizarion/angular-common.git
-
-### Pour un hotfix
-* créer une branch pour votre hotfix à partir de develop.
-
-            git checkout -b master-detail-hotfix develop
-
-* corriger, tester et commiter le correctif.
-
-            git commit -a -m "Correctif du bug blablab ..."
-
-* remerger avec la branch develop :
-
-                git checkout develop
-                git merge --no-ff master-detail-hotfix
-                git tag -a master-detail-hotfix
-
-* suppression de la branch
-                git branch -d master-detail-hotfix
-
-* push de develop
-               git push origin develop
-
-### Pour une nouvelle feature.
-
-* créer une nouvelle branch pour votre feature à partir de develop :
-
-            git checkout -b myfeature develop
-
-* rédiger la ngDoc contenant l'exemple d'utilisation de la documentation via l'annotation @example, le watch met à jour autatiquement le showcase.
-            gulp watch
-
-* commitez
-            git commit -a -m "Ma super feature"
-
-* et mergez avec develop
-
-            git checkout develop
-            git merge --no-ff myfeature
-
-* suppression de la branch
-
-            git branch -d myfeature
-
-* générer la dist
-
-            gulp build
-
-* push de develop
-
-               git push origin develop
-
-* générer le showcase à partir de la documentation
-
-            gulp docs
-
-* il ne reste plus qu'à déployer le showcase généré à partir de votre documentation
-
-            gulp deploy

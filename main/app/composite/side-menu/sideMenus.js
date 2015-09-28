@@ -18,7 +18,7 @@
  * ```html
  * <it-side-menus>
  *
- *  <it-side-menu-header it-hide-button-menu="true">
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
  *  </it-side-menu-header>
  *
  *   <!-- Center content -->
@@ -39,7 +39,7 @@
         <file name="index.html">
 
          <it-side-menus>
-             <it-side-menu-header it-button-menu="true">
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
 
 
              </it-side-menu-header>
