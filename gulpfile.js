@@ -224,7 +224,7 @@ gulp.task('watch', function() {
  *
  */
 gulp.task('watch', function() {
-    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
+    gulp.watch('./main/assets/scss/**/*.scss', ['css-debug']);
     gulp.watch(['./main/app/**/*.ngdoc'], ['docs']);
     gulp.watch(['./main/app/**/*.js'], ['debug']);
 });
@@ -258,6 +258,11 @@ gulp.task('test', function() {
  */
 gulp.task('debug', function(callback) {
     runSequence('uglify-debug','docs',
+        callback);
+});
+
+gulp.task('css-debug', function(callback) {
+    runSequence('sass','css','docs',
         callback);
 });
 

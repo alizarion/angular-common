@@ -2033,7 +2033,15 @@ IteSoft
 'use strict';
 
 IteSoft
-    .controller("$sideMenuCtrl",['$scope','$timeout','$window', function($scope,$timeout,$window){
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
         var _self = this;
         _self.scope = $scope;
 
@@ -2043,7 +2051,9 @@ IteSoft
             _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
 
             $timeout(function(){
-                $window.dispatchEvent(new Event('resize'));
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
             },300)
         };
         _self.hideSideMenu = function(){
@@ -2063,8 +2073,19 @@ IteSoft
  * A container for a side menu header.
  * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}
  *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
  * @usage
- * <it-side-menu-header it-hide-button-menu="true | false">
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
  * </it-side-menu-header>
  */
 IteSoft
@@ -2082,21 +2103,21 @@ IteSoft
                     .querySelector('.it-material-design-hamburger__icon'));
 
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
-
-                scope.$watch('showmenu',function(newValue,oldValue){
-                    if(newValue!=oldValue ){
-                    if (!newValue) {
-                        child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                        child.addClass('it-material-design-hamburger__icon--from-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                    } else {
-                        child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                        child.addClass('it-material-design-hamburger__icon--to-arrow');
-                        $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                    }
-                    }
-                },true);
-
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
 
                 if(attrs.itHideButtonMenu){
                     scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
@@ -2144,7 +2165,7 @@ IteSoft
  * ```html
  * <it-side-menus>
  *
- *  <it-side-menu-header it-hide-button-menu="true">
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
  *  </it-side-menu-header>
  *
  *   <!-- Center content -->
@@ -2165,7 +2186,7 @@ IteSoft
         <file name="index.html">
 
          <it-side-menus>
-             <it-side-menu-header it-button-menu="true">
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
 
 
              </it-side-menu-header>
