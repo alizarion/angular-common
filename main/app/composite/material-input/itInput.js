@@ -91,8 +91,8 @@ IteSoft
                         input.after('<div class="floating-label">' +  placeholder + '</div');
                     } else {
                         // Else user data binding text 
-                        input.after('<div class="floating-label">' +  scope.itText + '</div');
-                        scope.$watch('itText', function(value) {
+                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
+                        scope.$watch('itLabel', function(value) {
                             scope.$applyAsync(function(){
                                 if (!input[0].offsetParent) {
                                     return;
@@ -157,7 +157,7 @@ IteSoft
             },
             scope : {
                 itError : '=',
-                itText : '@'
+                itLabel : '@'
             }
         }
 });

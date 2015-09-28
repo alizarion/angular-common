@@ -9,7 +9,7 @@
  *
  * @description
  * A container for a side menu, sibling to an directive.
- *
+ * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
  * @usage
  * <it-side-menu>
  * </it-side-menu>

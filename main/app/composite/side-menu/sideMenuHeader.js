@@ -8,6 +8,7 @@
  *
  * @description
  * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}
  *
  * @usage
  * <it-side-menu-header it-hide-button-menu="true | false">
