@@ -26,18 +26,19 @@
      </example>
  */
 IteSoft
-    .directive('itBottomGlue', ['$window',  function ($window) {
+    .directive('itBottomGlue', ['$window','$timeout',  function ($window,$timeout) {
     return function (scope, element) {
 
         function _onWindowsResize () {
+
             var currentElement = element[0];
             var elementToResize = angular.element(element)[0];
             var marginBottom = 0;
             var paddingBottom = 0;
             var  paddingTop = 0;
             var  marginTop =0;
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
 
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
                 var computedStyles = $window.getComputedStyle(currentElement);
                 var mbottom = parseInt(computedStyles['margin-bottom'], 10);
                 var pbottom = parseInt(computedStyles['padding-bottom'], 10);
@@ -52,22 +53,21 @@ IteSoft
 
             var elementProperties = $window.getComputedStyle(element[0]);
             var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-
             var elementToResizeContainer = elementToResize.getBoundingClientRect();
             element.css('height', ($window.innerHeight
-                - elementToResizeContainer.top -marginBottom -
+                - (elementToResizeContainer.top )-marginBottom -
                 (paddingBottom - elementPaddingBottom)
                 + 'px' ));
             element.css('overflow-y', 'auto');
         }
 
-        scope.$applyAsync(function(){
+        $timeout(function(){
             _onWindowsResize();
             var w = angular.element($window);
             w.bind('resize', function () {
                 _onWindowsResize();
             });
-        })
+        },250)
 
     };
 
