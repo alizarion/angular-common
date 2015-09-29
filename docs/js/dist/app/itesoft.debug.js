@@ -1459,6 +1459,7 @@ IteSoft
  * except it's styled differently.
  *
  *
+ *
  * @example
     <example module="itesoft">
         <file name="index.html">
@@ -1851,7 +1852,7 @@ IteSoft
  * @parent sideMenus
  *
  * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  * <img src="../dist/assets/img/collapsed-item.gif" alt="">
  * @usage
@@ -1913,7 +1914,7 @@ IteSoft
  * @restrict A
  *
  * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  *  <div class="jumborton ng-scope">
  *    <img src="../dist/assets/img/nav-active.gif" alt="">
@@ -1975,7 +1976,7 @@ IteSoft.
  *
  * @description
  * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  * @usage
  * <it-side-menu>
@@ -2011,7 +2012,7 @@ IteSoft
  *
  * @description
  * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  * @usage
  * <it-side-menu>
  * </it-side-menu>
@@ -2071,7 +2072,7 @@ IteSoft
  *
  * @description
  * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
  *
  * <table class="table">
  *  <tr>

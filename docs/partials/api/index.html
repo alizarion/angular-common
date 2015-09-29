@@ -119,7 +119,17 @@ Une fois votre composant testé, documenté et commité, il convient de mettre �
 </code></pre></li>
 <li><p>créer une branch pour votre hotfix à partir de develop.</p>
 <pre><code>      git checkout -b master-detail-hotfix develop
+
+                             ___ myfeature _ &lt;--  feature branch
+                            /
+                           /
+                  ________O______develop_______
+                 /
+                /
+               /___________________master_______
 </code></pre></li>
+</ul>
+<ul>
 <li><p>corriger, tester et commiter le correctif.</p>
 <pre><code>      git commit -a -m &quot;Correctif du bug blablab ...&quot;
 </code></pre></li>

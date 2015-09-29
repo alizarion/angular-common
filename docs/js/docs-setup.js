@@ -45,7 +45,7 @@ NG_DOCS={
       "shortName": "itCollapsedItem",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "Directive to collapse grouped item in &lt;it-side-menu&gt;.",
+      "shortDescription": "Directive to collapse grouped item in &lt;it-side-menus&gt;.",
       "keywords": "alt api class collapse directive gif grouped href it-collapsed-item it-menu-animated item itesoft nav nav-pills nav-stacked navbar-nav sidemenus src title"
     },
     {
@@ -135,7 +135,7 @@ NG_DOCS={
       "shortName": "itNavActive",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "Directive to set active view css class on side menu item &lt;it-side-menu&gt;.",
+      "shortDescription": "Directive to set active view css class on side menu item &lt;it-side-menus&gt;.",
       "keywords": "active alt api class content css directive fa fa-book fa-fw fa-home gif href html it-nav-active item itesoft jumborton list-group menu nav nav-pills nav-stacked navbar-nav ng-scope set side src tables typography view"
     },
     {
@@ -223,7 +223,7 @@ NG_DOCS={
       "js/dist/app/itesoft.debug.js"
     ],
     "styles": [
-      "css/dist/assets/fonts/main.min.css"
+      "css/dist/assets/fonts/itesoft-bundle.min.css"
     ],
     "title": "Itesoft Awesome Docs",
     "html5Mode": false,
@@ -247,6 +247,6 @@ NG_DOCS={
     "js/dist/app/itesoft.debug.js"
   ],
   "styles": [
-    "css/dist/assets/fonts/main.min.css"
+    "css/dist/assets/fonts/itesoft-bundle.min.css"
   ]
 };
