@@ -1,3 +1,5 @@
+$busy-indicator-background : $background;
+
 it-busy-indicator .mask-container {
   margin-top: -5px;
   position: fixed;
@@ -5,7 +7,7 @@ it-busy-indicator .mask-container {
   height: 100%;
   z-index: 900;
   opacity: 1;
-  background: #eee;
+  background: $busy-indicator-background;
 }
 
 it-busy-indicator .mask-loading-container {
@@ -14,14 +16,14 @@ it-busy-indicator .mask-loading-container {
   height: 100%;
   z-index: 900;
   opacity: 0.3;
-  background: #eee; /* Old browsers */
-  background: -moz-linear-gradient(top, #eee 0%, #eee 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #eee)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #eee 0%, #eee 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #eee 0%, #eee 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #eee 0%, #eee 100%); /* IE10+ */
-  background: linear-gradient(to bottom, #eee 0%, #eee 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
+  background: $busy-indicator-background; /* Old browsers */
+  background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
+  background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
+  //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
 }
 
 it-busy-indicator .main-loading-container {
@@ -37,12 +39,12 @@ it-busy-indicator .main-loading-container {
   border-radius: 5px;
   opacity: 0.8;
   padding: 20px;
-  background: #eee; /* Old browsers */
-  background: -moz-linear-gradient(top, #eee 0%, #eee 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #eee)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, #eee 0%, #eee 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, #eee 0%, #eee 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, #eee 0%, #eee 100%); /* IE10+ */
-  background: linear-gradient(to bottom, #eee 0%, #eee 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
+  background: $busy-indicator-background; /* Old browsers */
+  background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
+  background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
+  //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
 }
