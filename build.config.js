@@ -36,24 +36,26 @@ module.exports = {
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
-        'main/assets/css/itesoft.css',
-        'main/assets/css/material.css',
         'main/assets/lib/angular-ui-grid/ui-grid.css'
-
-
-
     ],
-    assetsDistFiles : [
-        '!main/assets/lib/**/*.js',
-        '!main/assets/lib/**/*.html',
-        '!main/assets/lib/**/*.md',
-        '!main/assets/lib/**/*.txt',
-        '!main/assets/lib/**/*.json',
-        '!main/assets/css/**/*',
-        '!main/assets/scss/**/*.scss',
-        '!main/assets/scss/**/*.less',
-        'main/assets/**/*'
+
+    assetsDistFiles :[
+        'main/assets/**/*.gif',
+        'main/assets/**/*.png',
+        'main/assets/**/*.jpg',
+        'main/assets/**/*.svg'
     ],
+
+
+    fontFiles :[
+        'main/assets/**/*.eot',
+        'main/assets/**/*.svg',
+        'main/assets/**/*.ttf',
+        'main/assets/**/*.otf',
+        'main/assets/**/*.woff',
+        'main/assets/**/*.woff2'
+    ],
+
     vendorJavascriptFiles: [
         'main/assets/lib/angular/angular.min.js',
         'main/assets/lib/angular-animate/angular-animate.min.js',
@@ -66,6 +68,5 @@ module.exports = {
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
         'main/assets/lib/angular-media-queries/match-media.js'
-
     ]
 };

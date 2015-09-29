@@ -7,7 +7,7 @@
  * @parent sideMenus
  *
  * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  * <img src="../dist/assets/img/collapsed-item.gif" alt="">
  * @usage

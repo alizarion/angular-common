@@ -8,7 +8,7 @@
  *
  * @description
  * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
  *
  * <table class="table">
  *  <tr>

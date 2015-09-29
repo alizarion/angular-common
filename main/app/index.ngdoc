@@ -164,6 +164,15 @@ Une fois votre composant testé, documenté et commité, il convient de mettre �
 
             git checkout -b master-detail-hotfix develop
 
+                                   ___ myfeature _ <--  feature branch
+                                  /
+                                 /
+                        ________O______develop_______
+                       /
+                      /
+                     /___________________master_______
+
+
 * corriger, tester et commiter le correctif.
 
             git commit -a -m "Correctif du bug blablab ..."

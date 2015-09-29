@@ -8,7 +8,7 @@
  *
  * @description
  * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenu `<it-side-menu>`}.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  * @usage
  * <it-side-menu>
