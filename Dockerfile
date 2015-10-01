@@ -1,17 +1,8 @@
-FROM eboraas/debian:stable
-MAINTAINER Ed Boraas <ed@boraas.ca>
+FROM centos:7
+MAINTAINER Selim <selim@openlinux.fr>
 
-RUN apt-get update && apt-get -y install apache2 && apt-get clean
+ENV container docker
 
-ENV APACHE_RUN_USER www-data
-ENV APACHE_RUN_GROUP www-data
-ENV APACHE_LOG_DIR /var/log/apache2
-
-RUN /bin/ln -sf ../sites-available/default-ssl /etc/apache2/sites-enabled/001-default-ssl
-RUN /bin/ln -sf ../mods-available/ssl.conf /etc/apache2/mods-enabled/
-RUN /bin/ln -sf ../mods-available/ssl.load /etc/apache2/mods-enabled/
-
+RUN yum -y install httpd; yum clean all; systemctl enable httpd.service
 EXPOSE 80
-EXPOSE 443
-
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+CMD ["/usr/sbin/init"]
