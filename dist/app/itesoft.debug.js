@@ -345,13 +345,16 @@ IteSoft
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-6 it-fill" >' +
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$itCol ? $itCol : 6}} it-fill" >' +
                 '<div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-6 it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$itCol ? $itCol : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
                 '<div class="it-watermark" >{{$itNoDetail}}</div>' +
-                '</div>'
+                '</div>',
+            link : function (scope, element, attrs ) {
+                scope.$itCol = attrs.itCol;
+            }
 
         }
     }]);
@@ -548,17 +551,18 @@ IteSoft
             scope : {
                 itMasterData : '=',
                 itLang:'=',
+                itCol:'=',
                 itMasterDetailControl:'=',
                 itLockOnChange: '=',
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
                 '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-move-columns class="it-master-detail-grid it-fill">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid  it-fill">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -964,6 +968,12 @@ IteSoft
 
                     },true);
 
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                        console.log('resize');
+                    },250);
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
 
@@ -1432,7 +1442,7 @@ IteSoft
                             '<div class="col-xs-12 col-md-12 pull-right">'+
                                 '<div>'+
                                     '<form>'+
-                                        '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-6 pull-right" >'+
+                                        '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
                                             '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
                                             '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
                                         '</div>'+
@@ -1807,6 +1817,7 @@ IteSoft
             var paddingBottom = 0;
             var  paddingTop = 0;
             var  marginTop =0;
+
 
             while(currentElement !== null && typeof currentElement !== 'undefined'){
                 var computedStyles = $window.getComputedStyle(currentElement);
