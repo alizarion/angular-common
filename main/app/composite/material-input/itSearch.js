@@ -29,6 +29,20 @@
  *
  * @example
      <example module="itesoft-showcase">
+         <file name="index.html">
+         <div ng-controller="SearchDemoControllerGrid">
+         <div class="container-fluid">
+         <div class="jumbotron">
+         <div class="row">
+         <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
+         <it-search it-placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" it-filter="filter()"></it-search>
+         <div ui-grid="latinGrid" id="latinGrid"></div>
+         </div>
+         </div>
+         </div>
+         </div>
+         </file>
+
          <file name="Module.js">
          angular.module('itesoft-showcase',['ngResource','itesoft']);
          </file>
@@ -38,7 +52,7 @@
                                                     return $resource('http://jsonplaceholder.typicode.com/posts');
                                                 }]);
          </file>
-         <file name="Controller1.js">
+         <file name="Controller.js">
          angular.module('itesoft-showcase')
          .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
                             $scope.searchControl = {};
@@ -85,19 +99,6 @@
                             };
                      }]);
          </file>
-         <file name="index.html">
-         <div ng-controller="SearchDemoControllerGrid">
-         <div class="container-fluid">
-             <div class="jumbotron">
-                 <div class="row">
-                    <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
-                    <it-search it-placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" it-filter="filter()"></it-search>
-                    <div ui-grid="latinGrid" id="latinGrid"></div>
-                 </div>
-             </div>
-         </div>
-         </div>
-         </file>
 
      </example>
 
@@ -135,7 +136,7 @@
                                             return $resource('http://jsonplaceholder.typicode.com/posts');
                                         }]);
          </file>
-         <file name="Controller2.js">
+         <file name="Controller1.js">
              angular.module('itesoft-showcase1')
              .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
                     $scope.searchControl = {};
@@ -185,7 +186,6 @@ IteSoft
             controller : ['$scope',
                 function ($scope) {
                     $scope.itSearchControl.filterText = "";
-
                     $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
                         var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
                         var renderableRowTable = [];
