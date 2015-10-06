@@ -12,8 +12,10 @@
  * This object will be used as following:
  * <table class="table">
  *  <tr>
- *   <td><code>searchControl.columnFields = { <br/> columnFields : ['field1', 'field2', 'field3']  <br/>}</code></td>
- *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.</td>
+ *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
+ *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
+ *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
+ *   </td>
  *  </tr>
  *  <tr>
  *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
@@ -58,7 +60,7 @@
          .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
                             $scope.searchControl = {};
                             $scope.searchControl = {
-                                columnFields : ['title', 'body']
+                                columnDefs : [{field:'title'}, {field:'body'}]
                             };
 
                             $scope.dataSource = [];
@@ -143,7 +145,7 @@
              .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
                     $scope.searchControl = {};
                     $scope.searchControl = {
-                        columnFields : ['title', 'body']
+                        columnDefs : [{field:'title'}, {field:'body'}]
                     };
 
                     $scope.dataSource = [];
@@ -192,13 +194,20 @@ IteSoft
                         var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
                         var renderableRowTable = [];
                         var table = false;
-                        if ($scope.itSearchControl.columnFields) {
+                        if ($scope.itSearchControl.columnDefs) {
                             renderableRows.forEach(function (row) {
                                 var match = false;
                                 if (row.entity) {//UI-GRID
-                                    $scope.itSearchControl.columnFields.forEach(function (field) {
-                                        if (row.entity[field] && row.entity[field].toString().match(matcher)) {
-                                            match = true;
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (row.entity[col.field]) {
+                                            var renderedData = row.entity[col.field].toString();
+                                            if (col.cellFilter) {
+                                                $scope.value = renderedData;
+                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
+                                            }
+                                            if (renderedData.match(matcher)) {
+                                                match = true;
+                                            }
                                         }
                                     });
                                     if (!match) {
@@ -207,9 +216,9 @@ IteSoft
                                 }
                                 else {//TABLE
                                     table = true;
-                                    $scope.itSearchControl.columnFields.forEach(function (field) {
-                                        if (row[field] && row[field].toString().match(matcher)) {
-                                                match = true;
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (row[col.field] && row[col.field].toString().match(matcher)) {
+                                            match = true;
                                         }
                                     });
                                     if (match) {
