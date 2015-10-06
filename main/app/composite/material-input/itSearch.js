@@ -28,6 +28,7 @@
  * </it-search>
  *
  * @example
+ * <span><b>SEARCH IN UI-GRID</b></span>
      <example module="itesoft-showcase">
          <file name="index.html">
          <div ng-controller="SearchDemoControllerGrid">
@@ -102,6 +103,7 @@
 
      </example>
 
+* <span><b>SEARCH IN TABLE</b></span>
      <example module="itesoft-showcase1">
          <file name="index.html">
              <div ng-controller="SearchDemoControllerTable">
