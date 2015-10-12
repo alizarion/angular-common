@@ -21,10 +21,10 @@ in addition to allowing popups with completely custom content and look.</p>
 </ul>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-service-page itesoft-service-itpopup-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-34" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-10" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-34" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
-<script type="text/ng-template" id="index.html-34">
+<pre class="prettyprint linenums" ng-set-text="index.html-10" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
+<script type="text/ng-template" id="index.html-10">
          <div ng-controller="PopupCtrl">
              <button class="btn btn-info" ng-click="showAlert()">
              Alert
@@ -45,109 +45,97 @@ in addition to allowing popups with completely custom content and look.</p>
 <div class="tab-pane" title="Controller.js">
 <pre class="prettyprint linenums" ng-set-text="Controller.js"></pre>
 <script type="text/ng-template" id="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+         angular.module('itesoft')
+         .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
 
-                    $scope.showAlert = function(){
-                        var alertPopup = itPopup.alert({
-                            title: "{{'POPUP_TITLE' | translate}}",
-                            text: "{{'POPUP_CONTENT' | translate}}"
-                        });
-                        alertPopup.then(function() {
-                           alert('alert callback');
-                        });
-                    };
+              $scope.showAlert = function(){
+                  var alertPopup = itPopup.alert({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}"
+                  });
+                  alertPopup.then(function() {
+                     alert('alert callback');
+                  });
+              };
 
-                    $scope.showConfirm = function(){
-                        var confirmPopup = itPopup.confirm({
-                            title: "{{'POPUP_TITLE' | translate}}",
-                            text: "{{'POPUP_CONTENT' | translate}}",
-                            buttons: [
-                                {
-                                    text:  'toto',
-                                    type:  'btn-info',
-                                    onTap: function() {
-                                        return false;
-                                    }
-                                },
-                                {
-                                    text: 'Cancel',
-                                    type: '',
-                                    onTap: function () {
-                                        return false;
-                                    }
-                                },
-                                {
-                                    text: 'TITI',
-                                    type: '',
-                                    onTap: function () {
-                                        return false;
-                                    }
-                                }
-                               ]
-                        });
-                        confirmPopup.then(function(res) {
-                            alert('confirm validate');
-                        },function(){
-                            alert('confirm canceled');
-                        });
-                    };
+              $scope.showConfirm = function(){
+                  var confirmPopup = itPopup.confirm({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      buttons: [
 
+                          {
+                              text: 'Cancel',
+                              type: '',
+                              onTap: function () {
+                                  return false;
+                              }
+                          },
+                          {
+                              text: 'ok',
+                              type: '',
+                              onTap: function () {
+                                  return true;
+                              }
+                          }
+                         ]
+                  });
+                  confirmPopup.then(function(res) {
 
+                      alert('confirm validate');
+                  },function(){
+                      alert('confirm canceled');
+                  });
+              };
 
-                $scope.showCustomConfirm = function(){
-                var confirmPopup = itPopup.confirm({
-                    title: 'My Custom title',
-                    text: "{{'POPUP_CONTENT' | translate}}",
-                    buttons: [
-                        {
-                            text:  'Custom reject btn',
-                            type:  'btn-info',
-                            onTap: function() {
-                                return false;
-                            }
-                        },
-                        {
-                            text: 'Custom resolve btn',
-                            type: '',
-                            onTap: function () {
-                                return true;
-                            }
-                        },
-                        {
-                            text: 'My third Button',
-                            type: 'btn-danger',
-                            onTap: function () {
-                                return true;
-                            }
-                        }
-                    ]
-                });
-                confirmPopup.then(function(res) {
-                    alert('confirm validate');
-                },function(){
-                    alert('confirm canceled');
-                });
-                };
+          $scope.data = {};
+          $scope.data.user =  '';
 
-                $scope.showPrompt = function(){
-                    var promptPopup = itPopup.prompt({
-                        title: "{{'POPUP_TITLE' | translate}}",
-                        text: "{{'POPUP_CONTENT' | translate}}",
-                        inputLabel : "{{'POPUP_LABEL' | translate}}",
-                        inputType: 'password'
-                    });
-                    promptPopup.then(function(data) {
-                        alert('prompt validate with value ' + data.response);
-                    },function(){
-                        alert('prompt canceled');
-                    });
-                };
+          $scope.showCustomConfirm = function(){
+          var confirmPopup = itPopup.confirm({
+              title: 'My Custom title',
+              scope: $scope,
+              text: '<h5 id="example_my-custom-html-content" id="example_source_my-custom-html-content">My custom html content</h5> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+              buttons: [{
+                      text: 'My Custom Action Button',
+                      type: 'btn-danger',
+                      onTap: function (scope,e) {
+                           console.log(scope.data );
+                           if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                e.preventDefault();
+                           }
+                          return true;
+                      }
+                  }
+              ]
+          });
+          confirmPopup.then(function(res) {
+             console.log(res);
+              alert('confirm validate');
+          },function(){
+              alert('confirm canceled');
+          });
+          };
 
-                }]);
-    </script>
+          $scope.showPrompt = function(){
+              var promptPopup = itPopup.prompt({
+                  title: "{{'POPUP_TITLE' | translate}}",
+                  text: "{{'POPUP_CONTENT' | translate}}",
+                  inputLabel : "{{'POPUP_LABEL' | translate}}",
+                  inputType: 'password'
+              });
+              promptPopup.then(function(data) {
+                  alert('prompt validate with value ' + data.response);
+              },function(){
+                  alert('prompt canceled');
+              });
+          };
+
+          }]);
+
+     </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-34" ng-eval-javascript="Controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-10" ng-eval-javascript="Controller.js"></div>
 </div></div>
 </div>

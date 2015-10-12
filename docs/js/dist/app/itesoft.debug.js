@@ -345,17 +345,13 @@ IteSoft
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$itCol ? $itCol : 6}} it-fill" >' +
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
                 '<div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$itCol ? $itCol : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
                 '<div class="it-watermark" >{{$itNoDetail}}</div>' +
-                '</div>',
-            link : function (scope, element, attrs ) {
-                scope.$itCol = attrs.itCol;
-            }
-
+                '</div>'
         }
     }]);
 
@@ -609,6 +605,7 @@ IteSoft
                         _self.unlockOnEquals = true;
                     }
 
+                    $scope.$parent.$masterCol = $scope.itCol;
                     ItemWrapper.prototype.unlockCurrent = function(){
                         this.hasChanged = false;
                         this.isWatched = false;
@@ -1806,7 +1803,8 @@ IteSoft
      </example>
  */
 IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',  function ($window,$timeout) {
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
     return function (scope, element) {
 
         function _onWindowsResize () {
@@ -1817,7 +1815,6 @@ IteSoft
             var paddingBottom = 0;
             var  paddingTop = 0;
             var  marginTop =0;
-
 
             while(currentElement !== null && typeof currentElement !== 'undefined'){
                 var computedStyles = $window.getComputedStyle(currentElement);
@@ -2441,107 +2438,95 @@ IteSoft
     <example module="itesoft">
 
         <file name="Controller.js">
-                 angular.module('itesoft')
-                 .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
 
-                        $scope.showAlert = function(){
-                            var alertPopup = itPopup.alert({
-                                title: "{{'POPUP_TITLE' | translate}}",
-                                text: "{{'POPUP_CONTENT' | translate}}"
-                            });
-                            alertPopup.then(function() {
-                               alert('alert callback');
-                            });
-                        };
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
 
-                        $scope.showConfirm = function(){
-                            var confirmPopup = itPopup.confirm({
-                                title: "{{'POPUP_TITLE' | translate}}",
-                                text: "{{'POPUP_CONTENT' | translate}}",
-                                buttons: [
-                                    {
-                                        text:  'toto',
-                                        type:  'btn-info',
-                                        onTap: function() {
-                                            return false;
-                                        }
-                                    },
-                                    {
-                                        text: 'Cancel',
-                                        type: '',
-                                        onTap: function () {
-                                            return false;
-                                        }
-                                    },
-                                    {
-                                        text: 'TITI',
-                                        type: '',
-                                        onTap: function () {
-                                            return false;
-                                        }
-                                    }
-                                   ]
-                            });
-                            confirmPopup.then(function(res) {
-                                alert('confirm validate');
-                            },function(){
-                                alert('confirm canceled');
-                            });
-                        };
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
 
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
 
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
 
-                    $scope.showCustomConfirm = function(){
-                    var confirmPopup = itPopup.confirm({
-                        title: 'My Custom title',
-                        text: "{{'POPUP_CONTENT' | translate}}",
-                        buttons: [
-                            {
-                                text:  'Custom reject btn',
-                                type:  'btn-info',
-                                onTap: function() {
-                                    return false;
-                                }
-                            },
-                            {
-                                text: 'Custom resolve btn',
-                                type: '',
-                                onTap: function () {
-                                    return true;
-                                }
-                            },
-                            {
-                                text: 'My third Button',
-                                type: 'btn-danger',
-                                onTap: function () {
-                                    return true;
-                                }
-                            }
-                        ]
-                    });
-                    confirmPopup.then(function(res) {
-                        alert('confirm validate');
-                    },function(){
-                        alert('confirm canceled');
-                    });
-                    };
+              $scope.data = {};
+              $scope.data.user =  '';
 
-                    $scope.showPrompt = function(){
-                        var promptPopup = itPopup.prompt({
-                            title: "{{'POPUP_TITLE' | translate}}",
-                            text: "{{'POPUP_CONTENT' | translate}}",
-                            inputLabel : "{{'POPUP_LABEL' | translate}}",
-                            inputType: 'password'
-                        });
-                        promptPopup.then(function(data) {
-                            alert('prompt validate with value ' + data.response);
-                        },function(){
-                            alert('prompt canceled');
-                        });
-                    };
+              $scope.showCustomConfirm = function(){
+              var confirmPopup = itPopup.confirm({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (scope,e) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    e.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              confirmPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
 
-                    }]);
-        </file>
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
          <file name="index.html">
              <div ng-controller="PopupCtrl">
                  <button class="btn btn-info" ng-click="showAlert()">
@@ -2563,7 +2548,7 @@ IteSoft
  */
 
 IteSoft
-    .factory('itPopup',['$modal','$modalStack','$rootScope','$q',function($modal,$modalStack,$rootScope,$q){
+    .factory('itPopup',['$modal','$modalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
                              '<h3 it-compile="options.title"></h3>'+
@@ -2572,7 +2557,7 @@ IteSoft
                             '<p it-compile="options.text"></p>'+
                          '</div>'+
                          '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)" it-compile="button.text"></button>'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button,$event)" it-compile="button.text"></button>'+
                          '</div>';
 
         var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
@@ -2586,7 +2571,7 @@ IteSoft
             '</div>'+
             '</div>'+
             '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button)" it-compile="button.text"></button>'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button,$event)" it-compile="button.text"></button>'+
             '</div>';
 
         var itPopup = {
@@ -2598,21 +2583,29 @@ IteSoft
         function _createPopup(options){
             var self = {};
             self.scope = (options.scope || $rootScope).$new();
+
             self.responseDeferred = $q.defer();
             self.scope.$buttonTapped= function(button, event) {
                 var result = (button.onTap || noop)(event);
                 self.responseDeferred.resolve(result);
             };
 
-            options =  angular.extend({
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
                 scope: self.scope,
                 template : MODAL_TPLS,
                 controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                    $scope.data={};
+                   // $scope.data = {};
                     $scope.itButtonAction= function(button, event) {
-                        var todo = (button.onTap || noop)(event);
+                        var todo = (button.onTap || _noop)($scope,event);
+
                         var result = todo;
-                        self.responseDeferred.resolve(result ? close() : cancel());
+                        if (!event.defaultPrevented) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
                     };
 
                     function close(){
@@ -2626,8 +2619,9 @@ IteSoft
             }, options || {});
 
             options.scope.options = options;
-            self.options = options;
 
+
+            self.options = options;
 
             return self;
 
@@ -2636,9 +2630,8 @@ IteSoft
         function _showPopup(options){
             $modalStack.dismissAll();
             var popup = _createPopup(options);
-            var popupPromise =  $modal.open(popup.options).result;
 
-            return popupPromise;
+            return  $modal.open(popup.options).result;
         }
 
         function _showAlert(opts){
