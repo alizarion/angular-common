@@ -83,17 +83,18 @@ IteSoft
             scope : {
                 itMasterData : '=',
                 itLang:'=',
+                itCol:'=',
                 itMasterDetailControl:'=',
                 itLockOnChange: '=',
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill" ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
                 '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-move-columns class="it-master-detail-grid it-fill">' +
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid  it-fill">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -140,6 +141,7 @@ IteSoft
                         _self.unlockOnEquals = true;
                     }
 
+                    $scope.$parent.$masterCol = $scope.itCol;
                     ItemWrapper.prototype.unlockCurrent = function(){
                         this.hasChanged = false;
                         this.isWatched = false;
@@ -499,6 +501,12 @@ IteSoft
 
                     },true);
 
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                        console.log('resize');
+                    },250);
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
 

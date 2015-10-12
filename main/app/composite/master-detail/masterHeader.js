@@ -47,7 +47,7 @@ IteSoft
                             '<div class="col-xs-12 col-md-12 pull-right">'+
                                 '<div>'+
                                     '<form>'+
-                                        '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-6 pull-right" >'+
+                                        '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
                                             '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
                                             '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
                                         '</div>'+

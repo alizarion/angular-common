@@ -26,7 +26,8 @@
      </example>
  */
 IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',  function ($window,$timeout) {
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
     return function (scope, element) {
 
         function _onWindowsResize () {
