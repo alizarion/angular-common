@@ -65,6 +65,11 @@
  *   <td><code>grid.appScope.itAppScope</code></td>
  *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
  *  </tr>
+ *
+ *   <tr>
+ *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
+ *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
+ *  </tr>
  * </table>
  *
  * ```html
@@ -87,7 +92,7 @@
          <file name="index.html">
              <div ng-controller="MasterDetailController">
                  <it-master-detail >
-                    <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
                  <it-master-header it-search-placeholder="Recherche" >
                  <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
                  <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>

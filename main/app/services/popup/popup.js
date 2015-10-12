@@ -68,6 +68,7 @@
               var confirmPopup = itPopup.confirm({
                   title: 'My Custom title',
                   scope: $scope,
+                  backdrop:false,
                   text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
                   buttons: [{
                           text: 'My Custom Action Button',
@@ -177,6 +178,7 @@ IteSoft
             options = angular.extend({
                 scope: self.scope,
                 template : MODAL_TPLS,
+
                 controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
                    // $scope.data = {};
                     $scope.itButtonAction= function(button, event) {
