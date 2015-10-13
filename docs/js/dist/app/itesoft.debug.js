@@ -968,7 +968,6 @@ IteSoft
                         var event = document.createEvent('Event');
                         event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
                         $window.dispatchEvent(event);
-                        console.log('resize');
                     },250);
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){

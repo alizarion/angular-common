@@ -242,12 +242,12 @@ gulp.task('assets', function() {
 /**
  * Push to github
  */
-//gulp.task('deploy', function(callback) {
-//    runSequence('build','docs','push',
-//        callback);
-//});
+gulp.task('deploy', function(callback) {
+    runSequence('build','docs','push',
+        callback);
+});
 
-gulp.task('deploy', function() {
+gulp.task('push', function() {
     return gulp.src(['!./node_modules/**/*','!./main/**/*','./**/*'])
         .pipe(ghPages());
 });
