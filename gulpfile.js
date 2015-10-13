@@ -164,7 +164,7 @@ gulp.task('docs', function () {
     var options = {
         html5Mode: false,
         styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.min.js'],
+        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'],
         loadDefaults: {
             angular:false,
             angularAnimate: false

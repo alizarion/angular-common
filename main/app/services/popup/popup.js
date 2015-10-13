@@ -65,7 +65,7 @@
               $scope.data.user =  '';
 
               $scope.showCustomConfirm = function(){
-              var confirmPopup = itPopup.confirm({
+              var customPopup = itPopup.custom({
                   title: 'My Custom title',
                   scope: $scope,
                   backdrop:false,
@@ -83,7 +83,7 @@
                       }
                   ]
               });
-              confirmPopup.then(function(res) {
+              customPopup.then(function(res) {
                  console.log(res);
                   alert('confirm validate');
               },function(){
@@ -158,7 +158,8 @@ IteSoft
         var itPopup = {
             alert : _showAlert,
             confirm :_showConfirm,
-            prompt : _showPromt
+            prompt : _showPromt,
+            custom : _showCustom
         };
 
         function _createPopup(options){
@@ -246,6 +247,12 @@ IteSoft
                         onTap: function() { return false; }
                     }]
             }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
         }
 
         function _showPromt(opts){
