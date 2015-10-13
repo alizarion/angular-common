@@ -2742,7 +2742,7 @@ IteSoft
                   buttons: [{
                           text: 'My Custom Action Button',
                           type: 'btn-danger',
-                          onTap: function (scope,e) {
+                          onTap: function (event,scope) {
                                console.log(scope.data );
                                if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
                                     e.preventDefault();
@@ -2851,10 +2851,10 @@ IteSoft
                 controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
                    // $scope.data = {};
                     $scope.itButtonAction= function(button, event) {
-                        var todo = (button.onTap || _noop)($scope,event);
+                        var todo = (button.onTap || _noop)(event,$scope);
 
                         var result = todo;
-                        if (!event.defaultPrevented) {
+                        if (!event.isDefaultPrevented()) {
                             self.responseDeferred.resolve(result ? close() : cancel());
                         }
                     };

@@ -56,7 +56,7 @@ module.exports = {
         'main/assets/**/*.woff2'
     ],
 
-    vendorJavascriptFiles: [
+    vendorJavascriptDistFiles: [
         'main/assets/lib/angular/angular.min.js',
         'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
@@ -67,6 +67,20 @@ module.exports = {
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
+        'main/assets/lib/angular-media-queries/match-media.js'
+    ],
+
+    vendorJavascriptDebugFiles: [
+        'main/assets/lib/angular/angular.js',
+        'main/assets/lib/angular-animate/angular-animate.js',
+        'main/assets/lib/angular-translate/angular-translate.js',
+        'main/assets/lib/angular-route/angular-route.js',
+        'main/assets/lib/angular-resource/angular-resource.js',
+        'main/assets/lib/angular-sanitize/angular-sanitize.js',
+        'main/assets/lib/angular-messages/angular-messages.js',
+        'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.js',
+        'main/assets/lib/google-code-prettify/bin/prettify.js',
+        'main/assets/lib/angular-ui-grid/ui-grid.js',
         'main/assets/lib/angular-media-queries/match-media.js'
     ]
 };

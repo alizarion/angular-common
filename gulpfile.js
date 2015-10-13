@@ -164,7 +164,7 @@ gulp.task('docs', function () {
     var options = {
         html5Mode: false,
         styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'],
+        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.min.js'],
         loadDefaults: {
             angular:false,
             angularAnimate: false
@@ -206,8 +206,12 @@ gulp.task('vendor', function() {
      .pipe(assets.restore())
      .pipe(useref())
      .pipe(gulp.dest('dist/assets/lib/')); **/
-    return gulp.src(buildConfig.vendorJavascriptFiles)
+    gulp.src(buildConfig.vendorJavascriptDistFiles)
         .pipe(concat('vendor.min.js'))
+
+        .pipe(gulp.dest('dist/assets/lib'));
+    gulp.src(buildConfig.vendorJavascriptDebugFiles)
+        .pipe(concat('vendor.debug.js'))
 
         .pipe(gulp.dest('dist/assets/lib'));
 });
@@ -265,7 +269,7 @@ gulp.task('watch', function() {
 gulp.task('test', function() {
 
     /**Ajout des fihcier de test **/
-    var allVendorFiles = buildConfig.vendorJavascriptFiles.slice();
+    var allVendorFiles = buildConfig.vendorJavascriptDistFiles.slice();
     allVendorFiles.push('./main/assets/lib/angular-mocks/angular-mocks.js');
     var allAppFiles = buildConfig.appFiles.slice();
     allAppFiles = _removeValueFromArray(allAppFiles,'!main/app/**/*Test.js');
