@@ -133,9 +133,8 @@ IteSoft
             scope: {
                 isBusy:'='
             },
-            template:   '<div class="mask-container" ng-show="isBusy"></div>' +
-                '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
                 '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude></ng-transclude>'
+                '<ng-transclude ng-show="!isBusy"></ng-transclude>'
         };
     }]);
