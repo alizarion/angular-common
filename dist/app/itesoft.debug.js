@@ -152,10 +152,9 @@ IteSoft
             scope: {
                 isBusy:'='
             },
-            template:   '<div class="mask-container" ng-show="isBusy"></div>' +
-                '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
                 '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude></ng-transclude>'
+                '<ng-transclude ng-show="!isBusy"></ng-transclude>'
         };
     }]);
 "use strict";
@@ -254,54 +253,6 @@ IteSoft
         }
     }]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- *
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
 "use strict";
 /**
  * @ngdoc directive
@@ -1459,71 +1410,6 @@ IteSoft
         }
 
     });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- *
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -1722,6 +1608,251 @@ IteSoft
             }
         }
 });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSearch
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
+ *
+ * You MUST pass an object `<input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ></input>`.
+ * This object will be used as following:
+ * <table class="table">
+ *  <tr>
+ *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
+ *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
+ *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
+ *   <td>Method to filter in the grid or table according the choosen column fields.<br/>It returns the new rows to be displayed.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.filterText</code></td>
+ *   <td>This property of the scope has to be associated to the input<br/>(through ng-model).</td>
+ *  </tr>
+ * </table>
+ * You MUST also pass a function `<input it-search ng-change="filter()"></input>`.
+ * This function should call searchControl.multicolumnsFilter() to refresh the displayed data and has to be written in the application controller.
+ *
+ * @usage
+ * <input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()">
+ * </input>
+ *
+ * @example
+ * <span><b>SEARCH IN UI-GRID</b></span>
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerGrid">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <div ui-grid="latinGrid" id="latinGrid"></div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService.js">
+ angular.module('itesoft-showcase')
+ .factory('Latin',['$resource', function($resource){
+                                                    return $resource('http://jsonplaceholder.typicode.com/posts');
+                                                }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
+                            $scope.searchControl = {
+                                columnDefs : [{field:'title'}, {field:'body'}]
+                            };
+
+                            $scope.dataSource = [];
+
+                            //---------------ONLY UI-GRID--------------------
+                            $scope.myDefs = [
+                                    {
+                                        field: 'id',
+                                        width: 50
+                                    },
+                                    {
+                                        field: 'title'
+                                    },
+                                    {
+                                        field: 'body'
+                                    }
+                            ];
+                            $scope.latinGrid = {
+                                data: 'dataSource',
+                                columnDefs: $scope.myDefs,
+                                onRegisterApi: function (gridApi) {
+                                    $scope.gridApi = gridApi;
+                                    $scope.gridApi.grid.registerRowsProcessor($scope.searchControl.multicolumnsFilter, 200);
+                                }
+                            };
+                            //---------------ONLY UI-GRID--------------------
+
+                            $scope.filter = function () {
+                                $scope.gridApi.grid.refresh();
+                            };
+
+                            $scope.loadDataGrid = function() {
+                                $scope.dataSource = [];
+
+                                Latin.query().$promise
+                                .then(function(data){
+                                    $scope.dataSource = data;
+                                });
+                            };
+                     }]);
+ </file>
+
+ </example>
+
+ * <span><b>SEARCH IN TABLE</b></span>
+ <example module="itesoft-showcase1">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerTable">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataTable()">DISPLAY DATA IN TABLE</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans TABLE" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <table class="table table-striped table-hover ">
+ <thead>
+ <tr><th>id</th><th>title</th><th>body</th></tr>
+ </thead>
+ <tbody>
+ <tr ng-repeat="dataItem in data">
+ <td>{{dataItem.id}}</td>
+ <td>{{dataItem.title}}</td>
+ <td>{{dataItem.body}}</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module1.js">
+ angular.module('itesoft-showcase1',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService1.js">
+ angular.module('itesoft-showcase1')
+ .factory('Latin1',['$resource', function($resource){
+                                            return $resource('http://jsonplaceholder.typicode.com/posts');
+                                        }]);
+ </file>
+ <file name="Controller1.js">
+ angular.module('itesoft-showcase1')
+ .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
+                    $scope.searchControl = {};
+                    $scope.searchControl = {
+                        columnDefs : [{field:'title'}, {field:'body'}]
+                    };
+
+                    $scope.dataSource = [];
+                    $scope.data = [];
+
+                    $scope.filter = function () {
+                        $scope.data = $scope.searchControl.multicolumnsFilter($scope.dataSource);
+                    };
+
+                    $scope.loadDataTable = function() {
+                        $scope.dataSource = [];
+                        $scope.data = [];
+
+                        Latin1.query().$promise
+                        .then(function(data){
+                           $scope.dataSource = data;
+                           $scope.data = data;
+                        });
+                    };
+             }]);
+ </file>
+
+ </example>
+ **/
+IteSoft
+    .directive('itSearch',function() {
+        return {
+            restrict: 'A',
+            replace : true,
+            scope: {
+                itSearchControl:'='
+            },
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+
+                input.after('<span class="glyphicon glyphicon-search form-control-feedback"/>');
+            },
+            controller : ['$scope',
+                function ($scope) {
+                    $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
+                        var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
+                        var renderableRowTable = [];
+                        var table = false;
+                        if ($scope.itSearchControl.columnDefs) {
+                            renderableRows.forEach(function (row) {
+                                var match = false;
+                                if (row.entity) {//UI-GRID
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row.entity[col.field]) {
+                                            var renderedData = row.entity[col.field].toString();
+                                            if (col.cellFilter) {
+                                                $scope.value = renderedData;
+                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
+                                            }
+                                            if(typeof renderedData !== 'undefined' && renderedData != null){
+                                                if (renderedData.match(matcher)) {
+                                                    match = true;
+                                                }
+                                            }
+                                        }
+                                    });
+                                    if (!match) {
+                                        row.visible = false;
+                                    }
+                                }
+                                else {//TABLE
+                                    table = true;
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row[col.field] && row[col.field].toString().match(matcher)) {
+                                            match = true;
+                                        }
+                                    });
+                                    if (match) {
+                                        renderableRowTable.push(row);
+                                    }
+                                }
+                            });
+                        }
+                        if (table){
+                            renderableRows = renderableRowTable;
+                        }
+                        return renderableRows;
+                    };
+                }]
+        }
+    });
 'use strict';
 /**
  * @ngdoc directive
@@ -1780,6 +1911,54 @@ IteSoft
             }
         }
 }]);
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -1855,6 +2034,71 @@ IteSoft
     };
 
 }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ *
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -2374,55 +2618,6 @@ IteSoft
     }]);
 
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- *
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 /**
  * @ngdoc service
@@ -2704,3 +2899,51 @@ IteSoft
         }
         return itPopup;
     }]);
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+

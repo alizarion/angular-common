@@ -149,6 +149,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itSearch",
+      "shortName": "itSearch",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.",
+      "keywords": "$promise $resource $scope angular api application apply associated attribute based body box btn btn-primary call cellfilter choosen class column columndefs columns component container-fluid controller controller1 dans data dataitem datasource defined directive displayed factory field field1 field2 field3 fields filter filtertext form-control form-group function grid gridapi has-feedback html http input inside it-search it-search-control itesoft itesoft-showcase itesoft-showcase1 js jumbotron latin latin1 latingrid latinservice latinservice1 loaddatagrid loaddatatable module module1 multicolonnes multicolumns multicolumnsfilter multiple mydefs ng-change ng-click ng-controller ng-model ng-repeat ngresource object onregisterapi pass passed placeholder property providing query recherche refresh registerrowsprocessor return returns row rows scope searchcontrol searchdemocontrollergrid searchdemocontrollertable searches single table table-hover table-striped text title type typicode ui-grid ui-grid-------------------- width written"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itSideMenu",
       "shortName": "itSideMenu",
       "type": "directive",
