@@ -217,7 +217,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "itesoft",
       "shortDescription": "The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.",
-      "keywords": "$modal $modalstack $q $rootscope $scope action addition alert alertpopup allowing allows angular api backdrop btn btn-danger btn-info btn-warning built button buttons callback cancel canceled class completely confirm confirmpopup console content continue controller creating custom data email example_my-custom-html-content false flexible floating-label form-control function functions html inputlabel inputtype it-input it-label itesoft itpopup js log module ng-click ng-controller ng-model ontap order password popup popup_content popup_label popup_title popupctrl popups preventdefault programmatically prompt promptpopup require required respond response return scope service showalert showconfirm showcustomconfirm showing showprompt support system text title translate true type undefined user users validate var versions windows"
+      "keywords": "$modal $modalstack $q $rootscope $scope action addition alert alertpopup allowing allows angular api backdrop btn btn-danger btn-info btn-warning built button buttons callback cancel canceled class completely confirm confirmpopup console content continue controller creating custom custompopup data email example_my-custom-html-content false flexible floating-label form-control function functions html inputlabel inputtype it-input it-label itesoft itpopup js log module ng-click ng-controller ng-model ontap order password popup popup_content popup_label popup_title popupctrl popups preventdefault programmatically prompt promptpopup require required respond response return scope service showalert showconfirm showcustomconfirm showing showprompt support system text title translate true type undefined user users validate var versions windows"
     }
   ],
   "apis": {
@@ -229,7 +229,7 @@ NG_DOCS={
     "scripts": [
       "js/marked.js",
       "js/dist/assets/lib/vendor.min.js",
-      "js/dist/app/itesoft.min.js"
+      "js/dist/app/itesoft.debug.js"
     ],
     "styles": [
       "css/dist/assets/fonts/itesoft-bundle.min.css"
@@ -253,7 +253,7 @@ NG_DOCS={
   "scripts": [
     "js/marked.js",
     "js/dist/assets/lib/vendor.min.js",
-    "js/dist/app/itesoft.min.js"
+    "js/dist/app/itesoft.debug.js"
   ],
   "styles": [
     "css/dist/assets/fonts/itesoft-bundle.min.css"
