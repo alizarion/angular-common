@@ -2745,7 +2745,7 @@ IteSoft
                           onTap: function (event,scope) {
                                console.log(scope.data );
                                if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    e.preventDefault();
+                                    event.preventDefault();
                                }
                               return true;
                           }
@@ -2807,7 +2807,7 @@ IteSoft
                             '<p it-compile="options.text"></p>'+
                          '</div>'+
                          '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button,$event)" it-compile="button.text"></button>'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
                          '</div>';
 
         var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
@@ -2821,7 +2821,7 @@ IteSoft
             '</div>'+
             '</div>'+
             '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction(button,$event)" it-compile="button.text"></button>'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
             '</div>';
 
         var itPopup = {
@@ -2836,7 +2836,7 @@ IteSoft
             self.scope = (options.scope || $rootScope).$new();
 
             self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(button, event) {
+            self.scope.$buttonTapped= function(event, button ) {
                 var result = (button.onTap || noop)(event);
                 self.responseDeferred.resolve(result);
             };
@@ -2851,7 +2851,7 @@ IteSoft
 
                 controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
                    // $scope.data = {};
-                    $scope.itButtonAction= function(button, event) {
+                    $scope.itButtonAction= function(event, button ) {
                         var todo = (button.onTap || _noop)(event,$scope);
 
                         var result = todo;
