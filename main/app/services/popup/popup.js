@@ -3,8 +3,8 @@
  * @ngdoc service
  * @name itesoft.service:itPopup
  * @module itesoft
- * @requires $modal
- * @requires $modalStack
+ * @requires $uibModal
+ * @requires $uibModalStack
  * @requires $rootScope
  * @requires $q
  *
@@ -129,7 +129,7 @@
  */
 
 IteSoft
-    .factory('itPopup',['$modal','$modalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
                              '<h3 it-compile="options.title"></h3>'+
