@@ -240,9 +240,8 @@ gulp.task('assets', function() {
 
 
 
-
 gulp.task('deploy', function() {
-    return gulp.src(['!./node_modules/**/*','!./main/**/*','./**/*'])
+    return gulp.src(['!./node_modules/**/*','!./main/**/*','!./*','./**/*'])
         .pipe(ghPages());
 });
 
