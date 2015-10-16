@@ -16,7 +16,7 @@ Cette librairie a pour objectif la mise en commun des composants (génériques) 
 
 [git](https://git-scm.com/downloads) avec prise en charge du prompt sous windows.
 
-[npm](https://www.npmjs.com/package/npm).
+[npm](https://www.npmjs.com/package/npm).  testé et validé avec la version [0.12.2 de nodejs](https://nodejs.org/dist/v0.12.2/).
 
 installer bower en globale :
 
