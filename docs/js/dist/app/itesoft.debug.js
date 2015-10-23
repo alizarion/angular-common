@@ -2027,7 +2027,7 @@ IteSoft
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itBottomGue
+ * @name itesoft.directive:itBottomGlue
  * @module itesoft
  * @restrict A
  *
@@ -2094,6 +2094,42 @@ IteSoft
                 _onWindowsResize();
             });
         },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:HelloWorld
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="controller.js">
+             angular.module('itesoft').controller('HelloCtrl',['$scope',function($scope){
+               console.log('hello');
+             }]);
+         </file>
+         <file name="index.html">
+           <div ng-controller='HelloCtrl'>
+             <hello-world></hello-world>
+            </div> 
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('helloWorld', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+
+       console.log('world');
 
     };
 

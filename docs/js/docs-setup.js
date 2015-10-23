@@ -14,8 +14,17 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itBottomGue",
-      "shortName": "itBottomGue",
+      "id": "itesoft.directive:HelloWorld",
+      "shortName": "HelloWorld",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple directive to fill height.",
+      "keywords": "$scope angular api console controller directive fill function height hello helloctrl html itesoft js log module ng-controller simple"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itBottomGlue",
+      "shortName": "itBottomGlue",
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "Simple directive to fill height.",
