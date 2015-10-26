@@ -582,12 +582,12 @@ IteSoft
 
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
                         ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" tabindex="-1" ' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
                         ' ng-checked="row.isSelected"></div>');
 
-                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="grid.appScope.$parent.currentItemWrapper.hasChanged ? \'return false\':headerButtonClick($event)">' +
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
                         '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" ng-model="grid.selection.selectAll"></div>');
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
 
                     function ItemWrapper(item){
                         var _self = this;
@@ -689,7 +689,8 @@ IteSoft
                     function _displayDetail(item) {
                         var deferred = $q.defer();
                         if($scope.$parent.currentItemWrapper != null){
-                            if($scope.$parent.currentItemWrapper.hasChanged){
+                            if($scope.$parent.currentItemWrapper.hasChanged &&
+                                $scope.itLockOnChange){
                                 deferred.reject('undo or save before change');
                                 return deferred.promise;
                             }
@@ -899,7 +900,8 @@ IteSoft
 
                     function confirmLeavePage(e) {
                         if($scope.$parent.currentItemWrapper!=null){
-                            if ( $scope.$parent.currentItemWrapper.hasChanged ) {
+                            if ( $scope.$parent.currentItemWrapper.hasChanged
+                                && !$scope.itLockOnChange ) {
                                 itPopup.alert( $scope.itMasterDetailControl.navAlert);
                                 e.preventDefault();
                             }
@@ -972,8 +974,7 @@ IteSoft
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
 
-                        if($scope.$parent.currentItemWrapper != null
-                            && $scope.itLockOnChange ){
+                        if($scope.$parent.currentItemWrapper != null ){
                             if(!$scope.$parent.currentItemWrapper.isWatched)
                             {
                                 $scope.$parent.currentItemWrapper.isWatched = true;
@@ -1369,10 +1370,12 @@ IteSoft
                     });
 
                     $scope.goToMaster = function(){
+
                         if($scope.mobile &&
                             (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
                                 &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
                                 itPopup.alert(  $scope.$$childHead.$navAlert);
                             } else {
                                 $scope.activeState = 'master';
@@ -2027,7 +2030,7 @@ IteSoft
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
+ * @name itesoft.directive:itBottomGue
  * @module itesoft
  * @restrict A
  *
@@ -2094,42 +2097,6 @@ IteSoft
                 _onWindowsResize();
             });
         },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:HelloWorld
- * @module itesoft
- * @restrict A
- *
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="controller.js">
-             angular.module('itesoft').controller('HelloCtrl',['$scope',function($scope){
-               console.log('hello');
-             }]);
-         </file>
-         <file name="index.html">
-           <div ng-controller='HelloCtrl'>
-             <hello-world></hello-world>
-            </div> 
-         </file>
-     </example>
- */
-IteSoft
-    .directive('helloWorld', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-
-       console.log('world');
 
     };
 
