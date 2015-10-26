@@ -438,7 +438,7 @@ IteSoft
                     function confirmLeavePage(e) {
                         if($scope.$parent.currentItemWrapper!=null){
                             if ( $scope.$parent.currentItemWrapper.hasChanged
-                                && !$scope.itLockOnChange ) {
+                                && $scope.itLockOnChange ) {
                                 itPopup.alert( $scope.itMasterDetailControl.navAlert);
                                 e.preventDefault();
                             }
