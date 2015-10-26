@@ -317,10 +317,12 @@ IteSoft
                     });
 
                     $scope.goToMaster = function(){
+
                         if($scope.mobile &&
                             (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
                                 &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
                                 itPopup.alert(  $scope.$$childHead.$navAlert);
                             } else {
                                 $scope.activeState = 'master';
