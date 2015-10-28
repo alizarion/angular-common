@@ -89,7 +89,7 @@ IteSoft
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+

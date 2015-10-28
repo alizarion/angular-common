@@ -104,9 +104,8 @@ $menu-header:                      50px !default;
   overflow-x: hidden;
   width: 100%;
   clear: both;
-  z-index: 0;
   display: block;
-  height: 100%;
+  min-height: 100%;
   background-color: $menu-bg;
 }
 

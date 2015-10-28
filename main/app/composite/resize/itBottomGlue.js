@@ -66,6 +66,7 @@ IteSoft
             _onWindowsResize();
             var w = angular.element($window);
             w.bind('resize', function () {
+                console.log('resize');
                 _onWindowsResize();
             });
         },250)
