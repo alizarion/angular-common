@@ -65,6 +65,108 @@ IteSoft
         }]);
     }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * print the encapsuled content into full screen modal popup
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code><it-modal-full-screen it-open-class="myCssClass"></code></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+         <it-modal-full-screen>
+             <div class="jumbotron" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit. Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window',
+        function( $timeout,$window) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-button "><button class="btn pull-right"  ng-if="$isModalOpen" ng-click="$closeModal()"><i class="fa fa-compress"></i></button>' +
+                ' <button class="btn pull-right"  ng-if="!$isModalOpen" ng-click="$openModal()"><i class="fa fa-expand"></i></button> </div>'+
+                '<div  class="it-modal-full-screen-content" ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        contentElement.css('z-index', _findHighestZIndex() +100 );
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                        contentElement.removeAttr( 'style' );
+                        contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    }
+                }
+            }
+        }]);
+
+
 "use strict";
 
 /**
@@ -345,7 +447,7 @@ IteSoft
             transclude: true,
             scope: false,
             template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
-                '<div class="it-fill" ng-transclude>' +
+                ' <div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
                 '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
@@ -398,7 +500,7 @@ IteSoft
             transclude: true,
             scope:false,
             template : '<div class="row it-fill">' +
-                '           <div class="col-md-12  it-fill" ng-transclude>'+
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
 
                             '</div>'+
                        '</div>'
@@ -552,7 +654,7 @@ IteSoft
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
@@ -901,7 +1003,7 @@ IteSoft
                     function confirmLeavePage(e) {
                         if($scope.$parent.currentItemWrapper!=null){
                             if ( $scope.$parent.currentItemWrapper.hasChanged
-                                && !$scope.itLockOnChange ) {
+                                && $scope.itLockOnChange ) {
                                 itPopup.alert( $scope.itMasterDetailControl.navAlert);
                                 e.preventDefault();
                             }
@@ -1167,24 +1269,28 @@ IteSoft
 
                  </it-detail-header>
                  <it-detail-content>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                     it-text="code"
-                     ng-model="currentItemWrapper.currentItem.code"
-                     name=""
-                     ng-required="true"/>
-                 </div>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                     it-text="description"
-                     ng-model="currentItemWrapper.currentItem.description" name=""/>
-                 </div>
-                 <div class="form-group">
-                 <input type="checkbox"
-                     it-toggle
-                     ng-model="currentItemWrapper.currentItem.enabledde"
-                     it-text="tete"/>
-                 </div>
+                 <it-modal-full-screen>
+                      <div class="row">
+                             <div class="form-group">
+                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+                                     it-text="code"
+                                     ng-model="currentItemWrapper.currentItem.code"
+                                     name=""
+                                     ng-required="true"/>
+                             </div>
+                             <div class="form-group">
+                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+                                 it-text="description"
+                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                             </div>
+                             <div class="form-group">
+                             <input type="checkbox"
+                                 it-toggle
+                                 ng-model="currentItemWrapper.currentItem.enabledde"
+                                 it-text="tete"/>
+                             </div>
+                    </div>
+                 </it-modal-full-screen>
                  </it-detail-content>
                  </it-detail>
                  </it-master-detail>
@@ -1322,7 +1428,7 @@ IteSoft
             restrict: 'EA',
             transclude : true,
             scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "><div class="it-fill row " ng-transclude></div></div>',
+            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
             controller : [
                 '$scope',
                 'screenSize',
@@ -2027,81 +2133,6 @@ IteSoft
         };
     }]);
 'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGue
- * @module itesoft
- * @restrict A
- *
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-            var w = angular.element($window);
-            w.bind('resize', function () {
-                _onWindowsResize();
-            });
-        },250)
-
-    };
-
-}]);
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itCollapsedItem
@@ -2284,7 +2315,7 @@ IteSoft
             transclude : true,
             scope : true,
             template :
-                '<div class="it-menu-content menu-animated" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
                 '</div>'
         }
@@ -2393,8 +2424,8 @@ IteSoft
             template :
                 '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
                     '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon  ">' +
-                            '<span class="menu-animated it-material-design-hamburger__layer  "> ' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
                             '</span>' +
                         '</button>' +
                     ' </section>' +
@@ -2506,6 +2537,81 @@ IteSoft
     }]);
 
 
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGue
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+            var w = angular.element($window);
+            w.bind('resize', function () {
+                _onWindowsResize();
+            });
+        },250)
+
+    };
+
+}]);
 'use strict';
 
 IteSoft

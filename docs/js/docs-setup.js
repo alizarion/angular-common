@@ -131,6 +131,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itModalFullScreen",
+      "shortName": "itModalFullScreen",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "print the encapsuled content into full screen modal popup",
+      "keywords": "ab adipisicing amet api assumenda autem blanditiis class consectetur content cupiditate default directive dolor dolores dolorum ea elit encapsuled expanded expedita fugiat full html inventore ipsum it-modal-background it-open-class itesoft jumbotron maxime modal module mycssclass pariatur popup praesentium print quas screen set sit table temporibus tenetur velit vitae"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itNavActive",
       "shortName": "itNavActive",
       "type": "directive",
