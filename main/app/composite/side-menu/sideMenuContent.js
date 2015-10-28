@@ -23,7 +23,7 @@ IteSoft
             transclude : true,
             scope : true,
             template :
-                '<div class="it-menu-content menu-animated" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
                 '</div>'
         }

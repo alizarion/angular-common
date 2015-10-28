@@ -5,6 +5,7 @@
   //Side menu
 "colors",
 "variables",
+"modal-full-screen",
 "nav-tabs",
 "side-menu",
 "master-detail",
@@ -12,7 +13,8 @@
 "busy-indicator";
 
 html {
-  padding-top : 70px;
+  padding-top : 60px;
+  height: 100%;
 }
 
 html, body {
@@ -44,3 +46,8 @@ input::-ms-clear {
   width: 100%;
   text-align: center;
 }
+
+.it-background {
+  background-color: $background;
+}
+

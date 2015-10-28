@@ -112,7 +112,7 @@ gulp.task('itesoft-css',function(done){
  * build bundle css file.
  */
 gulp.task('css-bundle',function(done){
-    gulp.src(['dist/assets/fonts/*.css','dist/assets/css/*.css'])
+    gulp.src(['dist/assets/fonts/vendor.min.css','dist/assets/css/*.css'])
         .pipe(concat('itesoft-bundle.css'))
         .pipe(rename({ extname: '.min.css' }))
         .pipe(gulp.dest('dist/assets/fonts'))

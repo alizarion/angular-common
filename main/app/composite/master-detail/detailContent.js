@@ -42,7 +42,7 @@ IteSoft
             transclude: true,
             scope:false,
             template : '<div class="row it-fill">' +
-                '           <div class="col-md-12  it-fill" ng-transclude>'+
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
 
                             '</div>'+
                        '</div>'
