@@ -9,15 +9,15 @@
  *
  * <table class="table">
  *  <tr>
- *   <td><code><it-modal-full-screen it-open-class="myCssClass"></code></td>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
  *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
  *  </tr>
  * <tr>
- *   <td><code><it-modal-full-screen it-escape-key="27"></code></td>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
  *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
  *  </tr>
  * <tr>
- *   <td>it-z-index="700"</td>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
  *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
  *  </tr>
  *  </table>

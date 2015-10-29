@@ -64,9 +64,7 @@ IteSoft
 
         $timeout(function(){
             _onWindowsResize();
-            var w = angular.element($window);
-            w.bind('resize', function () {
-                console.log('resize');
+            $window.addEventListener('resize', function () {
                 _onWindowsResize();
             });
         },250)
