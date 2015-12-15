@@ -91,12 +91,15 @@ IteSoft
  * @example
  <example module="itesoft">
      <file name="index.html">
-         <it-modal-full-screen  >
-             <div class="jumbotron" >Lorem ipsum dolor sit amet,
+
+        <div style="height:500px">
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
              consectetur adipisicing elit. Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
              ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
              </div>
          </it-modal-full-screen>
+        </div>
      </file>
 
  </example>
@@ -122,11 +125,15 @@ IteSoft
             }
 
             var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
                 '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-                '<button class="btn pull-right" ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
                 '</div>'+
+
                 '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
                 ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
                 '</div>'+
                 '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
                 '</div>';
@@ -472,11 +479,15 @@ IteSoft
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
+                '   ng-if="currentItemWrapper.currentItem" ' +
+                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
                 ' <div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
+                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
+                'ng-if="!currentItemWrapper.currentItem">' +
                 '<div class="it-watermark" >{{$itNoDetail}}</div>' +
                 '</div>'
         }
@@ -684,8 +695,8 @@ IteSoft
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
-                '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid  it-fill">' +
+                '<div class="col-md-12 it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -1296,26 +1307,24 @@ IteSoft
                  </it-detail-header>
                  <it-detail-content>
                  <it-modal-full-screen>
-                      <div class="row">
                              <div class="form-group">
                                  <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                     it-text="code"
+                                     it-label="code"
                                      ng-model="currentItemWrapper.currentItem.code"
                                      name=""
                                      ng-required="true"/>
                              </div>
                              <div class="form-group">
                              <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                 it-text="description"
+                                 it-label="description"
                                  ng-model="currentItemWrapper.currentItem.description" name=""/>
                              </div>
                              <div class="form-group">
                              <input type="checkbox"
                                  it-toggle
                                  ng-model="currentItemWrapper.currentItem.enabledde"
-                                 it-text="tete"/>
+                                 it-label="tete"/>
                              </div>
-                    </div>
                  </it-modal-full-screen>
                  </it-detail-content>
                  </it-detail>
@@ -1649,7 +1658,7 @@ IteSoft
  *              ng-minlength="5"
  *              ng-maxlength="10"
  *              required=""
- *              it-text="Email"
+ *              it-label="Email"
  *              ng-model="user.email">
  *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
          *            <div class="form-error" ng-message="required">This field is required.</div>
@@ -1664,10 +1673,10 @@ IteSoft
             <div ng-controller="HomeCtrl">
                <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
                 <div class="form-group">
-                        <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
                 </div>
                 <div class="form-group">
-                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-text="Prénom" name="Prenom" ng-model="user.firstName">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
                 </div>
                   <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
                       <div class="form-error" ng-message="required">This field is required.</div>
@@ -2162,7 +2171,7 @@ IteSoft
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itBottomGue
+ * @name itesoft.directive:itBottomGlue
  * @module itesoft
  * @restrict A
  *
@@ -2189,7 +2198,6 @@ IteSoft
     .directive('itBottomGlue', ['$window','$timeout',
         function ($window,$timeout) {
     return function (scope, element) {
-
         function _onWindowsResize () {
 
             var currentElement = element[0];
@@ -2224,9 +2232,9 @@ IteSoft
 
         $timeout(function(){
             _onWindowsResize();
-            $window.addEventListener('resize', function () {
-                _onWindowsResize();
-            });
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
         },250)
 
     };
