@@ -41,11 +41,15 @@ IteSoft
             require: '^itMasterDetail',
             transclude: true,
             scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"   ng-if="currentItemWrapper.currentItem"  class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
+                '   ng-if="currentItemWrapper.currentItem" ' +
+                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
                 ' <div class="it-fill" ng-transclude>' +
                 '</div>' +
                 '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ng-if="!currentItemWrapper.currentItem">' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
+                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
+                'ng-if="!currentItemWrapper.currentItem">' +
                 '<div class="it-watermark" >{{$itNoDetail}}</div>' +
                 '</div>'
         }

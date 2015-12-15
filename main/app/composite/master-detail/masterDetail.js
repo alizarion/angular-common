@@ -115,26 +115,24 @@
                  </it-detail-header>
                  <it-detail-content>
                  <it-modal-full-screen>
-                      <div class="row">
                              <div class="form-group">
                                  <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                     it-text="code"
+                                     it-label="code"
                                      ng-model="currentItemWrapper.currentItem.code"
                                      name=""
                                      ng-required="true"/>
                              </div>
                              <div class="form-group">
                              <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                 it-text="description"
+                                 it-label="description"
                                  ng-model="currentItemWrapper.currentItem.description" name=""/>
                              </div>
                              <div class="form-group">
                              <input type="checkbox"
                                  it-toggle
                                  ng-model="currentItemWrapper.currentItem.enabledde"
-                                 it-text="tete"/>
+                                 it-label="tete"/>
                              </div>
-                    </div>
                  </it-modal-full-screen>
                  </it-detail-content>
                  </it-detail>

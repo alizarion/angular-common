@@ -35,7 +35,8 @@ $modal-full-screen-animation : $animation-speed;
 }
 
 .it-modal-full-screen-content {
-  clear: both;
+  padding-top: 40px;
+
 }
 
 .it-modal-full-screen:hover .it-modal-full-screen-button .btn {
@@ -73,10 +74,37 @@ $modal-full-screen-animation : $animation-speed;
   right:  0;
   bottom:  0;
   padding: 10px;
+  overflow: auto;
  /* transition  : all $animation-speed ease-in-out;*/
 }
 
-.it-modal-full-screen-button .btn {
-  margin: 0;
+ .btn {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -ms-transition: none !important;
+  -o-transition: none !important;
+  -webkit-transition-duration: none;
+  -moz-transition-duration: none;
+  -ms-transition-duration: none;
+  -o-transition-duration: none;
+  transition-duration: none;
+  -webkit-transition-timing-function: none;
+  -moz-transition-timing-function: none;
+  -ms-transition-timing-function: none;
+  -o-transition-timing-function: none;
+  transition-timing-function: none;
+  -webkit-transition-delay: 0;
+  -moz-transition-delay: 0;
+  -ms-transition-delay: 0;
+  transition-delay: 0;
+  -webkit-transition-timing-function: none !important;
+  -moz-transition-timing-function: none !important;
+  -ms-transition-timing-function: none !important;
+  -o-transition-timing-function: none !important;
+  transition-timing-function: none !important;
+}
+
+.it-modal-full-screen-header {
+ float: right;
 }
 

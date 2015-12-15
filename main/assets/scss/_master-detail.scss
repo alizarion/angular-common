@@ -1,10 +1,10 @@
 $slide-speed : 230ms;
 
 it-master-detail .it-master-detail-container {
-  overflow: hidden;
+  overflow: hidden !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
-  min-height: 300px;
+  min-height: 400px !important;
 }
 
 it-master-header .it-master-filter {
@@ -72,6 +72,7 @@ it-detail-header .it-material-design-hamburger__icon--to-arrow{
 
 .it-master .it-master-grid{
   padding-top: 115px;
+  min-height: 300px;
 }
 
 it-master-header .fuild-container{
@@ -567,6 +568,11 @@ it-master-header .it-master-header-search-group {
   margin: 0;
   padding: 0;
 }
+
+it-master .ui-grid-render-container-body .ui-grid-viewport {
+  min-height: 200px;
+}
+
 .it-master .ui-grid {
   border: 0px solid #d0d0d0;
   box-sizing: content-box;

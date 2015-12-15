@@ -24,12 +24,15 @@
  * @example
  <example module="itesoft">
      <file name="index.html">
-         <it-modal-full-screen  >
-             <div class="jumbotron" >Lorem ipsum dolor sit amet,
+
+        <div style="height:500px">
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
              consectetur adipisicing elit. Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
              ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
              </div>
          </it-modal-full-screen>
+        </div>
      </file>
 
  </example>
@@ -55,11 +58,15 @@ IteSoft
             }
 
             var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
                 '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-                '<button class="btn pull-right" ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
                 '</div>'+
+
                 '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
                 ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
                 '</div>'+
                 '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
                 '</div>';

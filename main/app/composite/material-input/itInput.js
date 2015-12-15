@@ -20,7 +20,7 @@
  *              ng-minlength="5"
  *              ng-maxlength="10"
  *              required=""
- *              it-text="Email"
+ *              it-label="Email"
  *              ng-model="user.email">
  *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
          *            <div class="form-error" ng-message="required">This field is required.</div>
@@ -35,10 +35,10 @@
             <div ng-controller="HomeCtrl">
                <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
                 <div class="form-group">
-                        <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
                 </div>
                 <div class="form-group">
-                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-text="Prénom" name="Prenom" ng-model="user.firstName">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
                 </div>
                   <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
                       <div class="form-error" ng-message="required">This field is required.</div>

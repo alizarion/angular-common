@@ -2,7 +2,7 @@
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itBottomGue
+ * @name itesoft.directive:itBottomGlue
  * @module itesoft
  * @restrict A
  *
@@ -29,7 +29,6 @@ IteSoft
     .directive('itBottomGlue', ['$window','$timeout',
         function ($window,$timeout) {
     return function (scope, element) {
-
         function _onWindowsResize () {
 
             var currentElement = element[0];
@@ -64,9 +63,9 @@ IteSoft
 
         $timeout(function(){
             _onWindowsResize();
-            $window.addEventListener('resize', function () {
-                _onWindowsResize();
-            });
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
         },250)
 
     };
