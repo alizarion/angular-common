@@ -208,7 +208,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
-      "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
+      "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model switch toggle type"
     },
     {
       "section": "api",
