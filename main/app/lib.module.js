@@ -14,5 +14,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid.selection',
     'ui.grid.autoResize',
     'ui.grid.resizeColumns',
-    'ui.grid.moveColumns'
+    'ui.grid.moveColumns',
+    'ngToast'
 ]);
