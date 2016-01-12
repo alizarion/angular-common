@@ -19,5 +19,8 @@
     "angular-media-queries": "0.4.1",
     "angular-messages": "1.4.7",
     "angular-mocks": "1.4.7"
+  },
+  "dependencies": {
+    "ngToast": "1.5.6"
   }
 }

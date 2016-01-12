@@ -36,7 +36,10 @@ module.exports = {
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
-        'main/assets/lib/angular-ui-grid/ui-grid.css'
+        'main/assets/lib/angular-ui-grid/ui-grid.css',
+        'main/assets/lib/ngToast/dist/ngToast.min.css',
+        'main/assets/lib/ngToast/dist/ngToast-animations.min.css'
+
     ],
 
     assetsDistFiles :[
@@ -67,7 +70,8 @@ module.exports = {
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
-        'main/assets/lib/angular-media-queries/match-media.js'
+        'main/assets/lib/angular-media-queries/match-media.js',
+        'main/assets/lib/ngToast/dist/ngToast.min.js'
     ],
 
     vendorJavascriptDebugFiles: [
