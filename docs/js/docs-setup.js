@@ -135,8 +135,8 @@ NG_DOCS={
       "shortName": "itModalFullScreen",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "print the encapsuled content into full screen modal popup test",
-      "keywords": "ab action adipisicing amet api assumenda autem blanditiis class close consectetur content cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expedita fugiat full height highest html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft jumbotron key keyboard mapping maxime modal module mycssclass pariatur popup praesentium print quas screen set sit style table temporibus tenetur test velit view vitae z-index"
+      "shortDescription": "print the encapsuled content into full screen modal popup",
+      "keywords": "ab action adipisicing amet api assumenda autem blanditiis class close consectetur content cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expedita fugiat full height highest html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft jumbotron key keyboard mapping maxime modal module mycssclass pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
     },
     {
       "section": "api",
