@@ -59,15 +59,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itDemo",
-      "shortName": "itDemo",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "my cool demo .",
-      "keywords": "api cool demo directive ea html it-message itesoft module test"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itDetail",
       "shortName": "itDetail",
       "type": "directive",
