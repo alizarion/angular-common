@@ -59,6 +59,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itDemo",
+      "shortName": "itDemo",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "my cool demo .",
+      "keywords": "api cool demo directive ea html it-message itesoft module test"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itDetail",
       "shortName": "itDetail",
       "type": "directive",
@@ -149,6 +158,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itNotifier",
+      "shortName": "itNotifier",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple notifier service, that display toasters.",
+      "keywords": "$emit $locationchangesuccess $log $rootscope $scope action adaptation add angular animation api attribute bad bad_request behavior boolean bottom bounds btn btn-danger btn-info btn-success btn-warning button center change class classes classname click close code compilecontent compliant config configure content controller counter css current decribes default defaultoptions detail details directive disable dismiss dismissbutton dismissonclick dismissonevent dismissontimeout display don empty enabled error errordetail errordetails event events example fade false final function happened horizontalposition html incomplete_object info injecting internal_error internal_server_error itesoft itnotifier itnotifierevent js left location log malformed_object message method methods modifying module ng-click ng-controller ngtoast ngtoastprovider notifier notifierctrl notifydismiss notifyerror notifyinfo notifysuccess number object openning options orginial original override parent pass personalise popup popups position precede production-- purposes received remove request result scope server service setting settings showerror showerroronevent showinfo showsuccess showsuccessevent showwarningonevent simple specific status string style success table time timeout toast toaster toasters top true trusted type unique unlimined values var verticalposition wanna warn warning ways"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itPrettyprint",
       "shortName": "itPrettyprint",
       "type": "directive",
@@ -208,7 +226,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
-      "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model switch toggle type"
+      "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
     },
     {
       "section": "api",
