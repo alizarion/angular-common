@@ -5,7 +5,7 @@
  * @restrict EA
  *
  * @description
- * print the encapsuled content into full screen modal popup
+ * print the encapsuled content into full screen modal popup. 42
  *
  * <table class="table">
  *  <tr>
@@ -24,11 +24,10 @@
  * @example
  <example module="itesoft">
      <file name="index.html">
-
-        <div style="height:500px">
+        <div konami style="height:500px">
          <it-modal-full-screen  class="it-fill">
              <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-             consectetur adipisicing elit. Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
              ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
              </div>
          </it-modal-full-screen>
