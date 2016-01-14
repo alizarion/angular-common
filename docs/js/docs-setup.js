@@ -135,8 +135,8 @@ NG_DOCS={
       "shortName": "itModalFullScreen",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "print the encapsuled content into full screen modal popup",
-      "keywords": "ab action adipisicing amet api assumenda autem blanditiis class close consectetur content cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expedita fugiat full height highest html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft jumbotron key keyboard mapping maxime modal module mycssclass pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
+      "shortDescription": "print the encapsuled content into full screen modal popup. 42",
+      "keywords": "ab action adipisicing amet api assumenda autem blanditiis class close consectetur content cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expedita fugiat full height highest html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft jumbotron key keyboard konami mapping maxime modal module mycssclass pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
     },
     {
       "section": "api",
@@ -209,6 +209,15 @@ NG_DOCS={
       "moduleName": "itesoft",
       "shortDescription": "A container element for side menu(s) and the main content. Allows the left and/or right side menu",
       "keywords": "active add allows api area center child class container content directive directives dragging eca element elements encompass href html it-animate it-button-menu it-collapsed-item it-hide-button-menu it-menu-animated it-nav-active itesoft left list-group main menu menus module nav nav-pills nav-stacked navbar-nav parent plunker side toggled true"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itSidePanel",
+      "shortName": "itSidePanel",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Directive that create side panel.",
+      "keywords": "api create directive itesoft panel side"
     },
     {
       "section": "api",
