@@ -212,21 +212,21 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itSidePanel",
-      "shortName": "itSidePanel",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "Directive that create side panel.",
-      "keywords": "api create directive itesoft panel side"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itToggle",
       "shortName": "itToggle",
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
       "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:rowHeight",
+      "shortName": "rowHeight",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple Stylesheet class to manage height like bootstrap row.",
+      "keywords": "adaptation api background-color bootstrap class col-md-3 css define directive div example height html it-fill itesoft manage module parent parts pixel production-- purposes rgba row row-height-1 row-height-10 row-height-2 row-height-3 row-height-4 row-height-5 simple solid split style stylesheet white"
     },
     {
       "section": "api",
