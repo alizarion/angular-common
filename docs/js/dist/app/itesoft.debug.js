@@ -337,7 +337,7 @@ IteSoft
             },
             template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
                 '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy"></ng-transclude>'
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
         };
     }]);
 "use strict";
