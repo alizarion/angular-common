@@ -146,8 +146,8 @@ IteSoft
                     }
                 });
 
-                // wait key input
-                input.on('key change', function() {
+                // wait for input
+                input.on('change', function() {
                     if (input.val() === null || input.val() == "undefined" || input.val() === "") {
                         input.addClass('empty');
                     } else {
