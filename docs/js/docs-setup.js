@@ -212,6 +212,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itSidePanel",
+      "shortName": "itSidePanel",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Directive that create side panel.",
+      "keywords": "api create directive itesoft panel side"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itToggle",
       "shortName": "itToggle",
       "type": "directive",
