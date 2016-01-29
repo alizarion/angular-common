@@ -216,8 +216,35 @@ NG_DOCS={
       "shortName": "itSidePanel",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "Directive that create side panel.",
-      "keywords": "api create directive itesoft panel side"
+      "shortDescription": "A container element for side panel and its Header, Content and Footer",
+      "keywords": "ab adipisicing alias aliquam amet aperiam api applied assumenda aut autem auto awesome background-color bar beatae blanditiis bootstrap btn btn-default btn-success button center class columns commodi consectetur container content covers css culpa cum cumque custom debitis default delectus deserunt dignissimos directive display div dolor dolorem ducimus element elements eligendi elit enim equal eveniet explicabo fa-star-o facilis font footer full greater harum header height hic highest html icon icons illo illum ipsam ipsum it-col it-height-mode it-icon-class it-side-panel-button it-side-panel-footer it-z-index itesoft iusto laboriosam lorem magnam margin minus mode module molestias neque nesciunt nobis officia officiis optio panel panel-- perspiciatis provident quaerat quas qui quisquam red rem repellendus repudiandae rerum saepe sapiente scroll set side similique sit site smaller soluta suscipit table table-cell tempora tempore temporibus tenetur text-align totam unde undefined vel velit veritatis vertical-align view voluptas width window z-index"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itSidePanelContent",
+      "shortName": "itSidePanelContent",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "A container for a Side Panel content, sibling to an directive.",
+      "keywords": "api container content directive itesoft panel sibling side"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itSidePanelFooter",
+      "shortName": "itSidePanelFooter",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "A container for a Side Panel footer, sibling to an directive.",
+      "keywords": "api container directive footer itesoft panel sibling side"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itSidePanelHeader",
+      "shortName": "itSidePanelHeader",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "A container for a Side Panel header, sibling to an directive.",
+      "keywords": "api container directive header itesoft panel sibling side"
     },
     {
       "section": "api",
