@@ -80,22 +80,22 @@
  * @example
  <example module="itesoft">
  <file name="custom.css">
-     .it-side-panel-button {
+     .it-side-panel-container .it-side-panel-button {
         background-color: red;
      }
 
-     .it-side-panel-footer {
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
         text-align: center;
         display: table;
         width: 100%;
-    }
+     }
 
-     .it-side-panel-footer div{
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
         display: table-cell;
         vertical-align:middle;
-    }
+     }
 
-     .it-side-panel-footer .btn {
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
         margin:0px;
      }
 
@@ -159,7 +159,7 @@ IteSoft
             transclude: true,
             controller: '$sidePanelCtrl',
             template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-show\': showPanel,\'col-md-0\': !showPanel}">' +
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
                 '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
                     '<span class="fa {{itIconClass}}"></span>' +
                 '</div>'+
