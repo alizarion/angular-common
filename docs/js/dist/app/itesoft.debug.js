@@ -20,54 +20,6 @@ var IteSoft = angular.module('itesoft', [
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- *
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-/**
- * @ngdoc directive
  * @name itesoft.directive:itModalFullScreen
  * @module itesoft
  * @restrict EA
@@ -199,6 +151,54 @@ IteSoft
             }
         }]);
 
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
 
 "use strict";
 
@@ -1784,8 +1784,8 @@ IteSoft
                     }
                 });
 
-                // wait key input
-                input.on('key change', function() {
+                // wait for input
+                input.on('change', function() {
                     if (input.val() === null || input.val() == "undefined" || input.val() === "") {
                         input.addClass('empty');
                     } else {
@@ -3558,7 +3558,11 @@ IteSoft
  *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
  * </tr>
  * </table>
- *  For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
+ * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
+ *
+ * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
+ * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
+ *
  *
  * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
  *
@@ -3615,7 +3619,11 @@ IteSoft
                         horizontalPosition: 'right',
                         verticalPosition: 'bottom',
                         compileContent: true,
-                        dismissOnClick: false
+                        dismissOnClick: false,
+                        success:{dismissOnClick: true},//optional overload behavior toast success
+                        info:{dismissOnClick: true},//optional overload behavior toast info
+                        error:{dismissOnTimeout: true},//optional overload behavior toast error
+                        warning:{dismissOnTimeout: true}//optional overload behavior toast warning
                     };
                     ngToast.configure(defaultOptions);
                 }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
@@ -3742,28 +3750,31 @@ IteSoft.service('itNotifier', ['ngToast', '$rootScope','$log', function (ngToast
 
     // method declaration
     itNotifier.notifySuccess= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options);
+            var localOptions = angular.extend(ngToast.settings, options,options.success);
             ngToast.success(localOptions);
             if(errorDetails != undefined) {
                 $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
             }
         };
     itNotifier.notifyError= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options);
+            var localOptions = angular.extend(ngToast.settings, options, options.error);
+
             ngToast.danger(localOptions);
             if(errorDetails != undefined) {
                 $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
             }
         };
     itNotifier.notifyInfo= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options);
+            var localOptions = angular.extend(ngToast.settings, options, options.info);
+
             ngToast.info(localOptions);
             if(errorDetails != undefined) {
                 $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
             }
         };
     itNotifier.notifyWarning= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options);
+            var localOptions = angular.extend(ngToast.settings, options, options.warning);
+
             ngToast.warning(localOptions);
             if(errorDetails != undefined) {
                 $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
