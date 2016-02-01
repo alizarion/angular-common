@@ -78,34 +78,42 @@ IteSoft
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
 
                 if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-                    var newHeight = (_self.scope.windowHeight-sidePanelContainer[0].getBoundingClientRect().top);
 
-                    sidePanelContainer.css('height', newHeight + 'px');
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+                    $log.debug("top = ", top);
+                    $log.debug("_self.scope.windowHeight = ", _self.scope.windowHeight);
+                    if(Math.abs(top) < _self.scope.windowHeight){
 
-                    var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                    sidePanel.css('height', newHeight+'px');
+                        var newHeight = (_self.scope.windowHeight-top);
 
-                    var heightHeader = (newHeight*0.10);
-                    var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                    sidePanelHeader.css('height',heightHeader+'px');
+                        sidePanelContainer.css('height', newHeight + 'px');
 
-                    var heightFooter = (newHeight*0.10);
-                    var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                    sidePanelFooter.css('height',heightFooter+'px');
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', newHeight+'px');
 
-                    var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                    sidePanelContent.css('height', (newHeight*0.8)+'px');
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
 
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
                 }
 
 
                 if(_self.scope.showPanel){
+                    $log.debug(" in watch => show panel");
                     var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
                     _self.scope.sidePanelContainerWidth = newWidth;
                     sidePanelContainer.css('width', newWidth + 'px');
                 //if its the firt time initialise all components width an right
                 }else {
-                    _self.scope.modifySidePanelCssProperties(true);
+                    _self.scope.modifySidePanelCssProperties();
                 }
 
             }, true);
