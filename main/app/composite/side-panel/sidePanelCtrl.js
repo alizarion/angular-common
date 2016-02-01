@@ -80,8 +80,9 @@ IteSoft
                 if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
 
                     var top = sidePanelContainer[0].getBoundingClientRect().top;
-                    $log.debug("top = ", top);
-                    $log.debug("_self.scope.windowHeight = ", _self.scope.windowHeight);
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
                     if(Math.abs(top) < _self.scope.windowHeight){
 
                         var newHeight = (_self.scope.windowHeight-top);
@@ -107,7 +108,6 @@ IteSoft
 
 
                 if(_self.scope.showPanel){
-                    $log.debug(" in watch => show panel");
                     var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
                     _self.scope.sidePanelContainerWidth = newWidth;
                     sidePanelContainer.css('width', newWidth + 'px');
