@@ -26,7 +26,7 @@
  * </tr>
  * <tr>
  *     <td><code>animation</code></td>
- *     <td>false</td>
+ *     <td>'fade'</td>
  *     <td>Adds an openning/ending animation, for example 'fade'</td>
  * </tr>
  * <tr>
@@ -55,8 +55,8 @@
  *     <td>Automatically remove toast message after specific time</td>
  * </tr>
  * <tr>
- *     <td><code>dismissButton: false</code></td>
- *     <td>false</td>
+ *     <td><code>dismissButton:</code></td>
+ *     <td>true</td>
  *     <td>Adds close button on toast message</td>
  * </tr>
  * <tr>
@@ -66,7 +66,7 @@
  * </tr>
  * <tr>
  *     <td><code>dismissOnClick</code></td>
- *     <td>true</td>
+ *     <td>false</td>
  *     <td>Allows to remove toast message with a click</td>
  * </tr>
  * <tr>
@@ -86,12 +86,19 @@
  * </tr>
  * <tr>
  *     <td><code>verticalPosition</code></td>
- *     <td>"top"</td>
+ *     <td>"bottom"</td>
  *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
  * </tr>
  * </table>
  * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
  *
+ * Overload of defaults options value for each type of toasts are :
+ * <ul>
+ * <li>success:{dismissOnClick: true}</li>
+ * <li>info:{dismissOnClick: true}</li>
+ * <li>error:{dismissOnTimeout: false}</li>
+ * <li>warning:{dismissOnTimeout: false}</li>
+ * </ul>
  * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
  * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
  *
@@ -141,9 +148,9 @@
          <file name="Controller.js">
 
             angular.module('itesoft')
-                .config(['ngToastProvider', function (ngToast) {
+                .config(['itNotifierProvider', function (itNotifierProvider) {
                     //configuration of default values
-                    var defaultOptions = {
+                    itNotifierProvider.defaultOptions = {
                         dismissOnTimeout: true,
                         timeout: 4000,
                         dismissButton: true,
@@ -154,23 +161,21 @@
                         dismissOnClick: false,
                         success:{dismissOnClick: true},//optional overload behavior toast success
                         info:{dismissOnClick: true},//optional overload behavior toast info
-                        error:{dismissOnTimeout: true},//optional overload behavior toast error
-                        warning:{dismissOnTimeout: true}//optional overload behavior toast warning
+                        error:{dismissOnTimeout: false},//optional overload behavior toast error
+                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
                     };
-                    ngToast.configure(defaultOptions);
+
                 }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
                     $scope.showSuccess = function(){
                         itNotifier.notifySuccess({
-                        content: "Success popup",
-                        dismissOnTimeout: true
+                        content: "Success popup"
                         });
                     };
                     $scope.showSuccessEvent = function(){
                         $scope.$emit('itNotifierEvent', {
                             type: "SUCCESS",
                             options: {
-                                content : "Success event popup",
-                                dismissOnTimeout: true
+                                content : "Success event popup"
                             }}
                          );
                     };
@@ -191,8 +196,7 @@
                         $scope.$emit('itNotifierEvent', {
                         type: "ERROR",
                         options: {
-                                content : "error event popup",
-                                dismissOnTimeout: false
+                                content : "error event popup"
                             },
                         errorDetails :
                             {
@@ -206,16 +210,14 @@
                     }
                     $scope.showInfo = function(){
                         itNotifier.notifyInfo({
-                        content: "Information popup",
-                        dismissOnTimeout: true
+                        content: "Information popup"
                         });
                     };
                     $scope.showWarningOnEvent = function(){
                         $scope.$emit('itNotifierEvent', {
                         type: "WARNING",
                         options: {
-                                content : "Warning event popup",
-                                dismissOnTimeout: false
+                                content : "Warning event popup"
                             },
                         errorDetails :
                             {
@@ -271,88 +273,154 @@
          </file>
      </example>
  **/
-IteSoft.service('itNotifier', ['ngToast', '$rootScope','$log', function (ngToast, $rootScope, $log) {
+IteSoft.provider('itNotifier', [ function () {
 
-    // service declaration
-    var itNotifier = {};
+    var self = this;
 
-    function _formatErrorDetails(errorDetails){
-        return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
-    }
+    //default behaviors
+    self.defaultOptions = {
+        dismissOnTimeout: true,
+        timeout: 4000,
+        dismissButton: true,
+        animation: 'fade',
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom',
+        compileContent: true,
+        dismissOnClick: false,
+        success:{dismissOnClick: true},//optional overload behavior toast success
+        info:{dismissOnClick: true},//optional overload behavior toast info
+        error:{dismissOnTimeout: false},//optional overload behavior toast error
+        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+    };
 
-    // method declaration
-    itNotifier.notifySuccess= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options,options.success);
+    //provide get method to build provider
+    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
+
+        // service declaration
+        var itNotifier = {};
+
+        //configuration of the ngToast
+        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
+
+        /**
+         * Private method that format error details message
+         * @param errorDetails
+         * @returns {string}
+         * @private
+         */
+        function _formatErrorDetails(errorDetails){
+            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
+        }
+
+        /** method declaration**/
+        /**
+         * Display a toast configure as success element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifySuccess= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
             ngToast.success(localOptions);
             if(errorDetails != undefined) {
                 $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
             }
         };
-    itNotifier.notifyError= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options, options.error);
+        /**
+         * Display a toast configure as error element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyError= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
 
             ngToast.danger(localOptions);
             if(errorDetails != undefined) {
                 $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
             }
         };
-    itNotifier.notifyInfo= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options, options.info);
+        /**
+         * Display a toast configure as info element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyInfo= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
 
             ngToast.info(localOptions);
             if(errorDetails != undefined) {
                 $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
             }
         };
-    itNotifier.notifyWarning= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, options, options.warning);
+        /**
+         * Display a toast configure as warning element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyWarning= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
 
             ngToast.warning(localOptions);
             if(errorDetails != undefined) {
                 $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
             }
         };
-    itNotifier.notifyDismiss= function (options,errorDetails) {
+        /**
+         * Dismiss all toaster
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyDismiss= function (options,errorDetails) {
             ngToast.dismiss();
         };
-    itNotifier.notify= function (options) {
-        $log.error('Unknown type for itNotifier: '+options )
-    }
+        /**
+         * Log an error because this type is unknown
+         * @param options
+         */
+        itNotifier.notify= function (options) {
+            $log.error('Unknown type for itNotifier: '+options )
+        }
 
-    //events declaration
+        /** events declaration **/
 
-    $rootScope.$on("$locationChangeSuccess", function () {
-        // Remove all currently display toaster messages.
-        itNotifier.notifyDismiss();
-    });
+        /**
+         * Listen an event and dismiss all toaster
+         */
+        $rootScope.$on("$locationChangeSuccess", function () {
+            // Remove all currently display toaster messages.
+            itNotifier.notifyDismiss();
+        });
 
-    $rootScope.$on("itNotifierEvent",function(event, args){
-        //Handle event and calls appropriate method depending on the type of request
-        if (args) {
-            switch (args.type) {
-                case "SUCCESS":
-                    itNotifier.notifySuccess(args.options,args.errorDetails);
-                    break;
-                case "ERROR":
-                    itNotifier.notifyError(args.options,args.errorDetails);
-                    break;
-                case "INFO":
-                    itNotifier.notifyInfo(args.options,args.errorDetails);
-                    break;
-                case "WARNING":
-                    itNotifier.notifyWarning(args.options,args.errorDetails);
-                    break;
-                case "DISMISS":
-                    itNotifier.notifyDismiss(args.options,args.errorDetails);
-                    break;
-                default:
-                    itNotifier.notify(args.type);
-                    break;
+        /**
+         * Listen an event and display associated toast depending on his type
+         */
+        $rootScope.$on("itNotifierEvent",function(event, args){
+            //Handle event and calls appropriate method depending on the type of request
+            if (args) {
+                switch (args.type) {
+                    case "SUCCESS":
+                        itNotifier.notifySuccess(args.options,args.errorDetails);
+                        break;
+                    case "ERROR":
+                        itNotifier.notifyError(args.options,args.errorDetails);
+                        break;
+                    case "INFO":
+                        itNotifier.notifyInfo(args.options,args.errorDetails);
+                        break;
+                    case "WARNING":
+                        itNotifier.notifyWarning(args.options,args.errorDetails);
+                        break;
+                    case "DISMISS":
+                        itNotifier.notifyDismiss(args.options,args.errorDetails);
+                        break;
+                    default:
+                        itNotifier.notify(args.type);
+                        break;
+                }
             }
-        }
-        else{
-            $log.error('Bad usage of itNotifier. Check manual for details');
-        }
-    });
-    return itNotifier;
+            else{
+                $log.error('Bad usage of itNotifier. Check manual for details');
+            }
+        });
+        return itNotifier;
+    }];
 }]);
