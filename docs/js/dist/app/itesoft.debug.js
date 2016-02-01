@@ -2830,22 +2830,22 @@ IteSoft
  * @example
  <example module="itesoft">
  <file name="custom.css">
-     .it-side-panel-button {
+     .it-side-panel-container .it-side-panel-button {
         background-color: red;
      }
 
-     .it-side-panel-footer {
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
         text-align: center;
         display: table;
         width: 100%;
-    }
+     }
 
-     .it-side-panel-footer div{
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
         display: table-cell;
         vertical-align:middle;
-    }
+     }
 
-     .it-side-panel-footer .btn {
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
         margin:0px;
      }
 
@@ -2909,7 +2909,7 @@ IteSoft
             transclude: true,
             controller: '$sidePanelCtrl',
             template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-show\': showPanel,\'col-md-0\': !showPanel}">' +
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
                 '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
                     '<span class="fa {{itIconClass}}"></span>' +
                 '</div>'+
@@ -2960,8 +2960,14 @@ IteSoft
         '$window',
         '$document',
         '$timeout',
-        function ($scope, $window, $document, $timeout) {
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
 
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
 
             var Z_INDEX_CSS_KEY = 'z-index';
 
@@ -2972,10 +2978,13 @@ IteSoft
 
             var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
             var DEFAULT_COL_MD = 4;
-            var DEFAULT_COLD_MD_PULL = DEFAULT_COL_MD;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
             var DEFAULT_ICON_CLASS = 'fa-search';
 
             var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
             var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
             var IT_SIDE_PANEL_CLASS = '.it-side-panel';
             var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
@@ -2991,8 +3000,11 @@ IteSoft
             //Set default col-md(s) to the scope
             _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
 
-            //Set default col-md-pull(s) to the scope
-            _self.scope.itSidePanelcolMdPull = DEFAULT_COLD_MD_PULL;
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
 
 
             var w = angular.element($window);
@@ -3016,31 +3028,62 @@ IteSoft
 
                 _self.scope.windowHeight = newValue.height;
                 _self.scope.windowWidth = newValue.width;
+
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
 
                 if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
                     var newHeight = (_self.scope.windowHeight-sidePanelContainer[0].getBoundingClientRect().top);
-                    //console.log(" newHeight calc = ("+_self.scope.windowHeight+"-"+sidePanelContainer[0].getBoundingClientRect().top+") " );
 
-                    sidePanelContainer.css("height", newHeight + "px");
+                    sidePanelContainer.css('height', newHeight + 'px');
 
                     var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                    sidePanel.css("height", newHeight+"px");
+                    sidePanel.css('height', newHeight+'px');
 
                     var heightHeader = (newHeight*0.10);
                     var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                    sidePanelHeader.css("height",heightHeader+"px");
+                    sidePanelHeader.css('height',heightHeader+'px');
 
                     var heightFooter = (newHeight*0.10);
                     var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                    sidePanelFooter.css("height",heightFooter+"px");
+                    sidePanelFooter.css('height',heightFooter+'px');
 
                     var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                    sidePanelContent.css("height", (newHeight*0.8)+"px");
+                    sidePanelContent.css('height', (newHeight*0.8)+'px');
 
                 }
 
+
+                if(_self.scope.showPanel){
+                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                //if its the firt time initialise all components width an right
+                }else {
+                    _self.scope.modifySidePanelCssProperties(true);
+                }
+
             }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function (){
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
 
             w.bind('resize', function () {
                 _self.scope.$apply();
@@ -3052,24 +3095,35 @@ IteSoft
             _self.scope.toggleSidePanel = function () {
                 _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
 
-                var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
                 var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
 
                 if(_self.scope.showPanel){
 
-                    sidePanel.addClass("col-md-"+_self.scope.itSidePanelcolMd);
-                    iconButtonElement.addClass("col-md-"+_self.scope.itSidePanelcolMd);
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function(){
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    },50);
+
 
                 } else {
-                    sidePanel.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
-                    iconButtonElement.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
-                }
 
-                $timeout(function(){
-                    var event = document.createEvent('Event');
-                    event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                    $window.dispatchEvent(event);
-                },300);
+
+                    //sidePanelContainer.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
+                    //iconButtonElement.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
+
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                }
             };
 
             _self.scope.setItSidePanelElement = function(element){
@@ -3096,17 +3150,19 @@ IteSoft
 
                     //If height mode is defined but unknown set to the default  height mode
                     _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
+                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
                 }
 
                 //Set height of header, content and footer
                 var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css("height","10%");
+                sidePanelHeader.css('height','10%');
 
                 var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css("height","10%");
+                sidePanelFooter.css('height','10%');
 
                 var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css("height", "80%");
+                sidePanelContent.css('height', '80%');
 
 
 
@@ -3115,14 +3171,12 @@ IteSoft
                     case IT_HEIGHT_MODE_FULL:
 
                         var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css("height");
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
 
                         if(sidePanelContainerHeight > _self.scope.windowHeight){
-                            sidePanelContainer.css("height", "100%");
+                            sidePanelContainer.css('height', '100%');
                             var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css("height", "100%");
-                        }else {
-                            //console.log("size of container is less than window height so height is 100%!");
+                            sidePanel.css('height', '100%');
                         }
                         break;
                     case IT_HEIGHT_MODE_AUTO:
@@ -3131,14 +3185,14 @@ IteSoft
                     case IT_HEIGHT_MODE_WINDOW:
 
                         var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css("height", "100%");
+                        sidePanel.css('height', '100%');
 
                         //set overflow : auto to the Side Panel Content
                         var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css("overflow", "auto");
+                        sidePanelContent.css('overflow', 'auto');
                         break;
                     default:
-                        console.error("Height mode : '"+_self.scope.itHeightMode+"'!");
+                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
                 }
             };
 
@@ -3167,8 +3221,22 @@ IteSoft
             _self.scope.setColMd = function (attrs) {
                 var colMd = DEFAULT_COL_MD;
                 if (!isNaN(parseInt(attrs.itCol))) {
-                    _self.scope.itSidePanelcolMd = attrs.itCol;
-                    _self.scope.itSidePanelcolMdPull = 12-_self.scope.itSidePanelcolMd;
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
                 }
             };
 
