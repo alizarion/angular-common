@@ -72,8 +72,8 @@
  *      <td>
  *          set css top position of the Side Panel. Default value is "none" mode
  *          <ul>
- *              <li><b>none</b> :  Will take the default css "top" property of the side panel. Default "top" is "0px".</li>
- *              <li><b>XX</b> : Has to be a number. It will override the default css top position
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
  *              </li>
  *          </ul>
  *      </td>
@@ -233,7 +233,7 @@
  <h2>Paragraph 2</h2>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
  <br>
- <h2 >Paragraph 3</h2>
+ <h2>Paragraph 3</h2>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
@@ -254,7 +254,7 @@
  </it-side-panel-header>
  <it-side-panel-content>
  <div>
- <h2>Paragraph 1</h2>
+ <h2>Search 1</h2>
  <p>
 
  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
@@ -262,10 +262,10 @@
  </p>
 
  <br>
- <h2>Paragraph 2</h2>
+ <h2>Search 2</h2>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
  <br>
- <h2 >Paragraph 3</h2>
+ <h2>Search 3</h2>
  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
 
  </div>
