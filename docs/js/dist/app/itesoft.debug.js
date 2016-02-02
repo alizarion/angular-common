@@ -2207,784 +2207,6 @@ IteSoft
         };
     }]);
 'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- *
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- *
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanel
- * @module itesoft
- * @restrict E
- *
- * @description
- * A container element for side panel and its Header, Content and Footer
- *
- * <table class="table">
- *   <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-col="3">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *          <it-side-panel it-z-index="700">
- *          </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-icon-class="fa-star-o">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-height-mode="auto | window | full">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set "Height Mode" of the Side Panel.
- *          <ul>
- *              <li><b>auto</b> :
- *                  <ul>
- *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
- *                      <li>Else the height of Side Panel is equal to its content</li>
- *                  </ul>
- *                </li>
- *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
- *              <li><b>full</b>
-*                   <ul>
- *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
- *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
- *                  </ul>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-side-panel>
- *      <it-side-panel-header>
- *          <!--Header of Side Panel -->
- *      </it-side-panel-header>
- *      <it-side-panel-content>
- *          <!--Content Side Panel-->
- *      </it-side-panel-content>
- *      <it-side-panel-footer>
- *          <!--Footer Side Panel-->
- *      </it-side-panel-footer>
- * </it-side-panel>
- * ```
- * @example
- <example module="itesoft">
- <file name="custom.css">
-     .it-side-panel-container .it-side-panel-button {
-        background-color: red;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
-        text-align: center;
-        display: table;
-        width: 100%;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
-        display: table-cell;
-        vertical-align:middle;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
-        margin:0px;
-     }
-
- </file>
- <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="auto"  it-icon-class="fa-star-o">
- <it-side-panel-header>
-    <div><h2>Filter</h2></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h3>Paragraph 1</h3>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
- <br>
- <h3>Paragraph 2</h3>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h3>Paragraph 3</h3>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h3>Paragraph 4</h3>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
- </file>
- </example>
- */
-IteSoft
-    .directive('itSidePanel', ['$window', function ($window) {
-
-
-        function _link(scope, element, attrs) {
-
-            scope.itSidePanelElement = element;
-
-            scope.setIconClass(scope, attrs);
-
-            scope.setZIndexes(element, attrs);
-
-            scope.setColMd(attrs);
-
-            scope.setHeightMode(attrs);
-        }
-
-        return {
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            controller: '$sidePanelCtrl',
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
-            '</div>'
-
-        };
-    }]);
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelContent
- * @module itesoft
- * @restrict E
- *
- * @description
- * A container for a Side Panel content, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-content>
- * </it-side-panel-content>
- */
-IteSoft
-    .directive('itSidePanelContent', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require: '^itSidePanel',
-            template:
-                '<div class="it-side-panel-content" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .controller("$sidePanelCtrl", [
-        '$scope',
-        '$window',
-        '$document',
-        '$timeout',
-        '$log',
-        function ($scope, $window, $document, $timeout, $log) {
-
-
-            var COL_MD_NAME = 'it-col';
-            var HEIGHT_MODE_NAME = 'it-height-mode';
-
-            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
-
-            var Z_INDEX_CSS_KEY = 'z-index';
-
-            var IT_HEIGHT_MODE_WINDOW = 'window';
-            var IT_HEIGHT_MODE_FULL = 'full';
-            var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
-
-            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
-            var DEFAULT_COL_MD = 4;
-            var MAX_COL_MD = 12;
-            var MIN_COL_MD = 1;
-
-            var DEFAULT_ICON_CLASS = 'fa-search';
-
-            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
-            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
-            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
-            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
-            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
-            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
-            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
-
-            var _self = this;
-            _self.scope = $scope;
-            _self.scope.showPanel = false;
-
-            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-            //Set default col-md(s) to the scope
-            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-
-            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
-
-            _self.scope.sidePanelContainerWidth = null;
-            _self.scope.sidePanelContainerRight = null;
-            _self.scope.sidePanelButtonRight = null;
-
-
-            var w = angular.element($window);
-
-
-            /**
-             * Get window Dimensions
-             * @returns {{height: Number, width: Number}}
-             */
-            _self.scope.getWindowDimensions = function () {
-                return {
-                    'height': $window.innerHeight,
-                    'width': $window.innerWidth
-                };
-            };
-
-            /**
-             * Watch the resizing of window Dimensions
-             */
-            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
-
-                _self.scope.windowHeight = newValue.height;
-                _self.scope.windowWidth = newValue.width;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-
-                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-                    var newHeight = (_self.scope.windowHeight-sidePanelContainer[0].getBoundingClientRect().top);
-
-                    sidePanelContainer.css('height', newHeight + 'px');
-
-                    var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                    sidePanel.css('height', newHeight+'px');
-
-                    var heightHeader = (newHeight*0.10);
-                    var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                    sidePanelHeader.css('height',heightHeader+'px');
-
-                    var heightFooter = (newHeight*0.10);
-                    var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                    sidePanelFooter.css('height',heightFooter+'px');
-
-                    var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                    sidePanelContent.css('height', (newHeight*0.8)+'px');
-
-                }
-
-
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
-                    _self.scope.sidePanelContainerWidth = newWidth;
-                    sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
-                    _self.scope.modifySidePanelCssProperties(true);
-                }
-
-            }, true);
-
-            /**
-             * Update Side panel Css properties (right and width)
-             */
-            _self.scope.modifySidePanelCssProperties = function (){
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
-                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
-
-                _self.scope.sidePanelContainerWidth = newWidth;
-                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
-                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                //update side panel container right and width properties
-                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
-                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-
-                //update side panel button right right property
-                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
-            };
-
-            w.bind('resize', function () {
-                _self.scope.$apply();
-            });
-
-            /**
-             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
-             */
-            _self.scope.toggleSidePanel = function () {
-                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if(_self.scope.showPanel){
-
-                    //Reset the right property of Side panel button
-                    iconButtonElement.css('right', "");
-
-                    //Do the transition in order to the side panel be visible
-                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
-                        _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
-
-
-                } else {
-
-
-                    //sidePanelContainer.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
-                    //iconButtonElement.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
-
-                    var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
-                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
-                }
-            };
-
-            _self.scope.setItSidePanelElement = function(element){
-                _self.scope.itSidePanelElement = element;
-            };
-
-
-            /**
-             * Set the Side Panel Height Mode from "it-height-mode" attributes
-             * @param attrs directive attributes object
-             */
-            _self.scope.setHeightMode = function (attrs){
-                _self.scope.itHeightMode = attrs.itHeightMode;
-
-                //If attribute is not defined set the default height Mode
-                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
-                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
-                    //Get the provided mode
-                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
-
-                    //If height mode is defined but unknown set to the default  height mode
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
-                }
-
-                //Set height of header, content and footer
-                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
-
-                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
-
-                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css('height', '80%');
-
-
-
-                //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
-                    case IT_HEIGHT_MODE_FULL:
-
-                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css('height');
-
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
-                            sidePanelContainer.css('height', '100%');
-                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css('height', '100%');
-                        }
-                        break;
-                    case IT_HEIGHT_MODE_AUTO:
-                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
-                        break;
-                    case IT_HEIGHT_MODE_WINDOW:
-
-                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css('height', '100%');
-
-                        //set overflow : auto to the Side Panel Content
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('overflow', 'auto');
-                        break;
-                    default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
-                }
-            };
-
-            /**
-             * Retrieve provided iconClass and put the value it in scope
-             * @param scope the scope
-             * @param attrs the attributes provided by directive
-             * @private
-             */
-            _self.scope.setIconClass = function (scope, attrs) {
-                var defaultIconClass = DEFAULT_ICON_CLASS;
-                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
-                    _self.scope.itIconClass = defaultIconClass;
-                } else {
-                    _self.scope.itIconClass = attrs.itIconClass;
-                }
-            };
-
-            /**
-             * Handle col-md of directive.
-             * If itCol is provided to the directive apply its col-md-X
-             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setColMd = function (attrs) {
-                var colMd = DEFAULT_COL_MD;
-                if (!isNaN(parseInt(attrs.itCol))) {
-
-                    if (attrs.itCol > MAX_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
-                            '(' + MAX_COL_MD + '). The maximum value is taken.');
-                    } else if (attrs.itCol < MIN_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
-                            '(' + MIN_COL_MD + '). The minimum value is taken.');
-                    } else {
-                        _self.scope.itSidePanelcolMd = attrs.itCol;
-                    }
-                } else {
-                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
-                }
-            };
-
-            /**
-             * Handle z indexes of directive.
-             * If itZIndex is provided to the directive apply its z-index
-             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setZIndexes = function (element, attrs) {
-
-                var zindex = null;
-                if (!isNaN(parseInt(attrs.itZIndex))) {
-                    zindex = parseInt(attrs.itZIndex);
-                }
-
-                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (zindex !== null) {
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
-                } else {
-
-                    var highestZIndex = _self.scope.findHighestZIndex();
-                    var newHighestZIndex = highestZIndex + 100;
-
-                    //set the zindex to side panel element
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
-
-                    //set the zindex to the icon button of the side panel element
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
-
-                }
-            };
-
-            /**
-             * Get Dom element from its class
-             * @param element dom element in which the class search will be performed
-             * @param className className. Using 'querySelector' selector convention
-             * @private
-             */
-            _self.scope.getElementFromClass = function (element, className) {
-                var content = angular.element(element[0].querySelector(className));
-                var sidePanel = angular.element(content[0]);
-                return sidePanel;
-            };
-
-            /**
-             * Find the highest z-index of the DOM
-             * @returns {number} the highest z-index value
-             * @private
-             */
-            _self.scope.findHighestZIndex = function () {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            };
-        }
-    ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelFooter
- * @module itesoft
- * @restrict E
- *
- * @description
- * A container for a Side Panel footer, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-footer>
- * </it-side-panel-footer>
- */
-IteSoft
-    .directive('itSidePanelFooter', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-footer" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelHeader
- * @module itesoft
- * @restrict E
- *
- * @description
- * A container for a Side Panel header, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-header>
- * </it-side-panel-header>
- */
-IteSoft
-    .directive('itSidePanelHeader', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-header text-center" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itCollapsedItem
@@ -3371,6 +2593,966 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanel
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * A container element for side panel and its Header, Content and Footer
+ *
+ * <table class="table">
+ *   <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-col="3">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *          <it-side-panel it-z-index="700">
+ *          </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-icon-class="fa-star-o">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-height-mode="auto | window | full">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set "Height Mode" of the Side Panel.
+ *          <ul>
+ *              <li><b>auto</b> :
+ *                  <ul>
+ *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
+ *                      <li>Else the height of Side Panel is equal to its content</li>
+ *                  </ul>
+ *                </li>
+ *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
+ *              <li><b>full</b>
+*                   <ul>
+ *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
+ *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
+ *                  </ul>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-top-position="XX | none">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set css top position of the Side Panel. Default value is "none" mode
+ *          <ul>
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-side-panel>
+ *      <it-side-panel-header>
+ *          <!--Header of Side Panel -->
+ *      </it-side-panel-header>
+ *      <it-side-panel-content>
+ *          <!--Content Side Panel-->
+ *      </it-side-panel-content>
+ *      <it-side-panel-footer>
+ *          <!--Footer Side Panel-->
+ *      </it-side-panel-footer>
+ * </it-side-panel>
+ * ```
+ * @example
+ <example module="itesoft">
+ <file name="custom.css">
+
+     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+       background-color: blue;
+     }
+
+     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+       background-color: green;
+     }
+
+     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+       background-color: gray;
+     }
+
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+        text-align: center;
+        display: table;
+        width: 100%;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+        display: table-cell;
+        vertical-align:middle;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+        margin:0px;
+     }
+
+ </file>
+ <file name="index.html">
+
+ <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
+ <it-side-panel-header>
+ <div><h1>Favorites</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Favorite 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Favorite 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 4</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 5</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 6</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 7</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 8</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 9</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 10</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 11</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 12</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 13</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 14</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 15</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 16</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+ <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
+ <it-side-panel-header>
+ <div><h1>Silicon Valley</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Paragraph 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Paragraph 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Paragraph 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+
+ <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
+ <it-side-panel-header>
+ <div><h1>Search</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Search 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Search 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Search 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+ </file>
+ </example>
+ */
+IteSoft
+    .directive('itSidePanel', ['$window', function ($window) {
+
+
+        function _link(scope, element, attrs) {
+
+            scope.itSidePanelElement = element;
+
+            scope.setIconClass(scope, attrs);
+
+            scope.setZIndexes(element, attrs);
+
+            scope.setColMd(attrs);
+
+            scope.setHeightMode(attrs);
+
+            scope.setTopPosition(attrs);
+
+        }
+
+        return {
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            controller: '$sidePanelCtrl',
+            scope : true,
+            template:
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+                    '<span class="fa {{itIconClass}}"></span>' +
+                '</div>'+
+                '<div class="it-side-panel" ng-transclude></div>'+
+            '</div>'
+
+        };
+    }]);
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelContent
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * A container for a Side Panel content, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-content>
+ * </it-side-panel-content>
+ */
+IteSoft
+    .directive('itSidePanelContent', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require: '^itSidePanel',
+            template:
+                '<div class="it-side-panel-content" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .controller("$sidePanelCtrl", [
+        '$scope',
+        '$window',
+        '$document',
+        '$timeout',
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
+
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
+
+            var Z_INDEX_CSS_KEY = 'z-index';
+
+            var IT_HEIGHT_MODE_WINDOW = 'window';
+            var IT_HEIGHT_MODE_FULL = 'full';
+            var IT_HEIGHT_MODE_AUTO = 'auto';
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+
+            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
+            var DEFAULT_COL_MD = 4;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
+            var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
+
+            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
+            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
+            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
+            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
+            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
+            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
+
+            var _self = this;
+            _self.scope = $scope;
+            _self.scope.showPanel = false;
+
+            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+            //Set default col-md(s) to the scope
+            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
+
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
+
+
+            var w = angular.element($window);
+
+
+            /**
+             * Get window Dimensions
+             * @returns {{height: Number, width: Number}}
+             */
+            _self.scope.getWindowDimensions = function () {
+                return {
+                    'height': $window.innerHeight,
+                    'width': $window.innerWidth
+                };
+            };
+
+            /**
+             * Watch the resizing of window Dimensions
+             */
+            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
+
+                _self.scope.windowHeight = newValue.height;
+                _self.scope.windowWidth = newValue.width;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+
+                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
+
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if(Math.abs(top) < _self.scope.windowHeight){
+
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if(_self.scope.isNoneTopPosition()){
+                            itTopPosition = 0;
+                        }
+
+                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
+
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
+                }
+
+
+                if(_self.scope.showPanel){
+                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                //if its the firt time initialise all components width an right
+                }else {
+                    _self.scope.modifySidePanelCssProperties();
+                }
+
+            }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function (){
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
+
+            w.bind('resize', function () {
+                _self.scope.$apply();
+            });
+
+            /**
+             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
+             */
+            _self.scope.toggleSidePanel = function () {
+                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if(_self.scope.showPanel){
+
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function(){
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    },50);
+
+
+                } else {
+
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                }
+            };
+
+            _self.scope.setItSidePanelElement = function(element){
+                _self.scope.itSidePanelElement = element;
+            };
+
+
+            /**
+             * Set the Side Panel Height Mode from "it-height-mode" attributes
+             * @param attrs directive attributes object
+             */
+            _self.scope.setHeightMode = function (attrs){
+                _self.scope.itHeightMode = attrs.itHeightMode;
+
+                //If attribute is not defined set the default height Mode
+                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
+                    //Get the provided mode
+                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
+                } else{
+
+                    //If height mode is defined but unknown set to the default  height mode
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
+                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                }
+
+                //Set height of header, content and footer
+                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                sidePanelHeader.css('height','10%');
+
+                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                sidePanelFooter.css('height','10%');
+
+                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                sidePanelContent.css('height', '80%');
+
+
+
+                //Configure height of Side Panel elements depending on the provided height mode
+                switch(_self.scope.itHeightMode) {
+                    case IT_HEIGHT_MODE_FULL:
+
+                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
+
+                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                            sidePanelContainer.css('height', '100%');
+                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                            sidePanel.css('height', '100%');
+                        }
+                        break;
+                    case IT_HEIGHT_MODE_AUTO:
+                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
+                        break;
+                    case IT_HEIGHT_MODE_WINDOW:
+
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', '100%');
+
+                        //set overflow : auto to the Side Panel Content
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('overflow', 'auto');
+                        break;
+                    default:
+                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                }
+            };
+
+            /**
+             * Retrieve provided iconClass and put the value it in scope
+             * @param scope the scope
+             * @param attrs the attributes provided by directive
+             * @private
+             */
+            _self.scope.setIconClass = function (scope, attrs) {
+                var defaultIconClass = DEFAULT_ICON_CLASS;
+                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
+                    _self.scope.itIconClass = defaultIconClass;
+                } else {
+                    _self.scope.itIconClass = attrs.itIconClass;
+                }
+            };
+
+            /**
+             * Handle col-md of directive.
+             * If itCol is provided to the directive apply its col-md-X
+             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setColMd = function (attrs) {
+                var colMd = DEFAULT_COL_MD;
+                if (!isNaN(parseInt(attrs.itCol))) {
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                }
+            };
+
+            /**
+             * Handle z indexes of directive.
+             * If itZIndex is provided to the directive apply its z-index
+             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setZIndexes = function (element, attrs) {
+
+                var zindex = null;
+                if (!isNaN(parseInt(attrs.itZIndex))) {
+                    zindex = parseInt(attrs.itZIndex);
+                }
+
+                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (zindex !== null) {
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
+                } else {
+
+                    var highestZIndex = _self.scope.findHighestZIndex();
+                    var newHighestZIndex = highestZIndex + 100;
+
+                    //set the zindex to side panel element
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
+
+                    //set the zindex to the icon button of the side panel element
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
+
+                }
+            };
+
+            /**
+             * Get Dom element from its class
+             * @param element dom element in which the class search will be performed
+             * @param className className. Using 'querySelector' selector convention
+             * @private
+             */
+            _self.scope.getElementFromClass = function (element, className) {
+                var content = angular.element(element[0].querySelector(className));
+                var sidePanel = angular.element(content[0]);
+                return sidePanel;
+            };
+
+            /**
+             * Find the highest z-index of the DOM
+             * @returns {number} the highest z-index value
+             * @private
+             */
+            _self.scope.findHighestZIndex = function () {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            };
+
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
+
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                }
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
+            };
+        }
+    ]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelFooter
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * A container for a Side Panel footer, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-footer>
+ * </it-side-panel-footer>
+ */
+IteSoft
+    .directive('itSidePanelFooter', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-footer" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelHeader
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * A container for a Side Panel header, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-header>
+ * </it-side-panel-header>
+ */
+IteSoft
+    .directive('itSidePanelHeader', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-header text-center" ng-transclude></div>'
+        };
+    });
+
+
 'use strict';
 
 IteSoft
