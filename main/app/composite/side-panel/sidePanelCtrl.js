@@ -12,6 +12,7 @@ IteSoft
 
             var COL_MD_NAME = 'it-col';
             var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
 
             var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
 
@@ -23,11 +24,17 @@ IteSoft
             var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
 
             var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
             var DEFAULT_COL_MD = 4;
             var MAX_COL_MD = 12;
             var MIN_COL_MD = 1;
 
             var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
 
             var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
             var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
@@ -45,6 +52,8 @@ IteSoft
 
             //Set default col-md(s) to the scope
             _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
 
             _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
 
@@ -78,24 +87,32 @@ IteSoft
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
 
                 if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-                    var newHeight = (_self.scope.windowHeight-sidePanelContainer[0].getBoundingClientRect().top);
 
-                    sidePanelContainer.css('height', newHeight + 'px');
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
 
-                    var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                    sidePanel.css('height', newHeight+'px');
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if(Math.abs(top) < _self.scope.windowHeight){
 
-                    var heightHeader = (newHeight*0.10);
-                    var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                    sidePanelHeader.css('height',heightHeader+'px');
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if(_self.scope.isNoneTopPosition()){
+                            itTopPosition = 0;
+                        }
 
-                    var heightFooter = (newHeight*0.10);
-                    var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                    sidePanelFooter.css('height',heightFooter+'px');
+                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
 
-                    var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                    sidePanelContent.css('height', (newHeight*0.8)+'px');
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
 
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
                 }
 
 
@@ -105,7 +122,7 @@ IteSoft
                     sidePanelContainer.css('width', newWidth + 'px');
                 //if its the firt time initialise all components width an right
                 }else {
-                    _self.scope.modifySidePanelCssProperties(true);
+                    _self.scope.modifySidePanelCssProperties();
                 }
 
             }, true);
@@ -158,10 +175,6 @@ IteSoft
 
 
                 } else {
-
-
-                    //sidePanelContainer.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
-                    //iconButtonElement.removeClass("col-md-"+_self.scope.itSidePanelcolMd);
 
                     var newRight = sidePanelContainer.css('width');
                     _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
@@ -349,6 +362,29 @@ IteSoft
                     }
                 }
                 return highest_index;
+            };
+
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
+
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                }
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
             };
         }
     ]);
