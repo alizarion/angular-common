@@ -266,6 +266,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:pixelWidth",
+      "shortName": "pixelWidth",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Simple Stylesheet class to manage width.",
+      "keywords": "adaptation api background-color class css directive example html increment itesoft manage module production-- purposes rgba simple solid style stylesheet white width width-1000 width-225 width-75 width-x"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:rowHeight",
       "shortName": "rowHeight",
       "type": "directive",

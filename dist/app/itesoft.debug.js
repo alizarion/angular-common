@@ -436,6 +436,787 @@ IteSoft
         }
     }]
 );
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itAutocomplete
+ * @module itesoft
+ * @restrict ECA
+ *
+ * @description
+ * The ItAutocomplete widgets provides suggestions while you type into the field
+ *
+ *
+ * ```html
+ *   <itAutocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-select
+ *      </td>
+ *      <td>
+ *          Default option class
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-selected
+ *      </td>
+ *      <td>
+ *          Selected option class
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-container
+ *      </td>
+ *      <td>
+ *          Option container div
+ *      </td>
+ *  </tr>
+ *  </table>
+ *
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+<style>
+ .width300{width:300px};
+ </style>
+ <div ng-controller="HomeCtrl">
+ <h1>Usage inside grid:</h1>
+ <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+ <h1>Standalone usage:</h1>
+ <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
+ selected id: {{selectedOption}}
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+        ['$scope',function($scope) {
+            $scope.myData = [];
+            // sample values
+            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
+            $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
+            $scope.lastNameOptions = [{id:"Carney",value:"Carney"},{id:"Wise",value:"Wise"},{id:"Waters",value:"Waters"}];
+            angular.copy($scope.myDataInit,$scope.myData);
+            $scope.gridOptions = {
+                data:$scope.myData,
+                useExternalFiltering: true,
+                enableFiltering: true,
+                onRegisterApi: function(gridApi){
+                  $scope.gridApi = gridApi;
+                  //quick an dirty example of filter that use it-autocomplete
+                  $scope.gridApi.core.on.filterChanged($scope, function(){
+                      $scope.myData = [];
+                      angular.forEach($scope.myDataInit,function(item){
+                            var key = '';
+                            var value = '';
+                            var filterUse = false;
+                            for (var i = 0; i < $scope.gridApi.grid.columns.length; i++) {
+                                key = $scope.gridApi.grid.columns[i].field;
+                                for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
+                                    filterUse = true;
+                                    value = $scope.gridApi.grid.columns[i].filters[j].term;
+                                    if (value != undefined && value != '') {
+                                        if(item[key] == value){
+                                            $scope.myData.push(item);
+                                         }
+                                    }
+                                }
+                            }
+                            if(! filterUse){
+                                angular.copy($scope.myDataInit,$scope.myData);
+                            }
+                            $scope.gridOptions.data = $scope.myData;
+                            $scope.gridOptions.totalItems = $scope.myData.length;
+                      })
+                    });
+                },
+                columnDefs:[{
+                    name: 'firstName',
+                    cellClass: 'firstName',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-class="\'width300\'" ></it-autocomplete></div>',
+                    filter:[{
+                      term: 1,
+                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
+                      }]
+                    },
+                    {
+                    name: 'lastName',
+                    cellClass: 'lastName',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-class="\'width300\'"></it-autocomplete></div>',
+                    filter:[{
+                      term: 1,
+                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
+                      }]
+                    }
+                ]
+            };
+            $scope.selectedOption = {};
+     }
+ ]);
+ </file>
+ </example>
+ */
+IteSoft
+    .directive('itAutocomplete', function () {
+        return {
+            restrict: 'AE',
+            scope: {
+                /**
+                 * items list must contain id and value
+                 */
+                items: "=",
+                /**
+                 * selected item id
+                 */
+                selectedOption: "=",
+                /**
+                 * stylesheet class added on input filter
+                 */
+                inputClass: "=",
+                /**
+                 * stylesheet class added on option
+                 */
+                optionClass: "=",
+                /**
+                 * input searchMode value= startsWith,contains default contains
+                 */
+                searchMode: "="
+            },
+            controllerAs: 'itAutocompleteCtrl',
+            controller: ['$scope', '$rootScope', '$translate',
+                function ($scope, $rootScope, $translate) {
+
+                    var self = this;
+
+                    /**
+                     * public fields
+                     * @type {{}}
+                     */
+                    self.fields = {
+                        items: [],
+                        inputSearch: '',
+                        showItems: false,
+                        optionClass: $scope.optionClass,
+                        inputClass: $scope.inputClass,
+                        defaultSelectClass: '',
+                        selectedSelectClass: '',
+                        searchMode: $scope.searchMode
+                    };
+                    self.fields.defaultSelectClass= self.fields.optionClass+" it-autocomplete-select";
+                    self.fields.selectedSelectClass= self.fields.defaultSelectClass+" it-autocomplete-selected";
+
+                    /**
+                     * public function
+                     * @type {{}}
+                     */
+                    self.fn = {
+                        select: select,
+                        change: change,
+                        click: click
+                    };
+
+                    /**
+                     * initialize default data
+                     */
+                    angular.copy($scope.items, self.fields.items);
+                    init();
+
+                    /**
+                     * Style class initialization
+                     */
+                    function init() {
+                        angular.forEach(self.fields.items, function (item) {
+                            item.class = self.fields.defaultSelectClass ;
+                        });
+                    }
+
+                    /**
+                     * Call when option is selected
+                     * @param id
+                     */
+                    function select(selectedItem) {
+                        init();
+                        selectedItem.class = self.fields.selectedSelectClass;
+                        $scope.selectedOption = selectedItem.id;
+                        self.fields.inputSearch = selectedItem.value;
+                    }
+
+                    /**
+                     * Call on click on the filter
+                     */
+                    function click() {
+                        if (self.fields.showItems) {
+                            self.fields.showItems = false;
+                        } else {
+                            self.fields.showItems = true;
+                        }
+                    }
+
+                    /**
+                     * Call when input content change
+                     */
+                    function change() {
+                        self.fields.items = [];
+                        if (self.fields.inputSearch == "") {
+                            angular.copy($scope.items, self.fields.items);
+                            init();
+                        } else {
+                            angular.forEach($scope.items, function (item) {
+                                /**
+                                 * StartsWith
+                                 */
+                                if(self.fields.searchMode == "startsWith") {
+                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
+                                /**
+                                 * Contains
+                                 */
+                                }else{
+                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase())!=-1) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            ],
+            template: '<div >' +
+            '<input ng-focus="itAutocompleteCtrl.fn.click()" ng-blur="itAutocompleteCtrl.fn.click()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '<div class="it-autocomplete-container">' +
+                '<div class="it-autocomplete-content" >' +
+                    '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
+                        '<div ng-class="item.class" ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCheckbox
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * The checkbox is no different than the HTML checkbox input,
+ * except it's styled differently.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+            <div>
+                 <input it-checkbox type="checkbox" it-label="Checkbox">
+            </div>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itCheckbox',function(){
+        return {
+            restrict: 'A',
+            transclude : true,
+            replace : true,
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+                input.wrap('<div class="checkbox"></div>');
+                input.wrap('<label></label>');
+                input.after('<span class="checkbox-material"><span class="check" style="margin-right:16px;width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itLabel || ''));
+            }
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itInput
+ * @module itesoft
+ * @restrict ECA
+ *
+ * @description
+ * Floating labels are just like Stacked Labels,
+ * except that their labels animate, or "float" up whe
+ * n text is entered in the input.
+ *
+ *
+ * ```html
+ *   <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
+ *       <input it-input
+ *              class="form-control floating-label"
+ *              type="text"
+ *              name="Email"
+ *              ng-minlength="5"
+ *              ng-maxlength="10"
+ *              required=""
+ *              it-label="Email"
+ *              ng-model="user.email">
+ *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
+         *            <div class="form-error" ng-message="required">This field is required.</div>
+         *            <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+         *            <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+ *             </div>
+ *   </form>
+ * ```
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="HomeCtrl">
+               <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
+                <div class="form-group">
+                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
+                </div>
+                <div class="form-group">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
+                </div>
+                  <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
+                      <div class="form-error" ng-message="required">This field is required.</div>
+                      <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+                      <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+                  </div>
+                  <button class="btn btn-primary" type="submit">submit</button>
+               </form>
+            </div>
+        </file>
+         <file name="Module.js">
+         angular.module('itesoft-showcase',['ngMessages','itesoft']);
+         </file>
+        <file name="controller.js">
+            angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
+                  $scope.user = {
+                      email : 'test@itesoft.com',
+                      firstName :''
+                     };
+
+                  $scope.submit = function(form){
+                       if(form.$valid){
+                         console.log('submit');
+                       }
+                  }
+            }]);
+        </file>
+
+    </example>
+ */
+IteSoft
+    .directive('itInput',function(){
+        return {
+            restrict: 'A',
+            replace : true,
+            require: '?ngModel',
+            link : function (scope, element, attrs, ngModel ) {
+                // Check if ngModel is there else go out
+                if (!ngModel)
+                    return;
+                // Fix on input element
+                var input = angular.element(element[0]);
+                //If there is no floating-lbal do nothing
+                if (input.hasClass('floating-label')) {
+                    // Wrapper for material design
+                    input.wrap('<div class="form-control-wrapper"></div>');
+                    // If there is astatic placeholder use it
+                    var placeholder = input.attr('placeholder');
+                    if (placeholder) {
+                        input.after('<div class="floating-label">' +  placeholder + '</div');
+                    } else {
+                        // Else user data binding text 
+                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
+                        scope.$watch('itLabel', function(value) {
+                            scope.$applyAsync(function(){
+                                if (!input[0].offsetParent) {
+                                    return;
+                                }
+                                var elementDiv = input[0].offsetParent.children;
+                                angular.forEach(elementDiv, function(divHtml) {
+                                    var div = angular.element(divHtml);
+                                    if (div.hasClass('floating-label')) {
+                                        div.text(value);
+                                    }
+                                });
+                            })
+
+                        });
+                    }
+                    input.after('<span class="material-input"></span>');
+                    input.attr('placeholder', '').removeClass('floating-label');
+                }
+                // Check if error message is set
+                input.after('<small class="text-danger" style="display:none;"></small>');
+                scope.$watch('itError', function(value) {
+                    if (!input[0].offsetParent) {
+                        return;
+                    }
+                    var elementDiv = input[0].offsetParent.children;
+                    angular.forEach(elementDiv, function(divHtml) {
+                        var div = angular.element(divHtml);
+                        if (div.hasClass('text-danger')) {
+                            div.text(value);
+                            if (value != '' && value != undefined) {
+                                div.removeClass('ng-hide');
+                                div.addClass('ng-show');
+                                div.css('display','block');
+                            } else {
+                                div.removeClass('ng-show');
+                                div.addClass('ng-hide');
+                                div.css('display','none');
+                            }
+                        }
+                    });
+                });
+                if (input.val() === null || input.val() == "undefined" || input.val() === "") {
+                    input.addClass('empty');
+                }
+                // Watch value and update to move floating label
+                scope.$watch(function () {return ngModel.$modelValue; }, function(value,oldValue) {
+                    if (value === null || value == undefined || value ==="" ) {
+                        input.addClass('empty');
+                    } else {
+                        input.removeClass('empty');
+                    }
+                });
+
+                // wait for input
+                input.on('change', function() {
+                    if (input.val() === null || input.val() == "undefined" || input.val() === "") {
+                        input.addClass('empty');
+                    } else {
+                        input.removeClass('empty');
+                    }
+                });
+            },
+            scope : {
+                itError : '=',
+                itLabel : '@'
+            }
+        }
+});
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSearch
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
+ *
+ * You MUST pass an object `<input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ></input>`.
+ * This object will be used as following:
+ * <table class="table">
+ *  <tr>
+ *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
+ *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
+ *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
+ *   <td>Method to filter in the grid or table according the choosen column fields.<br/>It returns the new rows to be displayed.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.filterText</code></td>
+ *   <td>This property of the scope has to be associated to the input<br/>(through ng-model).</td>
+ *  </tr>
+ * </table>
+ * You MUST also pass a function `<input it-search ng-change="filter()"></input>`.
+ * This function should call searchControl.multicolumnsFilter() to refresh the displayed data and has to be written in the application controller.
+ *
+ * @usage
+ * <input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()">
+ * </input>
+ *
+ * @example
+ * <span><b>SEARCH IN UI-GRID</b></span>
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerGrid">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <div ui-grid="latinGrid" id="latinGrid"></div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService.js">
+ angular.module('itesoft-showcase')
+ .factory('Latin',['$resource', function($resource){
+                                                    return $resource('http://jsonplaceholder.typicode.com/posts');
+                                                }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
+                            $scope.searchControl = {
+                                columnDefs : [{field:'title'}, {field:'body'}]
+                            };
+
+                            $scope.dataSource = [];
+
+                            //---------------ONLY UI-GRID--------------------
+                            $scope.myDefs = [
+                                    {
+                                        field: 'id',
+                                        width: 50
+                                    },
+                                    {
+                                        field: 'title'
+                                    },
+                                    {
+                                        field: 'body'
+                                    }
+                            ];
+                            $scope.latinGrid = {
+                                data: 'dataSource',
+                                columnDefs: $scope.myDefs,
+                                onRegisterApi: function (gridApi) {
+                                    $scope.gridApi = gridApi;
+                                    $scope.gridApi.grid.registerRowsProcessor($scope.searchControl.multicolumnsFilter, 200);
+                                }
+                            };
+                            //---------------ONLY UI-GRID--------------------
+
+                            $scope.filter = function () {
+                                $scope.gridApi.grid.refresh();
+                            };
+
+                            $scope.loadDataGrid = function() {
+                                $scope.dataSource = [];
+
+                                Latin.query().$promise
+                                .then(function(data){
+                                    $scope.dataSource = data;
+                                });
+                            };
+                     }]);
+ </file>
+
+ </example>
+
+ * <span><b>SEARCH IN TABLE</b></span>
+ <example module="itesoft-showcase1">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerTable">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataTable()">DISPLAY DATA IN TABLE</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans TABLE" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <table class="table table-striped table-hover ">
+ <thead>
+ <tr><th>id</th><th>title</th><th>body</th></tr>
+ </thead>
+ <tbody>
+ <tr ng-repeat="dataItem in data">
+ <td>{{dataItem.id}}</td>
+ <td>{{dataItem.title}}</td>
+ <td>{{dataItem.body}}</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module1.js">
+ angular.module('itesoft-showcase1',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService1.js">
+ angular.module('itesoft-showcase1')
+ .factory('Latin1',['$resource', function($resource){
+                                            return $resource('http://jsonplaceholder.typicode.com/posts');
+                                        }]);
+ </file>
+ <file name="Controller1.js">
+ angular.module('itesoft-showcase1')
+ .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
+                    $scope.searchControl = {};
+                    $scope.searchControl = {
+                        columnDefs : [{field:'title'}, {field:'body'}]
+                    };
+
+                    $scope.dataSource = [];
+                    $scope.data = [];
+
+                    $scope.filter = function () {
+                        $scope.data = $scope.searchControl.multicolumnsFilter($scope.dataSource);
+                    };
+
+                    $scope.loadDataTable = function() {
+                        $scope.dataSource = [];
+                        $scope.data = [];
+
+                        Latin1.query().$promise
+                        .then(function(data){
+                           $scope.dataSource = data;
+                           $scope.data = data;
+                        });
+                    };
+             }]);
+ </file>
+
+ </example>
+ **/
+IteSoft
+    .directive('itSearch',function() {
+        return {
+            restrict: 'A',
+            replace : true,
+            scope: {
+                itSearchControl:'='
+            },
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+
+                input.after('<span class="glyphicon glyphicon-search form-control-feedback"/>');
+            },
+            controller : ['$scope',
+                function ($scope) {
+                    $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
+                        var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
+                        var renderableRowTable = [];
+                        var table = false;
+                        if ($scope.itSearchControl.columnDefs) {
+                            renderableRows.forEach(function (row) {
+                                var match = false;
+                                if (row.entity) {//UI-GRID
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row.entity[col.field]) {
+                                            var renderedData = row.entity[col.field].toString();
+                                            if (col.cellFilter) {
+                                                $scope.value = renderedData;
+                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
+                                            }
+                                            if(typeof renderedData !== 'undefined' && renderedData != null){
+                                                if (renderedData.match(matcher)) {
+                                                    match = true;
+                                                }
+                                            }
+                                        }
+                                    });
+                                    if (!match) {
+                                        row.visible = false;
+                                    }
+                                }
+                                else {//TABLE
+                                    table = true;
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row[col.field] && row[col.field].toString().match(matcher)) {
+                                            match = true;
+                                        }
+                                    });
+                                    if (match) {
+                                        renderableRowTable.push(row);
+                                    }
+                                }
+                            });
+                        }
+                        if (table){
+                            renderableRows = renderableRowTable;
+                        }
+                        return renderableRows;
+                    };
+                }]
+        }
+    });
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itToggle
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * A toggle is an animated switch which binds a given model to a boolean.
+ * Allows dragging of the switch's nub.
+ *
+ *
+ * ```html
+ *     <input  it-toggle type="checkbox" it-label="Toggle button">
+ * ```
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+            <div>
+                <input  it-toggle type="checkbox" ng-model="data" it-label="Toggle button">
+            </div>
+        </file>
+
+    </example>
+ */
+IteSoft
+    .directive('itToggle',['$compile',function($compile){
+        return {
+            restrict: 'A',
+            transclude : true,
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+                input.wrap('<div class="togglebutton"></div>');
+                if (scope.itLabel == undefined) {
+                    input.wrap('<label></label>');
+                    input.after('<span class="toggle"></span>');
+                } else {
+                    input.wrap('<label></label>');
+                    input.after('<span class="toggle"></span><span>'+(scope.itLabel || '')+'</span>');
+
+                    scope.$watch('itLabel', function(value) {
+                        if ((value) && (input.context)) {
+                            var label = angular.element(input.context.parentNode);
+                            if ((label) && (attrs.itLabel)) {
+                                var labelText = angular.element(label.get(0).firstChild);
+                                labelText.get(0).textContent = value+'  ';
+                            }
+                        }
+                    });
+                }
+            },
+            scope: {
+                itLabel: '@'
+            }
+        }
+}]);
 "use strict";
 /**
  * @ngdoc directive
@@ -1601,787 +2382,6 @@ IteSoft
         }
 
     });
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itAutocomplete
- * @module itesoft
- * @restrict ECA
- *
- * @description
- * The ItAutocomplete widgets provides suggestions while you type into the field
- *
- *
- * ```html
- *   <itAutocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-select
- *      </td>
- *      <td>
- *          Default option class
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-selected
- *      </td>
- *      <td>
- *          Selected option class
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-container
- *      </td>
- *      <td>
- *          Option container div
- *      </td>
- *  </tr>
- *  </table>
- *
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-<style>
- .width300{width:300px};
- </style>
- <div ng-controller="HomeCtrl">
- <h1>Usage inside grid:</h1>
- <div id="grid1" ui-grid="gridOptions" class="grid"></div>
- <h1>Standalone usage:</h1>
- <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
- selected id: {{selectedOption}}
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
-        ['$scope',function($scope) {
-            $scope.myData = [];
-            // sample values
-            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
-            $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
-            $scope.lastNameOptions = [{id:"Carney",value:"Carney"},{id:"Wise",value:"Wise"},{id:"Waters",value:"Waters"}];
-            angular.copy($scope.myDataInit,$scope.myData);
-            $scope.gridOptions = {
-                data:$scope.myData,
-                useExternalFiltering: true,
-                enableFiltering: true,
-                onRegisterApi: function(gridApi){
-                  $scope.gridApi = gridApi;
-                  //quick an dirty example of filter that use it-autocomplete
-                  $scope.gridApi.core.on.filterChanged($scope, function(){
-                      $scope.myData = [];
-                      angular.forEach($scope.myDataInit,function(item){
-                            var key = '';
-                            var value = '';
-                            var filterUse = false;
-                            for (var i = 0; i < $scope.gridApi.grid.columns.length; i++) {
-                                key = $scope.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
-                                    filterUse = true;
-                                    value = $scope.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        if(item[key] == value){
-                                            $scope.myData.push(item);
-                                         }
-                                    }
-                                }
-                            }
-                            if(! filterUse){
-                                angular.copy($scope.myDataInit,$scope.myData);
-                            }
-                            $scope.gridOptions.data = $scope.myData;
-                            $scope.gridOptions.totalItems = $scope.myData.length;
-                      })
-                    });
-                },
-                columnDefs:[{
-                    name: 'firstName',
-                    cellClass: 'firstName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-class="\'width300\'" ></it-autocomplete></div>',
-                    filter:[{
-                      term: 1,
-                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
-                      }]
-                    },
-                    {
-                    name: 'lastName',
-                    cellClass: 'lastName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-class="\'width300\'"></it-autocomplete></div>',
-                    filter:[{
-                      term: 1,
-                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
-                      }]
-                    }
-                ]
-            };
-            $scope.selectedOption = {};
-     }
- ]);
- </file>
- </example>
- */
-IteSoft
-    .directive('itAutocomplete', function () {
-        return {
-            restrict: 'AE',
-            scope: {
-                /**
-                 * items list must contain id and value
-                 */
-                items: "=",
-                /**
-                 * selected item id
-                 */
-                selectedOption: "=",
-                /**
-                 * stylesheet class added on input filter
-                 */
-                inputClass: "=",
-                /**
-                 * stylesheet class added on option
-                 */
-                optionClass: "=",
-                /**
-                 * input searchMode value= startsWith,contains default contains
-                 */
-                searchMode: "="
-            },
-            controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate',
-                function ($scope, $rootScope, $translate) {
-
-                    var self = this;
-
-                    /**
-                     * public fields
-                     * @type {{}}
-                     */
-                    self.fields = {
-                        items: [],
-                        inputSearch: '',
-                        showItems: false,
-                        optionClass: $scope.optionClass,
-                        inputClass: $scope.inputClass,
-                        defaultSelectClass: '',
-                        selectedSelectClass: '',
-                        searchMode: $scope.searchMode
-                    };
-                    self.fields.defaultSelectClass= self.fields.optionClass+" it-autocomplete-select";
-                    self.fields.selectedSelectClass= self.fields.defaultSelectClass+" it-autocomplete-selected";
-
-                    /**
-                     * public function
-                     * @type {{}}
-                     */
-                    self.fn = {
-                        select: select,
-                        change: change,
-                        click: click
-                    };
-
-                    /**
-                     * initialize default data
-                     */
-                    angular.copy($scope.items, self.fields.items);
-                    init();
-
-                    /**
-                     * Style class initialization
-                     */
-                    function init() {
-                        angular.forEach(self.fields.items, function (item) {
-                            item.class = self.fields.defaultSelectClass ;
-                        });
-                    }
-
-                    /**
-                     * Call when option is selected
-                     * @param id
-                     */
-                    function select(selectedItem) {
-                        init();
-                        selectedItem.class = self.fields.selectedSelectClass;
-                        $scope.selectedOption = selectedItem.id;
-                        self.fields.inputSearch = selectedItem.value;
-                    }
-
-                    /**
-                     * Call on click on the filter
-                     */
-                    function click() {
-                        if (self.fields.showItems) {
-                            self.fields.showItems = false;
-                        } else {
-                            self.fields.showItems = true;
-                        }
-                    }
-
-                    /**
-                     * Call when input content change
-                     */
-                    function change() {
-                        self.fields.items = [];
-                        if (self.fields.inputSearch == "") {
-                            angular.copy($scope.items, self.fields.items);
-                            init();
-                        } else {
-                            angular.forEach($scope.items, function (item) {
-                                /**
-                                 * StartsWith
-                                 */
-                                if(self.fields.searchMode == "startsWith") {
-                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
-                                        self.fields.items.push(item);
-                                        item.class = self.fields.defaultSelectClass;
-                                    }
-                                /**
-                                 * Contains
-                                 */
-                                }else{
-                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase())!=-1) {
-                                        self.fields.items.push(item);
-                                        item.class = self.fields.defaultSelectClass;
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
-            ],
-            template: '<div >' +
-            '<input ng-focus="itAutocompleteCtrl.fn.click()" ng-blur="itAutocompleteCtrl.fn.click()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '<div class="it-autocomplete-container">' +
-                '<div class="it-autocomplete-content" >' +
-                    '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-                        '<div ng-class="item.class" ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCheckbox
- * @module itesoft
- * @restrict A
- *
- * @description
- * The checkbox is no different than the HTML checkbox input,
- * except it's styled differently.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-            <div>
-                 <input it-checkbox type="checkbox" it-label="Checkbox">
-            </div>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itCheckbox',function(){
-        return {
-            restrict: 'A',
-            transclude : true,
-            replace : true,
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-                input.wrap('<div class="checkbox"></div>');
-                input.wrap('<label></label>');
-                input.after('<span class="checkbox-material"><span class="check" style="margin-right:16px;width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itLabel || ''));
-            }
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itInput
- * @module itesoft
- * @restrict ECA
- *
- * @description
- * Floating labels are just like Stacked Labels,
- * except that their labels animate, or "float" up whe
- * n text is entered in the input.
- *
- *
- * ```html
- *   <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
- *       <input it-input
- *              class="form-control floating-label"
- *              type="text"
- *              name="Email"
- *              ng-minlength="5"
- *              ng-maxlength="10"
- *              required=""
- *              it-label="Email"
- *              ng-model="user.email">
- *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
-         *            <div class="form-error" ng-message="required">This field is required.</div>
-         *            <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
-         *            <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
- *             </div>
- *   </form>
- * ```
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="HomeCtrl">
-               <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
-                <div class="form-group">
-                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
-                </div>
-                <div class="form-group">
-                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
-                </div>
-                  <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
-                      <div class="form-error" ng-message="required">This field is required.</div>
-                      <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
-                      <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
-                  </div>
-                  <button class="btn btn-primary" type="submit">submit</button>
-               </form>
-            </div>
-        </file>
-         <file name="Module.js">
-         angular.module('itesoft-showcase',['ngMessages','itesoft']);
-         </file>
-        <file name="controller.js">
-            angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
-                  $scope.user = {
-                      email : 'test@itesoft.com',
-                      firstName :''
-                     };
-
-                  $scope.submit = function(form){
-                       if(form.$valid){
-                         console.log('submit');
-                       }
-                  }
-            }]);
-        </file>
-
-    </example>
- */
-IteSoft
-    .directive('itInput',function(){
-        return {
-            restrict: 'A',
-            replace : true,
-            require: '?ngModel',
-            link : function (scope, element, attrs, ngModel ) {
-                // Check if ngModel is there else go out
-                if (!ngModel)
-                    return;
-                // Fix on input element
-                var input = angular.element(element[0]);
-                //If there is no floating-lbal do nothing
-                if (input.hasClass('floating-label')) {
-                    // Wrapper for material design
-                    input.wrap('<div class="form-control-wrapper"></div>');
-                    // If there is astatic placeholder use it
-                    var placeholder = input.attr('placeholder');
-                    if (placeholder) {
-                        input.after('<div class="floating-label">' +  placeholder + '</div');
-                    } else {
-                        // Else user data binding text 
-                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
-                        scope.$watch('itLabel', function(value) {
-                            scope.$applyAsync(function(){
-                                if (!input[0].offsetParent) {
-                                    return;
-                                }
-                                var elementDiv = input[0].offsetParent.children;
-                                angular.forEach(elementDiv, function(divHtml) {
-                                    var div = angular.element(divHtml);
-                                    if (div.hasClass('floating-label')) {
-                                        div.text(value);
-                                    }
-                                });
-                            })
-
-                        });
-                    }
-                    input.after('<span class="material-input"></span>');
-                    input.attr('placeholder', '').removeClass('floating-label');
-                }
-                // Check if error message is set
-                input.after('<small class="text-danger" style="display:none;"></small>');
-                scope.$watch('itError', function(value) {
-                    if (!input[0].offsetParent) {
-                        return;
-                    }
-                    var elementDiv = input[0].offsetParent.children;
-                    angular.forEach(elementDiv, function(divHtml) {
-                        var div = angular.element(divHtml);
-                        if (div.hasClass('text-danger')) {
-                            div.text(value);
-                            if (value != '' && value != undefined) {
-                                div.removeClass('ng-hide');
-                                div.addClass('ng-show');
-                                div.css('display','block');
-                            } else {
-                                div.removeClass('ng-show');
-                                div.addClass('ng-hide');
-                                div.css('display','none');
-                            }
-                        }
-                    });
-                });
-                if (input.val() === null || input.val() == "undefined" || input.val() === "") {
-                    input.addClass('empty');
-                }
-                // Watch value and update to move floating label
-                scope.$watch(function () {return ngModel.$modelValue; }, function(value,oldValue) {
-                    if (value === null || value == undefined || value ==="" ) {
-                        input.addClass('empty');
-                    } else {
-                        input.removeClass('empty');
-                    }
-                });
-
-                // wait for input
-                input.on('change', function() {
-                    if (input.val() === null || input.val() == "undefined" || input.val() === "") {
-                        input.addClass('empty');
-                    } else {
-                        input.removeClass('empty');
-                    }
-                });
-            },
-            scope : {
-                itError : '=',
-                itLabel : '@'
-            }
-        }
-});
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSearch
- * @module itesoft
- * @restrict A
- *
- * @description
- * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
- *
- * You MUST pass an object `<input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ></input>`.
- * This object will be used as following:
- * <table class="table">
- *  <tr>
- *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
- *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
- *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
- *   <td>Method to filter in the grid or table according the choosen column fields.<br/>It returns the new rows to be displayed.</td>
- *  </tr>
- *  <tr>
- *   <td><code>searchControl.filterText</code></td>
- *   <td>This property of the scope has to be associated to the input<br/>(through ng-model).</td>
- *  </tr>
- * </table>
- * You MUST also pass a function `<input it-search ng-change="filter()"></input>`.
- * This function should call searchControl.multicolumnsFilter() to refresh the displayed data and has to be written in the application controller.
- *
- * @usage
- * <input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()">
- * </input>
- *
- * @example
- * <span><b>SEARCH IN UI-GRID</b></span>
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="SearchDemoControllerGrid">
- <div class="container-fluid">
- <div class="jumbotron">
- <div class="row">
- <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
- <form>
- <div class="form-group has-feedback" >
- <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
- </div>
- </form>
- <div ui-grid="latinGrid" id="latinGrid"></div>
- </div>
- </div>
- </div>
- </div>
- </file>
-
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="LatinService.js">
- angular.module('itesoft-showcase')
- .factory('Latin',['$resource', function($resource){
-                                                    return $resource('http://jsonplaceholder.typicode.com/posts');
-                                                }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
-                            $scope.searchControl = {
-                                columnDefs : [{field:'title'}, {field:'body'}]
-                            };
-
-                            $scope.dataSource = [];
-
-                            //---------------ONLY UI-GRID--------------------
-                            $scope.myDefs = [
-                                    {
-                                        field: 'id',
-                                        width: 50
-                                    },
-                                    {
-                                        field: 'title'
-                                    },
-                                    {
-                                        field: 'body'
-                                    }
-                            ];
-                            $scope.latinGrid = {
-                                data: 'dataSource',
-                                columnDefs: $scope.myDefs,
-                                onRegisterApi: function (gridApi) {
-                                    $scope.gridApi = gridApi;
-                                    $scope.gridApi.grid.registerRowsProcessor($scope.searchControl.multicolumnsFilter, 200);
-                                }
-                            };
-                            //---------------ONLY UI-GRID--------------------
-
-                            $scope.filter = function () {
-                                $scope.gridApi.grid.refresh();
-                            };
-
-                            $scope.loadDataGrid = function() {
-                                $scope.dataSource = [];
-
-                                Latin.query().$promise
-                                .then(function(data){
-                                    $scope.dataSource = data;
-                                });
-                            };
-                     }]);
- </file>
-
- </example>
-
- * <span><b>SEARCH IN TABLE</b></span>
- <example module="itesoft-showcase1">
- <file name="index.html">
- <div ng-controller="SearchDemoControllerTable">
- <div class="container-fluid">
- <div class="jumbotron">
- <div class="row">
- <button class="btn btn-primary" ng-click="loadDataTable()">DISPLAY DATA IN TABLE</button>
- <form>
- <div class="form-group has-feedback" >
- <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans TABLE" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
- </div>
- </form>
- <table class="table table-striped table-hover ">
- <thead>
- <tr><th>id</th><th>title</th><th>body</th></tr>
- </thead>
- <tbody>
- <tr ng-repeat="dataItem in data">
- <td>{{dataItem.id}}</td>
- <td>{{dataItem.title}}</td>
- <td>{{dataItem.body}}</td>
- </tr>
- </tbody>
- </table>
- </div>
- </div>
- </div>
- </div>
- </file>
- <file name="Module1.js">
- angular.module('itesoft-showcase1',['ngResource','itesoft']);
- </file>
- <file name="LatinService1.js">
- angular.module('itesoft-showcase1')
- .factory('Latin1',['$resource', function($resource){
-                                            return $resource('http://jsonplaceholder.typicode.com/posts');
-                                        }]);
- </file>
- <file name="Controller1.js">
- angular.module('itesoft-showcase1')
- .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
-                    $scope.searchControl = {};
-                    $scope.searchControl = {
-                        columnDefs : [{field:'title'}, {field:'body'}]
-                    };
-
-                    $scope.dataSource = [];
-                    $scope.data = [];
-
-                    $scope.filter = function () {
-                        $scope.data = $scope.searchControl.multicolumnsFilter($scope.dataSource);
-                    };
-
-                    $scope.loadDataTable = function() {
-                        $scope.dataSource = [];
-                        $scope.data = [];
-
-                        Latin1.query().$promise
-                        .then(function(data){
-                           $scope.dataSource = data;
-                           $scope.data = data;
-                        });
-                    };
-             }]);
- </file>
-
- </example>
- **/
-IteSoft
-    .directive('itSearch',function() {
-        return {
-            restrict: 'A',
-            replace : true,
-            scope: {
-                itSearchControl:'='
-            },
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-
-                input.after('<span class="glyphicon glyphicon-search form-control-feedback"/>');
-            },
-            controller : ['$scope',
-                function ($scope) {
-                    $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
-                        var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
-                        var renderableRowTable = [];
-                        var table = false;
-                        if ($scope.itSearchControl.columnDefs) {
-                            renderableRows.forEach(function (row) {
-                                var match = false;
-                                if (row.entity) {//UI-GRID
-                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
-                                        if (!match && row.entity[col.field]) {
-                                            var renderedData = row.entity[col.field].toString();
-                                            if (col.cellFilter) {
-                                                $scope.value = renderedData;
-                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
-                                            }
-                                            if(typeof renderedData !== 'undefined' && renderedData != null){
-                                                if (renderedData.match(matcher)) {
-                                                    match = true;
-                                                }
-                                            }
-                                        }
-                                    });
-                                    if (!match) {
-                                        row.visible = false;
-                                    }
-                                }
-                                else {//TABLE
-                                    table = true;
-                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
-                                        if (!match && row[col.field] && row[col.field].toString().match(matcher)) {
-                                            match = true;
-                                        }
-                                    });
-                                    if (match) {
-                                        renderableRowTable.push(row);
-                                    }
-                                }
-                            });
-                        }
-                        if (table){
-                            renderableRows = renderableRowTable;
-                        }
-                        return renderableRows;
-                    };
-                }]
-        }
-    });
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itToggle
- * @module itesoft
- * @restrict A
- *
- * @description
- * A toggle is an animated switch which binds a given model to a boolean.
- * Allows dragging of the switch's nub.
- *
- *
- * ```html
- *     <input  it-toggle type="checkbox" it-label="Toggle button">
- * ```
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-            <div>
-                <input  it-toggle type="checkbox" ng-model="data" it-label="Toggle button">
-            </div>
-        </file>
-
-    </example>
- */
-IteSoft
-    .directive('itToggle',['$compile',function($compile){
-        return {
-            restrict: 'A',
-            transclude : true,
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-                input.wrap('<div class="togglebutton"></div>');
-                if (scope.itLabel == undefined) {
-                    input.wrap('<label></label>');
-                    input.after('<span class="toggle"></span>');
-                } else {
-                    input.wrap('<label></label>');
-                    input.after('<span class="toggle"></span><span>'+(scope.itLabel || '')+'</span>');
-
-                    scope.$watch('itLabel', function(value) {
-                        if ((value) && (input.context)) {
-                            var label = angular.element(input.context.parentNode);
-                            if ((label) && (attrs.itLabel)) {
-                                var labelText = angular.element(label.get(0).firstChild);
-                                labelText.get(0).textContent = value+'  ';
-                            }
-                        }
-                    });
-                }
-            },
-            scope: {
-                itLabel: '@'
-            }
-        }
-}]);
 "use strict";
 /**
  * You do not talk about FIGHT CLUB!!
@@ -2563,6 +2563,35 @@ IteSoft
 
 /**
  * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
  * @name itesoft.directive:rowHeight
  * @module itesoft
  * @restrict A
@@ -2641,393 +2670,6 @@ IteSoft
  </file>
  </example>
  */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- *
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- *
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- *
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:true,
-            template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
-                    '</div>'+
-                '</div>'
-
-
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
-
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : true,
-            template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- *
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- *
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
-
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-
-             </it-side-menu-header>
-
-             <it-side-menu>
-                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-
-
-                     <li it-collapsed-item=""   >
-                     <a href=""><h5>Menu</h5></a>
-                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                     <li >
-                     <a href="#/widget/itloader">SubMenu1</a>
-                     </li>
-                     <li >
-                     <a href="#/widget/itBottomGlue">SubMenu2</a>
-                     </li>
-                     </ul>
-                     </li>
-                     </ul>
-              </it-side-menu>
-
-
-             <it-side-menu-content>
-
-                 <h1>See on Plunker !</h1>
-
-             </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
 'use strict';
 /**
  * @ngdoc directive
@@ -3833,6 +3475,393 @@ IteSoft
     });
 
 
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ *
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
+IteSoft
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ *
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
+                    }
+                }
+
+                setActive();
+
+                scope.$on('$locationChangeSuccess', setActive);
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:true,
+            template :
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="it-sidebar-inner">'+
+                        '<div class="nav navbar navbar-inverse">'+
+                        '<nav class="" ng-transclude ></nav>' +
+                        '</div>'+
+                    '</div>'+
+                '</div>'
+
+
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : true,
+            template :
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                    '<div class="it-container it-fill" ng-transclude></div>'+
+                '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ *
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
+IteSoft
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ *
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
+
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+
+             </it-side-menu-header>
+
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
+IteSoft
+    .directive('itSideMenus',function(){
+        return {
+            restrict: 'ECA',
+            transclude : true,
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
+        }
+});
 'use strict';
 
 IteSoft
