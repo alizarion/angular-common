@@ -212,6 +212,22 @@ IteSoft
                     }
 
                     /**
+                     * Watch selectedOption whange to select option if value change outside this directive
+                     */
+                    $scope.$watch('selectedOption',function(newValue,oldValue){
+                        var selected = false; 
+                        angular.forEach($scope.items, function (item) {
+                            if (item.id == newValue) {
+                                select(item);
+                                selected = true;
+                            }
+                        });
+                        if(! selected){
+                            init();
+                        }
+                    });
+
+                    /**
                      * Call when option is selected
                      * @param id
                      */
