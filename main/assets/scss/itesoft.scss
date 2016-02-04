@@ -93,3 +93,8 @@ input::-ms-clear {
   min-height: 90%;
   height: 90%; }
 
+@for $i from 1 through 40 {
+  .width-#{25 * $i} {
+    width: 25 * $i+px;
+  }
+}
