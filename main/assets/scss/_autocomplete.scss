@@ -1,0 +1,40 @@
+
+.it-autocomplete-container {
+  position: absolute;
+}
+
+.it-autocomplete-content {
+  top: 0px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.it-autocomplete-select {
+  background-color: white;
+  cursor: pointer;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.it-autocomplete-select:hover {
+  background-color: whitesmoke;
+}
+
+.it-autocomplete-selected {
+  background-color: #337ab7;
+  cursor: default;
+  color: white;
+}
+
+.ui-grid-filter-container .it-autocomplete-container {
+  position: fixed;
+  z-index: 9999;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.it-autocomplete-container {
+  max-height: 200px;
+  overflow: auto;
+}
