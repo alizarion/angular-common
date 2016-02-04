@@ -216,9 +216,10 @@ IteSoft
                      */
                     $scope.$watch('selectedOption',function(newValue,oldValue){
                         var selected = false; 
-                        angular.forEach($scope.items, function (item) {
+                        angular.forEach(self.fields.items, function (item) {
                             if (item.id == newValue) {
-                                select(item);
+                                self.fields.inputSearch = item.value;
+                                item.class = self.fields.selectedSelectClass;
                                 selected = true;
                             }
                         });
@@ -232,10 +233,7 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        init();
-                        selectedItem.class = self.fields.selectedSelectClass;
                         $scope.selectedOption = selectedItem.id;
-                        self.fields.inputSearch = selectedItem.value;
                     }
 
                     /**
