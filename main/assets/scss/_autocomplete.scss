@@ -13,8 +13,8 @@
 .it-autocomplete-select {
   background-color: white;
   cursor: pointer;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .it-autocomplete-select:hover {
@@ -30,11 +30,10 @@
 .ui-grid-filter-container .it-autocomplete-container {
   position: fixed;
   z-index: 9999;
-  max-height: 200px;
-  overflow: auto;
 }
 
 .it-autocomplete-container {
   max-height: 200px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
