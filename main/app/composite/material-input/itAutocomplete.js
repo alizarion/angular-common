@@ -10,7 +10,7 @@
  *
  *
  * ```html
- *   <itAutocomplete/>
+ *   <itAutocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
  * ```
  *
  * <h1>Skinning</h1>
@@ -62,7 +62,7 @@
  <h1>Usage inside grid:</h1>
  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
  <h1>Standalone usage:</h1>
- <it-autocomplete items="firstNameOptions" selected-option="selectedOption" ></it-autocomplete>
+ <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
  selected id: {{selectedOption}}
  </div>
  </file>
@@ -157,7 +157,11 @@ IteSoft
                 /**
                  * stylesheet class added on option
                  */
-                optionClass: "="
+                optionClass: "=",
+                /**
+                 * input searchMode value= startsWith,contains default contains
+                 */
+                searchMode: "="
             },
             controllerAs: 'itAutocompleteCtrl',
             controller: ['$scope', '$rootScope', '$translate',
@@ -176,7 +180,8 @@ IteSoft
                         optionClass: $scope.optionClass,
                         inputClass: $scope.inputClass,
                         defaultSelectClass: '',
-                        selectedSelectClass: ''
+                        selectedSelectClass: '',
+                        searchMode: $scope.searchMode
                     };
                     self.fields.defaultSelectClass= self.fields.optionClass+" it-autocomplete-select";
                     self.fields.selectedSelectClass= self.fields.defaultSelectClass+" it-autocomplete-selected";
@@ -238,9 +243,22 @@ IteSoft
                             init();
                         } else {
                             angular.forEach($scope.items, function (item) {
-                                if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
-                                    self.fields.items.push(item);
-                                    item.class = self.fields.defaultSelectClass;
+                                /**
+                                 * StartsWith
+                                 */
+                                if(self.fields.searchMode == "startsWith") {
+                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
+                                /**
+                                 * Contains
+                                 */
+                                }else{
+                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase())!=-1) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
                                 }
                             });
                         }
