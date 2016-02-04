@@ -221,6 +221,8 @@ IteSoft
                                 self.fields.inputSearch = item.value;
                                 item.class = self.fields.selectedSelectClass;
                                 selected = true;
+                            }else{
+                                item.class = self.fields.defaultSelectClass;
                             }
                         });
                         if(! selected){
