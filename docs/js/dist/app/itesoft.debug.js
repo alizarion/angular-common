@@ -19,55 +19,6 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- *
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-/**
  * @ngdoc directive
  * @name itesoft.directive:itCompile
  * @module itesoft
@@ -1662,7 +1613,7 @@ IteSoft
  *
  *
  * ```html
- *   <itAutocomplete/>
+ *   <itAutocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
  * ```
  *
  * <h1>Skinning</h1>
@@ -1714,7 +1665,7 @@ IteSoft
  <h1>Usage inside grid:</h1>
  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
  <h1>Standalone usage:</h1>
- <it-autocomplete items="firstNameOptions" selected-option="selectedOption" ></it-autocomplete>
+ <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
  selected id: {{selectedOption}}
  </div>
  </file>
@@ -1809,7 +1760,11 @@ IteSoft
                 /**
                  * stylesheet class added on option
                  */
-                optionClass: "="
+                optionClass: "=",
+                /**
+                 * input searchMode value= startsWith,contains default contains
+                 */
+                searchMode: "="
             },
             controllerAs: 'itAutocompleteCtrl',
             controller: ['$scope', '$rootScope', '$translate',
@@ -1828,7 +1783,8 @@ IteSoft
                         optionClass: $scope.optionClass,
                         inputClass: $scope.inputClass,
                         defaultSelectClass: '',
-                        selectedSelectClass: ''
+                        selectedSelectClass: '',
+                        searchMode: $scope.searchMode
                     };
                     self.fields.defaultSelectClass= self.fields.optionClass+" it-autocomplete-select";
                     self.fields.selectedSelectClass= self.fields.defaultSelectClass+" it-autocomplete-selected";
@@ -1890,9 +1846,22 @@ IteSoft
                             init();
                         } else {
                             angular.forEach($scope.items, function (item) {
-                                if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
-                                    self.fields.items.push(item);
-                                    item.class = self.fields.defaultSelectClass;
+                                /**
+                                 * StartsWith
+                                 */
+                                if(self.fields.searchMode == "startsWith") {
+                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
+                                /**
+                                 * Contains
+                                 */
+                                }else{
+                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase())!=-1) {
+                                        self.fields.items.push(item);
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
                                 }
                             });
                         }
@@ -3977,6 +3946,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 /**

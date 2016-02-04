@@ -5,7 +5,7 @@
 </h1>
 <div><h2 id="description">Description</h2>
 <div class="description"><div class="itesoft-directive-page itesoft-directive-itautocomplete-page"><p>The ItAutocomplete widgets provides suggestions while you type into the field</p>
-<pre><code class="lang-html">  &lt;itAutocomplete/&gt;
+<pre><code class="lang-html">  &lt;itAutocomplete items=&quot;[{id=1,value=&#39;premiere option&#39;}]&quot; selected-option=&quot;selectedId&quot; search-mode=&quot;&#39;contains&#39;&quot;  /&gt;
 </code></pre>
 <p><h3 id="description_skinning">Skinning</h3>
 Following is the list of structural style classes:</p>
@@ -67,7 +67,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-autocomplete"&gt;
 <h3 id="example_usage-inside-grid">Usage inside grid:</h3>
 <div id="grid1" ui-grid="gridOptions" class="grid"></div>
 <h3 id="example_standalone-usage">Standalone usage:</h3>
-<it-autocomplete items="firstNameOptions" selected-option="selectedOption" ></it-autocomplete>
+<it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
 selected id: {{selectedOption}}
 </div>
 </script>
