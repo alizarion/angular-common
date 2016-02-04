@@ -21,6 +21,10 @@
   background-color: whitesmoke;
 }
 
+.it-autocomplete-selected:hover {
+  background-color: #337ab6;
+}
+
 .it-autocomplete-selected {
   background-color: #337ab7;
   cursor: default;
