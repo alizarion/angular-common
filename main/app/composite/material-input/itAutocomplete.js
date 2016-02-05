@@ -193,22 +193,34 @@ IteSoft
                     self.fn = {
                         select: select,
                         change: change,
-                        click: click
+                        click: click,
+                        keyPressed: keyPressed,
                     };
 
                     /**
                      * initialize default data
                      */
-                    angular.copy($scope.items, self.fields.items);
-                    init();
+                    fullInit();
+                    $scope.focusIndex = 0;
 
                     /**
                      * Style class initialization
                      */
                     function init() {
+                        var i = 0;
                         angular.forEach(self.fields.items, function (item) {
                             item.class = self.fields.defaultSelectClass ;
+                            item.position = i ;
+                            i++;
                         });
+                    }
+
+                    /**
+                     * init + copy of items
+                     */
+                    function fullInit(){
+                        angular.copy($scope.items, self.fields.items);
+                        init();
                     }
 
                     /**
@@ -220,6 +232,7 @@ IteSoft
                             if (item.id == newValue) {
                                 self.fields.inputSearch = item.value;
                                 item.class = self.fields.selectedSelectClass;
+                                $scope.focusIndex = item.position;
                                 selected = true;
                             }else{
                                 item.class = self.fields.defaultSelectClass;
@@ -245,6 +258,7 @@ IteSoft
                         if (self.fields.showItems) {
                             self.fields.showItems = false;
                         } else {
+                            fullInit();
                             self.fields.showItems = true;
                         }
                     }
@@ -255,8 +269,7 @@ IteSoft
                     function change() {
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
-                            angular.copy($scope.items, self.fields.items);
-                            init();
+                            fullInit();
                         } else {
                             angular.forEach($scope.items, function (item) {
                                 /**
@@ -279,10 +292,41 @@ IteSoft
                             });
                         }
                     }
+
+                    /**
+                     * Manage keyboard interaction up down enter
+                     * @type {Array}
+                     */
+                    $scope.keys = [];
+                    $scope.keys.push({ code: 13, action: function() { click(); }});
+                    $scope.keys.push({ code: 38, action: function() { $scope.focusIndex--;}});
+                    $scope.keys.push({ code: 40, action: function() { $scope.focusIndex++; }});
+
+                    $scope.$watch('focusIndex',function(newValue,oldValue){
+                        if(newValue<0){
+                            $scope.focusIndex = 0;
+                        }else if(newValue >= self.fields.items.length ){
+                            $scope.focusIndex = self.fields.items.length-1;
+                        }
+                        select(self.fields.items[$scope.focusIndex]);
+
+                    });
+
+                    /**
+                     * Use to manage keyboard interaction
+                     * @param event
+                     */
+                    function keyPressed(event) {
+                        var code = event.keyCode;
+                        $scope.keys.forEach(function(o) {
+                            if ( o.code !== code ) { return; }
+                            o.action();
+                        });
+                    };
                 }
             ],
-            template: '<div >' +
-            '<input ng-focus="itAutocompleteCtrl.fn.click()" ng-blur="itAutocompleteCtrl.fn.click()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            template: '<div>' +
+            '<input ng-keydown="itAutocompleteCtrl.fn.keyPressed($event)" ng-focus="itAutocompleteCtrl.fn.click()" ng-blur="itAutocompleteCtrl.fn.click()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '<div class="it-autocomplete-container">' +
                 '<div class="it-autocomplete-content" >' +
                     '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
