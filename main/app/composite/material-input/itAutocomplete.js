@@ -193,7 +193,8 @@ IteSoft
                     self.fn = {
                         select: select,
                         change: change,
-                        click: click,
+                        hideItems: hideItems,
+                        showItems: showItems,
                         keyPressed: keyPressed,
                     };
 
@@ -227,7 +228,7 @@ IteSoft
                      * Watch selectedOption whange to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption',function(newValue,oldValue){
-                        var selected = false; 
+                        var selected = false;
                         angular.forEach(self.fields.items, function (item) {
                             if (item.id == newValue) {
                                 self.fields.inputSearch = item.value;
@@ -252,17 +253,18 @@ IteSoft
                     }
 
                     /**
-                     * Call on click on the filter
+                     * Hide option items
                      */
-                    function click() {
-                        if (self.fields.showItems) {
-                            self.fields.showItems = false;
-                        } else {
-                            fullInit();
-                            self.fields.showItems = true;
-                        }
+                    function hideItems(){
+                        self.fields.showItems = false;
                     }
 
+                    /**
+                     * Show option items
+                     */
+                    function showItems(){
+                        self.fields.showItems = true;
+                    }
                     /**
                      * Call when input content change
                      */
@@ -298,9 +300,14 @@ IteSoft
                      * @type {Array}
                      */
                     $scope.keys = [];
-                    $scope.keys.push({ code: 13, action: function() { click(); }});
-                    $scope.keys.push({ code: 38, action: function() { $scope.focusIndex--;}});
-                    $scope.keys.push({ code: 40, action: function() { $scope.focusIndex++; }});
+
+                    const KEY_ENTER =13;
+                    const KEY_DOWN= 38;
+                    const KEY_UP= 40;
+
+                    $scope.keys.push({ code: KEY_ENTER, action: function() { hideItems();}});
+                    $scope.keys.push({ code: KEY_DOWN, action: function() { $scope.focusIndex--;}});
+                    $scope.keys.push({ code: KEY_UP, action: function() { $scope.focusIndex++; }});
 
                     $scope.$watch('focusIndex',function(newValue,oldValue){
                         if(newValue<0){
@@ -326,7 +333,7 @@ IteSoft
                 }
             ],
             template: '<div>' +
-            '<input ng-keydown="itAutocompleteCtrl.fn.keyPressed($event)" ng-focus="itAutocompleteCtrl.fn.click()" ng-blur="itAutocompleteCtrl.fn.click()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '<input ng-keydown="itAutocompleteCtrl.fn.keyPressed($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '<div class="it-autocomplete-container">' +
                 '<div class="it-autocomplete-content" >' +
                     '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
