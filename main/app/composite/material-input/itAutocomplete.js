@@ -269,9 +269,9 @@ IteSoft
                      */
                     function _selectItemWithValue(value){
                         var selected = false;
-                        if (angular.isDefined(newValue) && newValue != -1) {
+                        if (angular.isDefined(value) && value != -1) {
                             angular.forEach(self.fields.items, function (item) {
-                                if (item.id == newValue) {
+                                if (item.id == value) {
                                     self.fields.inputSearch = item.value;
                                     item.class = self.fields.selectedSelectClass;
                                     $scope.focusIndex = item.position;
