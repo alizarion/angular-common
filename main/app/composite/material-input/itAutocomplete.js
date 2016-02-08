@@ -252,13 +252,15 @@ IteSoft
                      * Keyboard interation
                      */
                     $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        if (newValue < 0) {
-                            $scope.focusIndex = 0;
-                        } else if (newValue >= self.fields.items.length) {
-                            $scope.focusIndex = self.fields.items.length - 1;
-                        }
-                        if(angular.isDefined(self.fields.items)) {
-                            select(self.fields.items[$scope.focusIndex]);
+                        if(newValue != -1) {
+                            if (newValue < 0) {
+                                $scope.focusIndex = 0;
+                            } else if (newValue >= self.fields.items.length) {
+                                $scope.focusIndex = self.fields.items.length - 1;
+                            }
+                            if (angular.isDefined(self.fields.items)) {
+                                select(self.fields.items[$scope.focusIndex]);
+                            }
                         }
 
                     });
