@@ -114,7 +114,7 @@
                 columnDefs:[{
                     name: 'firstName',
                     cellClass: 'firstName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-class="\'width300\'" ></it-autocomplete></div>',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
                     filter:[{
                       term: 1,
                       options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
@@ -123,7 +123,7 @@
                     {
                     name: 'lastName',
                     cellClass: 'lastName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-class="\'width300\'"></it-autocomplete></div>',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-container-class="\'width300\'"></it-autocomplete></div>',
                     filter:[{
                       term: 1,
                       options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
@@ -159,15 +159,23 @@ IteSoft
                  */
                 optionClass: "=",
                 /**
+                 * stylesheet class added on option container
+                 */
+                optionContainerClass: "=",
+                /**
                  * input searchMode value= startsWith,contains default contains
                  */
                 searchMode: "="
             },
             controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate',
-                function ($scope, $rootScope, $translate) {
+            controller: ['$scope', '$rootScope', '$translate','$document',
+                function ($scope, $rootScope, $translate, $document) {
 
                     var self = this;
+
+                    /****************************************************************************************
+                     *                                  DECLARATION
+                     **************************************************************************************/
 
                     /**
                      * public fields
@@ -178,13 +186,21 @@ IteSoft
                         inputSearch: '',
                         showItems: false,
                         optionClass: $scope.optionClass,
+                        optionContainerClass: $scope.optionContainerClass,
                         inputClass: $scope.inputClass,
                         defaultSelectClass: '',
                         selectedSelectClass: '',
                         searchMode: $scope.searchMode
                     };
+                    self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
                     self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
+                    /**
+                     * Use unique id for container, all to find it if there are multiple itAutocomplete directive inside the same page
+                     * @type {string}
+                     */
+                    self.fields.optionContainerId = _generateID();
+
 
                     /**
                      * public function
@@ -193,16 +209,63 @@ IteSoft
                     self.fn = {
                         select: select,
                         change: change,
+                        init: init,
+                        fullInit: fullInit,
                         hideItems: hideItems,
                         showItems: showItems,
-                        keyPressed: keyPressed,
+                        keyBoardInteration: keyBoardInteration,
                     };
+
+                    /****************************************************************************************
+                     *                                  CODE
+                     **************************************************************************************/
 
                     /**
                      * initialize default data
                      */
                     fullInit();
                     $scope.focusIndex = 0;
+
+                    /**
+                     * Watch selectedOption whange to select option if value change outside this directive
+                     */
+                    $scope.$watch('selectedOption', function (newValue, oldValue) {
+                        var selected = false;
+                        if (angular.isDefined(newValue) && newValue != -1) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == newValue) {
+                                    self.fields.inputSearch = item.value;
+                                    item.class = self.fields.selectedSelectClass;
+                                    $scope.focusIndex = item.position;
+                                    selected = true;
+                                } else {
+                                    item.class = self.fields.defaultSelectClass;
+                                }
+                            });
+                            if (!selected) {
+                                init();
+                            }
+                        }
+                    });
+
+                    /**
+                     * Keyboard interation
+                     */
+                    $scope.$watch('focusIndex', function (newValue, oldValue) {
+                        if (newValue < 0) {
+                            $scope.focusIndex = 0;
+                        } else if (newValue >= self.fields.items.length) {
+                            $scope.focusIndex = self.fields.items.length - 1;
+                        }
+                        if(angular.isDefined(self.fields.items)) {
+                            select(self.fields.items[$scope.focusIndex]);
+                        }
+
+                    });
+
+                    /****************************************************************************************
+                     *                                  FUNCTION
+                     **************************************************************************************/
 
                     /**
                      * Style class initialization
@@ -225,34 +288,27 @@ IteSoft
                     }
 
                     /**
-                     * Watch selectedOption whange to select option if value change outside this directive
-                     */
-                    $scope.$watch('selectedOption', function (newValue, oldValue) {
-                        var selected = false;
-                        if (newValue != -1) {
-                            angular.forEach(self.fields.items, function (item) {
-                                if (item.id == newValue) {
-                                    self.fields.inputSearch = item.value;
-                                    item.class = self.fields.selectedSelectClass;
-                                    $scope.focusIndex = item.position;
-                                    selected = true;
-                                } else {
-                                    item.class = self.fields.defaultSelectClass;
-                                }
-                            });
-                            if (!selected) {
-                                init();
-                            }
-                        }
-                    });
-
-                    /**
                      * Call when option is selected
                      * @param id
                      */
                     function select(selectedItem) {
                         if (angular.isDefined(selectedItem)) {
                             $scope.selectedOption = selectedItem.id;
+                            var selectedDiv = $document[0].querySelector("#options_" +  selectedItem.id);
+                            scrollTo(selectedDiv);
+                        }
+                    }
+
+                    /**
+                     * Scroll on selectedItem when user use keyboard to select an item
+                     * @param divId
+                     */
+                    function scrollTo(targetDiv){
+                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
+                        if( angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
+                        && angular.isDefined(containerDiv) && containerDiv != null ) {
+                            var pos = targetDiv.getBoundingClientRect().top - containerDiv.getBoundingClientRect().top ;
+                            containerDiv.scrollTop = pos;
                         }
                     }
 
@@ -271,7 +327,7 @@ IteSoft
                     }
 
                     /**
-                     * Call when input content change
+                     * Call when search input content change
                      */
                     function change() {
                         self.fields.items = [];
@@ -298,6 +354,7 @@ IteSoft
                                 }
                             });
                         }
+                        showItems();
                     }
 
                     /**
@@ -309,6 +366,8 @@ IteSoft
                     const KEY_ENTER = 13;
                     const KEY_DOWN = 38;
                     const KEY_UP = 40;
+                    const KEY_BACK = 8;
+                    const KEY_DELETE = 8;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
@@ -326,21 +385,11 @@ IteSoft
                         }
                     });
 
-                    $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        if (newValue < 0) {
-                            $scope.focusIndex = 0;
-                        } else if (newValue >= self.fields.items.length) {
-                            $scope.focusIndex = self.fields.items.length - 1;
-                        }
-                        select(self.fields.items[$scope.focusIndex]);
-
-                    });
-
                     /**
                      * Use to manage keyboard interaction
                      * @param event
                      */
-                    function keyPressed(event) {
+                    function keyBoardInteration(event) {
                         var code = event.keyCode;
                         $scope.keys.forEach(function (o) {
                             if (o.code !== code) {
@@ -349,15 +398,28 @@ IteSoft
                             o.action();
                         });
                     };
+
+                    /**
+                     * Generate unique Id
+                     * @returns {string}
+                     */
+                    function _generateID() {
+                        var d = new Date().getTime();
+                        var uuid = 'option_container_xxxxxxxxxxxx4yxxxxx'.replace(/[xy]/g, function(c) {
+                            var r = (d + Math.random()*16)%16 | 0;
+                            d = Math.floor(d/16);
+                            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+                        });
+                        return uuid;
+                    };
                 }
             ],
             template: '<div>' +
-            '<input ng-keydown="itAutocompleteCtrl.fn.keyPressed($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '<div class="it-autocomplete-container">' +
-            '<div class="it-autocomplete-content" >' +
-            '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-            '<div ng-class="item.class" ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
-            '</div>' +
+            '<input ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ' +
+            'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '<div ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
+            '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
+            '<div ng-class="item.class" id="options_{{item.id}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
             '</div>' +
             '</div>' +
             '</div>'
