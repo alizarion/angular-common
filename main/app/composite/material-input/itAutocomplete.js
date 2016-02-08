@@ -55,7 +55,7 @@
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-<style>
+ <style>
  .width300{width:300px};
  </style>
  <div ng-controller="HomeCtrl">
@@ -71,7 +71,7 @@
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl',
-        ['$scope',function($scope) {
+ ['$scope',function($scope) {
             $scope.myData = [];
             // sample values
             $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
@@ -183,8 +183,8 @@ IteSoft
                         selectedSelectClass: '',
                         searchMode: $scope.searchMode
                     };
-                    self.fields.defaultSelectClass= self.fields.optionClass+" it-autocomplete-select";
-                    self.fields.selectedSelectClass= self.fields.defaultSelectClass+" it-autocomplete-selected";
+                    self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
+                    self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
 
                     /**
                      * public function
@@ -210,8 +210,8 @@ IteSoft
                     function init() {
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
-                            item.class = self.fields.defaultSelectClass ;
-                            item.position = i ;
+                            item.class = self.fields.defaultSelectClass;
+                            item.position = i;
                             i++;
                         });
                     }
@@ -219,7 +219,7 @@ IteSoft
                     /**
                      * init + copy of items
                      */
-                    function fullInit(){
+                    function fullInit() {
                         angular.copy($scope.items, self.fields.items);
                         init();
                     }
@@ -227,20 +227,22 @@ IteSoft
                     /**
                      * Watch selectedOption whange to select option if value change outside this directive
                      */
-                    $scope.$watch('selectedOption',function(newValue,oldValue){
+                    $scope.$watch('selectedOption', function (newValue, oldValue) {
                         var selected = false;
-                        angular.forEach(self.fields.items, function (item) {
-                            if (item.id == newValue) {
-                                self.fields.inputSearch = item.value;
-                                item.class = self.fields.selectedSelectClass;
-                                $scope.focusIndex = item.position;
-                                selected = true;
-                            }else{
-                                item.class = self.fields.defaultSelectClass;
+                        if (newValue != -1) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == newValue) {
+                                    self.fields.inputSearch = item.value;
+                                    item.class = self.fields.selectedSelectClass;
+                                    $scope.focusIndex = item.position;
+                                    selected = true;
+                                } else {
+                                    item.class = self.fields.defaultSelectClass;
+                                }
+                            });
+                            if (!selected) {
+                                init();
                             }
-                        });
-                        if(! selected){
-                            init();
                         }
                     });
 
@@ -249,22 +251,25 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        $scope.selectedOption = selectedItem.id;
+                        if (angular.isDefined(selectedItem)) {
+                            $scope.selectedOption = selectedItem.id;
+                        }
                     }
 
                     /**
                      * Hide option items
                      */
-                    function hideItems(){
+                    function hideItems() {
                         self.fields.showItems = false;
                     }
 
                     /**
                      * Show option items
                      */
-                    function showItems(){
+                    function showItems() {
                         self.fields.showItems = true;
                     }
+
                     /**
                      * Call when input content change
                      */
@@ -277,16 +282,16 @@ IteSoft
                                 /**
                                  * StartsWith
                                  */
-                                if(self.fields.searchMode == "startsWith") {
+                                if (self.fields.searchMode == "startsWith") {
                                     if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
                                         self.fields.items.push(item);
                                         item.class = self.fields.defaultSelectClass;
                                     }
-                                /**
-                                 * Contains
-                                 */
-                                }else{
-                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase())!=-1) {
+                                    /**
+                                     * Contains
+                                     */
+                                } else {
+                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
                                         self.fields.items.push(item);
                                         item.class = self.fields.defaultSelectClass;
                                     }
@@ -301,19 +306,31 @@ IteSoft
                      */
                     $scope.keys = [];
 
-                    const KEY_ENTER =13;
-                    const KEY_DOWN= 38;
-                    const KEY_UP= 40;
+                    const KEY_ENTER = 13;
+                    const KEY_DOWN = 38;
+                    const KEY_UP = 40;
 
-                    $scope.keys.push({ code: KEY_ENTER, action: function() { hideItems();}});
-                    $scope.keys.push({ code: KEY_DOWN, action: function() { $scope.focusIndex--;}});
-                    $scope.keys.push({ code: KEY_UP, action: function() { $scope.focusIndex++; }});
+                    $scope.keys.push({
+                        code: KEY_ENTER, action: function () {
+                            hideItems();
+                        }
+                    });
+                    $scope.keys.push({
+                        code: KEY_DOWN, action: function () {
+                            $scope.focusIndex--;
+                        }
+                    });
+                    $scope.keys.push({
+                        code: KEY_UP, action: function () {
+                            $scope.focusIndex++;
+                        }
+                    });
 
-                    $scope.$watch('focusIndex',function(newValue,oldValue){
-                        if(newValue<0){
+                    $scope.$watch('focusIndex', function (newValue, oldValue) {
+                        if (newValue < 0) {
                             $scope.focusIndex = 0;
-                        }else if(newValue >= self.fields.items.length ){
-                            $scope.focusIndex = self.fields.items.length-1;
+                        } else if (newValue >= self.fields.items.length) {
+                            $scope.focusIndex = self.fields.items.length - 1;
                         }
                         select(self.fields.items[$scope.focusIndex]);
 
@@ -325,8 +342,10 @@ IteSoft
                      */
                     function keyPressed(event) {
                         var code = event.keyCode;
-                        $scope.keys.forEach(function(o) {
-                            if ( o.code !== code ) { return; }
+                        $scope.keys.forEach(function (o) {
+                            if (o.code !== code) {
+                                return;
+                            }
                             o.action();
                         });
                     };
@@ -335,12 +354,12 @@ IteSoft
             template: '<div>' +
             '<input ng-keydown="itAutocompleteCtrl.fn.keyPressed($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '<div class="it-autocomplete-container">' +
-                '<div class="it-autocomplete-content" >' +
-                    '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-                        '<div ng-class="item.class" ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
+            '<div class="it-autocomplete-content" >' +
+            '<div ng-show="itAutocompleteCtrl.fields.showItems" ng-repeat="item in itAutocompleteCtrl.fields.items">' +
+            '<div ng-class="item.class" ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
             '</div>'
         }
     });
