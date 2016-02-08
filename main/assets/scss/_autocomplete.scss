@@ -1,3 +1,8 @@
+@mixin box-shadow($params) {
+  -webkit-box-shadow: $params;
+  -moz-box-shadow: $params;
+  box-shadow: $params;
+}
 
 .it-autocomplete-container {
   position: absolute;
@@ -8,6 +13,7 @@
   right: 0;
   bottom: 0;
   left: 0;
+  width: 100%;
 }
 
 .it-autocomplete-select {
@@ -15,6 +21,7 @@
   cursor: pointer;
   padding-left: 10px;
   padding-right: 10px;
+  width: 100%;
 }
 
 .it-autocomplete-select:hover {
@@ -38,6 +45,10 @@
 
 .it-autocomplete-container {
   max-height: 200px;
+  min-height: 50px;
+  min-width: 50px;
+  background-color: white;
   overflow-y: auto;
   overflow-x: hidden;
+  @include box-shadow(1px 1px 1px #666);
 }
