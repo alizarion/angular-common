@@ -249,6 +249,12 @@ IteSoft
                     });
 
                     /**
+                     * Watch item
+                     */
+                    $scope.$watch('items', function (newValue, oldValue) {
+                        fullInit();
+                    });
+                    /**
                      * Keyboard interation
                      */
                     $scope.$watch('focusIndex', function (newValue, oldValue) {
