@@ -225,27 +225,14 @@ IteSoft
                      */
                     fullInit();
                     $scope.focusIndex = 0;
+                    //Apply default select
+                    _selectItemWithValue($scope.selectedOption);
 
                     /**
                      * Watch selectedOption whange to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
-                        var selected = false;
-                        if (angular.isDefined(newValue) && newValue != -1) {
-                            angular.forEach(self.fields.items, function (item) {
-                                if (item.id == newValue) {
-                                    self.fields.inputSearch = item.value;
-                                    item.class = self.fields.selectedSelectClass;
-                                    $scope.focusIndex = item.position;
-                                    selected = true;
-                                } else {
-                                    item.class = self.fields.defaultSelectClass;
-                                }
-                            });
-                            if (!selected) {
-                                init();
-                            }
-                        }
+                        _selectItemWithValue(newValue);
                     });
 
                     /**
@@ -274,6 +261,30 @@ IteSoft
                     /****************************************************************************************
                      *                                  FUNCTION
                      **************************************************************************************/
+
+                    /**
+                     * Select Item with it value
+                     * @param value
+                     * @private
+                     */
+                    function _selectItemWithValue(value){
+                        var selected = false;
+                        if (angular.isDefined(newValue) && newValue != -1) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == newValue) {
+                                    self.fields.inputSearch = item.value;
+                                    item.class = self.fields.selectedSelectClass;
+                                    $scope.focusIndex = item.position;
+                                    selected = true;
+                                } else {
+                                    item.class = self.fields.defaultSelectClass;
+                                }
+                            });
+                            if (!selected) {
+                                init();
+                            }
+                        }
+                    }
 
                     /**
                      * Style class initialization
@@ -314,7 +325,7 @@ IteSoft
                     function scrollTo(targetDiv){
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
                         if( angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
-                        && angular.isDefined(containerDiv) && containerDiv != null ) {
+                            && angular.isDefined(containerDiv) && containerDiv != null ) {
                             var pos = targetDiv.getBoundingClientRect().top - containerDiv.getBoundingClientRect().top ;
                             containerDiv.scrollTop = pos;
                         }
