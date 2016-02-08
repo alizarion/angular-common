@@ -14,15 +14,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itAutocomplete",
-      "shortName": "itAutocomplete",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "The ItAutocomplete widgets provides suggestions while you type into the field",
-      "keywords": "$scope angular api applies appscope carney cellclass class classes col colfilter columndefs columns company comveyer container controller copy core cox data default directive dirty div eca employed enablefiltering enormo enormo1 enormo10 enormo11 enormo12 enormo2 enormo3 enormo4 enormo5 enormo6 enormo7 enormo8 enormo9 example false female field filter filterchanged filterheadertemplate filters filteruse firstname firstnamefilter firstnameoptions foreach fuelton function grid grid1 gridapi gridoptions homectrl html input-class inside it-autocomplete it-autocomplete-container it-autocomplete-select it-autocomplete-selected itautocomplete items itesoft itesoft-showcase js key lastname lastnamefilter lastnameoptions length list lorraine male module mydata mydatainit nancy ng-controller ng-repeat ngmessages onregisterapi option option-class options premiere push sample search-mode selected selected-option selectedid selectedoption startswith structural style suggestions table term totalitems true type ui-grid ui-grid-filter-container undefined usage useexternalfiltering values var waters widgets width300 wise"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itBottomGlue",
       "shortName": "itBottomGlue",
       "type": "directive",
@@ -263,15 +254,6 @@ NG_DOCS={
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
       "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:pixelWidth",
-      "shortName": "pixelWidth",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "Simple Stylesheet class to manage width.",
-      "keywords": "adaptation api background-color class css directive example html increment itesoft manage module production-- purposes rgba simple solid style stylesheet white width width-1000 width-225 width-75 width-x"
     },
     {
       "section": "api",
