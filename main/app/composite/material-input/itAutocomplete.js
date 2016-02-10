@@ -227,13 +227,21 @@ IteSoft
                     fullInit();
                     $scope.focusIndex = 0;
                     //Apply default select
-                    _selectItemWithValue($scope.selectedOption);
+                    _selectItemWithId($scope.selectedOption);
 
                     /**
-                     * Watch selectedOption whange to select option if value change outside this directive
+                     * Watch items change to items to reload select if item is now present
+                     */
+                    $scope.$watch('items', function (newValue, oldValue) {
+                        _selectItemWithId($scope.selectedOption);
+                    });
+
+
+                    /**
+                     * Watch selectedOption change to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
-                        _selectItemWithValue(newValue);
+                        _selectItemWithId(newValue);
                     });
 
                     /**
@@ -246,7 +254,7 @@ IteSoft
                      * Keyboard interation
                      */
                     $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        if(newValue != -1) {
+                        if(newValue != oldValue && newValue != -1) {
                             if (newValue < 0) {
                                 $scope.focusIndex = 0;
                             } else if (newValue >= self.fields.items.length) {
@@ -264,27 +272,29 @@ IteSoft
                      **************************************************************************************/
 
                     /**
-                     * Select Item with it value
-                     * @param value
+                     * Select Item with it id
+                     * @param id
                      * @private
                      */
-                    function _selectItemWithValue(value){
-                        var selected = false;
-                        self.fields.inputSearch = value;
-                        if (angular.isDefined(value) && value != -1) {
-                            angular.forEach(self.fields.items, function (item) {
-                                if (item.id == value) {
-                                    item.class = self.fields.selectedSelectClass;
-                                    $scope.focusIndex = item.position;
-                                    selected = true;
-                                } else {
-                                    item.class = self.fields.defaultSelectClass;
+                    function _selectItemWithId(id){
+                        $scope.$applyAsync(function(){
+                            var selected = false;
+                            if (angular.isDefined(id) && id != -1) {
+                                angular.forEach(self.fields.items, function (item) {
+                                    if (item.id == id) {
+                                        item.class = self.fields.selectedSelectClass;
+                                        $scope.focusIndex = item.position;
+                                        self.fields.inputSearch = item.value;
+                                        selected = true;
+                                    } else {
+                                        item.class = self.fields.defaultSelectClass;
+                                    }
+                                });
+                                if (!selected) {
+                                    init();
                                 }
-                            });
-                            if (!selected) {
-                                init();
                             }
-                        }
+                        });
                     }
 
                     /**
