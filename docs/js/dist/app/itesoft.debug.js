@@ -1665,8 +1665,8 @@ IteSoft
  <h1>Usage inside grid:</h1>
  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
  <h1>Standalone usage:</h1>
+ Selected Id:<input type="text" ng-model="selectedOption"/>
  <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
- selected id: {{selectedOption}}
  </div>
  </file>
  <file name="Module.js">
@@ -1690,24 +1690,28 @@ IteSoft
                   //quick an dirty example of filter that use it-autocomplete
                   $scope.gridApi.core.on.filterChanged($scope, function(){
                       $scope.myData = [];
+                            var filterUse = false;
                       angular.forEach($scope.myDataInit,function(item){
+                            var added = false;
                             var key = '';
                             var value = '';
-                            var filterUse = false;
                             for (var i = 0; i < $scope.gridApi.grid.columns.length; i++) {
-                                key = $scope.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
-                                    filterUse = true;
-                                    value = $scope.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        if(item[key] == value){
-                                            $scope.myData.push(item);
+                            if(!added){
+                                    key = $scope.gridApi.grid.columns[i].field;
+                                    for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
+                                            value = $scope.gridApi.grid.columns[i].filters[j].term;
+                                            if (value != undefined && value != '') {
+                                                if(item[key] == value &&  $scope.myData.push(item)){
+                                                    $scope.myData.push(item);
+                                                    added = true;
+                                                    filterUse = true;
+                                                 }
+                                            }
                                          }
                                     }
-                                }
-                            }
+                                    }
                             if(! filterUse){
-                                angular.copy($scope.myDataInit,$scope.myData);
+                             //angular.copy($scope.myDataInit,$scope.myData);
                             }
                             $scope.gridOptions.data = $scope.myData;
                             $scope.gridOptions.totalItems = $scope.myData.length;
@@ -1719,8 +1723,7 @@ IteSoft
                     cellClass: 'firstName',
                     filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
                     filter:[{
-                      term: 1,
-                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
+                      term: 1
                       }]
                     },
                     {
@@ -1728,9 +1731,7 @@ IteSoft
                     cellClass: 'lastName',
                     filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-container-class="\'width300\'"></it-autocomplete></div>',
                     filter:[{
-                      term: 1,
-                      options: [ {id: 1, value: 'male'}, {id: 2, value: 'female'} ]
-                      }]
+                      term: 1 }]
                     }
                 ]
             };
@@ -1872,10 +1873,10 @@ IteSoft
                      */
                     function _selectItemWithValue(value){
                         var selected = false;
+                        self.fields.inputSearch = value;
                         if (angular.isDefined(value) && value != -1) {
                             angular.forEach(self.fields.items, function (item) {
                                 if (item.id == value) {
-                                    self.fields.inputSearch = item.value;
                                     item.class = self.fields.selectedSelectClass;
                                     $scope.focusIndex = item.position;
                                     selected = true;
@@ -1993,16 +1994,25 @@ IteSoft
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
-                            hideItems();
+                            if (self.fields.showItems){
+                                hideItems();
+                            }else{
+                                showItems();
+                                if(self.fields.inputSearch == "") {
+                                    $scope.focusIndex = 0;
+                                }
+                            }
                         }
                     });
                     $scope.keys.push({
                         code: KEY_DOWN, action: function () {
+                            showItems();
                             $scope.focusIndex--;
                         }
                     });
                     $scope.keys.push({
                         code: KEY_UP, action: function () {
+                            showItems();
                             $scope.focusIndex++;
                         }
                     });
