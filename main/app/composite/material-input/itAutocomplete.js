@@ -279,7 +279,7 @@ IteSoft
                     function _selectItemWithId(id){
                         $scope.$applyAsync(function(){
                             var selected = false;
-                            if (angular.isDefined(id) && id != -1) {
+                            if (angular.isDefined(id)) {
                                 angular.forEach(self.fields.items, function (item) {
                                     if (item.id == id) {
                                         item.class = self.fields.selectedSelectClass;
