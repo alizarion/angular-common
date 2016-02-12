@@ -49,6 +49,14 @@
  *          Option container div
  *      </td>
  *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-div
+ *      </td>
+ *      <td>
+ *         parent  div
+ *      </td>
+ *  </tr>
  *  </table>
  *
  *
@@ -453,7 +461,7 @@ IteSoft
                     };
                 }
             ],
-            template: '<div>' +
+            template: '<div class="col-xs-12 it-autocomplete-div">' +
             '<input ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '<div ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
