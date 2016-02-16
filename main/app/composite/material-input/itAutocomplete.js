@@ -140,7 +140,7 @@
                     }
                 ]
             };
-            $scope.selectedOption = {};
+            $scope.selectedOption = "Lorraine";
      }
  ]);
  </file>
@@ -290,9 +290,9 @@ IteSoft
                             if (angular.isDefined(id)) {
                                 angular.forEach(self.fields.items, function (item) {
                                     if (item.id == id) {
-                                        item.class = self.fields.selectedSelectClass;
                                         $scope.focusIndex = item.position;
                                         self.fields.inputSearch = item.value;
+                                        select(item);
                                         selected = true;
                                     } else {
                                         item.class = self.fields.defaultSelectClass;
@@ -331,6 +331,7 @@ IteSoft
                      */
                     function select(selectedItem) {
                         if (angular.isDefined(selectedItem)) {
+                            selectedItem.class = self.fields.selectedSelectClass;
                             $scope.selectedOption = selectedItem.id;
                             var selectedDiv = $document[0].querySelector("#options_" +  selectedItem.id);
                             scrollTo(selectedDiv);
@@ -391,6 +392,9 @@ IteSoft
                                     }
                                 }
                             });
+                        }
+                        if( self.fields.items.length == 1){
+                            select(self.fields.items[0]);
                         }
                         showItems();
                     }
