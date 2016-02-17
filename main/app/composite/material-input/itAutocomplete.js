@@ -177,8 +177,8 @@ IteSoft
                 searchMode: "="
             },
             controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate','$document',
-                function ($scope, $rootScope, $translate, $document) {
+            controller: ['$scope', '$rootScope', '$translate','$document', '$timeout',
+                function ($scope, $rootScope, $translate, $document, $timeout) {
 
                     var self = this;
 
@@ -199,6 +199,7 @@ IteSoft
                         inputClass: $scope.inputClass,
                         defaultSelectClass: '',
                         selectedSelectClass: '',
+                        selectedItem: {},
                         searchMode: $scope.searchMode
                     };
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
@@ -262,7 +263,8 @@ IteSoft
                      * Keyboard interation
                      */
                     $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        if(newValue != oldValue && newValue != -1) {
+                        if(newValue != oldValue) {
+                            console.log("newValue "+newValue);
                             if (newValue < 0) {
                                 $scope.focusIndex = 0;
                             } else if (newValue >= self.fields.items.length) {
@@ -289,9 +291,10 @@ IteSoft
                             var selected = false;
                             if (angular.isDefined(id)) {
                                 angular.forEach(self.fields.items, function (item) {
-                                    if (item.id == id) {
+                                    if (item.id == id ) {
+                                        console.log("position "+item.id+" "+item.position);
                                         $scope.focusIndex = item.position;
-                                        self.fields.inputSearch = item.value;
+                                        self.fields.selectedItem = item;
                                         select(item);
                                         selected = true;
                                     } else {
@@ -330,10 +333,10 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        if (angular.isDefined(selectedItem)) {
-                            selectedItem.class = self.fields.selectedSelectClass;
+                        if (selectedItem != self.fields.selectedItem && angular.isDefined(selectedItem)) {
                             $scope.selectedOption = selectedItem.id;
                             var selectedDiv = $document[0].querySelector("#options_" +  selectedItem.id);
+                            selectedItem.class = self.fields.selectedSelectClass;
                             scrollTo(selectedDiv);
                         }
                     }
@@ -346,7 +349,9 @@ IteSoft
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
                         if( angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
                             && angular.isDefined(containerDiv) && containerDiv != null ) {
-                            var pos = targetDiv.getBoundingClientRect().top - containerDiv.getBoundingClientRect().top ;
+                            var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
+                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height ;
+                            var pos =targetPosition -  containerPosition  ;
                             containerDiv.scrollTop = pos;
                         }
                     }
@@ -356,6 +361,9 @@ IteSoft
                      */
                     function hideItems() {
                         self.fields.showItems = false;
+                        console.log("hide");
+
+                        self.fields.inputSearch = self.fields.selectedItem.value;
                     }
 
                     /**
@@ -373,6 +381,7 @@ IteSoft
                         if (self.fields.inputSearch == "") {
                             fullInit();
                         } else {
+                            var i = 0;
                             angular.forEach($scope.items, function (item) {
                                 /**
                                  * StartsWith
@@ -380,7 +389,9 @@ IteSoft
                                 if (self.fields.searchMode == "startsWith") {
                                     if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
                                         self.fields.items.push(item);
+                                        self.fields.items[i].position  = i;
                                         item.class = self.fields.defaultSelectClass;
+                                        i++;
                                     }
                                     /**
                                      * Contains
@@ -388,7 +399,9 @@ IteSoft
                                 } else {
                                     if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
                                         self.fields.items.push(item);
+                                        self.fields.items[i].position  = i;
                                         item.class = self.fields.defaultSelectClass;
+                                        i++;
                                     }
                                 }
                             });
