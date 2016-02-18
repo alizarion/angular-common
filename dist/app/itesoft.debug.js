@@ -19,55 +19,6 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- *
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-/**
  * @ngdoc directive
  * @name itesoft.directive:itCompile
  * @module itesoft
@@ -1650,6 +1601,7 @@ IteSoft
         }
 
     });
+
 'use strict';
 /**
  * @ngdoc directive
@@ -1724,6 +1676,7 @@ IteSoft
  <h1>Standalone usage:</h1>
  Selected Id:<input type="text" ng-model="selectedOption"/>
  <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
+ <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
  </div>
  </file>
  <file name="Module.js">
@@ -1829,8 +1782,8 @@ IteSoft
                 searchMode: "="
             },
             controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate','$document', '$timeout',
-                function ($scope, $rootScope, $translate, $document, $timeout) {
+            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
+                function ($scope, $rootScope, $translate, $document, $timeout, $log) {
 
                     var self = this;
 
@@ -1854,6 +1807,16 @@ IteSoft
                         selectedItem: {},
                         searchMode: $scope.searchMode
                     };
+
+                    if(angular.isUndefined(self.fields.optionClass)){
+                        self.fields.optionClass = '';
+                    }
+                    if(angular.isUndefined(self.fields.optionContainerClass)){
+                        self.fields.optionContainerClass = '';
+                    }
+                    if(angular.isUndefined(self.fields.inputClass)){
+                        self.fields.inputClass = '';
+                    }
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
                     self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
@@ -1894,29 +1857,29 @@ IteSoft
                      * Watch items change to items to reload select if item is now present
                      */
                     $scope.$watch('items', function (newValue, oldValue) {
+                        $log.debug("itAutocomplete: items value changed");
+                        fullInit();
                         _selectItemWithId($scope.selectedOption);
+                        hideItems();
                     });
-
 
                     /**
                      * Watch selectedOption change to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
-                        _selectItemWithId(newValue);
+                        $log.debug("itAutocomplete: selectedOption value changed");
+                        if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
+                            _selectItemWithId(newValue);
+                            hideItems();
+                        }
                     });
 
-                    /**
-                     * Watch item
-                     */
-                    $scope.$watch('items', function (newValue, oldValue) {
-                        fullInit();
-                    });
                     /**
                      * Keyboard interation
                      */
                     $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        if(newValue != oldValue) {
-                            console.log("newValue "+newValue);
+                        $log.debug("itAutocomplete: focusIndex value changed");
+                        if (newValue != oldValue) {
                             if (newValue < 0) {
                                 $scope.focusIndex = 0;
                             } else if (newValue >= self.fields.items.length) {
@@ -1938,46 +1901,48 @@ IteSoft
                      * @param id
                      * @private
                      */
-                    function _selectItemWithId(id){
-                        $scope.$applyAsync(function(){
-                            var selected = false;
-                            if (angular.isDefined(id)) {
-                                angular.forEach(self.fields.items, function (item) {
-                                    if (item.id == id ) {
-                                        console.log("position "+item.id+" "+item.position);
-                                        $scope.focusIndex = item.position;
-                                        self.fields.selectedItem = item;
-                                        select(item);
-                                        selected = true;
-                                    } else {
-                                        item.class = self.fields.defaultSelectClass;
-                                    }
-                                });
-                                if (!selected) {
-                                    init();
+                    function _selectItemWithId(id) {
+                        $log.debug("itAutocomplete: select with  id "+id);
+                        var selected = false;
+                        self.fields.selectedItem = {};
+                        if (angular.isDefined(id)) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == id) {
+                                    select(item);
+                                    selected = true;
                                 }
+                            });
+                            if (!selected) {
+                                init();
                             }
-                        });
+                        }
                     }
 
                     /**
-                     * Style class initialization
+                     * init + copy of externalItems
+                     */
+                    function fullInit() {
+                        $log.debug("itAutocomplete: copy option items");
+                        angular.copy($scope.items, self.fields.items);
+                        init();
+                    }
+
+                    /**
+                     * Style class and position initialization
                      */
                     function init() {
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
-                            item.class = self.fields.defaultSelectClass;
+                            if (angular.isDefined(self.fields.selectedItem)){
+                                if (self.fields.selectedItem != item) {
+                                    unselect(item);
+                                } else {
+                                    select(item)
+                                }
+                            }
                             item.position = i;
                             i++;
                         });
-                    }
-
-                    /**
-                     * init + copy of items
-                     */
-                    function fullInit() {
-                        angular.copy($scope.items, self.fields.items);
-                        init();
                     }
 
                     /**
@@ -1985,25 +1950,40 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        if (selectedItem != self.fields.selectedItem && angular.isDefined(selectedItem)) {
+                        $log.debug("itAutocomplete: select "+selectedItem.id);
+                        // reset last selectedItem class
+                        if (angular.isDefined(self.fields.selectedItem)) {
+                            unselect(self.fields.selectedItem);
+                        }
+                        if (angular.isDefined(selectedItem)) {
+                            $scope.focusIndex = selectedItem.position;
+                            self.fields.selectedItem = selectedItem;
                             $scope.selectedOption = selectedItem.id;
-                            var selectedDiv = $document[0].querySelector("#options_" +  selectedItem.id);
-                            selectedItem.class = self.fields.selectedSelectClass;
+                            self.fields.selectedItem.class = self.fields.selectedSelectClass;
+                            var selectedDiv = $document[0].querySelector("#options_" + selectedItem.id);
                             scrollTo(selectedDiv);
                         }
+                    }
+
+                    /**
+                     * Unselect item
+                     * @param item
+                     */
+                    function unselect(item) {
+                        item.class = self.fields.defaultSelectClass;
                     }
 
                     /**
                      * Scroll on selectedItem when user use keyboard to select an item
                      * @param divId
                      */
-                    function scrollTo(targetDiv){
+                    function scrollTo(targetDiv) {
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
-                        if( angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
-                            && angular.isDefined(containerDiv) && containerDiv != null ) {
+                        if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
+                            && angular.isDefined(containerDiv) && containerDiv != null) {
                             var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
-                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height ;
-                            var pos =targetPosition -  containerPosition  ;
+                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
+                            var pos = targetPosition - containerPosition;
                             containerDiv.scrollTop = pos;
                         }
                     }
@@ -2013,8 +1993,6 @@ IteSoft
                      */
                     function hideItems() {
                         self.fields.showItems = false;
-                        console.log("hide");
-
                         self.fields.inputSearch = self.fields.selectedItem.value;
                     }
 
@@ -2029,6 +2007,7 @@ IteSoft
                      * Call when search input content change
                      */
                     function change() {
+                        $log.debug("itAutocomplete: input search change value")
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
                             fullInit();
@@ -2041,8 +2020,7 @@ IteSoft
                                 if (self.fields.searchMode == "startsWith") {
                                     if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
                                         self.fields.items.push(item);
-                                        self.fields.items[i].position  = i;
-                                        item.class = self.fields.defaultSelectClass;
+                                        self.fields.items[i].position = i;
                                         i++;
                                     }
                                     /**
@@ -2051,14 +2029,13 @@ IteSoft
                                 } else {
                                     if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
                                         self.fields.items.push(item);
-                                        self.fields.items[i].position  = i;
-                                        item.class = self.fields.defaultSelectClass;
+                                        self.fields.items[i].position = i;
                                         i++;
                                     }
                                 }
                             });
                         }
-                        if( self.fields.items.length == 1){
+                        if (self.fields.items.length == 1) {
                             select(self.fields.items[0]);
                         }
                         showItems();
@@ -2078,11 +2055,11 @@ IteSoft
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
-                            if (self.fields.showItems){
+                            if (self.fields.showItems) {
                                 hideItems();
-                            }else{
+                            } else {
                                 showItems();
-                                if(self.fields.inputSearch == "") {
+                                if (self.fields.inputSearch == "") {
                                     $scope.focusIndex = 0;
                                 }
                             }
@@ -2121,10 +2098,10 @@ IteSoft
                      */
                     function _generateID() {
                         var d = new Date().getTime();
-                        var uuid = 'option_container_xxxxxxxxxxxx4yxxxxx'.replace(/[xy]/g, function(c) {
-                            var r = (d + Math.random()*16)%16 | 0;
-                            d = Math.floor(d/16);
-                            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+                        var uuid = 'option_container_xxxxxxxxxxxx4yxxxxx'.replace(/[xy]/g, function (c) {
+                            var r = (d + Math.random() * 16) % 16 | 0;
+                            d = Math.floor(d / 16);
+                            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
                         });
                         return uuid;
                     };
@@ -2140,7 +2117,8 @@ IteSoft
             '</div>' +
             '</div>'
         }
-    });
+    })
+;
 
 'use strict';
 /**
@@ -2682,71 +2660,6 @@ IteSoft
             }
         };
     }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- *
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
 'use strict';
 
 /**
@@ -2931,6 +2844,71 @@ IteSoft
  </file>
  </example>
  */
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ *
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -4236,6 +4214,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 /**
