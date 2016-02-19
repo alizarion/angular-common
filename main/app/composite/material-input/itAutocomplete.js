@@ -128,7 +128,7 @@
                 columnDefs:[{
                     name: 'firstName',
                     cellClass: 'firstName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete placeholder="\'filter\'" items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
                     filter:[{
                       term: 1
                       }]
@@ -176,7 +176,11 @@ IteSoft
                 /**
                  * input searchMode value= startsWith,contains default contains
                  */
-                searchMode: "="
+                searchMode: "=",
+                /**
+                 * input placeHolder
+                 */
+                placeholder: "="
             },
             controllerAs: 'itAutocompleteCtrl',
             controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
@@ -202,7 +206,8 @@ IteSoft
                         defaultSelectClass: '',
                         selectedSelectClass: '',
                         selectedItem: {},
-                        searchMode: $scope.searchMode
+                        searchMode: $scope.searchMode,
+                        placeholder: $scope.placeholder
                     };
 
                     if(angular.isUndefined(self.fields.optionClass)){
@@ -213,6 +218,9 @@ IteSoft
                     }
                     if(angular.isUndefined(self.fields.inputClass)){
                         self.fields.inputClass = '';
+                    }
+                    if(angular.isUndefined(self.fields.placeholder)){
+                        self.fields.placeholder = '';
                     }
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
@@ -504,8 +512,8 @@ IteSoft
                     };
                 }
             ],
-            template: '<div class="col-xs-12 it-autocomplete-div">' +
-            '<input ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ' +
+            template: '<div class="col-xs-12 it-autocomplete-div">'+
+            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '<div ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
