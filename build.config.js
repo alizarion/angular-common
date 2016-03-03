@@ -69,6 +69,7 @@ module.exports = {
         'main/assets/lib/angular-messages/angular-messages.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
+        'main/assets/lib/angular-local-storage/dist/angular-local-storage.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
         'main/assets/lib/angular-media-queries/match-media.js',
         'main/assets/lib/ngtoast/dist/ngToast.min.js'
@@ -84,6 +85,7 @@ module.exports = {
         'main/assets/lib/angular-messages/angular-messages.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.js',
         'main/assets/lib/google-code-prettify/bin/prettify.js',
+        'main/assets/lib/angular-local-storage/dist/angular-local-storage.js',
         'main/assets/lib/angular-ui-grid/ui-grid.js',
         'main/assets/lib/angular-media-queries/match-media.js',
         'main/assets/lib/ngtoast/dist/ngToast.js'

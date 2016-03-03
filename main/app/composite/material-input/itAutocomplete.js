@@ -10,7 +10,7 @@
  *
  *
  * ```html
- *   <itAutocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
+ *   <it-autocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
  * ```
  *
  * <h1>Skinning</h1>
