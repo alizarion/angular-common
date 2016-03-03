@@ -104,6 +104,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itLazyGrid",
+      "shortName": "itLazyGrid",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "The itLazyGrid widgets provides lazy grid feature on ui-grid",
+      "keywords": "$applyasync $scope $templatecache angular api applies appscope au avoir batch_name batchname build call callback cellclass cellfilter class classes click code columndef columndefs companyid companyname concern condition config console controller count credit currency custom1 custom2 custom3 custom4 custom5 data datechangestate daterangefilter dates dd de defaultterm demo des desc direction directive displayname document dropdownfilter du duedate eca emptyoption en entity est eur event f049865665 facture factures false feature fields filiale filterheadertemplate filters filtre fn fournisseur fournisseur1 function grid gridoptions headercellclass headertooltip height homectrl html ignore indiquant initialize initialload instantiate inv123456 invoice isbusy it-sp-supplierportal_invoices_date it-sp-supplierportal_invoices_documenttype it-sp-supplierportal_invoices_supplier items itesoft itesoft-showcase itlazygrid js la lang-html lazy lazygrid le link list load loaded loading log ma maxresult metadata minwidth module ng-controller ngmessages num number onregisterapi option options paginationpagesize paginationpagesizes par plage query ready require rest row rowselectionchanged rsql rsqlkey scandate scope selectedinvoice send showimage site size soit sort sorterrsqlkey sp_available_for_payment status stringfilter structural style supplier supplierid suppliername table totalamount totalitems totalnetamount tous translate true type ui-grid une user var visible widgets width width-125 width-50"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itLoader",
       "shortName": "itLoader",
       "type": "directive",
