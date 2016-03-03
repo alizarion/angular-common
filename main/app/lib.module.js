@@ -9,11 +9,13 @@ var IteSoft = angular.module('itesoft', [
     'ngAnimate',
     'matchMedia',
     'ui.grid',
+    'ui.grid.pagination',
     'ngRoute',
     'pascalprecht.translate',
     'ui.grid.selection',
     'ui.grid.autoResize',
     'ui.grid.resizeColumns',
     'ui.grid.moveColumns',
+    'LocalStorageModule',
     'ngToast'
 ]);
