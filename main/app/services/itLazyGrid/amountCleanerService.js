@@ -36,8 +36,21 @@ IteSoft.factory('itAmountCleanerService', [function () {
                     amountString = amountString.replace(",", ".");
                 }
 
+                //pas de traitement particulier pour le francais
+                //si la locale est en-US
+                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
+                    //suppression de la virgule permettant de séparer les milliers
+                    amountString = amountString.replace(",", "");
+                    //si la locale est de-DE
+                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
+                    //suppression du point permettant de séparer les milliers
+                    amountString = amountString.replace(".", "");
+                    //remplacement de la virgule par un point
+                    amountString = amountString.replace(",", ".");
+                }
+
                 //Formattage des montants avec la locale
-                result = new Intl.NumberFormat(aLocale.replace("_", "-")).v8Parse(amountString)
+                result = parseFloat(amountString);
 
                 console.log('result1 ' + result);
 
