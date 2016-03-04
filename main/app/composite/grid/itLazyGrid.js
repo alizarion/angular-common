@@ -327,7 +327,7 @@ IteSoft.directive('itLazyGrid',
 
                                         //Si la donnée doit être traitée comme un nombre
                                         if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
-                                            value = AmountCleanerService.cleanAmount(value, locale);
+                                            value = itAmountCleanerService.cleanAmount(value, locale);
                                         }
 
                                         var queryParam = itQueryParamFactory.create(key, value, condition);
