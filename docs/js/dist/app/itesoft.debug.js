@@ -68,6 +68,140 @@ IteSoft
         }]);
     }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+        <div konami style="height:500px">
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+        </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 'use strict';
 /**
  * @ngdoc directive
@@ -595,140 +729,6 @@ IteSoft.directive('itLazyGrid',
     DISMISS: "DISMISS"
 })
 ;
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- *
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-        <div konami style="height:500px">
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-        </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 
 /**
@@ -4803,6 +4803,282 @@ IteSoft
 
 'use strict';
 /**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itAmountCleanerService', [function () {
+
+        var supportedLocales = ['en_US',
+            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
+
+        return {
+            cleanAmount: function (amountString, aLocale) {
+                var result = 0;
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+
+                //Suppression des " " pour séparer les milliers et des caractères non numériques
+                amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //pas de traitement particulier pour le francais
+                //si la locale est en-US
+                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
+                    //suppression de la virgule permettant de séparer les milliers
+                    amountString = amountString.replace(",", "");
+                    //si la locale est de-DE
+                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
+                    //suppression du point permettant de séparer les milliers
+                    amountString = amountString.replace(".", "");
+                    //remplacement de la virgule par un point
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //Formattage des montants avec la locale
+                result = parseFloat(amountString);
+
+                console.log('result1 ' + result);
+
+                if (result == undefined) {
+                    result = parseFloat(amountString);
+                }
+
+                console.log('result2 ' + result);
+
+                return result;
+            },
+
+            formatAmount: function (amount, aLocale) {
+                var result = '';
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+                if (amount != undefined) {
+                    var amountString = amount.toString();
+
+                    //Suppression des " " pour séparer les milliers et des caractères non numériques
+                    amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                        amountString = amountString.replace(",", ".");
+                    }
+                }
+                //Formattage des montants avec la locale avec 2 décimales après la virgule
+                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2}).format(parseFloat(amountString));
+
+                return result;
+            }
+        }
+
+
+    }
+    ]
+)
+;
+/**
+ * Created by SZA on 20/01/2016.
+ */
+
+'use strict';
+/**
+ * Singleton that provide paginatorConfig
+ */
+IteSoft.factory('itPaginatorConfigService',
+        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
+            function ($q, $log, itNotifier, $filter, MetadataService) {
+
+                var self = this;
+                var deferred = $q.defer();
+
+                /**
+                 * fields
+                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
+                 */
+                self.fields = {
+                    options: [],
+                    defaultOption: "",
+                    loaded: false
+                };
+
+                /**
+                 * public method
+                 * @type {{initialize: initialize}}
+                 */
+                self.fn = {
+                    initialize: initialize
+                };
+
+                return self;
+                /**
+                 * filter initialization
+                 * @returns {*}
+                 */
+                function initialize() {
+                    if (!self.fields.loaded) {
+                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
+                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
+                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
+                            function (options) {
+                                self.fields.defaultOption = options[1].value;
+                                var paginatorOptions = options[0].value;
+                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
+                                    self.fields.options = paginatorOptions.split(',');
+                                } else {
+                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
+                                }
+
+                                $log.debug("PaginatorConfigService: loaded");
+                                self.fields.loaded = true;
+                                deferred.resolve('ok');
+                            },
+                            function (failed) {
+                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
+                            });
+                    } else {
+                        $log.debug("PaginatorConfigService: loaded");
+                        deferred.resolve('ok');
+                    }
+                    return deferred.promise;
+
+                }
+
+            }
+        ]
+    );
+'use strict';
+/**
+ * Query param service
+ */
+IteSoft.factory('itQueryParamFactory', [function () {
+    function QueryParam(key, value, operator) {
+        this.key = key;
+        this.value = value;
+        this.operator = operator;
+    }
+    return {
+        /**
+         * create a queryParam
+         * @param key: name
+         * @param value: myName
+         * @param operator: OPERATOR.equals
+         * @returns {QueryParam}
+         */
+        create: function (key, value, operator) {
+            return new QueryParam(key, value, operator);
+        }
+    }
+}]);
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
+        function Query(parameters, start, size, sort) {
+            this.parameters = parameters;
+            this.start = start;
+            this.size = size;
+            this.sort = sort;
+            /**
+             * Method that return RSQL path
+             * @returns {string}: query=id==1 and name=="name"
+             */
+            this.build = function () {
+                var result = '';
+                if (parameters != undefined) {
+                    this.parameters.forEach(function (entry) {
+                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
+
+                            //Si c'est une date max, on définit l'heure à 23h59
+                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
+                                entry.value.setHours(23);
+                                entry.value.setMinutes(59);
+                                entry.value.setSeconds(59);
+                                entry.value.setMilliseconds(999);
+                            }
+
+                            if (result.length > 0) {
+                                result += " and ";
+                            }
+
+                            //formattage ISO des dates
+                            if (entry.value instanceof Date) {
+                                entry.value = entry.value.toISOString();
+                            }
+
+                            if (entry.operator == OPERATOR.LIKE) {
+                                entry.value = entry.value + '%';
+                            }
+                            result += entry.key + entry.operator + entry.value;
+                        }
+                    });
+                }
+                result = 'query=' + result;
+                if (size != null && angular.isDefined(size) && size != '') {
+                    result += "&size=" + this.size;
+                }
+                if (start != null && angular.isDefined(start) && start != '') {
+                    result += "&start=" + this.start;
+                }
+                //le sorting en décroissant s'écrit -fieldName
+                if (sort != undefined) {
+                    if (this.sort.name != undefined) {
+                        result += "&sort="
+                        if (this.sort.direction == "desc") {
+                            result += "-"
+                        }
+                        result += this.sort.name;
+                    }
+                }
+                return result;
+
+            };
+
+
+        }
+
+        return {
+            create: function (parameters, start, size, sort) {
+                return new Query(parameters, start, size, sort);
+            }
+        }
+    }
+    ]
+);
+'use strict';
+/**
  * @ngdoc directive
  * @name itesoft.directive:itNotifier
  * @module itesoft
@@ -5227,269 +5503,6 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itAmountCleanerService', [function () {
-
-        var supportedLocales = ['en_US',
-            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
-
-        return {
-            cleanAmount: function (amountString, aLocale) {
-                var result = 0;
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-
-                //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //Formattage des montants avec la locale
-                result = new Intl.NumberFormat(aLocale.replace("_", "-")).v8Parse(amountString)
-
-                console.log('result1 ' + result);
-
-                if (result == undefined) {
-                    result = parseFloat(amountString);
-                }
-
-                console.log('result2 ' + result);
-
-                return result;
-            },
-
-            formatAmount: function (amount, aLocale) {
-                var result = '';
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-                if (amount != undefined) {
-                    var amountString = amount.toString();
-
-                    //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                        amountString = amountString.replace(",", ".");
-                    }
-                }
-                //Formattage des montants avec la locale avec 2 décimales après la virgule
-                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2}).format(parseFloat(amountString));
-
-                return result;
-            }
-        }
-
-
-    }
-    ]
-)
-;
-/**
- * Created by SZA on 20/01/2016.
- */
-
-'use strict';
-/**
- * Singleton that provide paginatorConfig
- */
-IteSoft.factory('itPaginatorConfigService',
-        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
-            function ($q, $log, itNotifier, $filter, MetadataService) {
-
-                var self = this;
-                var deferred = $q.defer();
-
-                /**
-                 * fields
-                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
-                 */
-                self.fields = {
-                    options: [],
-                    defaultOption: "",
-                    loaded: false
-                };
-
-                /**
-                 * public method
-                 * @type {{initialize: initialize}}
-                 */
-                self.fn = {
-                    initialize: initialize
-                };
-
-                return self;
-                /**
-                 * filter initialization
-                 * @returns {*}
-                 */
-                function initialize() {
-                    if (!self.fields.loaded) {
-                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
-                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
-                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
-                            function (options) {
-                                self.fields.defaultOption = options[1].value;
-                                var paginatorOptions = options[0].value;
-                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
-                                    self.fields.options = paginatorOptions.split(',');
-                                } else {
-                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
-                                }
-
-                                $log.debug("PaginatorConfigService: loaded");
-                                self.fields.loaded = true;
-                                deferred.resolve('ok');
-                            },
-                            function (failed) {
-                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
-                            });
-                    } else {
-                        $log.debug("PaginatorConfigService: loaded");
-                        deferred.resolve('ok');
-                    }
-                    return deferred.promise;
-
-                }
-
-            }
-        ]
-    );
-'use strict';
-/**
- * Query param service
- */
-IteSoft.factory('itQueryParamFactory', [function () {
-    function QueryParam(key, value, operator) {
-        this.key = key;
-        this.value = value;
-        this.operator = operator;
-    }
-    return {
-        /**
-         * create a queryParam
-         * @param key: name
-         * @param value: myName
-         * @param operator: OPERATOR.equals
-         * @returns {QueryParam}
-         */
-        create: function (key, value, operator) {
-            return new QueryParam(key, value, operator);
-        }
-    }
-}]);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
-        function Query(parameters, start, size, sort) {
-            this.parameters = parameters;
-            this.start = start;
-            this.size = size;
-            this.sort = sort;
-            /**
-             * Method that return RSQL path
-             * @returns {string}: query=id==1 and name=="name"
-             */
-            this.build = function () {
-                var result = '';
-                if (parameters != undefined) {
-                    this.parameters.forEach(function (entry) {
-                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
-
-                            //Si c'est une date max, on définit l'heure à 23h59
-                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
-                                entry.value.setHours(23);
-                                entry.value.setMinutes(59);
-                                entry.value.setSeconds(59);
-                                entry.value.setMilliseconds(999);
-                            }
-
-                            if (result.length > 0) {
-                                result += " and ";
-                            }
-
-                            //formattage ISO des dates
-                            if (entry.value instanceof Date) {
-                                entry.value = entry.value.toISOString();
-                            }
-
-                            if (entry.operator == OPERATOR.LIKE) {
-                                entry.value = entry.value + '%';
-                            }
-                            result += entry.key + entry.operator + entry.value;
-                        }
-                    });
-                }
-                result = 'query=' + result;
-                if (size != null && angular.isDefined(size) && size != '') {
-                    result += "&size=" + this.size;
-                }
-                if (start != null && angular.isDefined(start) && start != '') {
-                    result += "&start=" + this.start;
-                }
-                //le sorting en décroissant s'écrit -fieldName
-                if (sort != undefined) {
-                    if (this.sort.name != undefined) {
-                        result += "&sort="
-                        if (this.sort.direction == "desc") {
-                            result += "-"
-                        }
-                        result += this.sort.name;
-                    }
-                }
-                return result;
-
-            };
-
-
-        }
-
-        return {
-            create: function (parameters, start, size, sort) {
-                return new Query(parameters, start, size, sort);
-            }
-        }
-    }
-    ]
-);
 'use strict';
 /**
  * @ngdoc service
