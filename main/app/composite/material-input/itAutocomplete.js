@@ -397,7 +397,6 @@ IteSoft
                      * Hide option items
                      */
                     function hideItems($event) {
-                        debugger;
                         // Si appelé lors du click sur la touche entrée
                         if(angular.isUndefined($event) ){
                             self.fields.showItems = false;
