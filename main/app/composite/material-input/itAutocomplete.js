@@ -396,15 +396,61 @@ IteSoft
                     /**
                      * Hide option items
                      */
-                    function hideItems() {
-                        self.fields.showItems = false;
-                        self.fields.inputSearch = self.fields.selectedItem.value;
+                    function hideItems($event) {
+                        debugger;
+                        // Si appelé lors du click sur la touche entrée
+                        if(angular.isUndefined($event) ){
+                            self.fields.showItems = false;
+                            self.fields.inputSearch = self.fields.selectedItem.value;
+                            // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
+                        } else if(! document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
+                            self.fields.showItems = false;
+                            self.fields.inputSearch = self.fields.selectedItem.value;
+
+                            //si il s'agit de la scrollbar, on annule le onblur en remettant le focus sur l'element
+                        }else{
+                            $scope.$applyAsync(function(){
+                                $event.srcElement.focus();
+                            })
+                        };
+                    }
+
+                    /**
+                     * Return internet explorer version
+                     * @returns {number}
+                     */
+                    function getInternetExplorerVersion()
+                    {
+                        var rv = -1;
+                        if (navigator.appName == 'Microsoft Internet Explorer')
+                        {
+                            var ua = navigator.userAgent;
+                            var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                            if (re.exec(ua) != null)
+                                rv = parseFloat( RegExp.$1 );
+                        }
+                        else if (navigator.appName == 'Netscape')
+                        {
+                            var ua = navigator.userAgent;
+                            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
+                            if (re.exec(ua) != null)
+                                rv = parseFloat( RegExp.$1 );
+                        }
+                        return rv;
                     }
 
                     /**
                      * Show option items
                      */
-                    function showItems() {
+                    function showItems($event) {
+                        //refresh modal position on internet explorer because fixed position doesn't follow scroll
+                        if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
+                            var myParent = angular.element( $event.srcElement.parentElement)[0];
+                            if(angular.isDefined(myParent)) {
+                                var newTop = (myParent.getBoundingClientRect().top + myParent.getBoundingClientRect().height);
+                                $event.srcElement.parentElement.children[1].style.setProperty("top", newTop + "px");
+                            }
+                        }
                         self.fields.showItems = true;
                     }
 
@@ -513,9 +559,9 @@ IteSoft
                 }
             ],
             template: '<div class="col-xs-12 it-autocomplete-div">'+
-            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems()" ng-blur="itAutocompleteCtrl.fn.hideItems()" type="text" class="form-control" ' +
+            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '<div ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
+            '<div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
             '<div ng-class="item.class" id="options_{{item.id}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
             '</div>' +

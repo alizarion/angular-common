@@ -94,7 +94,8 @@ IteSoft.factory('itAmountCleanerService', [function () {
                     }
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
-                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2}).format(parseFloat(amountString));
+                //TODO dinar tunisien, incompatible
+                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
 
                 return result;
             }
