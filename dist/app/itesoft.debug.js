@@ -68,667 +68,6 @@ IteSoft
         }]);
     }]);
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- *
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-        <div konami style="height:500px">
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-        </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLazyGrid
- * @module itesoft
- * @restrict ECA
- *
- * @description
- * The itLazyGrid widgets provides lazy grid feature on ui-grid
- *
- *
- * ```html
- *    <it-lazy-grid option="option" ></it-lazy-grid>
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  </table>
- *
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- Query RSQL send to REST API:
-    <pre><code class="lang-html">{{query}}</code></pre>
-     <div style="height:300px;display:block;">
-        <it-lazy-grid options="options" ></it-lazy-grid>
-     </div>
-    </div>
- </div>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = {
-            // call when lazyGrid is instantiate
-            onRegisterApi: function (lazyGrid) {
-                $scope.lazyGrid = lazyGrid;
-                $scope.lazyGrid.appScope = $scope;
-                $scope.lazyGrid.fn.initialize();
-                $scope.lazyGrid.fn.callBack = load;
-                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
-                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
-
-                // Call after each loaded event
-                $scope.lazyGrid.on.loaded = function () {
-                };
-
-                // Call when user click
-                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
-                    $scope.selectedInvoice = row.entity;
-                };
-
-                // Loading columnDef
-                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
-                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
-                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" } ]}
-                 ];
-
-                //Call when grid is ready to use (with config)
-                $scope.$applyAsync(function () {
-                   $scope.lazyGrid.fn.initialLoad();
-                });
-        }};
-
-         // ui-grid loading function, will be call on:
-         //-filter
-         //-pagination
-         //-sorter
-        function load(query) {
-
-            // ignore this, it's just for demo
-            if(query.size == 2){
-                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else if(query.size == 4){
-                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else{
-                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
-                 ]};
-             }
-            // end ignore this, it's just for demo
-            query = query.build();
-            // query RSQL to send to REST API
-            console.log(query);
-            $scope.query = query;
-            $scope.lazyGrid.fields.gridOptions.data = data.items;
-            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
-
-            $scope.isBusy = false;
-            $scope.lazyGrid.on.loaded();
-        }
-     }
- ]
- );
- </file>
- </example>
- */
-IteSoft.directive('itLazyGrid',
-                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
-        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
-            return {
-                restrict: 'AE',
-                scope: {
-                    options: '='
-                },
-                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
-                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
-                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
-                '<div class="ui-grid-filter-container"> ' +
-                '<span ng-repeat="colFilter in col.filters" class="{{col.headerCellClass}}"> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{colFilter.emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{colFilter.emptyOption | translate}}" ng-model="colFilter.term" data-min-date="01/01/1980" data-max-date="01/01/2100" data-autoclose="1" ' +
-                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
-                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
-                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
-                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}"> </div>' +
-                ' </script> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
-                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
-                '<div role="navigation" class="ui-grid-pager-container"> ' +
-                '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
-                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
-                '<div class="first-triangle prev-triangle"></div> </button> ' +
-                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
-                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
-                '{{ paginationApi.getTotalPages() }} ' +
-                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
-                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
-                '<div class="last-triangle next-triangle">' +
-                '</div> ' +
-                '</button> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
-                '<div class="last-triangle"> ' +
-                '<div class="last-bar"> ' +
-                '</div> </div> ' +
-                '</button> </div> ' +
-                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
-                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
-                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
-                '</div> ' +
-                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
-                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
-                '</span> </div> ' +
-                '<div class="ui-grid-pager-count-container">' +
-                '<div class="ui-grid-pager-count"> ' +
-                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
-                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
-                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
-                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
-                ' </div> </div> </div> ' +
-                '</script>',
-                controllerAs: 'lazyGrid',
-                controller: ['$scope', function ($scope) {
-
-
-                    //Get current locale
-                    var locale = localStorageService.get('Locale');
-
-                    var self = this;
-
-                    self.options = $scope.options;
-
-                    /**
-                     * Fields
-                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
-                     */
-                    self.fields = {
-                        template: {pagination: $templateCache.get('paginationTemplate.html')},
-                        filter: [],
-                        externalFilter: {},
-                        gridApi: {},
-                        gridOptions: {},
-                        paginationOptions: {},
-                        appScope: {},
-                        promise: {refresh: {}}
-                    };
-
-                    /**
-                     * Event callback method
-                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
-                     */
-                    self.on = {
-                        loaded: onLoaded,
-                        ready: onReady,
-                        filterChange: onFilterChange,
-                        sortChange: onSortChange,
-                        paginationChanged: onPaginationChanged,
-                        rowSelectionChanged: onRowSelectionChanged
-                    };
-                    /**
-                     * Public Method
-                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
-                     */
-                    self.fn = {
-                        callBack: self.options.callBack,
-                        initialize: initialize,
-                        refresh: refresh,
-                        initialLoad: initialLoad,
-                        addExternalFilter: addExternalFilter
-                    };
-
-
-                    /**
-                     *
-                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
-                     */
-                    self.fields.paginationOptions = {
-                        pageNumber: 1,
-                        pageSize: 10,
-                        sort: {
-                            name: undefined,
-                            direction: undefined
-                        }
-                    };
-                    /**
-                     * Default grid options
-                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
-                     */
-                    self.fields.gridOptions = {
-                        enableFiltering: true,
-                        enableSorting: true,
-                        enableColumnMenus: false,
-                        useExternalPagination: true,
-                        useExternalSorting: true,
-                        enableRowSelection: true,
-                        enableRowHeaderSelection: false,
-                        multiSelect: false,
-                        modifierKeysToMultiSelect: false,
-                        noUnselect: true,
-                        useExternalFiltering: true,
-                        data: [],
-                        columnDefs: [],
-                        paginationTemplate: self.fields.template.pagination,
-                        onRegisterApi: function (gridApi) {
-                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
-                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
-                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
-                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
-                            self.fields.gridApi = gridApi;
-                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
-                        }
-                    };
-                    /**
-                     * Apply external filter
-                     * @private
-                     */
-                    function _applyExternalFilter() {
-                        $log.debug("LazyGrid:Apply External filter");
-                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
-                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
-                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
-                                self.fields.filter.push(queryParam);
-                            }
-                        });
-                    }
-
-                    /**
-                     * Apply filter
-                     * @private
-                     */
-                    function _applyFilter() {
-                        $log.debug("LazyGrid:Apply filter");
-                        var key = '';
-                        var value = '';
-                        var condition = OPERATOR.EQUALS;
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
-                                key = self.fields.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
-                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
-                                        // if filter key is override
-                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
-                                        if (rsqlKey != undefined) {
-                                            key = rsqlKey;
-                                        }
-
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
-                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
-                                        }
-
-                                        //Si la donnée doit être traitée comme un nombre
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
-                                            value = itAmountCleanerService.cleanAmount(value, locale);
-                                        }
-
-                                        var queryParam = itQueryParamFactory.create(key, value, condition);
-                                        self.fields.filter.push(queryParam);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    /**
-                     * Apply default filter configured inside columnDef filter option
-                     * @private
-                     */
-                    function _applyDefaultFilter() {
-                        $log.debug("LazyGrid:Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
-                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
-                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
-                                        //    self.fields.filter.push(queryParamClient);
-                                        //}
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Call after each loading
-                     */
-                    function onLoaded() {
-                    }
-
-                    /**
-                     * Call when grid is ready, when config is loaded (columnDef is present)
-                     */
-                    function onReady() {
-                    }
-
-                    /**
-                     * Call on filter change
-                     */
-                    function onFilterChange() {
-                        $log.debug("LazyGrid:Filter Changed");
-                        self.fields.filter = [];
-                        if (angular.isDefined(self.fields.promise.refresh)) {
-                            $timeout.cancel(self.fields.promise.refresh);
-                        }
-                        self.fields.promise.refresh = $timeout(function () {
-                                self.fn.refresh();
-                            }
-                            , 1000);
-
-                    }
-
-                    /**
-                     * Call on sort change
-                     * @param grid
-                     * @param sortColumns
-                     */
-                    function onSortChange(grid, sortColumns) {
-                        $log.debug("LazyGrid:Sort Changed");
-                        self.fields.filter = [];
-                        if (sortColumns.length == 0) {
-                            self.fields.paginationOptions.sort.name = undefined;
-                            self.fields.paginationOptions.sort.direction = undefined;
-                        } else {
-                            var sortKey = sortColumns[0].name;
-                            /**
-                             * Surcharge avec la clé rsql
-                             */
-                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
-                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
-                            }
-                            self.fields.paginationOptions.sort.name = sortKey;
-                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
-                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
-                        }
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Call when page changed
-                     * @param newPage
-                     * @param pageSize
-                     */
-                    function onPaginationChanged(newPage, pageSize) {
-                        $log.debug("LazyGrid:Pagination Changed");
-                        self.fields.filter = [];
-                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
-                            self.fields.paginationOptions.pageNumber = newPage;
-                            self.fields.paginationOptions.pageSize = pageSize;
-                            self.fn.refresh();
-                        }
-                    }
-
-                    /**
-                     * Call when user click on row
-                     */
-                    function onRowSelectionChanged() {
-                        $log.debug("LazyGrid:Row Selection Changed");
-                    }
-
-                    /**
-                     * Call to refresh data
-                     */
-                    function refresh() {
-                        $log.debug("LazyGrid:Refresh");
-                        _applyExternalFilter();
-                        _applyFilter();
-                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
-                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
-                        self.fn.callBack(query);
-                    }
-
-                    /**
-                     * Initial loading
-                     */
-                    function initialLoad() {
-                        $log.debug("LazyGrid:Initial load");
-
-                        //application des filtres pour récupérer le nom de filtre actifs
-                        _applyFilter();
-                        if (self.fields.filter.length <= 0) {
-                            _applyDefaultFilter();
-                        }
-                        //remise à 0 des informations de filtre
-                        self.fields.filter = [];
-
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Add external filter like clientId
-                     * @param filter external filter to always apply
-                     * @param filter.key
-                     * @param filter.value
-                     * @param filter.condition
-                     */
-                    function addExternalFilter(filter) {
-                        if (angular.isUndefined(filter.key)) {
-                            $log.error("External filter object must have key");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.condition)) {
-                            $log.error("External filter object must have condition");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.value)) {
-                            self.fields.externalFilter[filter.key] = {};
-                        } else {
-                            self.fields.externalFilter[filter.key] = filter;
-                        }
-                    }
-
-                    /**
-                     * Call before using
-                     * @returns {*}
-                     */
-                    function initialize() {
-
-                    }
-
-                    if (angular.isDefined(self.options.onRegisterApi)) {
-                        self.options.onRegisterApi(self);
-                        $log.debug('LazyGrid:onRegisterApi')
-                    }
-
-
-                }]
-            }
-        }
-    ]
-).constant("OPERATOR", {
-        "EQUALS": "==",
-        "LIKE": "==%",
-        "NOT_EQUALS": "!=",
-        "LESS_THAN": "=lt=",
-        "LESS_EQUALS": "=le=",
-        "GREATER_THAN": "=gt=",
-        "GREATER_EQUALS": "=ge="
-})
-.constant('NOTIFICATION_TYPE', {
-    INFO: "INFO",
-    WARNING: "WARNING",
-    ERROR: "ERROR",
-    SUCCESS: "SUCCESS",
-    DISMISS: "DISMISS"
-})
-;
 "use strict";
 /**
  * @ngdoc directive
@@ -1894,6 +1233,667 @@ IteSoft
         }
 
     });
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLazyGrid
+ * @module itesoft
+ * @restrict ECA
+ *
+ * @description
+ * The itLazyGrid widgets provides lazy grid feature on ui-grid
+ *
+ *
+ * ```html
+ *    <it-lazy-grid option="option" ></it-lazy-grid>
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  </table>
+ *
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ Query RSQL send to REST API:
+    <pre><code class="lang-html">{{query}}</code></pre>
+     <div style="height:300px;display:block;">
+        <it-lazy-grid options="options" ></it-lazy-grid>
+     </div>
+    </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = {
+            // call when lazyGrid is instantiate
+            onRegisterApi: function (lazyGrid) {
+                $scope.lazyGrid = lazyGrid;
+                $scope.lazyGrid.appScope = $scope;
+                $scope.lazyGrid.fn.initialize();
+                $scope.lazyGrid.fn.callBack = load;
+                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
+                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
+
+                // Call after each loaded event
+                $scope.lazyGrid.on.loaded = function () {
+                };
+
+                // Call when user click
+                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
+                    $scope.selectedInvoice = row.entity;
+                };
+
+                // Loading columnDef
+                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
+                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
+                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
+                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" } ]}
+                 ];
+
+                //Call when grid is ready to use (with config)
+                $scope.$applyAsync(function () {
+                   $scope.lazyGrid.fn.initialLoad();
+                });
+        }};
+
+         // ui-grid loading function, will be call on:
+         //-filter
+         //-pagination
+         //-sorter
+        function load(query) {
+
+            // ignore this, it's just for demo
+            if(query.size == 2){
+                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else if(query.size == 4){
+                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else{
+                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
+                 ]};
+             }
+            // end ignore this, it's just for demo
+            query = query.build();
+            // query RSQL to send to REST API
+            console.log(query);
+            $scope.query = query;
+            $scope.lazyGrid.fields.gridOptions.data = data.items;
+            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
+
+            $scope.isBusy = false;
+            $scope.lazyGrid.on.loaded();
+        }
+     }
+ ]
+ );
+ </file>
+ </example>
+ */
+IteSoft.directive('itLazyGrid',
+                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
+        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
+            return {
+                restrict: 'AE',
+                scope: {
+                    options: '='
+                },
+                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
+                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
+                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
+                '<div class="ui-grid-filter-container"> ' +
+                '<span ng-repeat="colFilter in col.filters" class="{{col.headerCellClass}}"> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{colFilter.emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{colFilter.emptyOption | translate}}" ng-model="colFilter.term" data-min-date="01/01/1980" data-max-date="01/01/2100" data-autoclose="1" ' +
+                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
+                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
+                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
+                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}"> </div>' +
+                ' </script> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
+                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
+                '<div role="navigation" class="ui-grid-pager-container"> ' +
+                '<div role="menubar" class="ui-grid-pager-control"> ' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
+                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<div class="first-triangle prev-triangle"></div> </button> ' +
+                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
+                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
+                '{{ paginationApi.getTotalPages() }} ' +
+                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
+                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
+                '<div class="last-triangle next-triangle">' +
+                '</div> ' +
+                '</button> ' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
+                '<div class="last-triangle"> ' +
+                '<div class="last-bar"> ' +
+                '</div> </div> ' +
+                '</button> </div> ' +
+                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
+                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
+                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
+                '</div> ' +
+                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
+                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
+                '</span> </div> ' +
+                '<div class="ui-grid-pager-count-container">' +
+                '<div class="ui-grid-pager-count"> ' +
+                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
+                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
+                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
+                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
+                ' </div> </div> </div> ' +
+                '</script>',
+                controllerAs: 'lazyGrid',
+                controller: ['$scope', function ($scope) {
+
+
+                    //Get current locale
+                    var locale = localStorageService.get('Locale');
+
+                    var self = this;
+
+                    self.options = $scope.options;
+
+                    /**
+                     * Fields
+                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
+                     */
+                    self.fields = {
+                        template: {pagination: $templateCache.get('paginationTemplate.html')},
+                        filter: [],
+                        externalFilter: {},
+                        gridApi: {},
+                        gridOptions: {},
+                        paginationOptions: {},
+                        appScope: {},
+                        promise: {refresh: {}}
+                    };
+
+                    /**
+                     * Event callback method
+                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
+                     */
+                    self.on = {
+                        loaded: onLoaded,
+                        ready: onReady,
+                        filterChange: onFilterChange,
+                        sortChange: onSortChange,
+                        paginationChanged: onPaginationChanged,
+                        rowSelectionChanged: onRowSelectionChanged
+                    };
+                    /**
+                     * Public Method
+                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
+                     */
+                    self.fn = {
+                        callBack: self.options.callBack,
+                        initialize: initialize,
+                        refresh: refresh,
+                        initialLoad: initialLoad,
+                        addExternalFilter: addExternalFilter
+                    };
+
+
+                    /**
+                     *
+                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
+                     */
+                    self.fields.paginationOptions = {
+                        pageNumber: 1,
+                        pageSize: 10,
+                        sort: {
+                            name: undefined,
+                            direction: undefined
+                        }
+                    };
+                    /**
+                     * Default grid options
+                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
+                     */
+                    self.fields.gridOptions = {
+                        enableFiltering: true,
+                        enableSorting: true,
+                        enableColumnMenus: false,
+                        useExternalPagination: true,
+                        useExternalSorting: true,
+                        enableRowSelection: true,
+                        enableRowHeaderSelection: false,
+                        multiSelect: false,
+                        modifierKeysToMultiSelect: false,
+                        noUnselect: true,
+                        useExternalFiltering: true,
+                        data: [],
+                        columnDefs: [],
+                        paginationTemplate: self.fields.template.pagination,
+                        onRegisterApi: function (gridApi) {
+                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
+                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
+                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
+                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
+                            self.fields.gridApi = gridApi;
+                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
+                        }
+                    };
+                    /**
+                     * Apply external filter
+                     * @private
+                     */
+                    function _applyExternalFilter() {
+                        $log.debug("LazyGrid:Apply External filter");
+                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
+                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
+                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
+                                self.fields.filter.push(queryParam);
+                            }
+                        });
+                    }
+
+                    /**
+                     * Apply filter
+                     * @private
+                     */
+                    function _applyFilter() {
+                        $log.debug("LazyGrid:Apply filter");
+                        var key = '';
+                        var value = '';
+                        var condition = OPERATOR.EQUALS;
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
+                                key = self.fields.gridApi.grid.columns[i].field;
+                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
+                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
+                                    if (value != undefined && value != '') {
+                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
+                                        // if filter key is override
+                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
+                                        if (rsqlKey != undefined) {
+                                            key = rsqlKey;
+                                        }
+
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
+                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
+                                        }
+
+                                        //Si la donnée doit être traitée comme un nombre
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
+                                            value = itAmountCleanerService.cleanAmount(value, locale);
+                                        }
+
+                                        var queryParam = itQueryParamFactory.create(key, value, condition);
+                                        self.fields.filter.push(queryParam);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    /**
+                     * Apply default filter configured inside columnDef filter option
+                     * @private
+                     */
+                    function _applyDefaultFilter() {
+                        $log.debug("LazyGrid:Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
+                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
+                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
+                                        //    self.fields.filter.push(queryParamClient);
+                                        //}
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Call after each loading
+                     */
+                    function onLoaded() {
+                    }
+
+                    /**
+                     * Call when grid is ready, when config is loaded (columnDef is present)
+                     */
+                    function onReady() {
+                    }
+
+                    /**
+                     * Call on filter change
+                     */
+                    function onFilterChange() {
+                        $log.debug("LazyGrid:Filter Changed");
+                        self.fields.filter = [];
+                        if (angular.isDefined(self.fields.promise.refresh)) {
+                            $timeout.cancel(self.fields.promise.refresh);
+                        }
+                        self.fields.promise.refresh = $timeout(function () {
+                                self.fn.refresh();
+                            }
+                            , 1000);
+
+                    }
+
+                    /**
+                     * Call on sort change
+                     * @param grid
+                     * @param sortColumns
+                     */
+                    function onSortChange(grid, sortColumns) {
+                        $log.debug("LazyGrid:Sort Changed");
+                        self.fields.filter = [];
+                        if (sortColumns.length == 0) {
+                            self.fields.paginationOptions.sort.name = undefined;
+                            self.fields.paginationOptions.sort.direction = undefined;
+                        } else {
+                            var sortKey = sortColumns[0].name;
+                            /**
+                             * Surcharge avec la clé rsql
+                             */
+                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
+                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
+                            }
+                            self.fields.paginationOptions.sort.name = sortKey;
+                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
+                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
+                        }
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Call when page changed
+                     * @param newPage
+                     * @param pageSize
+                     */
+                    function onPaginationChanged(newPage, pageSize) {
+                        $log.debug("LazyGrid:Pagination Changed");
+                        self.fields.filter = [];
+                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
+                            self.fields.paginationOptions.pageNumber = newPage;
+                            self.fields.paginationOptions.pageSize = pageSize;
+                            self.fn.refresh();
+                        }
+                    }
+
+                    /**
+                     * Call when user click on row
+                     */
+                    function onRowSelectionChanged() {
+                        $log.debug("LazyGrid:Row Selection Changed");
+                    }
+
+                    /**
+                     * Call to refresh data
+                     */
+                    function refresh() {
+                        $log.debug("LazyGrid:Refresh");
+                        _applyExternalFilter();
+                        _applyFilter();
+                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
+                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
+                        self.fn.callBack(query);
+                    }
+
+                    /**
+                     * Initial loading
+                     */
+                    function initialLoad() {
+                        $log.debug("LazyGrid:Initial load");
+
+                        //application des filtres pour récupérer le nom de filtre actifs
+                        _applyFilter();
+                        if (self.fields.filter.length <= 0) {
+                            _applyDefaultFilter();
+                        }
+                        //remise à 0 des informations de filtre
+                        self.fields.filter = [];
+
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Add external filter like clientId
+                     * @param filter external filter to always apply
+                     * @param filter.key
+                     * @param filter.value
+                     * @param filter.condition
+                     */
+                    function addExternalFilter(filter) {
+                        if (angular.isUndefined(filter.key)) {
+                            $log.error("External filter object must have key");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.condition)) {
+                            $log.error("External filter object must have condition");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.value)) {
+                            self.fields.externalFilter[filter.key] = {};
+                        } else {
+                            self.fields.externalFilter[filter.key] = filter;
+                        }
+                    }
+
+                    /**
+                     * Call before using
+                     * @returns {*}
+                     */
+                    function initialize() {
+
+                    }
+
+                    if (angular.isDefined(self.options.onRegisterApi)) {
+                        self.options.onRegisterApi(self);
+                        $log.debug('LazyGrid:onRegisterApi')
+                    }
+
+
+                }]
+            }
+        }
+    ]
+).constant("OPERATOR", {
+        "EQUALS": "==",
+        "LIKE": "==%",
+        "NOT_EQUALS": "!=",
+        "LESS_THAN": "=lt=",
+        "LESS_EQUALS": "=le=",
+        "GREATER_THAN": "=gt=",
+        "GREATER_EQUALS": "=ge="
+})
+.constant('NOTIFICATION_TYPE', {
+    INFO: "INFO",
+    WARNING: "WARNING",
+    ERROR: "ERROR",
+    SUCCESS: "SUCCESS",
+    DISMISS: "DISMISS"
+})
+;
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+        <div konami style="height:500px">
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+        </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 "use strict";
 
 /**
@@ -3242,71 +3242,6 @@ IteSoft
             }
         };
     }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- *
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
 'use strict';
 
 /**
@@ -3491,6 +3426,71 @@ IteSoft
  </file>
  </example>
  */
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ *
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -4797,55 +4797,6 @@ IteSoft
         }
     });
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- *
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 /**
  * Service that provide RSQL query
@@ -5123,294 +5074,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -5837,3 +5500,339 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ *
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
