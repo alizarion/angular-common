@@ -217,7 +217,7 @@ IteSoft
                         self.fields.optionContainerClass = '';
                     }
                     if(angular.isUndefined(self.fields.inputClass)){
-                        self.fields.inputClass = '';
+                        self.fields.inputClass = 'it-autocomplete-input-class';
                     }
                     if(angular.isUndefined(self.fields.placeholder)){
                         self.fields.placeholder = '';
@@ -443,11 +443,14 @@ IteSoft
                      */
                     function showItems($event) {
                         //refresh modal position on internet explorer because fixed position doesn't follow scroll
+                        debugger;
                         if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
-                            var myParent = angular.element( $event.srcElement.parentElement)[0];
-                            if(angular.isDefined(myParent)) {
+                                var container = $event.srcElement.parentElement.children[1];
+                                var myParent = angular.element($event.srcElement.parentElement)[0];
+                            //only needed with ie and fixed positiion
+                            if( angular.isDefined(container) && angular.isDefined(myParent) && container.currentStyle["position"]== "fixed") {
                                 var newTop = (myParent.getBoundingClientRect().top + myParent.getBoundingClientRect().height);
-                                $event.srcElement.parentElement.children[1].style.setProperty("top", newTop + "px");
+                                container.style.setProperty("top", newTop + "px");
                             }
                         }
                         self.fields.showItems = true;
