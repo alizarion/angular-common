@@ -148,6 +148,7 @@
  </file>
  </example>
  */
+
 IteSoft
     .directive('itAutocomplete', function () {
         return {
@@ -254,7 +255,7 @@ IteSoft
                      * initialize default data
                      */
                     fullInit();
-                    $scope.focusIndex = 0;
+                    $scope.focusIndex = -1;
                     //Apply default select
                     _selectItemWithId($scope.selectedOption);
 
@@ -286,7 +287,7 @@ IteSoft
                         $log.debug("itAutocomplete: focusIndex value changed");
                         if (newValue != oldValue) {
                             if (newValue < 0) {
-                                $scope.focusIndex = 0;
+                                $scope.focusIndex = -1;
                             } else if (newValue >= self.fields.items.length) {
                                 $scope.focusIndex = self.fields.items.length - 1;
                             }
@@ -512,7 +513,7 @@ IteSoft
                             } else {
                                 showItems();
                                 if (self.fields.inputSearch == "") {
-                                    $scope.focusIndex = 0;
+                                    $scope.focusIndex = -1;
                                 }
                             }
                         }
