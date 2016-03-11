@@ -443,7 +443,6 @@ IteSoft
                      */
                     function showItems($event) {
                         //refresh modal position on internet explorer because fixed position doesn't follow scroll
-                        debugger;
                         if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
                                 var container = $event.srcElement.parentElement.children[1];
                                 var myParent = angular.element($event.srcElement.parentElement)[0];
