@@ -8,7 +8,7 @@
  * @description
  * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
  * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.  
  *
  * ```html
  * <it-master-detail>
