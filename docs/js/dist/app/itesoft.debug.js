@@ -2076,7 +2076,7 @@ IteSoft
  * @description
  * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
  * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.  
  *
  * ```html
  * <it-master-detail>
@@ -2280,6 +2280,7 @@ IteSoft
  </file>
  </example>
  */
+
 IteSoft
     .directive('itAutocomplete', function () {
         return {
@@ -2386,7 +2387,7 @@ IteSoft
                      * initialize default data
                      */
                     fullInit();
-                    $scope.focusIndex = 0;
+                    $scope.focusIndex = -1;
                     //Apply default select
                     _selectItemWithId($scope.selectedOption);
 
@@ -2418,7 +2419,7 @@ IteSoft
                         $log.debug("itAutocomplete: focusIndex value changed");
                         if (newValue != oldValue) {
                             if (newValue < 0) {
-                                $scope.focusIndex = 0;
+                                $scope.focusIndex = -1;
                             } else if (newValue >= self.fields.items.length) {
                                 $scope.focusIndex = self.fields.items.length - 1;
                             }
@@ -2644,7 +2645,7 @@ IteSoft
                             } else {
                                 showItems();
                                 if (self.fields.inputSearch == "") {
-                                    $scope.focusIndex = 0;
+                                    $scope.focusIndex = -1;
                                 }
                             }
                         }
