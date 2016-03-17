@@ -2076,7 +2076,7 @@ IteSoft
  * @description
  * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
  * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.  
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
  *
  * ```html
  * <it-master-detail>
@@ -2106,7 +2106,7 @@ IteSoft
         return {
             restrict: 'EA',
             require: '^itMaster',
-            scope : false,
+            scope: { itSearchPlaceholder : '@'},
             transclude : true,
             template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
                                 '<div class="btn-toolbar it-fill" ng-transclude>'+
@@ -2125,7 +2125,9 @@ IteSoft
                 '</div>'+
                         '</div>',
             link : function (scope, element, attrs ) {
-                scope.placeholderText = attrs.itSearchPlaceholder;
+                scope.$watch('itSearchPlaceholder', function () {
+                    scope.placeholderText = attrs.itSearchPlaceholder;
+                });
             }
         }
 
