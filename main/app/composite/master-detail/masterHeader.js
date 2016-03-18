@@ -38,7 +38,7 @@ IteSoft
         return {
             restrict: 'EA',
             require: '^itMaster',
-            scope: { itSearchPlaceholder : '@'},
+            scope: false,
             transclude : true,
             template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
                                 '<div class="btn-toolbar it-fill" ng-transclude>'+
@@ -49,16 +49,16 @@ IteSoft
                                     '<form>'+
                                         '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
                                             '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                                            '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
+                                            '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{attrs.itSearchPlaceholder}}"/>'+
                                         '</div>'+
                                     '</form>'+
                                 '</div>'+
                             '</div>'+
                 '</div>'+
                         '</div>',
-            link : function (scope, element, attrs ) {
-                scope.$watch('itSearchPlaceholder', function () {
-                    scope.placeholderText = attrs.itSearchPlaceholder;
+            link: function (scope, element, attrs) {
+                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
+                    scope.placeholderText = newVal;
                 });
             }
         }
