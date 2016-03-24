@@ -54,6 +54,10 @@
  *   <td><code>grid.appScope.itAppScope</code></td>
  *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
  *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
  * </table>
  *
  * ```html
@@ -247,9 +251,9 @@ IteSoft
                                     }
                                 }
                                 $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
                             }, function (msg) {
                                 itPopup.alert($scope.itMasterDetailControl.navAlert);
-                                $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
                             });
                         }
                     };
