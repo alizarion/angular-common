@@ -19,7 +19,7 @@
 </tr></p>
 <p><tr>
     <td><code>animation</code></td>
-    <td>&#39;fade&#39;</td>
+    <td>false</td>
     <td>Adds an openning/ending animation, for example &#39;fade&#39;</td>
 </tr></p>
 <p><tr>
@@ -48,8 +48,8 @@
     <td>Automatically remove toast message after specific time</td>
 </tr></p>
 <p><tr>
-    <td><code>dismissButton:</code></td>
-    <td>true</td>
+    <td><code>dismissButton: false</code></td>
+    <td>false</td>
     <td>Adds close button on toast message</td>
 </tr></p>
 <p><tr>
@@ -59,7 +59,7 @@
 </tr></p>
 <p><tr>
     <td><code>dismissOnClick</code></td>
-    <td>false</td>
+    <td>true</td>
     <td>Allows to remove toast message with a click</td>
 </tr></p>
 <p><tr>
@@ -79,20 +79,11 @@
 </tr></p>
 <p><tr>
     <td><code>verticalPosition</code></td>
-    <td>&quot;bottom&quot;</td>
+    <td>&quot;top&quot;</td>
     <td>Vertical position of the toast message. possible values &quot;top&quot; or &quot;bottom&quot;</td>
 </tr>
 </table>
-It&#39;s possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.</p>
-<p>Overload of defaults options value for each type of toasts are :</p>
-<p><ul></p>
-<p><li>success:{dismissOnClick: true}</li></p>
-<p><li>info:{dismissOnClick: true}</li></p>
-<p><li>error:{dismissOnTimeout: false}</li></p>
-<p><li>warning:{dismissOnTimeout: false}</li>
-</ul>
-For example, in the &quot;Controller.js&quot;, the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
-The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config([&#39;ngToastProvider&#39; for details)</p>
+ For example, in the &quot;Controller.js&quot;, the notifyError method override orginial settings and add some content and disable the dismiss on timeout.</p>
 <p><br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object</p>
 <p><table class="table"></p>
 <p><tr>
@@ -145,10 +136,10 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itnotifier-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-123" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-82" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-123" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
-<script type="text/ng-template" id="index.html-123">
+<pre class="prettyprint linenums" ng-set-text="index.html-82" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
+<script type="text/ng-template" id="index.html-82">
         <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
         <div ng-controller="NotifierCtrl">
@@ -184,9 +175,9 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
 <script type="text/ng-template" id="Controller.js">
 
        angular.module('itesoft')
-           .config(['itNotifierProvider', function (itNotifierProvider) {
+           .config(['ngToastProvider', function (ngToast) {
                //configuration of default values
-               itNotifierProvider.defaultOptions = {
+               var defaultOptions = {
                    dismissOnTimeout: true,
                    timeout: 4000,
                    dismissButton: true,
@@ -194,24 +185,22 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
                    horizontalPosition: 'right',
                    verticalPosition: 'bottom',
                    compileContent: true,
-                   dismissOnClick: false,
-                   success:{dismissOnClick: true},//optional overload behavior toast success
-                   info:{dismissOnClick: true},//optional overload behavior toast info
-                   error:{dismissOnTimeout: false},//optional overload behavior toast error
-                   warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+                   dismissOnClick: false
                };
-
+               ngToast.configure(defaultOptions);
            }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
                $scope.showSuccess = function(){
                    itNotifier.notifySuccess({
-                   content: "Success popup"
+                   content: "Success popup",
+                   dismissOnTimeout: true
                    });
                };
                $scope.showSuccessEvent = function(){
                    $scope.$emit('itNotifierEvent', {
                        type: "SUCCESS",
                        options: {
-                           content : "Success event popup"
+                           content : "Success event popup",
+                           dismissOnTimeout: true
                        }}
                     );
                };
@@ -232,7 +221,8 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
                    $scope.$emit('itNotifierEvent', {
                    type: "ERROR",
                    options: {
-                           content : "error event popup"
+                           content : "error event popup",
+                           dismissOnTimeout: false
                        },
                    errorDetails :
                        {
@@ -246,14 +236,16 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
                }
                $scope.showInfo = function(){
                    itNotifier.notifyInfo({
-                   content: "Information popup"
+                   content: "Information popup",
+                   dismissOnTimeout: true
                    });
                };
                $scope.showWarningOnEvent = function(){
                    $scope.$emit('itNotifierEvent', {
                    type: "WARNING",
                    options: {
-                           content : "Warning event popup"
+                           content : "Warning event popup",
+                           dismissOnTimeout: false
                        },
                    errorDetails :
                        {
@@ -279,6 +271,6 @@ The toasts success behavior is also overloaded for dissmiss the toast on click. 
     </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-123" ng-eval-javascript="Controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-82" ng-eval-javascript="Controller.js"></div>
 </div></div>
 </div>

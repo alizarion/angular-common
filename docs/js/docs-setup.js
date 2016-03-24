@@ -14,15 +14,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itAutocomplete",
-      "shortName": "itAutocomplete",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "The ItAutocomplete widgets provides suggestions while you type into the field",
-      "keywords": "$scope angular api applies appscope carney cellclass class classes col colfilter columndefs columns company comveyer container controller copy core cox data default directive dirty div eca employed enablefiltering enormo enormo1 enormo10 enormo11 enormo12 enormo2 enormo3 enormo4 enormo5 enormo6 enormo7 enormo8 enormo9 example false field filter filterchanged filterheadertemplate filters filteruse firstname firstnamefilter firstnameoptions foreach fuelton function grid grid1 gridapi gridoptions homectrl html input-class inside it-autocomplete it-autocomplete-container it-autocomplete-div it-autocomplete-select it-autocomplete-selected itautocomplete items itesoft itesoft-showcase js key lastname lastnamefilter lastnameoptions length list lorraine module mydata mydatainit nancy ng-controller ng-model ng-repeat ngmessages onregisterapi option option-container-class parent placeholder premiere push sample search-mode selected selected-option selectedid selectedoption startswith structural style suggestions table term text totalitems true type ui-grid ui-grid-filter-container undefined usage useexternalfiltering values var waters widgets width300 wise"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itBottomGlue",
       "shortName": "itBottomGlue",
       "type": "directive",
@@ -104,15 +95,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itLazyGrid",
-      "shortName": "itLazyGrid",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "The itLazyGrid widgets provides lazy grid feature on ui-grid",
-      "keywords": "$applyasync $scope $templatecache angular api applies appscope au avoir batch_name batchname build call callback cellclass cellfilter class classes click code columndef columndefs companyid companyname concern condition config console controller count credit currency custom1 custom2 custom3 custom4 custom5 data datechangestate daterangefilter dates dd de defaultterm demo des desc direction directive displayname document dropdownfilter du duedate eca emptyoption en entity est eur event f049865665 facture factures false feature fields filiale filterheadertemplate filters filtre fn fournisseur fournisseur1 function grid gridoptions headercellclass headertooltip height homectrl html ignore indiquant initialize initialload instantiate inv123456 invoice isbusy it-sp-supplierportal_invoices_date it-sp-supplierportal_invoices_documenttype it-sp-supplierportal_invoices_supplier items itesoft itesoft-showcase itlazygrid js la lang-html lazy lazygrid le link list load loaded loading log ma maxresult metadata minwidth module ng-controller ngmessages num number onregisterapi option options paginationpagesize paginationpagesizes par plage query ready require rest row rowselectionchanged rsql rsqlkey scandate scope selectedinvoice send showimage site size soit sort sorterrsqlkey sp_available_for_payment status stringfilter structural style supplier supplierid suppliername table totalamount totalitems totalnetamount tous translate true type ui-grid une user var visible widgets width width-125 width-50"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itLoader",
       "shortName": "itLoader",
       "type": "directive",
@@ -172,7 +154,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "Simple notifier service, that display toasters.",
-      "keywords": "$emit $locationchangesuccess $log $rootscope $scope action adaptation add angular animation api attribute bad bad_request behavior boolean bottom bounds btn btn-danger btn-info btn-success btn-warning button center change class classes classname click close code compilecontent compliant config configuration configure content controller counter css current decribes default defaultoptions defaults defines detail details directive disable dismiss dismissbutton dismissonclick dismissonevent dismissontimeout display dissmiss don empty enabled error errordetail errordetails event events example fade false final function happened horizontalposition html incomplete_object info injecting internal_error internal_server_error itesoft itnotifier itnotifierevent itnotifierprovider js left location log malformed_object message method methods modifying module ng-click ng-controller ngtoast ngtoastprovider notifier notifierctrl notifydismiss notifyerror notifyinfo notifysuccess number object openning options orginial original overload overloaded overloading override parameter parent pass personalise popup popups position precede production-- purposes received remove request result scope server service setting settings showerror showerroronevent showinfo showsuccess showsuccessevent showwarningonevent simple specific status string style success table time timeout toast toaster toasters toasts top true trusted type unique unlimined values verticalposition wanna warn warning ways"
+      "keywords": "$emit $locationchangesuccess $log $rootscope $scope action adaptation add angular animation api attribute bad bad_request behavior boolean bottom bounds btn btn-danger btn-info btn-success btn-warning button center change class classes classname click close code compilecontent compliant config configure content controller counter css current decribes default defaultoptions detail details directive disable dismiss dismissbutton dismissonclick dismissonevent dismissontimeout display don empty enabled error errordetail errordetails event events example fade false final function happened horizontalposition html incomplete_object info injecting internal_error internal_server_error itesoft itnotifier itnotifierevent js left location log malformed_object message method methods modifying module ng-click ng-controller ngtoast ngtoastprovider notifier notifierctrl notifydismiss notifyerror notifyinfo notifysuccess number object openning options orginial original override parent pass personalise popup popups position precede production-- purposes received remove request result scope server service setting settings showerror showerroronevent showinfo showsuccess showsuccessevent showwarningonevent simple specific status string style success table time timeout toast toaster toasters top true trusted type unique unlimined values var verticalposition wanna warn warning ways"
     },
     {
       "section": "api",
@@ -230,57 +212,12 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "itesoft.directive:itSidePanel",
-      "shortName": "itSidePanel",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "A container element for side panel and its Header, Content and Footer",
-      "keywords": "ab adipisicing alias aliquam amet aperiam api applied assumenda aut autem auto awesome background-color bar beatae blanditiis blue bootstrap btn btn-default btn-success button center class columns commodi consectetur container content covers css culpa cum cumque custom debitis default delectus deserunt dignissimos directive display div dolor dolorem ducimus element elements eligendi elit enim equal eveniet explicabo fa-pied-piper-alt fa-star-o facilis font footer full gray greater green harum header height hic highest html icon icons illo illum ipsam ipsum it-col it-height-mode it-icon-class it-side-panel it-side-panel-button it-side-panel-container it-side-panel-footer it-top-position it-z-index itesoft iusto laboriosam lorem magnam margin minus mode module molestias neque nesciunt nobis number officia officiis optio override panel panel-- perspiciatis position property provident quaerat quas qui quisquam rem repellendus repudiandae rerum saepe sapiente scroll selector set side similique sit site smaller soluta suscipit table table-cell tempora tempore temporibus tenetur text-align theside top totam unde undefined valley vel velit veritatis vertical-align view voluptas width window xx z-index"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:itSidePanelContent",
-      "shortName": "itSidePanelContent",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "A container for a Side Panel content, sibling to an directive.",
-      "keywords": "api container content directive itesoft panel sibling side"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:itSidePanelFooter",
-      "shortName": "itSidePanelFooter",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "A container for a Side Panel footer, sibling to an directive.",
-      "keywords": "api container directive footer itesoft panel sibling side"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:itSidePanelHeader",
-      "shortName": "itSidePanelHeader",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "A container for a Side Panel header, sibling to an directive.",
-      "keywords": "api container directive header itesoft panel sibling side"
-    },
-    {
-      "section": "api",
       "id": "itesoft.directive:itToggle",
       "shortName": "itToggle",
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A toggle is an animated switch which binds a given model to a boolean.",
       "keywords": "allows animated api binds boolean button checkbox data directive dragging html it-label it-toggle itesoft model module ng-model nub switch toggle type"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:pixelWidth",
-      "shortName": "pixelWidth",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "Simple Stylesheet class to manage width.",
-      "keywords": "adaptation api background-color class css directive example html increment itesoft manage module production-- purposes rgba simple solid style stylesheet white width width-1000 width-225 width-75 width-x"
     },
     {
       "section": "api",
