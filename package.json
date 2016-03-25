@@ -2,9 +2,7 @@
     "name": "angular-common",
     "version": "1.0.0",
     "description": "Mise en commun de directives AngularJS",
-    "scripts" : {
-        "postinstall" : "npm install -g gulp@3.9.0 bower@1.6.5"
-    },
+
 
     "dependencies": {
         "bower": "1.6.5",
