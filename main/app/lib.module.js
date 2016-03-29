@@ -17,5 +17,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid.resizeColumns',
     'ui.grid.moveColumns',
     'LocalStorageModule',
-    'ngToast'
+    'ngToast',
+    'ui.codemirror'
 ]);
