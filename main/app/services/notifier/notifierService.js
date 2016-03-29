@@ -1,7 +1,7 @@
 'use strict';
 /**
- * @ngdoc directive
- * @name itesoft.directive:itNotifier
+ * @ngdoc service
+ * @name itesoft.service:itNotifier
  * @module itesoft
  * @since 1.0.1
  * @requires ngToast

@@ -77,7 +77,6 @@ $menu-header:                      50px !default;
 }
 
 .it-side-menu-expanded{
-  max-height: 900px;
   opacity: 1;
   -webkit-transition :  all $menu-animation-speed ease-in-out;
   transition: all $menu-animation-speed ease-in-out;
@@ -89,6 +88,10 @@ $menu-header:                      50px !default;
   margin-left: 15px;
 }
 
+
+.it-menu-content .it-container {
+  display: inline-block;
+}
 
 
 
