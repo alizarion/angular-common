@@ -26,6 +26,27 @@ $menu-header:                      50px !default;
   float: none;
   display: block;
 }
+.it-side-menu .navbar ul > * >  h2 {
+  opacity: .5;
+  text-align: left;
+  font-size: 15px;
+  margin: 2px 2px 2px 20px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.843137);
+  border-top: solid 1px;
+  border-top-style: dashed;
+  padding-top: 15px;
+  width: 80%;
+}
+
+.it-side-menu .navbar ul > a:hover {
+
+  text-decoration: none;
+}
+.it-side-menu .navbar ul > a{
+
+  text-decoration: none;
+}
 
 .it-side-menu .it-sidebar-inner  .navbar {
   width: $menu-width;
