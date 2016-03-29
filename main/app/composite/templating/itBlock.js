@@ -6,11 +6,11 @@ IteSoft.directive('itBlock',
                 restrict: 'E',
                 scope: true,
                 transclude: true,
-                template: '<div ng-if="itBlockController.isDistURL && $root.editBlock && position!=\'replace\'" class="block" ng-class="removed ? \'removed-block block\':\'block\'">' +
+                template: '<div ng-if="itBlockController.isDistURL && $root.editBlock && (position!=\'replace\' || content!= \'\')" class="block" ng-class="removed ? \'removed-block block\':\'block\'">' +
                 '<div ng-click="itBlockController.addBefore()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
                 '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
-                '<div ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
-                '<div ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
+                '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
+                '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
                 '<ng-transclude></ng-transclude>' +
                 '</div>' +
                 '<ng-transclude  ng-if="!$root.editBlock && !removed"  ></ng-transclude>',
@@ -46,16 +46,20 @@ IteSoft.directive('itBlock',
                         this.isDistURL = currentPath.indexOf("dist") > 0;
                         this.register = function (value) {
                             $scope.content = value;
-                        }
+                        };
                         this.addBefore = function () {
                             var block = BlockService.new('PS_before' + $scope.name, $scope.name, 'before', '', 'PS');
                             var modalInstance = itBlockModalService.open(block);
                         };
                         this.editBlock = function () {
-                            var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
+                            if (angular.isDefined($scope.ref) && $scope.ref != '') {
+                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
+
+                            } else {
+                                var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS');
+                            }
                             var modalInstance = itBlockModalService.open(block);
                         };
-
                         this.restoreBlock = function () {
                             var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
                             BlockService.restore.get({'name': block.name}, function () {

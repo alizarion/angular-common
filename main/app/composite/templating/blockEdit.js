@@ -4,7 +4,7 @@ IteSoft.directive('blockEdit', [function () {
     return {
         restrict: 'E',
         template: '<div class="readOnly-block"> <div class="inside-block-tags"> ' +
-        '<div ui-codemirror="{ lineNumbers: true, theme:\'dracula\', lineWrapping : true, mode: \'xml\', ' +
+        '<div ui-codemirror="{ lineNumbers: true, theme:\'dracula\', lineWrapping : false, mode: \'xml\', ' +
         'smartIndent:  true, readOnly: false, viewportMargin: 1000 }" ' +
         'ng-model="blockEditController.fields.block.content"> </div>',
         scope: {
