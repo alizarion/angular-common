@@ -5,7 +5,7 @@
  * @name itesoft.directive:itAutocomplete
  * @module itesoft
  * @restrict ECA
- *
+ * @since 1.1
  * @description
  * The ItAutocomplete widgets provides suggestions while you type into the field
  *

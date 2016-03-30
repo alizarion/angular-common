@@ -4,7 +4,7 @@
  * @name itesoft.directive:itMasterDetail
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * A container element for master-detail main content.
  *

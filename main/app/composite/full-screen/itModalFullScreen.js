@@ -3,7 +3,7 @@
  * @name itesoft.directive:itModalFullScreen
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * print the encapsuled content into full screen modal popup. 42
  *

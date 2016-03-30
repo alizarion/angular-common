@@ -5,7 +5,7 @@
  * @name itesoft.directive:itBusyIndicator
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
  * <li>It has 2 usage modes:

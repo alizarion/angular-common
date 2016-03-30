@@ -3,7 +3,7 @@
  * @name itesoft.filter:itUnicode
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * Simple filter that escape string to unicode.
  *

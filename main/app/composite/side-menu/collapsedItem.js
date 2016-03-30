@@ -5,7 +5,7 @@
  * @module itesoft
  * @restrict E
  * @parent sideMenus
- *
+ * @since 1.0
  * @description
  * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *

@@ -18,7 +18,7 @@
         "gulp-karma": "0.0.5",
         "gulp-less": "3.0.3",
         "gulp-minify-css": "1.2.1",
-        "gulp-ngdocs": "https://github.com/alizarion/gulp-ngdocs/tarball/6cab78af78a490830645726c886f90b447acd369",
+        "gulp-ngdocs": "https://github.com/alizarion/gulp-ngdocs/tarball/017bdd66c027e6491cb26758e6442f46f16d3b8f",
         "gulp-rename": "1.2.2",
         "gulp-sass": "2.1.0",
         "gulp-serve": "0.1.0",

@@ -5,7 +5,7 @@
  * @name itesoft.directive:rowHeight
  * @module itesoft
  * @restrict A
- *
+ * @since 1.1
  * @description
  * Simple Stylesheet class to manage height like bootstrap row.<br/>
  * Height is split in 10 parts.<br/>

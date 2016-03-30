@@ -4,7 +4,7 @@
  * @name itesoft.directive:itDetailHeader
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
  * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.

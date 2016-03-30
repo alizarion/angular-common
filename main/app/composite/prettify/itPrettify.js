@@ -6,7 +6,7 @@
  * @module itesoft
  * @restrict EA
  * @parent itesoft
- *
+ * @since 1.0
  * @description
  * A container for display source code in browser with syntax highlighting.
  *

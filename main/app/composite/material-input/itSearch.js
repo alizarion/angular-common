@@ -4,7 +4,7 @@
  * @name itesoft.directive:itSearch
  * @module itesoft
  * @restrict A
- *
+ * @since 1.0
  * @description
  * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
  *

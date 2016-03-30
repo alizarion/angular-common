@@ -3,6 +3,7 @@
  * @ngdoc service
  * @name itesoft.service:itPopup
  * @module itesoft
+ * @since 1.0
  * @requires $uibModal
  * @requires $uibModalStack
  * @requires $rootScope

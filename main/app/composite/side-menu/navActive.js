@@ -5,7 +5,7 @@
  * @name itesoft.directive:itNavActive
  * @module itesoft
  * @restrict A
- *
+ * @since 1.0
  * @description
  * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *

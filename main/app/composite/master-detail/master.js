@@ -4,7 +4,7 @@
  * @name itesoft.directive:itMaster
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * Most important part of master-detail component, that
  *

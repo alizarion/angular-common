@@ -4,7 +4,7 @@
  * @name itesoft.directive:itSidePanelHeader
  * @module itesoft
  * @restrict E
- *
+ * @since 1.0
  * @description
  * A container for a Side Panel header, sibling to an directive.
  * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.

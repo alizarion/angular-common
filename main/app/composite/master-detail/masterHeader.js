@@ -4,7 +4,7 @@
  * @name itesoft.directive:itMasterHeader
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
  * can contain the action buttons of selected items.

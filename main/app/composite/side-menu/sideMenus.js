@@ -4,7 +4,7 @@
  * @name itesoft.directive:itSideMenus
  * @module itesoft
  * @restrict ECA
- *
+ * @since 1.0
  * @description
  * A container element for side menu(s) and the main content. Allows the left and/or right side menu
  * to be toggled by dragging the main content area side to side.

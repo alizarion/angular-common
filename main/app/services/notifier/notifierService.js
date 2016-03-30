@@ -3,7 +3,7 @@
  * @ngdoc service
  * @name itesoft.service:itNotifier
  * @module itesoft
- * @since 1.0.1
+ * @since 1.1
  * @requires ngToast
  * @requires $rootScope
  * @requires $log
