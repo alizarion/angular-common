@@ -14,6 +14,51 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "dependencies.directive:bs-datepicker",
+      "shortName": "bs-datepicker",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "AngularStrap Add datepicker functionality with any form text input.",
+      "keywords": "$invalid add angularstrap api bootstrap-additions bs-datepicker class col-xs-6 control-label currently data-autoclose data-date-format data-date-type data-max-date data-min-date date2 dateparser datepicker datepickerform datepickers dependencies directive docs fa fa-arrows-h fa-calendar form form-control form-group form-inline fromdate functionality github has-error helper html http input io itesoft loaded mgcrea-datepickers module ng-class ng-model number placeholder purposes range require role selecteddate selecteddateasnumber styling text today tooltip type untildate yyyy-mm-dd"
+    },
+    {
+      "section": "api",
+      "id": "dependencies.directive:bs-tooltip",
+      "shortName": "bs-tooltip",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "AngularStrap Tooltip : Add small overlays of content on hover, to any element for housing secondary information.",
+      "keywords": "$scope add ae am-fade-and-scale am-flip-x angular angularstrap api assign bag beard body booth bottom-left bs-enabled bs-tooltip btn btn-primary button check checkbox checked class click col-xs-5 content controller data-animation data-attrs data-container data-placement data-title data-trigger data-type denim dependencies directive element enable false focus form-control function github haven heard hello housing hover href html http info input-group input-group-btn io itesoft js keffiyeh letterpress level maincontroller message messenger mgcrea-tooltips module multiline ng-controller ng-model overlays pants photo placeholder raw scope secondary small stumptown success text title toggle tooltip type variables vegan"
+    },
+    {
+      "section": "api",
+      "id": "dependencies.directive:ui-grid",
+      "shortName": "ui-grid",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "Complex Angularjs dataGrid",
+      "keywords": "$http $interval $scope address ae age aggregatecolumn aggregates aggregatestree aggregation aggregations aggval angular angularjs api asc attributecol avg balance body btn btn-success button cellfilter celltemplate changegrouping children class cleargrouping col colname columndefs company complex console controller count currency custom_filters customtreeaggregationfinalizerfn data datagrid delete dependencies desc direction directive enablefiltering entity expandall expandallrows false female filter foreach function gender genderhash getaggregates getfullyear getmonth grid grid1 gridapi gridoptions groupcolumn groupheader grouping grouppriority groupval html http https info input itesoft js json length log maincontroller male map mapgender match max module newnode ng-click ng-controller ng-if node null number onregisterapi otheraggregations priority rawgit recursiveextract registered registereddate rendercontainers rendered replace result return row rownum second slice sort success title togglefirstrow togglerow togglerowtreestate togglesecondrow tooltip tree treeaggregationtype treebase treechildren treelevel treerowheaderalwaysvisible true type typeof ui-grid ui-grid-cell-contents ui-grid-grouping uigridgroupingconstants undefined var visiblerowcache width"
+    },
+    {
+      "section": "api",
+      "id": "dependencies.service:localStorage",
+      "shortName": "localStorage",
+      "type": "service",
+      "moduleName": "dependencies",
+      "shortDescription": "An Angular module that gives you access to the browsers local storage",
+      "keywords": "$scope access ae angular angular-local-storage api browsers class config console controller demo dependencies example_-storage-type- floating-label form-control form-group function getstoragetype html https it-input it-label itesoft js key local localstorage localstorageservice localstorageserviceprovider log lskeys maincontroller module ng-click ng-controller ng-maxlength ng-minlength ng-model read required saved savethis service sessionstorage set setnotify setprefix setstoragetype storage storagetype text true type write"
+    },
+    {
+      "section": "api",
+      "id": "dependencies.service:screenSize",
+      "shortName": "screenSize",
+      "type": "service",
+      "moduleName": "dependencies",
+      "shortDescription": "Provides an Angular service that returns true if the current screen width matches or false if not. Uses the screen widths predefined in Twitter Bootstrap 3 or a customized size you define.",
+      "keywords": "$scope ae angular angular-match-media api bootstrap checks controller current customized define dependencies dynamic false function html https ismatch ismobile itesoft js load maincontroller match matches media method mobile module ng-controller predefined resize returns screen screensize service size sm staic true twitter updates width widths window xs"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itAutocomplete",
       "shortName": "itAutocomplete",
       "type": "directive",
