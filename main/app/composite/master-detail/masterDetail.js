@@ -70,6 +70,10 @@
  *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
  *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
  *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
  * </table>
  *
  * ```html
