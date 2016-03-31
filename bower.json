@@ -12,6 +12,7 @@
     "angular-sanitize": "1.4.7",
     "components-font-awesome": "4.3.0",
     "bootstrap-material-design": "0.3.0",
+    "angular-strap": "2.3.7",
     "google-code-prettify": "1.0.4",
     "angular-ui-grid": "3.0.7",
     "angular-animate": "1.4.7",

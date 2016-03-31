@@ -155,6 +155,7 @@ gulp.task('uglify', function() {
  * Concat et Minifie le Javascript applicatif
  */
 gulp.task('uglify-debug', function() {
+    buildConfig.appFiles.push('!main/app/**/*.demo.js');
     return gulp.src(buildConfig.appFiles)
         .pipe(concat('itesoft.debug.js'))
         .pipe(gulp.dest('dist/app'));
@@ -175,6 +176,7 @@ gulp.task('docs', function () {
     };
     var docFiles = buildConfig.appFiles.slice();
     docFiles.push('main/app/**/*.ngdoc');
+    console.log(docFiles);
     gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest('./docs'));
