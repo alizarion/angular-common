@@ -5,7 +5,7 @@
  * @name itesoft.directive:pixelWidth
  * @module itesoft
  * @restrict A
- *
+ * @since 1.1
  * @description
  * Simple Stylesheet class to manage width.
  * width-x increment by 25

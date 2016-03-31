@@ -4,7 +4,7 @@
  * @name itesoft.directive:itSidePanelFooter
  * @module itesoft
  * @restrict E
- *
+ * @since 1.0
  * @description
  * A container for a Side Panel footer, sibling to an directive.
  * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.

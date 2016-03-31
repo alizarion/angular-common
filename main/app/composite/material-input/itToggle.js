@@ -4,7 +4,7 @@
  * @name itesoft.directive:itToggle
  * @module itesoft
  * @restrict A
- *
+ * @since 1.0
  * @description
  * A toggle is an animated switch which binds a given model to a boolean.
  * Allows dragging of the switch's nub.

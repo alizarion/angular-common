@@ -4,7 +4,7 @@
  * @name itesoft.directive:itInput
  * @module itesoft
  * @restrict ECA
- *
+ * @since 1.0
  * @description
  * Floating labels are just like Stacked Labels,
  * except that their labels animate, or "float" up whe

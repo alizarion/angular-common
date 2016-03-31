@@ -4,7 +4,7 @@
  * @name itesoft.directive:itLazyGrid
  * @module itesoft
  * @restrict ECA
- *
+ * @since 1.1
  * @description
  * The itLazyGrid widgets provides lazy grid feature on ui-grid
  *

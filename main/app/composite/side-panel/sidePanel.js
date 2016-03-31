@@ -4,7 +4,7 @@
  * @name itesoft.directive:itSidePanel
  * @module itesoft
  * @restrict E
- *
+ * @since 1.0
  * @description
  * A container element for side panel and its Header, Content and Footer
  *

@@ -2,7 +2,7 @@
 /**
  * @ngdoc directive
  * @name itesoft.directive:itSideMenuContent
-
+ * @since 1.0
  * @module itesoft
  * @restrict E
  * @parent itesoft/sideMenus

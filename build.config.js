@@ -24,6 +24,7 @@ module.exports = {
      */
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
+
         'main/app/app.module.js',
         'main/app/**/*.js'
 
@@ -72,6 +73,8 @@ module.exports = {
         'main/assets/lib/angular-local-storage/dist/angular-local-storage.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
         'main/assets/lib/angular-media-queries/match-media.js',
+        'main/assets/lib/angular-strap/dist/angular-strap.min.js',
+        'main/assets/lib/angular-strap/dist/angular-strap.tpl.js',
         'main/assets/lib/ngtoast/dist/ngToast.min.js'
     ],
 

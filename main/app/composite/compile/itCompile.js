@@ -3,7 +3,7 @@
  * @name itesoft.directive:itCompile
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * This directive can evaluate and transclude an expression in a scope context.
  *

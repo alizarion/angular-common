@@ -5,7 +5,7 @@
  * @name itesoft.directive:itBottomGlue
  * @module itesoft
  * @restrict A
- *
+ * @since 1.0
  * @description
  * Simple directive to fill height.
  *
