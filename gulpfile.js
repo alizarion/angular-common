@@ -242,9 +242,15 @@ gulp.task('assets', function() {
 
 
 
-gulp.task('deploy', function() {
+gulp.task('deploy-on-github', function() {
     return gulp.src(['!./node_modules/**/*','!./main/**/*','!./*','./**/*'])
         .pipe(ghPages());
+});
+
+
+gulp.task('deploy', function(callback) {
+   runSequence('build','docs','deploy-on-github',
+        callback);
 });
 
 /**
