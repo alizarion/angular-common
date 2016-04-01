@@ -4,7 +4,7 @@
  * @name itesoft.directive:itInput
  * @module itesoft
  * @restrict ECA
- *
+ * @since 1.0
  * @description
  * Floating labels are just like Stacked Labels,
  * except that their labels animate, or "float" up whe
@@ -20,7 +20,7 @@
  *              ng-minlength="5"
  *              ng-maxlength="10"
  *              required=""
- *              it-text="Email"
+ *              it-label="Email"
  *              ng-model="user.email">
  *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
          *            <div class="form-error" ng-message="required">This field is required.</div>
@@ -35,10 +35,10 @@
             <div ng-controller="HomeCtrl">
                <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
                 <div class="form-group">
-                        <input it-input class="form-control floating-label" type="text" it-text="Email" ng-model="user.email">
+                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
                 </div>
                 <div class="form-group">
-                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-text="Prénom" name="Prenom" ng-model="user.firstName">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
                 </div>
                   <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
                       <div class="form-error" ng-message="required">This field is required.</div>
@@ -91,8 +91,8 @@ IteSoft
                         input.after('<div class="floating-label">' +  placeholder + '</div');
                     } else {
                         // Else user data binding text 
-                        input.after('<div class="floating-label">' +  scope.itText + '</div');
-                        scope.$watch('itText', function(value) {
+                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
+                        scope.$watch('itLabel', function(value) {
                             scope.$applyAsync(function(){
                                 if (!input[0].offsetParent) {
                                     return;
@@ -146,8 +146,8 @@ IteSoft
                     }
                 });
 
-                // wait key input
-                input.on('key change', function() {
+                // wait for input
+                input.on('change', function() {
                     if (input.val() === null || input.val() == "undefined" || input.val() === "") {
                         input.addClass('empty');
                     } else {
@@ -157,7 +157,7 @@ IteSoft
             },
             scope : {
                 itError : '=',
-                itText : '@'
+                itLabel : '@'
             }
         }
 });

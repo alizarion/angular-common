@@ -1,0 +1,54 @@
+@mixin box-shadow($params) {
+  -webkit-box-shadow: $params;
+  -moz-box-shadow: $params;
+  box-shadow: $params;
+}
+
+.it-autocomplete-container {
+  position: absolute;
+}
+
+.it-autocomplete-content {
+  top: 0px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.it-autocomplete-select {
+  background-color: white;
+  cursor: pointer;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%;
+}
+
+.it-autocomplete-select:hover {
+  background-color: whitesmoke;
+}
+
+.it-autocomplete-selected:hover {
+  background-color: #337ab6;
+}
+
+.it-autocomplete-selected {
+  background-color: #337ab7;
+  cursor: default;
+  color: white;
+}
+
+.ui-grid-filter-container .it-autocomplete-container {
+  position: fixed;
+  z-index: 9999;
+}
+
+.it-autocomplete-container {
+  max-height: 200px;
+  min-height: 50px;
+  min-width: 50px;
+  background-color: white;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include box-shadow(1px 1px 1px #666);
+}

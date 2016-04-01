@@ -2,14 +2,14 @@
 /**
  * @ngdoc directive
  * @name itesoft.directive:itSideMenuContent
-
+ * @since 1.0
  * @module itesoft
  * @restrict E
  * @parent itesoft/sideMenus
  *
  * @description
  * A container for a side menu, sibling to an directive.
- *
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  * @usage
  * <it-side-menu>
  * </it-side-menu>
@@ -23,7 +23,7 @@ IteSoft
             transclude : true,
             scope : true,
             template :
-                '<div class="it-menu-content menu-animated" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
                 '</div>'
         }

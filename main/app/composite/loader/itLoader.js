@@ -6,7 +6,7 @@
  * @name itesoft.directive:itLoader
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * Simple loading spinner that handle http request pending.
  *

@@ -4,7 +4,7 @@
  * @name itesoft.directive:itDetailContent
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * A container element for detail part of the master-detail main content.
  *
@@ -42,7 +42,7 @@ IteSoft
             transclude: true,
             scope:false,
             template : '<div class="row it-fill">' +
-                '           <div class="col-md-12  it-fill" ng-transclude>'+
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
 
                             '</div>'+
                        '</div>'

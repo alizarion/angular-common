@@ -4,7 +4,7 @@
  * @name itesoft.directive:itMasterDetail
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * A container element for master-detail main content.
  *
@@ -65,6 +65,15 @@
  *   <td><code>grid.appScope.itAppScope</code></td>
  *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
  *  </tr>
+ *
+ *   <tr>
+ *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
+ *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
  * </table>
  *
  * ```html
@@ -87,7 +96,7 @@
          <file name="index.html">
              <div ng-controller="MasterDetailController">
                  <it-master-detail >
-                    <it-master it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
                  <it-master-header it-search-placeholder="Recherche" >
                  <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
                  <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
@@ -109,24 +118,26 @@
 
                  </it-detail-header>
                  <it-detail-content>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                     it-text="code"
-                     ng-model="currentItemWrapper.currentItem.code"
-                     name=""
-                     ng-required="true"/>
-                 </div>
-                 <div class="form-group">
-                 <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                     it-text="description"
-                     ng-model="currentItemWrapper.currentItem.description" name=""/>
-                 </div>
-                 <div class="form-group">
-                 <input type="checkbox"
-                     it-toggle
-                     ng-model="currentItemWrapper.currentItem.enabledde"
-                     it-text="tete"/>
-                 </div>
+                 <it-modal-full-screen>
+                             <div class="form-group">
+                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+                                     it-label="code"
+                                     ng-model="currentItemWrapper.currentItem.code"
+                                     name=""
+                                     ng-required="true"/>
+                             </div>
+                             <div class="form-group">
+                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+                                 it-label="description"
+                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                             </div>
+                             <div class="form-group">
+                             <input type="checkbox"
+                                 it-toggle
+                                 ng-model="currentItemWrapper.currentItem.enabledde"
+                                 it-label="tete"/>
+                             </div>
+                 </it-modal-full-screen>
                  </it-detail-content>
                  </it-detail>
                  </it-master-detail>
@@ -264,7 +275,7 @@ IteSoft
             restrict: 'EA',
             transclude : true,
             scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "><div class="it-fill row " ng-transclude></div></div>',
+            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
             controller : [
                 '$scope',
                 'screenSize',
@@ -312,10 +323,12 @@ IteSoft
                     });
 
                     $scope.goToMaster = function(){
+
                         if($scope.mobile &&
                             (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
                                 &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
                                 itPopup.alert(  $scope.$$childHead.$navAlert);
                             } else {
                                 $scope.activeState = 'master';

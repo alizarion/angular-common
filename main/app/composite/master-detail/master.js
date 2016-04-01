@@ -4,7 +4,7 @@
  * @name itesoft.directive:itMaster
  * @module itesoft
  * @restrict EA
- *
+ * @since 1.0
  * @description
  * Most important part of master-detail component, that
  *
@@ -54,6 +54,10 @@
  *   <td><code>grid.appScope.itAppScope</code></td>
  *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
  *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
  * </table>
  *
  * ```html
@@ -83,17 +87,18 @@ IteSoft
             scope : {
                 itMasterData : '=',
                 itLang:'=',
+                itCol:'=',
                 itMasterDetailControl:'=',
                 itLockOnChange: '=',
                 itNoDataMsg: '@',
                 itNoDetailMsg:'@'
             },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class="it-master-detail-slide-right col-md-6 it-fill" ui-i18n="{{itLang}}">'+
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
                 '<div class="row" ng-transclude>'+
                 '</div>'+
                 '<div class="row it-master-grid it-fill" >'+
-                '<div class="col-md-12 it-master-detail-container it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns ui-grid-auto-resize  ui-grid-move-columns class="it-master-detail-grid">' +
+                '<div class="col-md-12 it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
                 '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
                 '</div>'+
                 '</div>'+
@@ -118,12 +123,12 @@ IteSoft
 
                     $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
                         ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" tabindex="-1" ' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
                         ' ng-checked="row.isSelected"></div>');
 
-                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="grid.appScope.$parent.currentItemWrapper.hasChanged ? \'return false\':headerButtonClick($event)">' +
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
                         '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged" ng-model="grid.selection.selectAll"></div>');
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
 
                     function ItemWrapper(item){
                         var _self = this;
@@ -140,6 +145,7 @@ IteSoft
                         _self.unlockOnEquals = true;
                     }
 
+                    $scope.$parent.$masterCol = $scope.itCol;
                     ItemWrapper.prototype.unlockCurrent = function(){
                         this.hasChanged = false;
                         this.isWatched = false;
@@ -199,7 +205,7 @@ IteSoft
                         gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
                             '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
                             '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
-                            '<span class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
+                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
                             '</div>',
                         rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
                             '</div>'
@@ -224,7 +230,8 @@ IteSoft
                     function _displayDetail(item) {
                         var deferred = $q.defer();
                         if($scope.$parent.currentItemWrapper != null){
-                            if($scope.$parent.currentItemWrapper.hasChanged){
+                            if($scope.$parent.currentItemWrapper.hasChanged &&
+                                $scope.itLockOnChange){
                                 deferred.reject('undo or save before change');
                                 return deferred.promise;
                             }
@@ -244,9 +251,9 @@ IteSoft
                                     }
                                 }
                                 $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
                             }, function (msg) {
                                 itPopup.alert($scope.itMasterDetailControl.navAlert);
-                                $scope.gridApi.selection.selectRow($scope.$parent.currentItemWrapper.originalItem);
                             });
                         }
                     };
@@ -434,7 +441,8 @@ IteSoft
 
                     function confirmLeavePage(e) {
                         if($scope.$parent.currentItemWrapper!=null){
-                            if ( $scope.$parent.currentItemWrapper.hasChanged ) {
+                            if ( $scope.$parent.currentItemWrapper.hasChanged
+                                && $scope.itLockOnChange ) {
                                 itPopup.alert( $scope.itMasterDetailControl.navAlert);
                                 e.preventDefault();
                             }
@@ -499,11 +507,15 @@ IteSoft
 
                     },true);
 
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                    },250);
 
                     $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
 
-                        if($scope.$parent.currentItemWrapper != null
-                            && $scope.itLockOnChange ){
+                        if($scope.$parent.currentItemWrapper != null ){
                             if(!$scope.$parent.currentItemWrapper.isWatched)
                             {
                                 $scope.$parent.currentItemWrapper.isWatched = true;

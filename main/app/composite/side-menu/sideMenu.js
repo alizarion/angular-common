@@ -5,9 +5,10 @@
  * @module itesoft
  * @restrict E
  * @parent sideMenus
- *
+ * @since 1.0
  * @description
  * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
  *
  * @usage
  * <it-side-menu>

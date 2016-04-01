@@ -22,6 +22,8 @@ var flatten = require('gulp-flatten');
 var sh = require('shelljs');
 var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
+var karma = require('gulp-karma');
+var serve = require('gulp-serve');
 
 /**
  * Execute les actions de build dans l'ordre
@@ -71,16 +73,49 @@ gulp.task('sass', function(done) {
 });
 
 /**
- * Minifie les fichiers css
+ * build css files
  */
-gulp.task('css', function(done) {
+gulp.task('css', function(callback) {
+    runSequence(['vendor-css','itesoft-css'],'css-bundle',
+        callback);
+});
+
+/**
+ * build vendor minified css file.
+ */
+gulp.task('vendor-css',function(done){
     gulp.src(buildConfig.vendorCssFiles)
-        .pipe(concat('main.css'))
+        .pipe(concat('vendor.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
         }))
         .pipe(rename({ extname: '.min.css' }))
         .pipe(gulp.dest('./dist/assets/fonts'))
+        .on('end', done);
+});
+
+/**
+ * build css minified css file.
+ */
+gulp.task('itesoft-css',function(done){
+    gulp.src(['./main/assets/css/*.css'])
+        .pipe(concat('itesoft.css'))
+        .pipe(minifyCss({
+            keepSpecialComments: 0
+        }))
+        .pipe(rename({ extname: '.min.css' }))
+        .pipe(gulp.dest('./dist/assets/css'))
+        .on('end', done);
+});
+
+/**
+ * build bundle css file.
+ */
+gulp.task('css-bundle',function(done){
+    gulp.src(['dist/assets/fonts/vendor.min.css','dist/assets/css/*.css'])
+        .pipe(concat('itesoft-bundle.css'))
+        .pipe(rename({ extname: '.min.css' }))
+        .pipe(gulp.dest('dist/assets/fonts'))
         .on('end', done);
 });
 
@@ -90,12 +125,7 @@ gulp.task('css', function(done) {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('fonts', function() {
-    gulp.src(['main/assets/lib/**/*.eot',
-        'main/assets/lib/**/*.svg',
-        'main/assets/lib/**/*.ttf',
-        'main/assets/lib/**/*.otf',
-        'main/assets/lib/**/*.woff',
-        'main/assets/lib/**/*.woff2'])
+    gulp.src(buildConfig.fontFiles)
         .pipe(flatten())
         .pipe(gulp.dest('./main/assets/fonts'));
 
@@ -109,8 +139,9 @@ gulp.task('fonts', function() {
  * Concat et Minifie le Javascript applicatif
  */
 gulp.task('uglify', function() {
+
     return gulp.src(buildConfig.appFiles)
-        .pipe(concat('lib.min.js'))
+        .pipe(concat('itesoft.min.js'))
         .pipe(header(buildConfig.closureStart))
         .pipe(footer(buildConfig.closureEnd))
         .pipe(uglify())
@@ -124,19 +155,17 @@ gulp.task('uglify', function() {
  * Concat et Minifie le Javascript applicatif
  */
 gulp.task('uglify-debug', function() {
+    buildConfig.appFiles.push('!main/app/**/*.demo.js');
     return gulp.src(buildConfig.appFiles)
-        .pipe(concat('itesoft-debug.js'))
-//        .pipe(header(buildConfig.closureStart))
-//        .pipe(footer(buildConfig.closureEnd))
-//        .pipe(header(buildConfig.banner,{pkg:pkg}))
+        .pipe(concat('itesoft.debug.js'))
         .pipe(gulp.dest('dist/app'));
 });
 
 gulp.task('docs', function () {
     var options = {
         html5Mode: false,
-        styles:['./dist/assets/fonts/main.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft-debug.js'],
+        styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
+        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'],
         loadDefaults: {
             angular:false,
             angularAnimate: false
@@ -147,6 +176,7 @@ gulp.task('docs', function () {
     };
     var docFiles = buildConfig.appFiles.slice();
     docFiles.push('main/app/**/*.ngdoc');
+    console.log(docFiles);
     gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest('./docs'));
@@ -178,8 +208,12 @@ gulp.task('vendor', function() {
      .pipe(assets.restore())
      .pipe(useref())
      .pipe(gulp.dest('dist/assets/lib/')); **/
-    return gulp.src(buildConfig.vendorJavascriptFiles)
+    gulp.src(buildConfig.vendorJavascriptDistFiles)
         .pipe(concat('vendor.min.js'))
+
+        .pipe(gulp.dest('dist/assets/lib'));
+    gulp.src(buildConfig.vendorJavascriptDebugFiles)
+        .pipe(concat('vendor.debug.js'))
 
         .pipe(gulp.dest('dist/assets/lib'));
 });
@@ -199,19 +233,26 @@ gulp.task('html', function() {
  * copie des resources present dans assets autre que Javascrip (sera minifié et concaténé)
  */
 gulp.task('assets', function() {
-    gulp.src(buildConfig.assetsDistFiles)
+    var globalAssetsType = buildConfig.assetsDistFiles.slice();
+    globalAssetsType = globalAssetsType.concat(buildConfig.fontFiles.slice());
+    gulp.src(globalAssetsType)
         // And put it in the dist folder
         .pipe(gulp.dest('dist/assets'));
 });
 
 
 
-
-gulp.task('deploy', function() {
-    return gulp.src(['!./node_modules/**/*','!./main/**/*','./**/*'])
+gulp.task('deploy-on-github', function() {
+    return gulp.src(['!./node_modules/**/*','!./main/**/*','!./*','./**/*'])
         .pipe(ghPages());
 });
 
+
+gulp.task('deploy', function(callback) {
+   runSequence('build','docs','deploy-on-github',
+        callback);
+});
+
 /**
  * Obsérve les modification des scss et compile en css
  */
@@ -220,13 +261,38 @@ gulp.task('watch', function() {
 });
 
 /**
- * Obsérve les modification des scss et compile en css
+ * Watch les modifications des fichiers scss et les compile
+ *
  */
 gulp.task('watch', function() {
-    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
+    gulp.watch('./main/assets/scss/**/*.scss', ['css-debug']);
     gulp.watch(['./main/app/**/*.ngdoc'], ['docs']);
     gulp.watch(['./main/app/**/*.js'], ['debug']);
 });
+
+/**
+ * Test unitaire jasmine
+ */
+gulp.task('test', function() {
+
+    /**Ajout des fihcier de test **/
+    var allVendorFiles = buildConfig.vendorJavascriptDistFiles.slice();
+    allVendorFiles.push('./main/assets/lib/angular-mocks/angular-mocks.js');
+    var allAppFiles = buildConfig.appFiles.slice();
+    allAppFiles = _removeValueFromArray(allAppFiles,'!main/app/**/*Test.js');
+    var testFiles = allVendorFiles.concat(allAppFiles);
+
+    return gulp.src(testFiles)
+        .pipe(karma({
+            configFile: 'karma.conf.js',
+            action: 'run'
+        }))
+        .on('error', function(err) {
+            console.log(err);
+            this.emit('end');
+        });
+});
+
 
 /**
  * Execute les actions de build dans l'ordre
@@ -236,6 +302,12 @@ gulp.task('debug', function(callback) {
         callback);
 });
 
+gulp.task('css-debug', function(callback) {
+    runSequence('sass','css','docs',
+        callback);
+});
+
+gulp.task('serve', serve('docs'));
 
 /**
  * Lance l'installation des dépendences GIT
@@ -246,6 +318,8 @@ gulp.task('install', ['git-check'], function() {
             gutil.log('bower', gutil.colors.cyan(data.id), data.message);
         });
 });
+
+
 
 /**
  * Check l'installation de GIT
@@ -263,4 +337,19 @@ gulp.task('git-check', function(done) {
     done();
 });
 
-
+/**
+ * Simple function to remove item from array by value.
+ * @param array
+ * @returns array without removed items.
+ * @private
+ */
+function _removeValueFromArray(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+        what = a[--L];
+        while ((ax= arr.indexOf(what)) !== -1) {
+            arr.splice(ax, 1);
+        }
+    }
+    return arr;
+}

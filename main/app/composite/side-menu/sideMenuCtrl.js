@@ -1,7 +1,15 @@
 'use strict';
 
 IteSoft
-    .controller("$sideMenuCtrl",['$scope','$timeout','$window', function($scope,$timeout,$window){
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
         var _self = this;
         _self.scope = $scope;
 
@@ -11,7 +19,9 @@ IteSoft
             _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
 
             $timeout(function(){
-                $window.dispatchEvent(new Event('resize'));
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
             },300)
         };
         _self.hideSideMenu = function(){

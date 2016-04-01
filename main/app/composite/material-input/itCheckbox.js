@@ -4,7 +4,7 @@
  * @name itesoft.directive:itCheckbox
  * @module itesoft
  * @restrict A
- *
+ * @since 1.0
  * @description
  * The checkbox is no different than the HTML checkbox input,
  * except it's styled differently.

@@ -24,7 +24,7 @@ module.exports = {
      */
     appFiles: [
         '!main/app/**/*Test.js', // Exclude test files
-        '!main/app/**/*.demo.js', // Exclude demo files
+
         'main/app/app.module.js',
         'main/app/**/*.js'
 
@@ -37,27 +37,31 @@ module.exports = {
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
-        'main/assets/css/itesoft.css',
-        'main/assets/css/material.css',
-        'main/assets/lib/angular-ui-grid/ui-grid.css'
-
-
+        'main/assets/lib/angular-ui-grid/ui-grid.css',
+        'main/assets/lib/ngtoast/dist/ngToast.min.css',
+        'main/assets/lib/ngtoast/dist/ngToast-animations.min.css'
 
     ],
-    assetsDistFiles : [
-        '!main/assets/lib/**/*.js',
-        '!main/assets/lib/**/*.html',
-        '!main/assets/lib/**/*.md',
-        '!main/assets/lib/**/*.txt',
-        '!main/assets/lib/**/*.json',
-        '!main/assets/css/**/*',
-        '!main/assets/scss/**/*.scss',
-        '!main/assets/scss/**/*.less',
-        'main/assets/**/*'
+
+    assetsDistFiles :[
+        'main/assets/**/*.gif',
+        'main/assets/**/*.png',
+        'main/assets/**/*.jpg',
+        'main/assets/**/*.svg'
     ],
-    vendorJavascriptFiles: [
+
+
+    fontFiles :[
+        'main/assets/**/*.eot',
+        'main/assets/**/*.svg',
+        'main/assets/**/*.ttf',
+        'main/assets/**/*.otf',
+        'main/assets/**/*.woff',
+        'main/assets/**/*.woff2'
+    ],
+
+    vendorJavascriptDistFiles: [
         'main/assets/lib/angular/angular.min.js',
-        'main/assets/lib/jquery/dist/jquery.min.js',
         'main/assets/lib/angular-animate/angular-animate.min.js',
         'main/assets/lib/angular-translate/angular-translate.min.js',
         'main/assets/lib/angular-route/angular-route.min.js',
@@ -66,8 +70,27 @@ module.exports = {
         'main/assets/lib/angular-messages/angular-messages.min.js',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
         'main/assets/lib/google-code-prettify/bin/prettify.min.js',
+        'main/assets/lib/angular-local-storage/dist/angular-local-storage.min.js',
         'main/assets/lib/angular-ui-grid/ui-grid.min.js',
-        'main/assets/lib/angular-media-queries/match-media.js'
+        'main/assets/lib/angular-media-queries/match-media.js',
+        'main/assets/lib/angular-strap/dist/angular-strap.min.js',
+        'main/assets/lib/angular-strap/dist/angular-strap.tpl.js',
+        'main/assets/lib/ngtoast/dist/ngToast.min.js'
+    ],
 
+    vendorJavascriptDebugFiles: [
+        'main/assets/lib/angular/angular.js',
+        'main/assets/lib/angular-animate/angular-animate.js',
+        'main/assets/lib/angular-translate/angular-translate.js',
+        'main/assets/lib/angular-route/angular-route.js',
+        'main/assets/lib/angular-resource/angular-resource.js',
+        'main/assets/lib/angular-sanitize/angular-sanitize.js',
+        'main/assets/lib/angular-messages/angular-messages.js',
+        'main/assets/lib/angular-bootstrap/ui-bootstrap-tpls.js',
+        'main/assets/lib/google-code-prettify/bin/prettify.js',
+        'main/assets/lib/angular-local-storage/dist/angular-local-storage.js',
+        'main/assets/lib/angular-ui-grid/ui-grid.js',
+        'main/assets/lib/angular-media-queries/match-media.js',
+        'main/assets/lib/ngtoast/dist/ngToast.js'
     ]
 };
