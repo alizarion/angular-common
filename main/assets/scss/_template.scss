@@ -1,0 +1,56 @@
+
+
+
+
+.template-circle-btn{
+  border-radius: 50%;
+  width: 23px;
+  height: 24px;
+  background: white;
+  color: #2d4150;
+  padding: 5px;
+  box-shadow: 0 2px 6px 0 rgba(22, 45, 61, 0.55);
+  margin: 5px;
+}
+
+.template-circle-text-btn{
+  font-weight: bold;
+  font-size: 13px;
+}
+.block-btn {
+  z-index: 1000;
+  margin: 10px;
+}
+
+.block-control-panel .template-circle-btn{
+  margin-top:20px;
+}
+
+.modal-control-panel {
+  height: 50px;
+  border-bottom: 1px solid #d9e1e8;
+}
+
+.template-circle-btn:hover{
+  cursor:pointer;
+  color: #03a9f4;
+}
+
+.float-right{
+  float:right;
+}
+
+.removed-block{
+  background-color:DarkGray ;
+}
+
+.block .floating-label{
+  top: 0px  !important;
+}
+
+.block{
+  border: 1px solid #ddd;
+  padding: 5px;
+  display: inline-block;
+  width: 100%;
+}
