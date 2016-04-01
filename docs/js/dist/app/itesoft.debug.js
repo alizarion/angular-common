@@ -24,55 +24,6 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-/**
  * @ngdoc directive
  * @name itesoft.directive:itCompile
  * @module itesoft
@@ -5027,6 +4978,309 @@ IteSoft
     });
 
 
+
+'use strict';
+
+IteSoft.factory('BlockService', ['$resource', 'CONFIG', '$http',
+    function ($resource, CONFIG, $http) {
+        return {
+            custom: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
+            original: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/'),
+            restore: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/:name'),
+            customByOriginal: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
+            build: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
+            preview: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
+            'new': function (name, ref, position, content, roleAllowed, version) {
+                return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBlock
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * The Block widgets provides  way to customize UI.
+ *
+ * <h1>Enable</h1>
+ * Enable editMode with
+ *
+ * ```js
+ * $rootScope.editSite
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
+ * ```
+ *
+ * ```html
+ *   <it-block name="login_input" role="RD"></it-block>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl">
+ <it-block name="login_input" role="RD">
+ <div class="form-group">
+ <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+ </div>
+ </it-block>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ .constant("CONFIG", {
+            "TEMPLATE_EDITOR_URL": "http://localhost:8080/"
+            });
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {
+                   $rootScope.editSite = true;
+                }]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlock',
+    [
+        function () {
+            return {
+                restrict: 'E',
+                scope: true,
+                transclude: true,
+                template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
+                ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
+                ' class="block" ng-class="removed ? \'removed-block block\':\'block\'">' +
+                '<div ng-click="itBlockController.addBefore()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
+                '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
+                '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
+                '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
+                '</div>' +
+                '<ng-transclude ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" && !removed"  ></ng-transclude>',
+                controllerAs: 'itBlockController',
+                link: function ($scope, element, attrs, ctrl, transclude) {
+                    transclude($scope, function (content) {
+                        var myContent = "";
+                        angular.forEach(content, function (contentLine) {
+                            if (contentLine.outerHTML) {
+                                myContent += contentLine.outerHTML;
+                            }
+                        });
+                        $scope.content = myContent;
+                    });
+                    $scope.ref = attrs["ref"];
+                    $scope.role = attrs["role"];
+                    $scope.position = attrs["position"];
+                    $scope.name = attrs["name"];
+                    $scope.removed = false;
+                    $scope.version =  attrs["version"];
+                    if (angular.isDefined(attrs["removed"])) {
+                        $scope.removed = attrs["removed"];
+                    }
+                    this.fields = {};
+
+                },
+                controller: ['$scope','$location','$log','$timeout',
+                    function ($scope,$location,$log,$timeout) {
+
+                        var self = this;
+
+                        var currentPath = $location.absUrl();
+
+
+                        self.activated = false;
+                        self.manyTimesOver =0;
+                        self.timer = 0;
+                        self.leave = function(){
+                            self.manyTimesOver =-1;
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                        };
+                        self.over = function(){
+                            self.manyTimesOver =+1;
+                            self.activated = self.manyTimesOver > 0 ? true: false;
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                        };
+
+                        this.register = function (value) {
+                            $scope.content = value;
+                        };
+                        this.addBefore = function () {
+                            var block = BlockService.new('PS_before' + $scope.name, $scope.name, 'before', '', 'PS',1);
+                        };
+                        this.editBlock = function () {
+                            if (angular.isDefined($scope.ref) && $scope.ref != '') {
+                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
+
+                            } else {
+                                var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
+                            }
+                        };
+                        this.restoreBlock = function () {
+                            var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
+                            BlockService.restore.get({'name': block.name}, function () {
+                                BlockService.build.get(function () {
+                                    BlockService.build.get(function () {
+                                        location.reload();
+                                    }, function () {
+                                        $log.error("Unable to build dist  ")
+                                    })
+                                }, function () {
+                                    $log.error("Unable to restore block " + JSON.stringify(block));
+                                })
+                            })
+                        };
+
+                        this.deleteBlock = function () {
+                            var confirmPopup = itPopup.confirm({
+                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
+                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
+                                buttons: [
+
+                                    {
+                                        text: 'Cancel',
+                                        type: '',
+                                        onTap: function () {
+                                            return false;
+                                        }
+                                    },
+                                    {
+                                        text: 'ok',
+                                        type: '',
+                                        onTap: function () {
+                                            return true;
+                                        }
+                                    }
+                                ]
+                            });
+                            confirmPopup.then(function (res) {
+                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
+                                BlockService.custom.delete(block, function () {
+                                    BlockService.build.get(function () {
+                                        location.reload();
+                                    }, function () {
+                                        $log.error("Unable to build dist  ")
+                                    })
+                                }, function () {
+                                    $log.error("Unable to delete current block " + JSON.stringify(block))
+                                });
+                            }, function () {
+                                itNotifier.notifyError({
+                                    content: "{{'BLOCK_DELETED_KO' | translate}}"
+                                });
+                            });
+                        };
+                    }
+                ]
+            }
+        }]
+)
+
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBlockControlPanel
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * The Control Panel Block widgets provides a way to activate it-block edition
+ *
+ * <h1>Translate</h1>
+ * ```config
+ * TEMPLATE.BLOCK.EDIT
+ * TEMPLATE.BLOCK.READONLY
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * CONFIG.REST_TEMPLATE_API_URL = template API URL
+ * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
+ * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
+ * ```
+ * 
+ * 
+ * ```html
+ *   <it-block-control-panel ></it-block-control-panel>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div>
+     <it-block-control-panel></it-block-control-panel>
+     </div>
+ </file>
+ <file name="Module.js">
+     angular.module('itesoft-showcase',['ngResource','itesoft'])
+     .constant("CONFIG", {
+            "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+            "TEMPLATE_EDITOR_URL": "http://localhost:8080/",
+            "ENABLE_TEMPLATE_EDITOR": true
+            })
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope','$rootScope',
+     function($scope,$rootScope) {$rootScope.editSite=true;}]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlockControlPanel',
+    ['$log',
+        function ($log) {
+            return {
+                restrict: 'EA',
+                scope: true,
+                template:
+                '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editBlock=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
+                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editBlock=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
+                '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
+                '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
+                '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
+                '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
+                '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a>' +
+
+                '</div>',
+                controllerAs: 'itBlockControlPanelController',
+                controller: ['$rootScope','BlockService','CONFIG',
+                    function ($rootScope,BlockService,CONFIG) {
+                        var self = this;
+
+                        self.CONFIG = CONFIG;
+                        this.refresh = function(){
+                            BlockService.build.get(function () {
+                                    location.reload();
+                            }, function () {
+                                $log.error("Unable to refresh " )
+                            });
+                        };
+                        this.editJS =  function(){
+                        };
+                        this.editCSS =  function(){
+                        };
+                        this.addFile =  function(){
+                        };
+                    }
+                ]
+            }
+        }]
+);
+
 'use strict';
 
 IteSoft
@@ -5140,6 +5394,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 /**
