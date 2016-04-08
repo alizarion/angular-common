@@ -59,13 +59,13 @@ IteSoft.directive('itBlock',
                 transclude: true,
                 template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
                 ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
-                ' class="block" ng-class="removed ? \'removed-block block\':\'block\'">' +
-                '<div ng-click="itBlockController.addBefore()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
+                ' ng-class="removed ? \'removed-block block\':\'block\'">' +
+                '<div ng-click="itBlockController.addBlock()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
                 '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
                 '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
                 '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
                 '</div>' +
-                '<ng-transclude ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" && !removed"  ></ng-transclude>',
+                '<ng-transclude ng-class="removed ? \'removed-content block-content\':\'content\'" ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" ng-if="!removed || $root.editSite "  ></ng-transclude>',
                 controllerAs: 'itBlockController',
                 link: function ($scope, element, attrs, ctrl, transclude) {
                     transclude($scope, function (content) {
@@ -89,33 +89,30 @@ IteSoft.directive('itBlock',
                     this.fields = {};
 
                 },
-                controller: ['$scope','$location','$log','$timeout',
-                    function ($scope,$location,$log,$timeout) {
+                controller: ['$scope','$location','$log','$timeout','itPopup','BlockService','PilotSiteSideService',
+                    function ($scope,$location,$log,$timeout,itPopup,BlockService,PilotSiteSideService) {
 
                         var self = this;
-
-                        var currentPath = $location.absUrl();
-
 
                         self.activated = false;
                         self.manyTimesOver =0;
                         self.timer = 0;
+
                         self.leave = function(){
                             self.manyTimesOver =-1;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
                         };
+
                         self.over = function(){
                             self.manyTimesOver =+1;
                             self.activated = self.manyTimesOver > 0 ? true: false;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
                         };
 
                         this.register = function (value) {
                             $scope.content = value;
                         };
-                        this.addBefore = function () {
-                            var block = BlockService.new('PS_before' + $scope.name, $scope.name, 'before', '', 'PS',1);
-                        };
+                        
                         this.editBlock = function () {
                             if (angular.isDefined($scope.ref) && $scope.ref != '') {
                                 var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
@@ -123,7 +120,16 @@ IteSoft.directive('itBlock',
                             } else {
                                 var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
                             }
+                            PilotSiteSideService.fn.editBlock(block);
                         };
+
+                        this.addBlock = function () {
+                            if (angular.isDefined($scope.name) && $scope.name != '') {
+                                var block = BlockService.new('PS_new_' + $scope.name, $scope.name, 'before', $scope.content, 'PS',1);
+                                PilotSiteSideService.fn.createBlock(block);
+                            }
+                        };
+
                         this.restoreBlock = function () {
                             var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
                             BlockService.restore.get({'name': block.name}, function () {

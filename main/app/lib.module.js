@@ -20,5 +20,6 @@ var IteSoft = angular.module('itesoft', [
     'LocalStorageModule',
     'ngToast',
     'mgcrea.ngStrap.datepicker',
-    'mgcrea.ngStrap.tooltip'
+    'mgcrea.ngStrap.tooltip',
+    'ui.codemirror'
 ]);

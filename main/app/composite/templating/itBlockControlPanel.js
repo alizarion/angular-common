@@ -17,11 +17,11 @@
  * <h1>Config</h1>
  * ```config
  * CONFIG.REST_TEMPLATE_API_URL = template API URL
+ * CONFIG.REST_EDITOR_API_URL = editor pilot API URL
  * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
  * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
  * ```
- * 
- * 
+ *
  * ```html
  *   <it-block-control-panel ></it-block-control-panel>
  * ```
@@ -29,22 +29,23 @@
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-     <div>
-     <it-block-control-panel></it-block-control-panel>
-     </div>
+ <div>
+ <it-block-control-panel></it-block-control-panel>
+ </div>
  </file>
  <file name="Module.js">
-     angular.module('itesoft-showcase',['ngResource','itesoft'])
-     .constant("CONFIG", {
+ angular.module('itesoft-showcase',['ngResource','itesoft'])
+ .constant("CONFIG", {
             "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+            "REST_EDITOR_API_URL": "http://localhost:8081/rest",
             "TEMPLATE_EDITOR_URL": "http://localhost:8080/",
             "ENABLE_TEMPLATE_EDITOR": true
             })
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope','$rootScope',
-     function($scope,$rootScope) {$rootScope.editSite=true;}]);
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {$rootScope.editSite=true;}]);
  </file>
  </example>
  */
@@ -56,36 +57,90 @@ IteSoft.directive('itBlockControlPanel',
                 scope: true,
                 template:
                 '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editBlock=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
-                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editBlock=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
-                '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
-                '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
-                '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
-                '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
-                '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a>' +
-
+                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> '+
+                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
+                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
+                    '<div class="block-control-panel-action-container">'+
+                    '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
+                    '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
+                    '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
+                    '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
+                    '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a></div>' +
+                    '</div>'+
+                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">'+
+                    '<span class="glyphicon glyphicon-warning-sign glyphicon-align-left" aria-hidden="true"></span>'+
+                    '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>'+
+                '</div>' +
                 '</div>',
+
                 controllerAs: 'itBlockControlPanelController',
-                controller: ['$rootScope','BlockService','CONFIG',
-                    function ($rootScope,BlockService,CONFIG) {
+                controller: ['$scope','$rootScope', '$interval','$location','$route','$timeout','$log', 'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG',
+                    function ($scope, $rootScope,$interval,$location,$route,$timeout,$log, BlockService, PilotSiteSideService, PilotService, CONFIG) {
                         var self = this;
 
+                        self.editorIsOpen = false;
                         self.CONFIG = CONFIG;
-                        this.refresh = function(){
+                        this.refresh = function () {
                             BlockService.build.get(function () {
-                                    location.reload();
+                                location.reload();
                             }, function () {
-                                $log.error("Unable to refresh " )
+                                $log.error("Unable to refresh ")
                             });
                         };
-                        this.editJS =  function(){
+                        self.interval = 0 ;
+                        PilotSiteSideService.on.pong=function(res){
+                            $log.log("pong");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
                         };
-                        this.editCSS =  function(){
+                        PilotSiteSideService.on.editorConnect=function(res){
+                            $log.log("editorConnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
                         };
-                        this.addFile =  function(){
+                        PilotSiteSideService.on.editorDisconnect=function(res){
+                            $log.log("editorDisconnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.close=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.error=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.transportFailure=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.reload=this.refresh;
+
+
+                        this.editJS = function () {
+                            PilotSiteSideService.fn.editPage("JS")
+                        };
+                        this.editCSS = function () {
+                            PilotSiteSideService.fn.editPage("CSS")
+                        };
+                        this.addFile = function () {
+                            PilotSiteSideService.fn.createPage("CSS")
                         };
                     }
                 ]
             }
-        }]
+        }
+    ]
 );
