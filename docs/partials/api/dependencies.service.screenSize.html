@@ -1,0 +1,38 @@
+<h1><code ng:non-bindable="">screenSize</code>
+<div><span class="hint">service in module <code ng:non-bindable="">dependencies</code>
+<code ng:non-bindable=""><a target="_blank" href="https://github.com/alizarion/angular-common/releases/tag/v1.0"> since v1.0</a></code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="dependencies-service-page dependencies-service-screensize-page"><p>Provides an Angular service that returns true if the current screen width matches or false if not. Uses the screen widths predefined in Twitter Bootstrap 3 or a customized size you define.
+There is a staic method is which checks for a match on page load and a dynamic method on which checks for a match and updates the value on window resize.
+See more :  <a href="https://github.com/jacopotarantino/angular-match-media">angular-match-media</a></p>
+</div></div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="dependencies-service-page dependencies-service-screensize-page"><h4 id="example_source">Source</h4>
+<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-25" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-25" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
+<script type="text/ng-template" id="index.html-25">
+       <div ng-controller="mainController">
+           <h4 id="example_-is-mobile-{{ismobile}}"> is mobile : {{isMobile}}</h4>
+           <div> Your screen size is: {{ '' | media }} </div>
+       </div>
+   </script>
+</div>
+<div class="tab-pane" title="Controller.js">
+<pre class="prettyprint linenums" ng-set-text="Controller.js"></pre>
+<script type="text/ng-template" id="Controller.js">
+    angular.module('itesoft')
+        .controller('mainController', ['screenSize','$scope', function (screenSize,$scope) {
+         $scope.isMobile = screenSize.on('xs, sm', function(isMatch){
+           $scope.isMobile = isMatch;
+         });
+     }]);
+    </script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-25" ng-eval-javascript="Controller.js"></div>
+</div></div>
+</div>
