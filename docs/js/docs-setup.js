@@ -32,6 +32,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "dependencies.directive:ui-code-mirror",
+      "shortName": "ui-code-mirror",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "Provides an Code Editor Component",
+      "keywords": "$scope ae angular api application class code codemirror codemirror-foldgutter codemirror-linenumbers codemirror-lint-markers component content controller data dependencies directive editor editoroptions enter floating-label foldgutter form-control function gutters html https indentwithtabs it-fill itesoft itesoft-showcase js json linenumbers linewrapping lint maincontroller matchtags mode model module ng-model placeholder screensize script styleactiveline text true type ui ui-codemirror write"
+    },
+    {
+      "section": "api",
       "id": "dependencies.directive:ui-grid",
       "shortName": "ui-grid",
       "type": "directive",
