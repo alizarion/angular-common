@@ -20,7 +20,8 @@ var IteSoft = angular.module('itesoft', [
     'LocalStorageModule',
     'ngToast',
     'mgcrea.ngStrap.datepicker',
-    'mgcrea.ngStrap.tooltip'
+    'mgcrea.ngStrap.tooltip',
+    'ui.codemirror'
 ]);
 
 /**
@@ -3537,71 +3538,6 @@ IteSoft
             }
         };
     }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- * @since 1.0
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
 'use strict';
 
 /**
@@ -3786,6 +3722,71 @@ IteSoft
  </file>
  </example>
  */
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -5062,13 +5063,13 @@ IteSoft.directive('itBlock',
                 transclude: true,
                 template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
                 ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
-                ' class="block" ng-class="removed ? \'removed-block block\':\'block\'">' +
-                '<div ng-click="itBlockController.addBefore()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
+                ' ng-class="removed ? \'removed-block block\':\'block\'">' +
+                '<div ng-click="itBlockController.addBlock()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
                 '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
                 '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
                 '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
                 '</div>' +
-                '<ng-transclude ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" && !removed"  ></ng-transclude>',
+                '<ng-transclude ng-class="removed ? \'removed-content block-content\':\'content\'" ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" ng-if="!removed || $root.editSite "  ></ng-transclude>',
                 controllerAs: 'itBlockController',
                 link: function ($scope, element, attrs, ctrl, transclude) {
                     transclude($scope, function (content) {
@@ -5092,33 +5093,30 @@ IteSoft.directive('itBlock',
                     this.fields = {};
 
                 },
-                controller: ['$scope','$location','$log','$timeout',
-                    function ($scope,$location,$log,$timeout) {
+                controller: ['$scope','$location','$log','$timeout','itPopup','BlockService','PilotSiteSideService',
+                    function ($scope,$location,$log,$timeout,itPopup,BlockService,PilotSiteSideService) {
 
                         var self = this;
-
-                        var currentPath = $location.absUrl();
-
 
                         self.activated = false;
                         self.manyTimesOver =0;
                         self.timer = 0;
+
                         self.leave = function(){
                             self.manyTimesOver =-1;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
                         };
+
                         self.over = function(){
                             self.manyTimesOver =+1;
                             self.activated = self.manyTimesOver > 0 ? true: false;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},1000);
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
                         };
 
                         this.register = function (value) {
                             $scope.content = value;
                         };
-                        this.addBefore = function () {
-                            var block = BlockService.new('PS_before' + $scope.name, $scope.name, 'before', '', 'PS',1);
-                        };
+                        
                         this.editBlock = function () {
                             if (angular.isDefined($scope.ref) && $scope.ref != '') {
                                 var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
@@ -5126,7 +5124,16 @@ IteSoft.directive('itBlock',
                             } else {
                                 var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
                             }
+                            PilotSiteSideService.fn.editBlock(block);
                         };
+
+                        this.addBlock = function () {
+                            if (angular.isDefined($scope.name) && $scope.name != '') {
+                                var block = BlockService.new('PS_new_' + $scope.name, $scope.name, 'before', $scope.content, 'PS',1);
+                                PilotSiteSideService.fn.createBlock(block);
+                            }
+                        };
+
                         this.restoreBlock = function () {
                             var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
                             BlockService.restore.get({'name': block.name}, function () {
@@ -5208,11 +5215,11 @@ IteSoft.directive('itBlock',
  * <h1>Config</h1>
  * ```config
  * CONFIG.REST_TEMPLATE_API_URL = template API URL
+ * CONFIG.REST_EDITOR_API_URL = editor pilot API URL
  * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
  * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
  * ```
- * 
- * 
+ *
  * ```html
  *   <it-block-control-panel ></it-block-control-panel>
  * ```
@@ -5220,22 +5227,23 @@ IteSoft.directive('itBlock',
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-     <div>
-     <it-block-control-panel></it-block-control-panel>
-     </div>
+ <div>
+ <it-block-control-panel></it-block-control-panel>
+ </div>
  </file>
  <file name="Module.js">
-     angular.module('itesoft-showcase',['ngResource','itesoft'])
-     .constant("CONFIG", {
+ angular.module('itesoft-showcase',['ngResource','itesoft'])
+ .constant("CONFIG", {
             "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+            "REST_EDITOR_API_URL": "http://localhost:8081/rest",
             "TEMPLATE_EDITOR_URL": "http://localhost:8080/",
             "ENABLE_TEMPLATE_EDITOR": true
             })
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope','$rootScope',
-     function($scope,$rootScope) {$rootScope.editSite=true;}]);
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {$rootScope.editSite=true;}]);
  </file>
  </example>
  */
@@ -5247,39 +5255,401 @@ IteSoft.directive('itBlockControlPanel',
                 scope: true,
                 template:
                 '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editBlock=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
-                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editBlock=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
-                '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
-                '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
-                '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
-                '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
-                '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a>' +
-
+                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> '+
+                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
+                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
+                    '<div class="block-control-panel-action-container">'+
+                    '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
+                    '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
+                    '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
+                    '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
+                    '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a></div>' +
+                    '</div>'+
+                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">'+
+                    '<span class="glyphicon glyphicon-warning-sign glyphicon-align-left" aria-hidden="true"></span>'+
+                    '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>'+
+                '</div>' +
                 '</div>',
+
                 controllerAs: 'itBlockControlPanelController',
-                controller: ['$rootScope','BlockService','CONFIG',
-                    function ($rootScope,BlockService,CONFIG) {
+                controller: ['$scope','$rootScope', '$interval','$location','$route','$timeout','$log', 'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG',
+                    function ($scope, $rootScope,$interval,$location,$route,$timeout,$log, BlockService, PilotSiteSideService, PilotService, CONFIG) {
                         var self = this;
 
+                        self.editorIsOpen = false;
                         self.CONFIG = CONFIG;
-                        this.refresh = function(){
+                        this.refresh = function () {
                             BlockService.build.get(function () {
-                                    location.reload();
+                                location.reload();
                             }, function () {
-                                $log.error("Unable to refresh " )
+                                $log.error("Unable to refresh ")
                             });
                         };
-                        this.editJS =  function(){
+                        self.interval = 0 ;
+                        PilotSiteSideService.on.pong=function(res){
+                            $log.log("pong");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
                         };
-                        this.editCSS =  function(){
+                        PilotSiteSideService.on.editorConnect=function(res){
+                            $log.log("editorConnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
                         };
-                        this.addFile =  function(){
+                        PilotSiteSideService.on.editorDisconnect=function(res){
+                            $log.log("editorDisconnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.close=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.error=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.transportFailure=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.reload=this.refresh;
+
+
+                        this.editJS = function () {
+                            PilotSiteSideService.fn.editPage("JS")
+                        };
+                        this.editCSS = function () {
+                            PilotSiteSideService.fn.editPage("CSS")
+                        };
+                        this.addFile = function () {
+                            PilotSiteSideService.fn.createPage("CSS")
                         };
                     }
                 ]
             }
-        }]
+        }
+    ]
 );
+
+/**
+ * Created by stephen on 03/04/2016.
+ */
+
+'use strict';
+
+IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
+    function ($resource, $log, CONFIG) {
+
+        var self = this;
+
+        self.ACTION_EDIT_BLOCK = "editBlock";
+        self.ACTION_REMOVE_BLOCK = "removeBlock";
+        self.ACTION_CREATE_BLOCK = "createBlock";
+        self.ACTION_EDIT_PAGE = "editPage";
+        self.ACTION_REMOVE_PAGE = "removePage";
+        self.ACTION_CREATE_PAGE = "createPage";
+        self.ACTION_PING = "ping";
+        self.ACTION_PONG = "pong";
+        self.ACTION_DISCONNECT = "disconnect";
+        self.ACTION_TIMEOUT = "timeout";
+        self.ACTION_CONNECT = "connect";
+        self.ACTION_RELOAD = "reload";
+        self.DEST_EDITOR = "editor";
+        self.DEST_SITE = "site";
+        self.DEST_ALL = "all";
+
+        self.fields = {
+            socket: {},
+            request: {
+                url: CONFIG.REST_EDITOR_API_URL,
+                contentType: 'application/json',
+                logLevel: 'debug',
+                transport: 'websocket',
+                trackMessageLength: true,
+                reconnectInterval: 5000,
+                enableXDR: true,
+                timeout: 60000},
+            model: {},
+            dest: ""
+        };
+
+        self.fn = {
+            ping: _ping,
+            pong: _pong
+        };
+        self.on = {
+            message:{},
+            open:undefined,
+            close:undefined,
+            reopen:undefined,
+            transportFailure:undefined,
+            error:undefined
+        };
+
+        self.fields.request.onOpen = function (response) {
+            self.fields.model.transport = response.transport;
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.open)){
+                self.on.open();
+            }
+        };
+
+        self.fields.request.onClientTimeout = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
+            setTimeout(function () {
+                self.fields.socket = atmosphere.subscribe(self.fields.request);
+            }, self.fields.request.reconnectInterval);
+        };
+
+        self.fields.request.onReopen = function (response) {
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.reopen)){
+                self.on.reopen();
+            }
+        };
+
+        //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
+        self.fields.request.onTransportFailure = function (errorMsg, request) {
+            atmosphere.util.info(errorMsg);
+            request.fallbackTransport = 'long-polling';
+            if(angular.isDefined(self.on.transportFailure)){
+                self.on.transportFailure();
+            }
+        };
+
+        self.fields.request.onMessage = function (response) {
+            self.on.message(response);
+        };
+
+        self.fields.request.onClose = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
+            if(angular.isDefined(self.on.close)){
+                self.on.close();
+            }
+        };
+
+        self.fields.request.onError = function (response) {
+            self.fields.model.logged = false;
+            if(angular.isDefined(self.on.error)){
+                self.on.error();
+            }
+        };
+
+        self.fields.request.onReconnect = function (request, response) {
+            self.fields.model.connected = false;
+        };
+
+
+        function _ping(dest) {
+            $log.log("ping "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
+        }
+
+        function _pong(dest) {
+            $log.log("pong "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
+        }
+
+        self.fields.socket = atmosphere.subscribe(self.fields.request);
+        return self;
+    }
+]
+)
+;
+
+/**
+ * Created by stephen on 03/04/2016.
+ */
+
+'use strict';
+
+IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
+    function ($resource, $log, CONFIG, PilotService) {
+
+        var self = this;
+
+        self.fields = {};
+
+        self.fn = {
+            editBlock: _editBlock,
+            removeBlock: _removeBlock,
+            createBlock: _createBlock,
+            editPage: _editPage,
+            removePage: _removePage,
+            createPage: _createPage,
+            ping: PilotService.fn.ping
+        };
+
+        self.on = {
+            reload: undefined,
+            pong: undefined,
+            editorConnect: undefined,
+            editorDisconnect: undefined,
+            close:undefined,
+            reopen:undefined,
+            transportFailure:undefined,
+            error:undefined
+        };
+        PilotService.fields.dest = PilotService.DEST_EDITOR;
+
+        // test connection with editor when websocket is open
+        PilotService.on.open = function (response) {
+            $log.log("WebSocket connection is opened");
+            self.fn.ping(PilotService.DEST_EDITOR);
+        };
+
+        PilotService.on.reopen = function (response) {
+            $log.log("WebSocket connection is reopened");
+            self.fn.ping(PilotService.DEST_EDITOR);
+        };
+
+        PilotService.on.close=function(){
+            if(angular.isDefined(self.on.close)){
+                self.on.close();
+            }
+        };
+        PilotService.on.error=function(){
+            if(angular.isDefined(self.on.error)){
+                self.on.error();
+            }
+        };
+        PilotService.on.transportFailure=function(){
+            if(angular.isDefined(self.on.transportFailure)){
+                self.on.transportFailure();
+            }
+        };
+
+        PilotService.on.message = function (response) {
+            var responseText = response.responseBody;
+            try {
+                var message = atmosphere.util.parseJSON(responseText);
+                if (message.dest == PilotService.DEST_ALL) {
+                    switch (message.action) {
+                        case PilotService.ACTION_CONNECT:
+                            $log.log(PilotService.ACTION_CONNECT);
+                            if (angular.isDefined(self.on.editorConnect)) {
+                                self.on.editorConnect();
+                            }
+                            break;
+                        case PilotService.ACTION_DISCONNECT:
+                            $log.log(PilotService.ACTION_DISCONNECT);
+                            if (angular.isDefined(self.on.editorDisconnect)) {
+                                self.on.editorDisconnect();
+                            }
+                            break;
+                    }
+                }
+                if (message.dest == PilotService.DEST_SITE) {
+                    switch (message.action) {
+                        case PilotService.ACTION_RELOAD:
+                            $log.log(PilotService.ACTION_RELOAD);
+                            if (angular.isDefined(self.on.reload)) {
+                                self.on.reload();
+                            }
+                            break;
+                        case PilotService.ACTION_PING:
+                            $log.log(PilotService.ACTION_PING);
+                            PilotService.pong(PilotService.DEST_EDITOR);
+                            break;
+                        case PilotService.ACTION_PONG:
+                            $log.log(PilotService.ACTION_PONG);
+                            if (angular.isDefined(self.on.pong)) {
+                                self.on.pong();
+                            }
+                            break;
+                        case PilotService.ACTION_PONG:
+                            $log.log(PilotService.ACTION_PONG);
+                            if (angular.isDefined(self.on.pong)) {
+                                self.on.pong();
+                            }
+                            break;
+                        case PilotService.ACTION_DISCONNECT:
+                            $log.log(PilotService.ACTION_DISCONNECT);
+                            if (angular.isDefined(self.on.editorDisconnect)) {
+                                self.on.editorDisconnect();
+                            }
+                            break;
+                        case PilotService.ACTION_CONNECT:
+                            $log.log(PilotService.ACTION_CONNECT);
+                            if (angular.isDefined(self.on.editorConnect)) {
+                                self.on.editorConnect();
+                            }
+                            break;
+                    }
+                }
+            } catch (e) {
+                $log.error("Error parsing JSON: ", responseText);
+                throw e;
+            }
+        };
+
+        function _editBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _removeBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _createBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _editPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        function _removePage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        function _createPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        return self;
+    }
+]);
 
 'use strict';
 
