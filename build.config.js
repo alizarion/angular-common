@@ -41,7 +41,12 @@ module.exports = {
         'main/assets/lib/ngtoast/dist/ngToast.min.css',
         'main/assets/lib/ngtoast/dist/ngToast-animations.min.css',
         'main/assets/lib/codemirror/lib/codemirror.css',
-        'main/assets/lib/codemirror/theme/mdn-like.css'
+        'main/assets/lib/codemirror/theme/mdn-like.css',
+        'main/assets/lib/codemirror/theme/material.css',
+        'main/assets/lib/codemirror/addon/dialog/dialog.css',
+        'main/assets/lib/codemirror/addon/display/fullscreen.css',
+        'main/assets/lib/codemirror/addon/fold/foldgutter.css',
+        'main/assets/lib/codemirror/addon/lint/lint.css'
 
     ],
 
