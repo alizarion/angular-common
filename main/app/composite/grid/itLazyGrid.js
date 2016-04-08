@@ -27,7 +27,6 @@
  *  </tr>
  *  </table>
  *
- *
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
