@@ -21,6 +21,9 @@
     "angular-messages": "1.4.7",
     "angular-mocks": "1.4.7",
     "ngtoast": "1.5.6",
-    "angular-local-storage": "0.2.3"
+    "angular-local-storage": "0.2.3",
+    "angular-ui-codemirror": "0.3",
+    "jsonlint": "https://gitlab.com/itesoft/jsonlint.git",
+    "angular-atmosphere": "https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js"
   }
 }

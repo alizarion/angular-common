@@ -39,7 +39,9 @@ module.exports = {
         'main/assets/lib/google-code-prettify/bin/prettify.min.css',
         'main/assets/lib/angular-ui-grid/ui-grid.css',
         'main/assets/lib/ngtoast/dist/ngToast.min.css',
-        'main/assets/lib/ngtoast/dist/ngToast-animations.min.css'
+        'main/assets/lib/ngtoast/dist/ngToast-animations.min.css',
+        'main/assets/lib/codemirror/lib/codemirror.css',
+        'main/assets/lib/codemirror/theme/mdn-like.css'
 
     ],
 
@@ -75,7 +77,32 @@ module.exports = {
         'main/assets/lib/angular-media-queries/match-media.js',
         'main/assets/lib/angular-strap/dist/angular-strap.min.js',
         'main/assets/lib/angular-strap/dist/angular-strap.tpl.js',
-        'main/assets/lib/ngtoast/dist/ngToast.min.js'
+        'main/assets/lib/ngtoast/dist/ngToast.min.js',
+        'main/assets/lib/codemirror/lib/codemirror.js',
+        'main/assets/lib/codemirror/mode/xml/xml.js',
+        'main/assets/lib/codemirror/mode/javascript/javascript.js',
+        'main/assets/lib/codemirror/mode/clike/clike.js',
+        'main/assets/lib/angular-ui-codemirror/ui-codemirror.min.js',
+        'main/assets/lib/codemirror/addon/search/search.js',
+        'main/assets/lib/codemirror/addon/search/searchcursor.js',
+        'main/assets/lib/codemirror/addon/dialog/dialog.js',
+        'main/assets/lib/codemirror/addon/fold/xml-fold.js',
+        'main/assets/lib/codemirror/addon/edit/matchtags.js',
+        'main/assets/lib/codemirror/addon/search/match-highlighter.js',
+        'main/assets/lib/codemirror/addon/selection/active-line.js',
+        'main/assets/lib/codemirror/addon/display/placeholder.js',
+        'main/assets/lib/codemirror/addon/display/fullscreen.js',
+        'main/assets/lib/codemirror/addon/fold/foldcode.js',
+        'main/assets/lib/codemirror/addon/fold/foldgutter.js',
+        'main/assets/lib/codemirror/addon/fold/brace-fold.js',
+        'main/assets/lib/codemirror/addon/fold/markdown-fold.js',
+        'main/assets/lib/codemirror/addon/fold/comment-fold.js',
+        'main/assets/lib/codemirror/addon/fold/indent-fold.js',
+        'main/assets/lib/codemirror/addon/lint/lint.js',
+        'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
+        'main/assets/lib/jsonlint/lib/jsonlint.js',
+        'main/assets/lib/codemirror/addon/lint/json-lint.js',
+        'main/assets/lib/angular-atmosphere/index.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -91,6 +118,31 @@ module.exports = {
         'main/assets/lib/angular-local-storage/dist/angular-local-storage.js',
         'main/assets/lib/angular-ui-grid/ui-grid.js',
         'main/assets/lib/angular-media-queries/match-media.js',
-        'main/assets/lib/ngtoast/dist/ngToast.js'
+        'main/assets/lib/ngtoast/dist/ngToast.js',
+        'main/assets/lib/codemirror/lib/codemirror.js',
+        'main/assets/lib/codemirror/mode/xml/xml.js',
+        'main/assets/lib/codemirror/mode/javascript/javascript.js',
+        'main/assets/lib/codemirror/mode/clike/clike.js',
+        'main/assets/lib/angular-ui-codemirror/ui-codemirror.js',
+        'main/assets/lib/codemirror/addon/search/search.js',
+        'main/assets/lib/codemirror/addon/search/searchcursor.js',
+        'main/assets/lib/codemirror/addon/dialog/dialog.js',
+        'main/assets/lib/codemirror/addon/fold/xml-fold.js',
+        'main/assets/lib/codemirror/addon/edit/matchtags.js',
+        'main/assets/lib/codemirror/addon/search/match-highlighter.js',
+        'main/assets/lib/codemirror/addon/selection/active-line.js',
+        'main/assets/lib/codemirror/addon/display/placeholder.js',
+        'main/assets/lib/codemirror/addon/display/fullscreen.js',
+        'main/assets/lib/codemirror/addon/fold/foldcode.js',
+        'main/assets/lib/codemirror/addon/fold/foldgutter.js',
+        'main/assets/lib/codemirror/addon/fold/brace-fold.js',
+        'main/assets/lib/codemirror/addon/fold/markdown-fold.js',
+        'main/assets/lib/codemirror/addon/fold/comment-fold.js',
+        'main/assets/lib/codemirror/addon/fold/indent-fold.js',
+        'main/assets/lib/codemirror/addon/lint/lint.js',
+        'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
+        'main/assets/lib/jsonlint/lib/jsonlint.js',
+        'main/assets/lib/codemirror/addon/lint/json-lint.js',
+        'main/assets/lib/angular-atmosphere/index.js'
     ]
 };
