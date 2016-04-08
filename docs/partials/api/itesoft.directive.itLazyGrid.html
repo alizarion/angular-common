@@ -33,10 +33,10 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-lazy-grid"&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itlazygrid-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-0" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-1" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-0" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
-<script type="text/ng-template" id="index.html-0">
+<pre class="prettyprint linenums" ng-set-text="index.html-1" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-1">
 <style>
 </style>
 <div ng-controller="HomeCtrl" >
@@ -86,7 +86,7 @@ angular.module('itesoft-showcase')
                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                    {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" } ]}
+                    {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
                 ];
 
                //Call when grid is ready to use (with config)
@@ -145,6 +145,6 @@ angular.module('itesoft-showcase')
 </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-0" ng-eval-javascript="Module.js controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-1" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>

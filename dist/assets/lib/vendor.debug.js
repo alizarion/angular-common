@@ -84068,7 +84068,7 @@ angular.module('ui.grid').run(['$templateCache', function($templateCache) {
 
   // THE END
 
-  CodeMirror.version = "5.13.2";
+  CodeMirror.version = "5.13.4";
 
   return CodeMirror;
 });

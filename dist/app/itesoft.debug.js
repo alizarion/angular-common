@@ -206,810 +206,6 @@ IteSoft
         }]);
 
 
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itAmountCleanerService', [function () {
-
-        var supportedLocales = ['en_US',
-            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
-
-        return {
-            cleanAmount: function (amountString, aLocale) {
-                var result = 0;
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-
-                //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //pas de traitement particulier pour le francais
-                //si la locale est en-US
-                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
-                    //suppression de la virgule permettant de séparer les milliers
-                    amountString = amountString.replace(",", "");
-                    //si la locale est de-DE
-                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
-                    //suppression du point permettant de séparer les milliers
-                    amountString = amountString.replace(".", "");
-                    //remplacement de la virgule par un point
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //Formattage des montants avec la locale
-                result = parseFloat(amountString);
-
-                console.log('result1 ' + result);
-
-                if (result == undefined) {
-                    result = parseFloat(amountString);
-                }
-
-                console.log('result2 ' + result);
-
-                return result;
-            },
-
-            formatAmount: function (amount, aLocale) {
-                var result = '';
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-                if (amount != undefined) {
-                    var amountString = amount.toString();
-
-                    //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                        amountString = amountString.replace(",", ".");
-                    }
-                }
-                //Formattage des montants avec la locale avec 2 décimales après la virgule
-                //TODO dinar tunisien, incompatible
-                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
-
-                return result;
-            }
-        }
-
-
-    }
-    ]
-)
-;
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLazyGrid
- * @module itesoft
- * @restrict ECA
- * @since 1.1
- * @description
- * The itLazyGrid widgets provides lazy grid feature on ui-grid
- *
- *
- * ```html
- *    <it-lazy-grid option="option" ></it-lazy-grid>
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  </table>
- *
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- Query RSQL send to REST API:
-    <pre><code class="lang-html">{{query}}</code></pre>
-     <div style="height:300px;display:block;">
-        <it-lazy-grid options="options" ></it-lazy-grid>
-     </div>
-    </div>
- </div>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = {
-            // call when lazyGrid is instantiate
-            onRegisterApi: function (lazyGrid) {
-                $scope.lazyGrid = lazyGrid;
-                $scope.lazyGrid.appScope = $scope;
-                $scope.lazyGrid.fn.initialize();
-                $scope.lazyGrid.fn.callBack = load;
-                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
-                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
-
-                // Call after each loaded event
-                $scope.lazyGrid.on.loaded = function () {
-                };
-
-                // Call when user click
-                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
-                    $scope.selectedInvoice = row.entity;
-                };
-
-                // Loading columnDef
-                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
-                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
-                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" } ]}
-                 ];
-
-                //Call when grid is ready to use (with config)
-                $scope.$applyAsync(function () {
-                   $scope.lazyGrid.fn.initialLoad();
-                });
-        }};
-
-         // ui-grid loading function, will be call on:
-         //-filter
-         //-pagination
-         //-sorter
-        function load(query) {
-
-            // ignore this, it's just for demo
-            if(query.size == 2){
-                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else if(query.size == 4){
-                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else{
-                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
-                 ]};
-             }
-            // end ignore this, it's just for demo
-            query = query.build();
-            // query RSQL to send to REST API
-            console.log(query);
-            $scope.query = query;
-            $scope.lazyGrid.fields.gridOptions.data = data.items;
-            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
-
-            $scope.isBusy = false;
-            $scope.lazyGrid.on.loaded();
-        }
-     }
- ]
- );
- </file>
- </example>
- */
-IteSoft.directive('itLazyGrid',
-                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
-        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
-            return {
-                restrict: 'AE',
-                scope: {
-                    options: '='
-                },
-                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
-                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
-                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
-                '<div class="ui-grid-filter-container"> ' +
-                '<span ng-repeat="colFilter in col.filters" class="{{col.headerCellClass}}"> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{colFilter.emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{colFilter.emptyOption | translate}}" ng-model="colFilter.term" data-min-date="01/01/1980" data-max-date="01/01/2100" data-autoclose="1" ' +
-                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
-                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
-                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
-                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}"> </div>' +
-                ' </script> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
-                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
-                '<div role="navigation" class="ui-grid-pager-container"> ' +
-                '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
-                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
-                '<div class="first-triangle prev-triangle"></div> </button> ' +
-                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
-                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
-                '{{ paginationApi.getTotalPages() }} ' +
-                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
-                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
-                '<div class="last-triangle next-triangle">' +
-                '</div> ' +
-                '</button> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
-                '<div class="last-triangle"> ' +
-                '<div class="last-bar"> ' +
-                '</div> </div> ' +
-                '</button> </div> ' +
-                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
-                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
-                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
-                '</div> ' +
-                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
-                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
-                '</span> </div> ' +
-                '<div class="ui-grid-pager-count-container">' +
-                '<div class="ui-grid-pager-count"> ' +
-                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
-                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
-                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
-                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
-                ' </div> </div> </div> ' +
-                '</script>',
-                controllerAs: 'lazyGrid',
-                controller: ['$scope', function ($scope) {
-
-
-                    //Get current locale
-                    var locale = localStorageService.get('Locale');
-
-                    var self = this;
-
-                    self.options = $scope.options;
-
-                    /**
-                     * Fields
-                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
-                     */
-                    self.fields = {
-                        template: {pagination: $templateCache.get('paginationTemplate.html')},
-                        filter: [],
-                        externalFilter: {},
-                        gridApi: {},
-                        gridOptions: {},
-                        paginationOptions: {},
-                        appScope: {},
-                        promise: {refresh: {}}
-                    };
-
-                    /**
-                     * Event callback method
-                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
-                     */
-                    self.on = {
-                        loaded: onLoaded,
-                        ready: onReady,
-                        filterChange: onFilterChange,
-                        sortChange: onSortChange,
-                        paginationChanged: onPaginationChanged,
-                        rowSelectionChanged: onRowSelectionChanged
-                    };
-                    /**
-                     * Public Method
-                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
-                     */
-                    self.fn = {
-                        callBack: self.options.callBack,
-                        initialize: initialize,
-                        refresh: refresh,
-                        initialLoad: initialLoad,
-                        addExternalFilter: addExternalFilter
-                    };
-
-
-                    /**
-                     *
-                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
-                     */
-                    self.fields.paginationOptions = {
-                        pageNumber: 1,
-                        pageSize: 10,
-                        sort: {
-                            name: undefined,
-                            direction: undefined
-                        }
-                    };
-                    /**
-                     * Default grid options
-                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
-                     */
-                    self.fields.gridOptions = {
-                        enableFiltering: true,
-                        enableSorting: true,
-                        enableColumnMenus: false,
-                        useExternalPagination: true,
-                        useExternalSorting: true,
-                        enableRowSelection: true,
-                        enableRowHeaderSelection: false,
-                        multiSelect: false,
-                        modifierKeysToMultiSelect: false,
-                        noUnselect: true,
-                        useExternalFiltering: true,
-                        data: [],
-                        columnDefs: [],
-                        paginationTemplate: self.fields.template.pagination,
-                        onRegisterApi: function (gridApi) {
-                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
-                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
-                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
-                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
-                            self.fields.gridApi = gridApi;
-                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
-                        }
-                    };
-                    /**
-                     * Apply external filter
-                     * @private
-                     */
-                    function _applyExternalFilter() {
-                        $log.debug("LazyGrid:Apply External filter");
-                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
-                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
-                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
-                                self.fields.filter.push(queryParam);
-                            }
-                        });
-                    }
-
-                    /**
-                     * Apply filter
-                     * @private
-                     */
-                    function _applyFilter() {
-                        $log.debug("LazyGrid:Apply filter");
-                        var key = '';
-                        var value = '';
-                        var condition = OPERATOR.EQUALS;
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
-                                key = self.fields.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
-                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
-                                        // if filter key is override
-                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
-                                        if (rsqlKey != undefined) {
-                                            key = rsqlKey;
-                                        }
-
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
-                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
-                                        }
-
-                                        //Si la donnée doit être traitée comme un nombre
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
-                                            value = itAmountCleanerService.cleanAmount(value, locale);
-                                        }
-
-                                        var queryParam = itQueryParamFactory.create(key, value, condition);
-                                        self.fields.filter.push(queryParam);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    /**
-                     * Apply default filter configured inside columnDef filter option
-                     * @private
-                     */
-                    function _applyDefaultFilter() {
-                        $log.debug("LazyGrid:Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
-                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
-                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
-                                        //    self.fields.filter.push(queryParamClient);
-                                        //}
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Call after each loading
-                     */
-                    function onLoaded() {
-                    }
-
-                    /**
-                     * Call when grid is ready, when config is loaded (columnDef is present)
-                     */
-                    function onReady() {
-                    }
-
-                    /**
-                     * Call on filter change
-                     */
-                    function onFilterChange() {
-                        $log.debug("LazyGrid:Filter Changed");
-                        self.fields.filter = [];
-                        if (angular.isDefined(self.fields.promise.refresh)) {
-                            $timeout.cancel(self.fields.promise.refresh);
-                        }
-                        self.fields.promise.refresh = $timeout(function () {
-                                self.fn.refresh();
-                            }
-                            , 1000);
-
-                    }
-
-                    /**
-                     * Call on sort change
-                     * @param grid
-                     * @param sortColumns
-                     */
-                    function onSortChange(grid, sortColumns) {
-                        $log.debug("LazyGrid:Sort Changed");
-                        self.fields.filter = [];
-                        if (sortColumns.length == 0) {
-                            self.fields.paginationOptions.sort.name = undefined;
-                            self.fields.paginationOptions.sort.direction = undefined;
-                        } else {
-                            var sortKey = sortColumns[0].name;
-                            /**
-                             * Surcharge avec la clé rsql
-                             */
-                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
-                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
-                            }
-                            self.fields.paginationOptions.sort.name = sortKey;
-                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
-                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
-                        }
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Call when page changed
-                     * @param newPage
-                     * @param pageSize
-                     */
-                    function onPaginationChanged(newPage, pageSize) {
-                        $log.debug("LazyGrid:Pagination Changed");
-                        self.fields.filter = [];
-                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
-                            self.fields.paginationOptions.pageNumber = newPage;
-                            self.fields.paginationOptions.pageSize = pageSize;
-                            self.fn.refresh();
-                        }
-                    }
-
-                    /**
-                     * Call when user click on row
-                     */
-                    function onRowSelectionChanged() {
-                        $log.debug("LazyGrid:Row Selection Changed");
-                    }
-
-                    /**
-                     * Call to refresh data
-                     */
-                    function refresh() {
-                        $log.debug("LazyGrid:Refresh");
-                        _applyExternalFilter();
-                        _applyFilter();
-                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
-                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
-                        self.fn.callBack(query);
-                    }
-
-                    /**
-                     * Initial loading
-                     */
-                    function initialLoad() {
-                        $log.debug("LazyGrid:Initial load");
-
-                        //application des filtres pour récupérer le nom de filtre actifs
-                        _applyFilter();
-                        if (self.fields.filter.length <= 0) {
-                            _applyDefaultFilter();
-                        }
-                        //remise à 0 des informations de filtre
-                        self.fields.filter = [];
-
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Add external filter like clientId
-                     * @param filter external filter to always apply
-                     * @param filter.key
-                     * @param filter.value
-                     * @param filter.condition
-                     */
-                    function addExternalFilter(filter) {
-                        if (angular.isUndefined(filter.key)) {
-                            $log.error("External filter object must have key");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.condition)) {
-                            $log.error("External filter object must have condition");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.value)) {
-                            self.fields.externalFilter[filter.key] = {};
-                        } else {
-                            self.fields.externalFilter[filter.key] = filter;
-                        }
-                    }
-
-                    /**
-                     * Call before using
-                     * @returns {*}
-                     */
-                    function initialize() {
-
-                    }
-
-                    if (angular.isDefined(self.options.onRegisterApi)) {
-                        self.options.onRegisterApi(self);
-                        $log.debug('LazyGrid:onRegisterApi')
-                    }
-
-
-                }]
-            }
-        }
-    ]
-).constant("OPERATOR", {
-        "EQUALS": "==",
-        "LIKE": "==%",
-        "NOT_EQUALS": "!=",
-        "LESS_THAN": "=lt=",
-        "LESS_EQUALS": "=le=",
-        "GREATER_THAN": "=gt=",
-        "GREATER_EQUALS": "=ge="
-})
-.constant('NOTIFICATION_TYPE', {
-    INFO: "INFO",
-    WARNING: "WARNING",
-    ERROR: "ERROR",
-    SUCCESS: "SUCCESS",
-    DISMISS: "DISMISS"
-})
-;
-/**
- * Created by SZA on 20/01/2016.
- */
-
-'use strict';
-/**
- * Singleton that provide paginatorConfig
- */
-IteSoft.factory('itPaginatorConfigService',
-        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
-            function ($q, $log, itNotifier, $filter, MetadataService) {
-
-                var self = this;
-                var deferred = $q.defer();
-
-                /**
-                 * fields
-                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
-                 */
-                self.fields = {
-                    options: [],
-                    defaultOption: "",
-                    loaded: false
-                };
-
-                /**
-                 * public method
-                 * @type {{initialize: initialize}}
-                 */
-                self.fn = {
-                    initialize: initialize
-                };
-
-                return self;
-                /**
-                 * filter initialization
-                 * @returns {*}
-                 */
-                function initialize() {
-                    if (!self.fields.loaded) {
-                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
-                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
-                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
-                            function (options) {
-                                self.fields.defaultOption = options[1].value;
-                                var paginatorOptions = options[0].value;
-                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
-                                    self.fields.options = paginatorOptions.split(',');
-                                } else {
-                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
-                                }
-
-                                $log.debug("PaginatorConfigService: loaded");
-                                self.fields.loaded = true;
-                                deferred.resolve('ok');
-                            },
-                            function (failed) {
-                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
-                            });
-                    } else {
-                        $log.debug("PaginatorConfigService: loaded");
-                        deferred.resolve('ok');
-                    }
-                    return deferred.promise;
-
-                }
-
-            }
-        ]
-    );
-'use strict';
-/**
- * Query param service
- */
-IteSoft.factory('itQueryParamFactory', [function () {
-    function QueryParam(key, value, operator) {
-        this.key = key;
-        this.value = value;
-        this.operator = operator;
-    }
-    return {
-        /**
-         * create a queryParam
-         * @param key: name
-         * @param value: myName
-         * @param operator: OPERATOR.equals
-         * @returns {QueryParam}
-         */
-        create: function (key, value, operator) {
-            return new QueryParam(key, value, operator);
-        }
-    }
-}]);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
-        function Query(parameters, start, size, sort) {
-            this.parameters = parameters;
-            this.start = start;
-            this.size = size;
-            this.sort = sort;
-            /**
-             * Method that return RSQL path
-             * @returns {string}: query=id==1 and name=="name"
-             */
-            this.build = function () {
-                var result = '';
-                if (parameters != undefined) {
-                    this.parameters.forEach(function (entry) {
-                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
-
-                            //Si c'est une date max, on définit l'heure à 23h59
-                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
-                                entry.value.setHours(23);
-                                entry.value.setMinutes(59);
-                                entry.value.setSeconds(59);
-                                entry.value.setMilliseconds(999);
-                            }
-
-                            if (result.length > 0) {
-                                result += " and ";
-                            }
-
-                            //formattage ISO des dates
-                            if (entry.value instanceof Date) {
-                                entry.value = entry.value.toISOString();
-                            }
-
-                            if (entry.operator == OPERATOR.LIKE) {
-                                entry.value = entry.value + '%';
-                            }
-                            result += entry.key + entry.operator + entry.value;
-                        }
-                    });
-                }
-                result = 'query=' + result;
-                if (size != null && angular.isDefined(size) && size != '') {
-                    result += "&size=" + this.size;
-                }
-                if (start != null && angular.isDefined(start) && start != '') {
-                    result += "&start=" + this.start;
-                }
-                //le sorting en décroissant s'écrit -fieldName
-                if (sort != undefined) {
-                    if (this.sort.name != undefined) {
-                        result += "&sort="
-                        if (this.sort.direction == "desc") {
-                            result += "-"
-                        }
-                        result += this.sort.name;
-                    }
-                }
-                return result;
-
-            };
-
-
-        }
-
-        return {
-            create: function (parameters, start, size, sort) {
-                return new Query(parameters, start, size, sort);
-            }
-        }
-    }
-    ]
-);
 "use strict";
 
 /**
@@ -3790,6 +2986,1197 @@ IteSoft
 'use strict';
 /**
  * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
+IteSoft
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
+                    }
+                }
+
+                setActive();
+
+                scope.$on('$locationChangeSuccess', setActive);
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:true,
+            template :
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="it-sidebar-inner">'+
+                        '<div class="nav navbar navbar-inverse">'+
+                        '<nav class="" ng-transclude ></nav>' +
+                        '</div>'+
+                    '</div>'+
+                '</div>'
+
+
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+ * @since 1.0
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : true,
+            template :
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                    '<div class="it-container it-fill" ng-transclude></div>'+
+                '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
+IteSoft
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
+
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+
+             </it-side-menu-header>
+
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
+IteSoft
+    .directive('itSideMenus',function(){
+        return {
+            restrict: 'ECA',
+            transclude : true,
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
+        }
+});
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itAmountCleanerService', [function () {
+
+        var supportedLocales = ['en_US',
+            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
+
+        return {
+            cleanAmount: function (amountString, aLocale) {
+                var result = 0;
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+
+                //Suppression des " " pour séparer les milliers et des caractères non numériques
+                amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //pas de traitement particulier pour le francais
+                //si la locale est en-US
+                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
+                    //suppression de la virgule permettant de séparer les milliers
+                    amountString = amountString.replace(",", "");
+                    //si la locale est de-DE
+                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
+                    //suppression du point permettant de séparer les milliers
+                    amountString = amountString.replace(".", "");
+                    //remplacement de la virgule par un point
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //Formattage des montants avec la locale
+                result = parseFloat(amountString);
+
+                console.log('result1 ' + result);
+
+                if (result == undefined) {
+                    result = parseFloat(amountString);
+                }
+
+                console.log('result2 ' + result);
+
+                return result;
+            },
+
+            formatAmount: function (amount, aLocale) {
+                var result = '';
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+                if (amount != undefined) {
+                    var amountString = amount.toString();
+
+                    //Suppression des " " pour séparer les milliers et des caractères non numériques
+                    amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                        amountString = amountString.replace(",", ".");
+                    }
+                }
+                //Formattage des montants avec la locale avec 2 décimales après la virgule
+                //TODO dinar tunisien, incompatible
+                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+
+                return result;
+            }
+        }
+
+
+    }
+    ]
+)
+;
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLazyGrid
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.1
+ * @description
+ * The itLazyGrid widgets provides lazy grid feature on ui-grid
+ *
+ *
+ * ```html
+ *    <it-lazy-grid option="option" ></it-lazy-grid>
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  </table>
+ *
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ Query RSQL send to REST API:
+    <pre><code class="lang-html">{{query}}</code></pre>
+     <div style="height:300px;display:block;">
+        <it-lazy-grid options="options" ></it-lazy-grid>
+     </div>
+    </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = {
+            // call when lazyGrid is instantiate
+            onRegisterApi: function (lazyGrid) {
+                $scope.lazyGrid = lazyGrid;
+                $scope.lazyGrid.appScope = $scope;
+                $scope.lazyGrid.fn.initialize();
+                $scope.lazyGrid.fn.callBack = load;
+                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
+                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
+
+                // Call after each loaded event
+                $scope.lazyGrid.on.loaded = function () {
+                };
+
+                // Call when user click
+                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
+                    $scope.selectedInvoice = row.entity;
+                };
+
+                // Loading columnDef
+                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
+                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
+                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
+                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
+                 ];
+
+                //Call when grid is ready to use (with config)
+                $scope.$applyAsync(function () {
+                   $scope.lazyGrid.fn.initialLoad();
+                });
+        }};
+
+         // ui-grid loading function, will be call on:
+         //-filter
+         //-pagination
+         //-sorter
+        function load(query) {
+
+            // ignore this, it's just for demo
+            if(query.size == 2){
+                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else if(query.size == 4){
+                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else{
+                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
+                 ]};
+             }
+            // end ignore this, it's just for demo
+            query = query.build();
+            // query RSQL to send to REST API
+            console.log(query);
+            $scope.query = query;
+            $scope.lazyGrid.fields.gridOptions.data = data.items;
+            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
+
+            $scope.isBusy = false;
+            $scope.lazyGrid.on.loaded();
+        }
+     }
+ ]
+ );
+ </file>
+ </example>
+ */
+IteSoft.directive('itLazyGrid',
+                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
+        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
+            return {
+                restrict: 'AE',
+                scope: {
+                    options: '='
+                },
+                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
+                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
+                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
+                '<div class="ui-grid-filter-container"> ' +
+                '<span ng-repeat="colFilter in col.filters" class="{{col.headerCellClass}}"> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{colFilter.emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{colFilter.emptyOption | translate}}" ng-model="colFilter.term" data-min-date="01/01/1980" data-max-date="01/01/2100" data-autoclose="1" ' +
+                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
+                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
+                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
+                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
+                ' </script> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
+                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
+                '<div role="navigation" class="ui-grid-pager-container"> ' +
+                '<div role="menubar" class="ui-grid-pager-control"> ' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
+                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<div class="first-triangle prev-triangle"></div> </button> ' +
+                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
+                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
+                '{{ paginationApi.getTotalPages() }} ' +
+                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
+                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
+                '<div class="last-triangle next-triangle">' +
+                '</div> ' +
+                '</button> ' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
+                '<div class="last-triangle"> ' +
+                '<div class="last-bar"> ' +
+                '</div> </div> ' +
+                '</button> </div> ' +
+                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
+                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
+                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
+                '</div> ' +
+                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
+                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
+                '</span> </div> ' +
+                '<div class="ui-grid-pager-count-container">' +
+                '<div class="ui-grid-pager-count"> ' +
+                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
+                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
+                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
+                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
+                ' </div> </div> </div> ' +
+                '</script>',
+                controllerAs: 'lazyGrid',
+                controller: ['$scope', function ($scope) {
+
+
+                    //Get current locale
+                    var locale = localStorageService.get('Locale');
+
+                    var self = this;
+
+                    self.options = $scope.options;
+
+                    /**
+                     * Fields
+                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
+                     */
+                    self.fields = {
+                        template: {pagination: $templateCache.get('paginationTemplate.html')},
+                        filter: [],
+                        externalFilter: {},
+                        gridApi: {},
+                        gridOptions: {},
+                        paginationOptions: {},
+                        appScope: {},
+                        promise: {refresh: {}}
+                    };
+
+                    /**
+                     * Event callback method
+                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
+                     */
+                    self.on = {
+                        loaded: onLoaded,
+                        ready: onReady,
+                        filterChange: onFilterChange,
+                        sortChange: onSortChange,
+                        paginationChanged: onPaginationChanged,
+                        rowSelectionChanged: onRowSelectionChanged
+                    };
+                    /**
+                     * Public Method
+                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
+                     */
+                    self.fn = {
+                        callBack: self.options.callBack,
+                        initialize: initialize,
+                        refresh: refresh,
+                        initialLoad: initialLoad,
+                        addExternalFilter: addExternalFilter
+                    };
+
+
+                    /**
+                     *
+                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
+                     */
+                    self.fields.paginationOptions = {
+                        pageNumber: 1,
+                        pageSize: 10,
+                        sort: {
+                            name: undefined,
+                            direction: undefined
+                        }
+                    };
+                    /**
+                     * Default grid options
+                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
+                     */
+                    self.fields.gridOptions = {
+                        enableFiltering: true,
+                        enableSorting: true,
+                        enableColumnMenus: false,
+                        useExternalPagination: true,
+                        useExternalSorting: true,
+                        enableRowSelection: true,
+                        enableRowHeaderSelection: false,
+                        multiSelect: false,
+                        modifierKeysToMultiSelect: false,
+                        noUnselect: true,
+                        useExternalFiltering: true,
+                        data: [],
+                        columnDefs: [],
+                        paginationTemplate: self.fields.template.pagination,
+                        onRegisterApi: function (gridApi) {
+                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
+                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
+                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
+                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
+                            self.fields.gridApi = gridApi;
+                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
+                        }
+                    };
+                    /**
+                     * Apply external filter
+                     * @private
+                     */
+                    function _applyExternalFilter() {
+                        $log.debug("LazyGrid:Apply External filter");
+                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
+                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
+                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
+                                self.fields.filter.push(queryParam);
+                            }
+                        });
+                    }
+
+                    /**
+                     * Apply filter
+                     * @private
+                     */
+                    function _applyFilter() {
+                        $log.debug("LazyGrid:Apply filter");
+                        var key = '';
+                        var value = '';
+                        var condition = OPERATOR.EQUALS;
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
+                                key = self.fields.gridApi.grid.columns[i].field;
+                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
+                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
+                                    if (value != undefined && value != '') {
+                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
+                                        // if filter key is override
+                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
+                                        if (rsqlKey != undefined) {
+                                            key = rsqlKey;
+                                        }
+
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
+                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
+                                        }
+
+                                        //Si la donnée doit être traitée comme un nombre
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
+                                            value = itAmountCleanerService.cleanAmount(value, locale);
+                                        }
+
+                                        var queryParam = itQueryParamFactory.create(key, value, condition);
+                                        self.fields.filter.push(queryParam);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    /**
+                     * Apply default filter configured inside columnDef filter option
+                     * @private
+                     */
+                    function _applyDefaultFilter() {
+                        $log.debug("LazyGrid:Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
+                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
+                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
+                                        //    self.fields.filter.push(queryParamClient);
+                                        //}
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Call after each loading
+                     */
+                    function onLoaded() {
+                    }
+
+                    /**
+                     * Call when grid is ready, when config is loaded (columnDef is present)
+                     */
+                    function onReady() {
+                    }
+
+                    /**
+                     * Call on filter change
+                     */
+                    function onFilterChange() {
+                        $log.debug("LazyGrid:Filter Changed");
+                        self.fields.filter = [];
+                        if (angular.isDefined(self.fields.promise.refresh)) {
+                            $timeout.cancel(self.fields.promise.refresh);
+                        }
+                        self.fields.promise.refresh = $timeout(function () {
+                                self.fn.refresh();
+                            }
+                            , 1000);
+
+                    }
+
+                    /**
+                     * Call on sort change
+                     * @param grid
+                     * @param sortColumns
+                     */
+                    function onSortChange(grid, sortColumns) {
+                        $log.debug("LazyGrid:Sort Changed");
+                        self.fields.filter = [];
+                        if (sortColumns.length == 0) {
+                            self.fields.paginationOptions.sort.name = undefined;
+                            self.fields.paginationOptions.sort.direction = undefined;
+                        } else {
+                            var sortKey = sortColumns[0].name;
+                            /**
+                             * Surcharge avec la clé rsql
+                             */
+                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
+                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
+                            }
+                            self.fields.paginationOptions.sort.name = sortKey;
+                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
+                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
+                        }
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Call when page changed
+                     * @param newPage
+                     * @param pageSize
+                     */
+                    function onPaginationChanged(newPage, pageSize) {
+                        $log.debug("LazyGrid:Pagination Changed");
+                        self.fields.filter = [];
+                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
+                            self.fields.paginationOptions.pageNumber = newPage;
+                            self.fields.paginationOptions.pageSize = pageSize;
+                            self.fn.refresh();
+                        }
+                    }
+
+                    /**
+                     * Call when user click on row
+                     */
+                    function onRowSelectionChanged() {
+                        $log.debug("LazyGrid:Row Selection Changed");
+                    }
+
+                    /**
+                     * Call to refresh data
+                     */
+                    function refresh() {
+                        $log.debug("LazyGrid:Refresh");
+                        _applyExternalFilter();
+                        _applyFilter();
+                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
+                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
+                        self.fn.callBack(query);
+                    }
+
+                    /**
+                     * Initial loading
+                     */
+                    function initialLoad() {
+                        $log.debug("LazyGrid:Initial load");
+
+                        //application des filtres pour récupérer le nom de filtre actifs
+                        _applyFilter();
+                        if (self.fields.filter.length <= 0) {
+                            _applyDefaultFilter();
+                        }
+                        //remise à 0 des informations de filtre
+                        self.fields.filter = [];
+
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Add external filter like clientId
+                     * @param filter external filter to always apply
+                     * @param filter.key
+                     * @param filter.value
+                     * @param filter.condition
+                     */
+                    function addExternalFilter(filter) {
+                        if (angular.isUndefined(filter.key)) {
+                            $log.error("External filter object must have key");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.condition)) {
+                            $log.error("External filter object must have condition");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.value)) {
+                            self.fields.externalFilter[filter.key] = {};
+                        } else {
+                            self.fields.externalFilter[filter.key] = filter;
+                        }
+                    }
+
+                    /**
+                     * Call before using
+                     * @returns {*}
+                     */
+                    function initialize() {
+
+                    }
+
+                    if (angular.isDefined(self.options.onRegisterApi)) {
+                        self.options.onRegisterApi(self);
+                        $log.debug('LazyGrid:onRegisterApi')
+                    }
+
+
+                }]
+            }
+        }
+    ]
+).constant("OPERATOR", {
+        "EQUALS": "==",
+        "LIKE": "==%",
+        "NOT_EQUALS": "!=",
+        "LESS_THAN": "=lt=",
+        "LESS_EQUALS": "=le=",
+        "GREATER_THAN": "=gt=",
+        "GREATER_EQUALS": "=ge="
+})
+.constant('NOTIFICATION_TYPE', {
+    INFO: "INFO",
+    WARNING: "WARNING",
+    ERROR: "ERROR",
+    SUCCESS: "SUCCESS",
+    DISMISS: "DISMISS"
+})
+;
+/**
+ * Created by SZA on 20/01/2016.
+ */
+
+'use strict';
+/**
+ * Singleton that provide paginatorConfig
+ */
+IteSoft.factory('itPaginatorConfigService',
+        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
+            function ($q, $log, itNotifier, $filter, MetadataService) {
+
+                var self = this;
+                var deferred = $q.defer();
+
+                /**
+                 * fields
+                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
+                 */
+                self.fields = {
+                    options: [],
+                    defaultOption: "",
+                    loaded: false
+                };
+
+                /**
+                 * public method
+                 * @type {{initialize: initialize}}
+                 */
+                self.fn = {
+                    initialize: initialize
+                };
+
+                return self;
+                /**
+                 * filter initialization
+                 * @returns {*}
+                 */
+                function initialize() {
+                    if (!self.fields.loaded) {
+                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
+                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
+                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
+                            function (options) {
+                                self.fields.defaultOption = options[1].value;
+                                var paginatorOptions = options[0].value;
+                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
+                                    self.fields.options = paginatorOptions.split(',');
+                                } else {
+                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
+                                }
+
+                                $log.debug("PaginatorConfigService: loaded");
+                                self.fields.loaded = true;
+                                deferred.resolve('ok');
+                            },
+                            function (failed) {
+                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
+                            });
+                    } else {
+                        $log.debug("PaginatorConfigService: loaded");
+                        deferred.resolve('ok');
+                    }
+                    return deferred.promise;
+
+                }
+
+            }
+        ]
+    );
+'use strict';
+/**
+ * Query param service
+ */
+IteSoft.factory('itQueryParamFactory', [function () {
+    function QueryParam(key, value, operator) {
+        this.key = key;
+        this.value = value;
+        this.operator = operator;
+    }
+    return {
+        /**
+         * create a queryParam
+         * @param key: name
+         * @param value: myName
+         * @param operator: OPERATOR.equals
+         * @returns {QueryParam}
+         */
+        create: function (key, value, operator) {
+            return new QueryParam(key, value, operator);
+        }
+    }
+}]);
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
+        function Query(parameters, start, size, sort) {
+            this.parameters = parameters;
+            this.start = start;
+            this.size = size;
+            this.sort = sort;
+            /**
+             * Method that return RSQL path
+             * @returns {string}: query=id==1 and name=="name"
+             */
+            this.build = function () {
+                var result = '';
+                if (parameters != undefined) {
+                    this.parameters.forEach(function (entry) {
+                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
+
+                            //Si c'est une date max, on définit l'heure à 23h59
+                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
+                                entry.value.setHours(23);
+                                entry.value.setMinutes(59);
+                                entry.value.setSeconds(59);
+                                entry.value.setMilliseconds(999);
+                            }
+
+                            if (result.length > 0) {
+                                result += " and ";
+                            }
+
+                            //formattage ISO des dates
+                            if (entry.value instanceof Date) {
+                                entry.value = entry.value.toISOString();
+                            }
+
+                            if (entry.operator == OPERATOR.LIKE) {
+                                entry.value = entry.value + '%';
+                            }
+                            result += entry.key + entry.operator + entry.value;
+                        }
+                    });
+                }
+                result = 'query=' + result;
+                if (size != null && angular.isDefined(size) && size != '') {
+                    result += "&size=" + this.size;
+                }
+                if (start != null && angular.isDefined(start) && start != '') {
+                    result += "&start=" + this.start;
+                }
+                //le sorting en décroissant s'écrit -fieldName
+                if (sort != undefined) {
+                    if (this.sort.name != undefined) {
+                        result += "&sort="
+                        if (this.sort.direction == "desc") {
+                            result += "-"
+                        }
+                        result += this.sort.name;
+                    }
+                }
+                return result;
+
+            };
+
+
+        }
+
+        return {
+            create: function (parameters, start, size, sort) {
+                return new Query(parameters, start, size, sort);
+            }
+        }
+    }
+    ]
+);
+'use strict';
+/**
+ * @ngdoc directive
  * @name itesoft.directive:itSidePanel
  * @module itesoft
  * @restrict E
@@ -4592,6 +4979,120 @@ IteSoft
     });
 
 
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
 
 'use strict';
 
@@ -5263,556 +5764,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
         return self;
     }
 ]);
-
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:true,
-            template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
-                    '</div>'+
-                '</div>'
-
-
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
- * @since 1.0
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : true,
-            template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
-
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-
-             </it-side-menu-header>
-
-             <it-side-menu>
-                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-
-
-                     <li it-collapsed-item=""   >
-                     <a href=""><h5>Menu</h5></a>
-                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                     <li >
-                     <a href="#/widget/itloader">SubMenu1</a>
-                     </li>
-                     <li >
-                     <a href="#/widget/itBottomGlue">SubMenu2</a>
-                     </li>
-                     </ul>
-                     </li>
-                     </ul>
-              </it-side-menu>
-
-
-             <it-side-menu-content>
-
-                 <h1>See on Plunker !</h1>
-
-             </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 'use strict';
 /**
@@ -6529,3 +6480,51 @@ IteSoft
         }
         return itPopup;
     }]);
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
