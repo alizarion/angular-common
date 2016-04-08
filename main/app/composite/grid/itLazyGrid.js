@@ -74,7 +74,7 @@
                  $scope.lazyGrid.fields.gridOptions.columnDefs = [
                      {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
                      { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" } ]}
+                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
                  ];
 
                 //Call when grid is ready to use (with config)
@@ -154,7 +154,7 @@ IteSoft.directive('itLazyGrid',
                 'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
                 '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
                 '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
-                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}"> </div>' +
+                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
                 ' </script> ' +
                 '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
                 '<script type="text/ng-template" id="paginationTemplate.html"> ' +
