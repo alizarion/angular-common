@@ -72,6 +72,140 @@ IteSoft
         }]);
     }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+        <div konami style="height:500px">
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+        </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 'use strict';
 /**
  * Service that provide RSQL query
@@ -876,140 +1010,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-        <div konami style="height:500px">
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-        </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 
 /**
@@ -2423,6 +2423,45 @@ IteSoft
         }
 
     });
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 
 'use strict';
 /**
@@ -3501,45 +3540,6 @@ IteSoft
 }]);
 "use strict";
 /**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
-"use strict";
-/**
  * @ngdoc directive
  * @name itesoft.directive:itPrettyprint
 
@@ -3603,190 +3603,6 @@ IteSoft
 
         };
     }]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -4174,6 +3990,862 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
+
+'use strict';
+
+IteSoft.factory('BlockService', ['$resource', 'CONFIG', '$http',
+    function ($resource, CONFIG, $http) {
+        return {
+            custom: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
+            original: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/'),
+            restore: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/:name'),
+            customByOriginal: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
+            build: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
+            preview: $resource(
+                CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
+            'new': function (name, ref, position, content, roleAllowed, version) {
+                return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBlock
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * The Block widgets provides  way to customize UI.
+ *
+ * <h1>Enable</h1>
+ * Enable editMode with
+ *
+ * ```js
+ * $rootScope.editSite
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
+ * ```
+ *
+ * ```html
+ *   <it-block name="login_input" role="RD"></it-block>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl">
+ <it-block name="login_input" role="RD">
+ <div class="form-group">
+ <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+ </div>
+ </it-block>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ .constant("CONFIG", {
+            "TEMPLATE_EDITOR_URL": "http://localhost:8080/"
+            });
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {
+                   $rootScope.editSite = true;
+                }]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlock',
+    [
+        function () {
+            return {
+                restrict: 'E',
+                scope: true,
+                transclude: true,
+                template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
+                ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
+                ' ng-class="removed ? \'removed-block block\':\'block\'">' +
+                '<div ng-click="itBlockController.addBlock()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
+                '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
+                '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
+                '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
+                '</div>' +
+                '<ng-transclude ng-class="removed ? \'removed-content block-content\':\'content\'" ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" ng-if="!removed || $root.editSite "  ></ng-transclude>',
+                controllerAs: 'itBlockController',
+                link: function ($scope, element, attrs, ctrl, transclude) {
+                    transclude($scope, function (content) {
+                        var myContent = "";
+                        angular.forEach(content, function (contentLine) {
+                            if (contentLine.outerHTML) {
+                                myContent += contentLine.outerHTML;
+                            }
+                        });
+                        $scope.content = myContent;
+                    });
+                    $scope.ref = attrs["ref"];
+                    $scope.role = attrs["role"];
+                    $scope.position = attrs["position"];
+                    $scope.name = attrs["name"];
+                    $scope.removed = false;
+                    $scope.version =  attrs["version"];
+                    if (angular.isDefined(attrs["removed"])) {
+                        $scope.removed = attrs["removed"];
+                    }
+                    this.fields = {};
+
+                },
+                controller: ['$scope','$location','$log','$timeout','itPopup','BlockService','PilotSiteSideService',
+                    function ($scope,$location,$log,$timeout,itPopup,BlockService,PilotSiteSideService) {
+
+                        var self = this;
+
+                        self.activated = false;
+                        self.manyTimesOver =0;
+                        self.timer = 0;
+
+                        self.leave = function(){
+                            self.manyTimesOver =-1;
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
+                        };
+
+                        self.over = function(){
+                            self.manyTimesOver =+1;
+                            self.activated = self.manyTimesOver > 0 ? true: false;
+                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
+                        };
+
+                        this.register = function (value) {
+                            $scope.content = value;
+                        };
+                        
+                        this.editBlock = function () {
+                            if (angular.isDefined($scope.ref) && $scope.ref != '') {
+                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
+
+                            } else {
+                                var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
+                            }
+                            PilotSiteSideService.fn.editBlock(block);
+                        };
+
+                        this.addBlock = function () {
+                            if (angular.isDefined($scope.name) && $scope.name != '') {
+                                var block = BlockService.new('PS_new_' + $scope.name, $scope.name, 'before', $scope.content, 'PS',1);
+                                PilotSiteSideService.fn.createBlock(block);
+                            }
+                        };
+
+                        this.restoreBlock = function () {
+                            var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
+                            BlockService.restore.get({'name': block.name}, function () {
+                                BlockService.build.get(function () {
+                                    BlockService.build.get(function () {
+                                        location.reload();
+                                    }, function () {
+                                        $log.error("Unable to build dist  ")
+                                    })
+                                }, function () {
+                                    $log.error("Unable to restore block " + JSON.stringify(block));
+                                })
+                            })
+                        };
+
+                        this.deleteBlock = function () {
+                            var confirmPopup = itPopup.confirm({
+                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
+                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
+                                buttons: [
+
+                                    {
+                                        text: 'Cancel',
+                                        type: '',
+                                        onTap: function () {
+                                            return false;
+                                        }
+                                    },
+                                    {
+                                        text: 'ok',
+                                        type: '',
+                                        onTap: function () {
+                                            return true;
+                                        }
+                                    }
+                                ]
+                            });
+                            confirmPopup.then(function (res) {
+                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
+                                BlockService.custom.delete(block, function () {
+                                    BlockService.build.get(function () {
+                                        location.reload();
+                                    }, function () {
+                                        $log.error("Unable to build dist  ")
+                                    })
+                                }, function () {
+                                    $log.error("Unable to delete current block " + JSON.stringify(block))
+                                });
+                            }, function () {
+                                itNotifier.notifyError({
+                                    content: "{{'BLOCK_DELETED_KO' | translate}}"
+                                });
+                            });
+                        };
+                    }
+                ]
+            }
+        }]
+)
+
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBlockControlPanel
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * The Control Panel Block widgets provides a way to activate it-block edition
+ *
+ * <h1>Translate</h1>
+ * ```config
+ * TEMPLATE.BLOCK.EDIT
+ * TEMPLATE.BLOCK.READONLY
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * CONFIG.REST_TEMPLATE_API_URL = template API URL
+ * CONFIG.REST_EDITOR_API_URL = editor pilot API URL
+ * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
+ * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
+ * ```
+ *
+ * ```html
+ *   <it-block-control-panel ></it-block-control-panel>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div>
+ <it-block-control-panel></it-block-control-panel>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft'])
+ .constant("CONFIG", {
+            "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+            "REST_EDITOR_API_URL": "http://localhost:8081/rest",
+            "TEMPLATE_EDITOR_URL": "http://localhost:8080/",
+            "ENABLE_TEMPLATE_EDITOR": true
+            })
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {$rootScope.editSite=true;}]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlockControlPanel',
+    ['$log',
+        function ($log) {
+            return {
+                restrict: 'EA',
+                scope: true,
+                template:
+                '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> '+
+                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
+                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
+                    '<div class="block-control-panel-action-container">'+
+                    '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
+                    '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
+                    '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
+                    '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
+                    '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a></div>' +
+                    '</div>'+
+                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">'+
+                    '<span class="glyphicon glyphicon-warning-sign glyphicon-align-left" aria-hidden="true"></span>'+
+                    '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>'+
+                '</div>' +
+                '</div>',
+
+                controllerAs: 'itBlockControlPanelController',
+                controller: ['$scope','$rootScope', '$interval','$location','$route','$timeout','$log', 'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG',
+                    function ($scope, $rootScope,$interval,$location,$route,$timeout,$log, BlockService, PilotSiteSideService, PilotService, CONFIG) {
+                        var self = this;
+
+                        self.editorIsOpen = false;
+                        self.CONFIG = CONFIG;
+                        this.refresh = function () {
+                            BlockService.build.get(function () {
+                                location.reload();
+                            }, function () {
+                                $log.error("Unable to refresh ")
+                            });
+                        };
+                        self.interval = 0 ;
+                        PilotSiteSideService.on.pong=function(res){
+                            $log.log("pong");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
+                        };
+                        PilotSiteSideService.on.editorConnect=function(res){
+                            $log.log("editorConnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = true;
+                            })
+                        };
+                        PilotSiteSideService.on.editorDisconnect=function(res){
+                            $log.log("editorDisconnect");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.close=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.error=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+                        PilotSiteSideService.on.transportFailure=function(){
+                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                            $scope.$applyAsync(function(){
+                                self.editorIsOpen = false;
+                            })
+                        };
+
+                        PilotSiteSideService.on.reload=this.refresh;
+
+
+                        this.editJS = function () {
+                            PilotSiteSideService.fn.editPage("JS")
+                        };
+                        this.editCSS = function () {
+                            PilotSiteSideService.fn.editPage("CSS")
+                        };
+                        this.addFile = function () {
+                            PilotSiteSideService.fn.createPage("CSS")
+                        };
+                    }
+                ]
+            }
+        }
+    ]
+);
+
+/**
+ * Created by stephen on 03/04/2016.
+ */
+
+'use strict';
+
+IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
+    function ($resource, $log, CONFIG) {
+
+        var self = this;
+
+        self.ACTION_EDIT_BLOCK = "editBlock";
+        self.ACTION_REMOVE_BLOCK = "removeBlock";
+        self.ACTION_CREATE_BLOCK = "createBlock";
+        self.ACTION_EDIT_PAGE = "editPage";
+        self.ACTION_REMOVE_PAGE = "removePage";
+        self.ACTION_CREATE_PAGE = "createPage";
+        self.ACTION_PING = "ping";
+        self.ACTION_PONG = "pong";
+        self.ACTION_DISCONNECT = "disconnect";
+        self.ACTION_TIMEOUT = "timeout";
+        self.ACTION_CONNECT = "connect";
+        self.ACTION_RELOAD = "reload";
+        self.DEST_EDITOR = "editor";
+        self.DEST_SITE = "site";
+        self.DEST_ALL = "all";
+
+        self.fields = {
+            socket: {},
+            request: {
+                url: CONFIG.REST_EDITOR_API_URL,
+                contentType: 'application/json',
+                logLevel: 'debug',
+                transport: 'websocket',
+                trackMessageLength: true,
+                reconnectInterval: 5000,
+                enableXDR: true,
+                timeout: 60000},
+            model: {},
+            dest: ""
+        };
+
+        self.fn = {
+            ping: _ping,
+            pong: _pong
+        };
+        self.on = {
+            message:{},
+            open:undefined,
+            close:undefined,
+            reopen:undefined,
+            transportFailure:undefined,
+            error:undefined
+        };
+
+        self.fields.request.onOpen = function (response) {
+            self.fields.model.transport = response.transport;
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.open)){
+                self.on.open();
+            }
+        };
+
+        self.fields.request.onClientTimeout = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
+            setTimeout(function () {
+                self.fields.socket = atmosphere.subscribe(self.fields.request);
+            }, self.fields.request.reconnectInterval);
+        };
+
+        self.fields.request.onReopen = function (response) {
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.reopen)){
+                self.on.reopen();
+            }
+        };
+
+        //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
+        self.fields.request.onTransportFailure = function (errorMsg, request) {
+            atmosphere.util.info(errorMsg);
+            request.fallbackTransport = 'long-polling';
+            if(angular.isDefined(self.on.transportFailure)){
+                self.on.transportFailure();
+            }
+        };
+
+        self.fields.request.onMessage = function (response) {
+            self.on.message(response);
+        };
+
+        self.fields.request.onClose = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
+            if(angular.isDefined(self.on.close)){
+                self.on.close();
+            }
+        };
+
+        self.fields.request.onError = function (response) {
+            self.fields.model.logged = false;
+            if(angular.isDefined(self.on.error)){
+                self.on.error();
+            }
+        };
+
+        self.fields.request.onReconnect = function (request, response) {
+            self.fields.model.connected = false;
+        };
+
+
+        function _ping(dest) {
+            $log.log("ping "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
+        }
+
+        function _pong(dest) {
+            $log.log("pong "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
+        }
+
+        self.fields.socket = atmosphere.subscribe(self.fields.request);
+        return self;
+    }
+]
+)
+;
+
+/**
+ * Created by stephen on 03/04/2016.
+ */
+
+'use strict';
+
+IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
+    function ($resource, $log, CONFIG, PilotService) {
+
+        var self = this;
+
+        self.fields = {};
+
+        self.fn = {
+            editBlock: _editBlock,
+            removeBlock: _removeBlock,
+            createBlock: _createBlock,
+            editPage: _editPage,
+            removePage: _removePage,
+            createPage: _createPage,
+            ping: PilotService.fn.ping
+        };
+
+        self.on = {
+            reload: undefined,
+            pong: undefined,
+            editorConnect: undefined,
+            editorDisconnect: undefined,
+            close:undefined,
+            reopen:undefined,
+            transportFailure:undefined,
+            error:undefined
+        };
+        PilotService.fields.dest = PilotService.DEST_EDITOR;
+
+        // test connection with editor when websocket is open
+        PilotService.on.open = function (response) {
+            $log.log("WebSocket connection is opened");
+            self.fn.ping(PilotService.DEST_EDITOR);
+        };
+
+        PilotService.on.reopen = function (response) {
+            $log.log("WebSocket connection is reopened");
+            self.fn.ping(PilotService.DEST_EDITOR);
+        };
+
+        PilotService.on.close=function(){
+            if(angular.isDefined(self.on.close)){
+                self.on.close();
+            }
+        };
+        PilotService.on.error=function(){
+            if(angular.isDefined(self.on.error)){
+                self.on.error();
+            }
+        };
+        PilotService.on.transportFailure=function(){
+            if(angular.isDefined(self.on.transportFailure)){
+                self.on.transportFailure();
+            }
+        };
+
+        PilotService.on.message = function (response) {
+            var responseText = response.responseBody;
+            try {
+                var message = atmosphere.util.parseJSON(responseText);
+                if (message.dest == PilotService.DEST_ALL) {
+                    switch (message.action) {
+                        case PilotService.ACTION_CONNECT:
+                            $log.log(PilotService.ACTION_CONNECT);
+                            if (angular.isDefined(self.on.editorConnect)) {
+                                self.on.editorConnect();
+                            }
+                            break;
+                        case PilotService.ACTION_DISCONNECT:
+                            $log.log(PilotService.ACTION_DISCONNECT);
+                            if (angular.isDefined(self.on.editorDisconnect)) {
+                                self.on.editorDisconnect();
+                            }
+                            break;
+                    }
+                }
+                if (message.dest == PilotService.DEST_SITE) {
+                    switch (message.action) {
+                        case PilotService.ACTION_RELOAD:
+                            $log.log(PilotService.ACTION_RELOAD);
+                            if (angular.isDefined(self.on.reload)) {
+                                self.on.reload();
+                            }
+                            break;
+                        case PilotService.ACTION_PING:
+                            $log.log(PilotService.ACTION_PING);
+                            PilotService.pong(PilotService.DEST_EDITOR);
+                            break;
+                        case PilotService.ACTION_PONG:
+                            $log.log(PilotService.ACTION_PONG);
+                            if (angular.isDefined(self.on.pong)) {
+                                self.on.pong();
+                            }
+                            break;
+                        case PilotService.ACTION_PONG:
+                            $log.log(PilotService.ACTION_PONG);
+                            if (angular.isDefined(self.on.pong)) {
+                                self.on.pong();
+                            }
+                            break;
+                        case PilotService.ACTION_DISCONNECT:
+                            $log.log(PilotService.ACTION_DISCONNECT);
+                            if (angular.isDefined(self.on.editorDisconnect)) {
+                                self.on.editorDisconnect();
+                            }
+                            break;
+                        case PilotService.ACTION_CONNECT:
+                            $log.log(PilotService.ACTION_CONNECT);
+                            if (angular.isDefined(self.on.editorConnect)) {
+                                self.on.editorConnect();
+                            }
+                            break;
+                    }
+                }
+            } catch (e) {
+                $log.error("Error parsing JSON: ", responseText);
+                throw e;
+            }
+        };
+
+        function _editBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _removeBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _createBlock(block) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_BLOCK,
+                params: [{'block': block}]
+            }));
+        }
+
+        function _editPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        function _removePage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        function _createPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        return self;
+    }
+]);
+
 'use strict';
 /**
  * @ngdoc directive
@@ -4979,678 +5651,6 @@ IteSoft
     });
 
 
-
-'use strict';
-
-IteSoft.factory('BlockService', ['$resource', 'CONFIG', '$http',
-    function ($resource, CONFIG, $http) {
-        return {
-            custom: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
-            original: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/'),
-            restore: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/:name'),
-            customByOriginal: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/:name'),
-            build: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
-            preview: $resource(
-                CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
-            'new': function (name, ref, position, content, roleAllowed, version) {
-                return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBlock
- * @module itesoft
- * @restrict E
- *
- * @description
- * The Block widgets provides  way to customize UI.
- *
- * <h1>Enable</h1>
- * Enable editMode with
- *
- * ```js
- * $rootScope.editSite
- * ```
- *
- * <h1>Config</h1>
- * ```config
- * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
- * ```
- *
- * ```html
- *   <it-block name="login_input" role="RD"></it-block>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="HomeCtrl">
- <it-block name="login_input" role="RD">
- <div class="form-group">
- <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
- </div>
- </it-block>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- .constant("CONFIG", {
-            "TEMPLATE_EDITOR_URL": "http://localhost:8080/"
-            });
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope','$rootScope',
- function($scope,$rootScope) {
-                   $rootScope.editSite = true;
-                }]);
- </file>
- </example>
- */
-IteSoft.directive('itBlock',
-    [
-        function () {
-            return {
-                restrict: 'E',
-                scope: true,
-                transclude: true,
-                template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
-                ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
-                ' ng-class="removed ? \'removed-block block\':\'block\'">' +
-                '<div ng-click="itBlockController.addBlock()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
-                '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
-                '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
-                '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
-                '</div>' +
-                '<ng-transclude ng-class="removed ? \'removed-content block-content\':\'content\'" ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" ng-if="!removed || $root.editSite "  ></ng-transclude>',
-                controllerAs: 'itBlockController',
-                link: function ($scope, element, attrs, ctrl, transclude) {
-                    transclude($scope, function (content) {
-                        var myContent = "";
-                        angular.forEach(content, function (contentLine) {
-                            if (contentLine.outerHTML) {
-                                myContent += contentLine.outerHTML;
-                            }
-                        });
-                        $scope.content = myContent;
-                    });
-                    $scope.ref = attrs["ref"];
-                    $scope.role = attrs["role"];
-                    $scope.position = attrs["position"];
-                    $scope.name = attrs["name"];
-                    $scope.removed = false;
-                    $scope.version =  attrs["version"];
-                    if (angular.isDefined(attrs["removed"])) {
-                        $scope.removed = attrs["removed"];
-                    }
-                    this.fields = {};
-
-                },
-                controller: ['$scope','$location','$log','$timeout','itPopup','BlockService','PilotSiteSideService',
-                    function ($scope,$location,$log,$timeout,itPopup,BlockService,PilotSiteSideService) {
-
-                        var self = this;
-
-                        self.activated = false;
-                        self.manyTimesOver =0;
-                        self.timer = 0;
-
-                        self.leave = function(){
-                            self.manyTimesOver =-1;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
-                        };
-
-                        self.over = function(){
-                            self.manyTimesOver =+1;
-                            self.activated = self.manyTimesOver > 0 ? true: false;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
-                        };
-
-                        this.register = function (value) {
-                            $scope.content = value;
-                        };
-                        
-                        this.editBlock = function () {
-                            if (angular.isDefined($scope.ref) && $scope.ref != '') {
-                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
-
-                            } else {
-                                var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
-                            }
-                            PilotSiteSideService.fn.editBlock(block);
-                        };
-
-                        this.addBlock = function () {
-                            if (angular.isDefined($scope.name) && $scope.name != '') {
-                                var block = BlockService.new('PS_new_' + $scope.name, $scope.name, 'before', $scope.content, 'PS',1);
-                                PilotSiteSideService.fn.createBlock(block);
-                            }
-                        };
-
-                        this.restoreBlock = function () {
-                            var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
-                            BlockService.restore.get({'name': block.name}, function () {
-                                BlockService.build.get(function () {
-                                    BlockService.build.get(function () {
-                                        location.reload();
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
-                                    })
-                                }, function () {
-                                    $log.error("Unable to restore block " + JSON.stringify(block));
-                                })
-                            })
-                        };
-
-                        this.deleteBlock = function () {
-                            var confirmPopup = itPopup.confirm({
-                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
-                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
-                                buttons: [
-
-                                    {
-                                        text: 'Cancel',
-                                        type: '',
-                                        onTap: function () {
-                                            return false;
-                                        }
-                                    },
-                                    {
-                                        text: 'ok',
-                                        type: '',
-                                        onTap: function () {
-                                            return true;
-                                        }
-                                    }
-                                ]
-                            });
-                            confirmPopup.then(function (res) {
-                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
-                                BlockService.custom.delete(block, function () {
-                                    BlockService.build.get(function () {
-                                        location.reload();
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
-                                    })
-                                }, function () {
-                                    $log.error("Unable to delete current block " + JSON.stringify(block))
-                                });
-                            }, function () {
-                                itNotifier.notifyError({
-                                    content: "{{'BLOCK_DELETED_KO' | translate}}"
-                                });
-                            });
-                        };
-                    }
-                ]
-            }
-        }]
-)
-
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBlockControlPanel
- * @module itesoft
- * @restrict E
- *
- * @description
- * The Control Panel Block widgets provides a way to activate it-block edition
- *
- * <h1>Translate</h1>
- * ```config
- * TEMPLATE.BLOCK.EDIT
- * TEMPLATE.BLOCK.READONLY
- * ```
- *
- * <h1>Config</h1>
- * ```config
- * CONFIG.REST_TEMPLATE_API_URL = template API URL
- * CONFIG.REST_EDITOR_API_URL = editor pilot API URL
- * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
- * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
- * ```
- *
- * ```html
- *   <it-block-control-panel ></it-block-control-panel>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div>
- <it-block-control-panel></it-block-control-panel>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft'])
- .constant("CONFIG", {
-            "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-            "REST_EDITOR_API_URL": "http://localhost:8081/rest",
-            "TEMPLATE_EDITOR_URL": "http://localhost:8080/",
-            "ENABLE_TEMPLATE_EDITOR": true
-            })
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope','$rootScope',
- function($scope,$rootScope) {$rootScope.editSite=true;}]);
- </file>
- </example>
- */
-IteSoft.directive('itBlockControlPanel',
-    ['$log',
-        function ($log) {
-            return {
-                restrict: 'EA',
-                scope: true,
-                template:
-                '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> '+
-                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
-                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
-                    '<div class="block-control-panel-action-container">'+
-                    '<div ng-click="itBlockControlPanelController.refresh()" class="glyphicon glyphicon-refresh template-circle-btn "></div>' +
-                    '<div ng-click="itBlockControlPanelController.editCSS()" class="glyphicon template-circle-btn template template-circle-text-btn">CS</div>' +
-                    '<div ng-click="itBlockControlPanelController.editJS()" class="glyphicon template-circle-btn template-circle-text-btn">JS</div> ' +
-                    '<div ng-click="itBlockControlPanelController.addFile()" class="glyphicon glyphicon-plus template-add-block template-circle-btn "></div>' +
-                    '<a ng-href="{{itBlockControlPanelController.url}}" target="_blank" class="glyphicon glyphicon-save-file template-circle-btn"></a></div>' +
-                    '</div>'+
-                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">'+
-                    '<span class="glyphicon glyphicon-warning-sign glyphicon-align-left" aria-hidden="true"></span>'+
-                    '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>'+
-                '</div>' +
-                '</div>',
-
-                controllerAs: 'itBlockControlPanelController',
-                controller: ['$scope','$rootScope', '$interval','$location','$route','$timeout','$log', 'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG',
-                    function ($scope, $rootScope,$interval,$location,$route,$timeout,$log, BlockService, PilotSiteSideService, PilotService, CONFIG) {
-                        var self = this;
-
-                        self.editorIsOpen = false;
-                        self.CONFIG = CONFIG;
-                        this.refresh = function () {
-                            BlockService.build.get(function () {
-                                location.reload();
-                            }, function () {
-                                $log.error("Unable to refresh ")
-                            });
-                        };
-                        self.interval = 0 ;
-                        PilotSiteSideService.on.pong=function(res){
-                            $log.log("pong");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = true;
-                            })
-                        };
-                        PilotSiteSideService.on.editorConnect=function(res){
-                            $log.log("editorConnect");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = true;
-                            })
-                        };
-                        PilotSiteSideService.on.editorDisconnect=function(res){
-                            $log.log("editorDisconnect");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = false;
-                            })
-                        };
-
-                        PilotSiteSideService.on.close=function(){
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.error=function(){
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.transportFailure=function(){
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function(){
-                                self.editorIsOpen = false;
-                            })
-                        };
-
-                        PilotSiteSideService.on.reload=this.refresh;
-
-
-                        this.editJS = function () {
-                            PilotSiteSideService.fn.editPage("JS")
-                        };
-                        this.editCSS = function () {
-                            PilotSiteSideService.fn.editPage("CSS")
-                        };
-                        this.addFile = function () {
-                            PilotSiteSideService.fn.createPage("CSS")
-                        };
-                    }
-                ]
-            }
-        }
-    ]
-);
-
-/**
- * Created by stephen on 03/04/2016.
- */
-
-'use strict';
-
-IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
-    function ($resource, $log, CONFIG) {
-
-        var self = this;
-
-        self.ACTION_EDIT_BLOCK = "editBlock";
-        self.ACTION_REMOVE_BLOCK = "removeBlock";
-        self.ACTION_CREATE_BLOCK = "createBlock";
-        self.ACTION_EDIT_PAGE = "editPage";
-        self.ACTION_REMOVE_PAGE = "removePage";
-        self.ACTION_CREATE_PAGE = "createPage";
-        self.ACTION_PING = "ping";
-        self.ACTION_PONG = "pong";
-        self.ACTION_DISCONNECT = "disconnect";
-        self.ACTION_TIMEOUT = "timeout";
-        self.ACTION_CONNECT = "connect";
-        self.ACTION_RELOAD = "reload";
-        self.DEST_EDITOR = "editor";
-        self.DEST_SITE = "site";
-        self.DEST_ALL = "all";
-
-        self.fields = {
-            socket: {},
-            request: {
-                url: CONFIG.REST_EDITOR_API_URL,
-                contentType: 'application/json',
-                logLevel: 'debug',
-                transport: 'websocket',
-                trackMessageLength: true,
-                reconnectInterval: 5000,
-                enableXDR: true,
-                timeout: 60000},
-            model: {},
-            dest: ""
-        };
-
-        self.fn = {
-            ping: _ping,
-            pong: _pong
-        };
-        self.on = {
-            message:{},
-            open:undefined,
-            close:undefined,
-            reopen:undefined,
-            transportFailure:undefined,
-            error:undefined
-        };
-
-        self.fields.request.onOpen = function (response) {
-            self.fields.model.transport = response.transport;
-            self.fields.model.connected = true;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
-            if(angular.isDefined(self.on.open)){
-                self.on.open();
-            }
-        };
-
-        self.fields.request.onClientTimeout = function (response) {
-            self.fields.model.connected = false;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
-            setTimeout(function () {
-                self.fields.socket = atmosphere.subscribe(self.fields.request);
-            }, self.fields.request.reconnectInterval);
-        };
-
-        self.fields.request.onReopen = function (response) {
-            self.fields.model.connected = true;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
-            if(angular.isDefined(self.on.reopen)){
-                self.on.reopen();
-            }
-        };
-
-        //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
-        self.fields.request.onTransportFailure = function (errorMsg, request) {
-            atmosphere.util.info(errorMsg);
-            request.fallbackTransport = 'long-polling';
-            if(angular.isDefined(self.on.transportFailure)){
-                self.on.transportFailure();
-            }
-        };
-
-        self.fields.request.onMessage = function (response) {
-            self.on.message(response);
-        };
-
-        self.fields.request.onClose = function (response) {
-            self.fields.model.connected = false;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
-            if(angular.isDefined(self.on.close)){
-                self.on.close();
-            }
-        };
-
-        self.fields.request.onError = function (response) {
-            self.fields.model.logged = false;
-            if(angular.isDefined(self.on.error)){
-                self.on.error();
-            }
-        };
-
-        self.fields.request.onReconnect = function (request, response) {
-            self.fields.model.connected = false;
-        };
-
-
-        function _ping(dest) {
-            $log.log("ping "+dest);
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
-        }
-
-        function _pong(dest) {
-            $log.log("pong "+dest);
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
-        }
-
-        self.fields.socket = atmosphere.subscribe(self.fields.request);
-        return self;
-    }
-]
-)
-;
-
-/**
- * Created by stephen on 03/04/2016.
- */
-
-'use strict';
-
-IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
-    function ($resource, $log, CONFIG, PilotService) {
-
-        var self = this;
-
-        self.fields = {};
-
-        self.fn = {
-            editBlock: _editBlock,
-            removeBlock: _removeBlock,
-            createBlock: _createBlock,
-            editPage: _editPage,
-            removePage: _removePage,
-            createPage: _createPage,
-            ping: PilotService.fn.ping
-        };
-
-        self.on = {
-            reload: undefined,
-            pong: undefined,
-            editorConnect: undefined,
-            editorDisconnect: undefined,
-            close:undefined,
-            reopen:undefined,
-            transportFailure:undefined,
-            error:undefined
-        };
-        PilotService.fields.dest = PilotService.DEST_EDITOR;
-
-        // test connection with editor when websocket is open
-        PilotService.on.open = function (response) {
-            $log.log("WebSocket connection is opened");
-            self.fn.ping(PilotService.DEST_EDITOR);
-        };
-
-        PilotService.on.reopen = function (response) {
-            $log.log("WebSocket connection is reopened");
-            self.fn.ping(PilotService.DEST_EDITOR);
-        };
-
-        PilotService.on.close=function(){
-            if(angular.isDefined(self.on.close)){
-                self.on.close();
-            }
-        };
-        PilotService.on.error=function(){
-            if(angular.isDefined(self.on.error)){
-                self.on.error();
-            }
-        };
-        PilotService.on.transportFailure=function(){
-            if(angular.isDefined(self.on.transportFailure)){
-                self.on.transportFailure();
-            }
-        };
-
-        PilotService.on.message = function (response) {
-            var responseText = response.responseBody;
-            try {
-                var message = atmosphere.util.parseJSON(responseText);
-                if (message.dest == PilotService.DEST_ALL) {
-                    switch (message.action) {
-                        case PilotService.ACTION_CONNECT:
-                            $log.log(PilotService.ACTION_CONNECT);
-                            if (angular.isDefined(self.on.editorConnect)) {
-                                self.on.editorConnect();
-                            }
-                            break;
-                        case PilotService.ACTION_DISCONNECT:
-                            $log.log(PilotService.ACTION_DISCONNECT);
-                            if (angular.isDefined(self.on.editorDisconnect)) {
-                                self.on.editorDisconnect();
-                            }
-                            break;
-                    }
-                }
-                if (message.dest == PilotService.DEST_SITE) {
-                    switch (message.action) {
-                        case PilotService.ACTION_RELOAD:
-                            $log.log(PilotService.ACTION_RELOAD);
-                            if (angular.isDefined(self.on.reload)) {
-                                self.on.reload();
-                            }
-                            break;
-                        case PilotService.ACTION_PING:
-                            $log.log(PilotService.ACTION_PING);
-                            PilotService.pong(PilotService.DEST_EDITOR);
-                            break;
-                        case PilotService.ACTION_PONG:
-                            $log.log(PilotService.ACTION_PONG);
-                            if (angular.isDefined(self.on.pong)) {
-                                self.on.pong();
-                            }
-                            break;
-                        case PilotService.ACTION_PONG:
-                            $log.log(PilotService.ACTION_PONG);
-                            if (angular.isDefined(self.on.pong)) {
-                                self.on.pong();
-                            }
-                            break;
-                        case PilotService.ACTION_DISCONNECT:
-                            $log.log(PilotService.ACTION_DISCONNECT);
-                            if (angular.isDefined(self.on.editorDisconnect)) {
-                                self.on.editorDisconnect();
-                            }
-                            break;
-                        case PilotService.ACTION_CONNECT:
-                            $log.log(PilotService.ACTION_CONNECT);
-                            if (angular.isDefined(self.on.editorConnect)) {
-                                self.on.editorConnect();
-                            }
-                            break;
-                    }
-                }
-            } catch (e) {
-                $log.error("Error parsing JSON: ", responseText);
-                throw e;
-            }
-        };
-
-        function _editBlock(block) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_EDIT_BLOCK,
-                params: [{'block': block}]
-            }));
-        }
-
-        function _removeBlock(block) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_REMOVE_BLOCK,
-                params: [{'block': block}]
-            }));
-        }
-
-        function _createBlock(block) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_CREATE_BLOCK,
-                params: [{'block': block}]
-            }));
-        }
-
-        function _editPage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_EDIT_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        function _removePage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_REMOVE_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        function _createPage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_CREATE_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        return self;
-    }
-]);
-
 'use strict';
 
 IteSoft
@@ -5765,344 +5765,6 @@ IteSoft
         }
     });
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
 'use strict';
 /**
  * @ngdoc service
@@ -6529,3 +6191,341 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
