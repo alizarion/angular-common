@@ -37,7 +37,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "dependencies",
       "shortDescription": "Provides an Code Editor Component",
-      "keywords": "$scope ae angular api application class code codemirror codemirror-foldgutter codemirror-linenumbers codemirror-lint-markers component content controller data dependencies directive editor editoroptions enter floating-label foldgutter form-control function gutters html https indentwithtabs it-fill itesoft itesoft-showcase js json linenumbers linewrapping lint maincontroller matchtags material mode model module ng-controller ng-model placeholder screensize styleactiveline text theme titi toto true type ui ui-codemirror"
+      "keywords": "$scope ae angular api application autocomplete class classe code codemirror codemirror-foldgutter codemirror-linenumbers codemirror-lint-markers component content controller css ctrl-space data dependencies directive editor editorcssoptions editorhtmloptions editorjsonoptions editorjsoptions enter extrakeys floating-label foldgutter form-control function globalvars gutters html https indentwithtabs it-fill itesoft itesoft-showcase javascript js json linenumbers linewrapping lint maincontroller matchtags material mode modelcss modelhtml modeljs modeljson module ng-controller ng-model placeholder screensize styleactiveline test text theme titi toto true type ui ui-codemirror"
     },
     {
       "section": "api",

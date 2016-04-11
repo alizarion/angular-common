@@ -17,16 +17,35 @@ as attribute<pre class="prettyprint linenums">&lt;ANY ui-code-mirror&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="dependencies-directive-page dependencies-directive-ui-code-mirror-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js Controller.js" source-edit-html="index.html-25" source-edit-css="" source-edit-js="Module.js Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js Controller.js" source-edit-html="index.html-26" source-edit-css="" source-edit-js="Module.js Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-25" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js Controller.js"></pre>
-<script type="text/ng-template" id="index.html-25">
+<pre class="prettyprint linenums" ng-set-text="index.html-26" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js Controller.js"></pre>
+<script type="text/ng-template" id="index.html-26">
        <div ng-controller="mainController">
-        <textarea ui-codemirror="editorOptions" name="json data"
+        <h4 id="example_json">JSON</h4>
+        <textarea ui-codemirror="editorJSONOptions" name="json data"
         class="it-fill form-control floating-label"
         type="text"
         placeholder="Enter content"
-        ng-model="model">
+        ng-model="modelJSON">
+        </textarea>
+       <h4 id="example_javascript">JAVASCRIPT</h4>
+        <textarea ui-codemirror="editorJSOptions" name="js data"
+        class="it-fill form-control floating-label"
+        placeholder="Enter content"
+        ng-model="modelJS">
+        </textarea>
+        <h4 id="example_css">CSS</h4>
+        <textarea ui-codemirror="editorCSSOptions" name="css data"
+        class="it-fill form-control floating-label"
+        placeholder="Enter content"
+        ng-model="modelCSS">
+        </textarea>
+        <h4 id="example_html">HTML</h4>
+        <textarea ui-codemirror="editorHTMLOptions" name="css data"
+        class="it-fill form-control floating-label"
+        placeholder="Enter content"
+        ng-model="modelHTML">
         </textarea>
        </div>
    </script>
@@ -42,23 +61,66 @@ as attribute<pre class="prettyprint linenums">&lt;ANY ui-code-mirror&gt;
 <script type="text/ng-template" id="Controller.js">
     angular.module('itesoft-showcase')
         .controller('mainController', ['screenSize','$scope', function (screenSize,$scope) {
-          $scope.model= '{"toto":{"toto":{"titi":3}}}';
-          $scope.editorOptions = {
-                   lineWrapping: true,
-                   lineNumbers: true,
-                   indentWithTabs: true,
-                   matchTags: {bothTags: true},
-                   foldGutter: true,
-                   gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
-                   styleActiveLine: true,
-                   mode: "application/json",
-                   theme: "material",
-                   lint: true
-               };
+          $scope.modelJSON= '{"toto":{"toto":{"titi":3}}}';
+          $scope.modelJS= 'function test(){}';
+          $scope.modelCSS= '.classe{width:100px}';
+          $scope.modelHTML= '<html></html>';
+          $scope.editorJSONOptions = {
+               lineWrapping: true,
+               lineNumbers: true,
+               indentWithTabs: true,
+               matchTags: {bothTags: true},
+               extraKeys: {"Ctrl-Space": "autocomplete"},
+               foldGutter: true,
+               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+               styleActiveLine: true,
+               mode: "application/json",
+               theme: "material",
+               lint: true
+           };
+           $scope.editorJSOptions = {
+               lineWrapping: true,
+               lineNumbers: true,
+               indentWithTabs: true,
+               matchTags: {bothTags: true},
+               extraKeys: {"Ctrl-Space": "autocomplete"},
+               foldGutter: true,
+               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+               styleActiveLine: true,
+               mode: {name: "javascript", globalVars: true},
+               theme: "material",
+               lint: true
+           };
+           $scope.editorCSSOptions = {
+               lineWrapping: true,
+               lineNumbers: true,
+               indentWithTabs: true,
+               matchTags: {bothTags: true},
+               extraKeys: {"Ctrl-Space": "autocomplete"},
+               foldGutter: true,
+               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+               styleActiveLine: true,
+               mode: {name: "css", globalVars: true},
+               theme: "material",
+               lint: true
+           };
+           $scope.editorHTMLOptions = {
+               lineWrapping: true,
+               lineNumbers: true,
+               indentWithTabs: true,
+               matchTags: {bothTags: true},
+               extraKeys: {"Ctrl-Space": "autocomplete"},
+               foldGutter: true,
+               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+               styleActiveLine: true,
+               mode: "text/html",
+               theme: "material",
+               lint: true
+           };
      }]);
     </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-25" ng-eval-javascript="Module.js Controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-26" ng-eval-javascript="Module.js Controller.js"></div>
 </div></div>
 </div>
