@@ -240,7 +240,8 @@ IteSoft.directive('itLazyGrid',
                         initialize: initialize,
                         refresh: refresh,
                         initialLoad: initialLoad,
-                        addExternalFilter: addExternalFilter
+                        addExternalFilter: addExternalFilter,
+                        refreshDefaultFilter:refreshDefaultFilter
                     };
 
 
@@ -355,6 +356,29 @@ IteSoft.directive('itLazyGrid',
                                         column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
 
                                         $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Refresh datagrid by reset filters and applying default filter
+                     */
+                    function refreshDefaultFilter(){
+                        $log.debug("LazyGrid:Reset Filter and Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters)
+                                    && angular.isDefined(column.colDef.filters[0])) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }else{
+                                        //efface tous les filtres
+                                        angular.forEach(column.colDef.filters, function(filter){
+                                            filter.term="";
+                                        });
                                     }
                                 }
                             });
@@ -488,6 +512,7 @@ IteSoft.directive('itLazyGrid',
                             self.fields.externalFilter[filter.key] = filter;
                         }
                     }
+
 
                     /**
                      * Call before using

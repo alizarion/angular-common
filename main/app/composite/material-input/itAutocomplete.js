@@ -274,6 +274,10 @@ IteSoft
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
                         $log.debug("itAutocomplete: selectedOption value changed");
+                        //if an oldValue is set
+                        if(angular.isDefined(oldValue)){
+                            _unselectItemWithId(oldValue);
+                        }
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
                             _selectItemWithId(newValue);
                             hideItems();
@@ -321,6 +325,23 @@ IteSoft
                             if (!selected) {
                                 init();
                             }
+                        }
+                    }
+
+                    /**
+                     * Unselect Item with it id
+                     * @param id
+                     * @private
+                     */
+                    function _unselectItemWithId(id){
+                        $log.debug("itAutocomplete: unselect with id "+id);
+                        self.fields.selectedItem = {};
+                        if (angular.isDefined(id)) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == id) {
+                                    unselect(item);
+                                }
+                            });
                         }
                     }
 
