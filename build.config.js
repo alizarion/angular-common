@@ -46,7 +46,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/dialog/dialog.css',
         'main/assets/lib/codemirror/addon/display/fullscreen.css',
         'main/assets/lib/codemirror/addon/fold/foldgutter.css',
-        'main/assets/lib/codemirror/addon/lint/lint.css'
+        'main/assets/lib/codemirror/addon/lint/lint.css',
+        'main/assets/lib/codemirror/addon/hint/show-hint.css'
 
     ],
 
@@ -86,6 +87,7 @@ module.exports = {
         'main/assets/lib/codemirror/lib/codemirror.js',
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
+        'main/assets/lib/codemirror/mode/css/css.js',
         'main/assets/lib/codemirror/mode/clike/clike.js',
         'main/assets/lib/angular-ui-codemirror/ui-codemirror.min.js',
         'main/assets/lib/codemirror/addon/search/search.js',
@@ -104,9 +106,18 @@ module.exports = {
         'main/assets/lib/codemirror/addon/fold/comment-fold.js',
         'main/assets/lib/codemirror/addon/fold/indent-fold.js',
         'main/assets/lib/codemirror/addon/lint/lint.js',
-        'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
         'main/assets/lib/jsonlint/lib/jsonlint.js',
+        'main/assets/lib/codemirror/addon/lint/html-lint.js',
         'main/assets/lib/codemirror/addon/lint/json-lint.js',
+        'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
+        'main/assets/lib/codemirror/addon/hint/show-hint.js',
+        'main/assets/lib/codemirror/addon/lint/css-lint.js',
+        'main/assets/lib/codemirror/addon/hint/css-hint.js',
+        'main/assets/lib/codemirror/addon/hint/xml-hint.js',
+        'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
+        'main/assets/lib/codemirror/addon/hint/html-hint.js',
+        'main/assets/lib/jshint/dist/jshint.js',
+        'main/assets/lib/csslint/release/csslint.js',
         'main/assets/lib/angular-atmosphere/index.js'
     ],
 
@@ -127,6 +138,7 @@ module.exports = {
         'main/assets/lib/codemirror/lib/codemirror.js',
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
+        'main/assets/lib/codemirror/mode/css/css.js',
         'main/assets/lib/codemirror/mode/clike/clike.js',
         'main/assets/lib/angular-ui-codemirror/ui-codemirror.js',
         'main/assets/lib/codemirror/addon/search/search.js',
@@ -147,7 +159,17 @@ module.exports = {
         'main/assets/lib/codemirror/addon/lint/lint.js',
         'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
         'main/assets/lib/jsonlint/lib/jsonlint.js',
+        'main/assets/lib/codemirror/addon/lint/html-lint.js',
         'main/assets/lib/codemirror/addon/lint/json-lint.js',
+        'main/assets/lib/codemirror/addon/lint/javascript-lint.js',
+        'main/assets/lib/codemirror/addon/hint/show-hint.js',
+        'main/assets/lib/codemirror/addon/lint/css-lint.js',
+        'main/assets/lib/codemirror/addon/hint/css-hint.js',
+        'main/assets/lib/codemirror/addon/hint/xml-hint.js',
+        'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
+        'main/assets/lib/codemirror/addon/hint/html-hint.js',
+        'main/assets/lib/jshint/dist/jshint.js',
+        'main/assets/lib/csslint/release/csslint.js',
         'main/assets/lib/angular-atmosphere/index.js'
     ]
 };
