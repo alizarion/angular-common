@@ -24,6 +24,8 @@
     "angular-local-storage": "0.2.3",
     "angular-ui-codemirror": "0.3",
     "jsonlint": "https://gitlab.com/itesoft/jsonlint.git",
+    "csslint": "https://gitlab.com/itesoft/csslint.git",
+    "jshint": "2.9.1",
     "angular-atmosphere": "https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js"
   }
 }

@@ -273,6 +273,8 @@ IteSoft
                      * Watch selectedOption change to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
+
+                        _unSelectItemWithId(oldValue);
                         $log.debug("itAutocomplete: selectedOption value changed");
                         //if an oldValue is set
                         if(angular.isDefined(oldValue)){
@@ -311,7 +313,7 @@ IteSoft
                      * @param id
                      * @private
                      */
-                    function _selectItemWithId(id) {
+                    function _selectItemWithId(id) {[]
                         $log.debug("itAutocomplete: select with  id "+id);
                         var selected = false;
                         self.fields.selectedItem = {};
