@@ -274,7 +274,6 @@ IteSoft
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
 
-                        _unSelectItemWithId(oldValue);
                         $log.debug("itAutocomplete: selectedOption value changed");
                         //if an oldValue is set
                         if(angular.isDefined(oldValue)){
