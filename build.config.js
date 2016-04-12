@@ -88,6 +88,7 @@ module.exports = {
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
         'main/assets/lib/codemirror/mode/css/css.js',
+        'main/assets/lib/codemirror/mode/htmlmixed/htmlmixed.js',
         'main/assets/lib/codemirror/mode/clike/clike.js',
         'main/assets/lib/angular-ui-codemirror/ui-codemirror.min.js',
         'main/assets/lib/codemirror/addon/search/search.js',
@@ -117,8 +118,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
-        'main/assets/lib/csslint/release/csslint.js',
-        'main/assets/lib/angular-atmosphere/index.js'
+        'main/assets/lib/angular-atmosphere/index.js',
+        'main/assets/lib/csslint/dist/csslint.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -139,6 +140,7 @@ module.exports = {
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
         'main/assets/lib/codemirror/mode/css/css.js',
+        'main/assets/lib/codemirror/mode/htmlmixed/htmlmixed.js',
         'main/assets/lib/codemirror/mode/clike/clike.js',
         'main/assets/lib/angular-ui-codemirror/ui-codemirror.js',
         'main/assets/lib/codemirror/addon/search/search.js',
@@ -169,7 +171,7 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
-        'main/assets/lib/csslint/release/csslint.js',
-        'main/assets/lib/angular-atmosphere/index.js'
+        'main/assets/lib/angular-atmosphere/index.js',
+        'main/assets/lib/csslint/dist/csslint.js'
     ]
 };
