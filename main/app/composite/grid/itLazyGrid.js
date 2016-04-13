@@ -147,10 +147,13 @@ IteSoft.directive('itLazyGrid',
                 '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
                 '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
                 '<div class="ui-grid-filter-container"> ' +
-                '<span ng-repeat="colFilter in col.filters" class="{{col.headerCellClass}}"> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{colFilter.emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{colFilter.emptyOption | translate}}" ng-model="colFilter.term" data-min-date="01/01/1980" data-max-date="01/01/2100" data-autoclose="1" ' +
-                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span> </div> ' +
+                '<span class="{{col.headerCellClass}}"> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
+                'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
+                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span></div> ' +
                 '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
                 '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
                 '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
