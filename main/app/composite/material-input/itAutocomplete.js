@@ -336,7 +336,7 @@ IteSoft
                      */
                     function _unselectItemWithId(id){
                         $log.debug("itAutocomplete: unselect with id "+id);
-                        self.fields.selectedItem = {};
+
                         if (angular.isDefined(id)) {
                             angular.forEach(self.fields.items, function (item) {
                                 if (item.id == id) {
