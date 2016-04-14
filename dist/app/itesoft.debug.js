@@ -73,55 +73,6 @@ IteSoft
     }]);
 
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-/**
  * @ngdoc directive
  * @name itesoft.directive:itModalFullScreen
  * @module itesoft
@@ -3888,6 +3839,393 @@ IteSoft
 'use strict';
 /**
  * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
+IteSoft
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
+                    }
+                }
+
+                setActive();
+
+                scope.$on('$locationChangeSuccess', setActive);
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:true,
+            template :
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="it-sidebar-inner">'+
+                        '<div class="nav navbar navbar-inverse">'+
+                        '<nav class="" ng-transclude ></nav>' +
+                        '</div>'+
+                    '</div>'+
+                '</div>'
+
+
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+ * @since 1.0
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : true,
+            template :
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                    '<div class="it-container it-fill" ng-transclude></div>'+
+                '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
+IteSoft
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
+
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+
+             </it-side-menu-header>
+
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
+IteSoft
+    .directive('itSideMenus',function(){
+        return {
+            restrict: 'ECA',
+            transclude : true,
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
  * @name itesoft.directive:itSidePanel
  * @module itesoft
  * @restrict E
@@ -4690,393 +5028,6 @@ IteSoft
     });
 
 
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:true,
-            template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
-                    '</div>'+
-                '</div>'
-
-
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
- * @since 1.0
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : true,
-            template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
-
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-
-             </it-side-menu-header>
-
-             <it-side-menu>
-                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-
-
-                     <li it-collapsed-item=""   >
-                     <a href=""><h5>Menu</h5></a>
-                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                     <li >
-                     <a href="#/widget/itloader">SubMenu1</a>
-                     </li>
-                     <li >
-                     <a href="#/widget/itBottomGlue">SubMenu2</a>
-                     </li>
-                     </ul>
-                     </li>
-                     </ul>
-              </it-side-menu>
-
-
-             <it-side-menu-content>
-
-                 <h1>See on Plunker !</h1>
-
-             </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
 
 'use strict';
 
@@ -5862,6 +5813,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 /**
