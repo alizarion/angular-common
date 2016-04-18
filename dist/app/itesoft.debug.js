@@ -26,6 +26,54 @@ var IteSoft = angular.module('itesoft', [
 
 /**
  * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
+/**
+ * @ngdoc directive
  * @name itesoft.directive:itModalFullScreen
  * @module itesoft
  * @restrict EA
@@ -53,12 +101,12 @@ var IteSoft = angular.module('itesoft', [
 
          <it-modal-full-screen  class="it-fill">
              <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+             ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
              </div>
          </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
+        <div konami style="height:500px">
+        </div>
      </file>
 
  </example>
@@ -159,290 +207,6 @@ IteSoft
         }]);
 
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -508,7 +272,7 @@ IteSoft.factory('itAmountCleanerService', [function () {
                 return result;
             },
 
-            formatAmount: function (amount, aLocale) {
+            formatAmount: function (amount, aLocale, currency) {
                 var result = '';
 
 
@@ -539,8 +303,24 @@ IteSoft.factory('itAmountCleanerService', [function () {
                     }
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
-                //TODO dinar tunisien, incompatible
-                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                if(angular.isDefined(currency)){
+
+                    if(currency === 'TND'){
+                        // 3 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
+
+                    }else if(currency === 'YEN'){
+                        // 0 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
+
+                    }else{
+                        // 2 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                    }
+
+                }else{
+                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                }
 
                 return result;
             }
@@ -1273,6 +1053,242 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
+);
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
 );
 "use strict";
 /**
@@ -5701,6 +5717,55 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 IteSoft
@@ -5814,55 +5879,6 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 'use strict';
 /**
