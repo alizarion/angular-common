@@ -63,7 +63,7 @@ IteSoft.factory('itAmountCleanerService', [function () {
                 return result;
             },
 
-            formatAmount: function (amount, aLocale) {
+            formatAmount: function (amount, aLocale, currency) {
                 var result = '';
 
 
@@ -94,8 +94,24 @@ IteSoft.factory('itAmountCleanerService', [function () {
                     }
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
-                //TODO dinar tunisien, incompatible
-                result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                if(angular.isDefined(currency)){
+
+                    if(currency === 'TND'){
+                        // 3 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
+
+                    }else if(currency === 'YEN'){
+                        // 0 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
+
+                    }else{
+                        // 2 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                    }
+
+                }else{
+                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                }
 
                 return result;
             }
