@@ -24,6 +24,16 @@
  *   </td>
  *  </tr>
  *  <tr>
+ *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
+ *   <td>Method to get the current configuration options.
+ *   <br />storage: local (default value) for localStorage or query for url query parameter
+ *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
+ *   <br />onChangePopup:
+ *   <br />title: title of popup confirmation
+ *   <br />text: text of popup confirmation
+ *   </td>
+ *  </tr>
+ *  <tr>
  *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
  *   <td>Method to get the current language.</td>
  *  </tr>
@@ -101,7 +111,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                 return self.options;
             },
             changeLanguage: function (lang, scope, callback) {
-                var deferred = $q.defer();
                 var data = {
                     currentLanguage:
                         this.getCurrentLanguage()
