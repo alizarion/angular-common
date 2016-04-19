@@ -379,7 +379,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "itesoft",
       "shortDescription": "itLanguageChangeHandlerProvider modifies the current language to a new language. Features:",
-      "keywords": "$scope $translate allows angular api asks browser btn btn-warning callback change changelanguage changing class code config configuration confirmation consuming controller culture current currentlanguage data default en en_gb example features fr_fr function getconfig getcurrentlanguage getdefaultlocale getlanguagecode html initial initiallanguage itesoft itlanguagechangehandler itlanguagechangehandlerprovider itpopup js language languagechanged local locale localstorageservice localstorageserviceprovider maincontroller method modifies module ng-click ng-controller ng-model option optional options parameter promise query receive returned scope service set setprefix setting storage stores string table text type updated var"
+      "keywords": "$scope $translate allows angular api asks browser btn btn-warning callback change changelanguage changing class code config configuration confirmation consuming controller culture current currentlanguage data default display en en_gb example features fr_fr function getconfig getcurrentlanguage getdefaultlocale getlanguagecode html initial initiallanguage itesoft itlanguagechangehandler itlanguagechangehandlerprovider itpopup js language languagechanged local locale localstorage localstorageservice localstorageserviceprovider maincontroller method modifies module ng-click ng-controller ng-model option optional options parameter popup promise query receive returned scope service set setprefix setting storage stores string table text title true type updated url var"
     },
     {
       "section": "api",

@@ -8,7 +8,7 @@
 <div class="description"><div class="itesoft-service-page itesoft-service-itlanguagechangehandler-page"><p>itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
 <br/>1) Asks confirmation (optional) before changing the language;
 <br/>2) Stores the new culture setting either in the browser&#39;s local storage [&quot;local&quot;] (default),  or as a query string parameter [&quot;query&quot;]
-<br/>3) Allows the consuming service to receive returned results by either a callback method or a promise.
+<br/>3) Allows the consuming service to receive returned results by a callback method.
 <br/></p>
 <table class="table">
  <tr>
@@ -17,6 +17,16 @@
    <br/>lang (required). The new language culture, e.g. &quot;en_GB&quot;.
    <br/>scope (optional). The current scope.
    <br/>callback (optional). The callback function.
+  </td>
+ </tr>
+ <tr>
+  <td><code>itLanguageChangeHandler.getConfig()</code></td>
+  <td>Method to get the current configuration options.
+  <br />storage: local (default value) for localStorage or query for url query parameter
+  <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
+  <br />onChangePopup:
+  <br />title: title of popup confirmation
+  <br />text: text of popup confirmation
   </td>
  </tr>
  <tr>
@@ -66,6 +76,7 @@
        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
                    // example for storage option configuration value
                    itLanguageChangeHandlerProvider.options.storage = "local";
+                    
                    localStorageServiceProvider.setPrefix('itesoft');
 
                }])
