@@ -30,6 +30,7 @@
  <example module="itesoft-showcase">
  <file name="index.html">
  <div>
+ <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
  <it-block-control-panel></it-block-control-panel>
  </div>
  </file>
@@ -92,10 +93,10 @@ IteSoft.directive('itBlockControlPanel',
                 '</div>',
 
                 controllerAs: 'itBlockControlPanelController',
-                controller: ['$scope', '$rootScope', '$interval', '$location', '$route', '$timeout', '$log', '$document',
-                    'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup',
-                    function ($scope, $rootScope, $interval, $location, $route, $timeout, $log, $document,
-                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup) {
+                controller: ['$scope', '$rootScope', '$location','$log', '$document', '$filter',
+                    'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
+                    function ($scope, $rootScope, $location, $log, $document ,$filter,
+                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup,itNotifier) {
                         var self = this;
 
                         self.editorIsOpen = false;
@@ -105,8 +106,11 @@ IteSoft.directive('itBlockControlPanel',
                         this.refresh = function () {
                             BlockService.build.get(function () {
                                     location.reload();
-                            }, function () {
-                                $log.error("Unable to refresh ")
+                            }, function (error) {
+                                itNotifier.notifyError({
+                                    content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                    dismissOnTimeout: false
+                                },error);
                             });
                         };
                         self.interval = 0;
@@ -266,10 +270,18 @@ IteSoft.directive('itBlockControlPanel',
                                         if($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
+                                    }, function (error) {
+                                        itNotifier.notifyError({
+                                                content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                                dismissOnTimeout: false
+                                            },error);
                                     })
-                                }, function () {
+                                }, function (error) {
+
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    },error);
                                     $log.error("Unable to restore block " + JSON.stringify(block));
                                 })
                             })
@@ -308,11 +320,17 @@ IteSoft.directive('itBlockControlPanel',
                                         if($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
+                                    }, function (error) {
+                                        itNotifier.notifyError({
+                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                            dismissOnTimeout: false
+                                        },error);
                                     })
-                                }, function () {
-                                    $log.error("Unable to delete current block " + JSON.stringify(block))
+                                }, function (error) {
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    },error);
                                 });
                             }, function () {
                                 itNotifier.notifyError({

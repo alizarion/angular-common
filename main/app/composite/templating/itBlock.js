@@ -32,6 +32,7 @@
  <example module="itesoft-showcase">
  <file name="index.html">
     <div ng-controller="HomeCtrl">
+         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
          <it-block-control-panel></it-block-control-panel>
          <it-block name="zone-coding-lines-actions" style="margin:10px">
          <it-block name="login_input" role="RD">
