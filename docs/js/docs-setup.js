@@ -91,7 +91,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The Block widgets provides  way to customize UI.",
-      "keywords": "$rootscope $scope angular api block class config constant controller customize directive editmode editor editsite email enable floating-label form-control form-group function homectrl html http it-input it-label itesoft itesoft-showcase js login_input module ng-controller ng-model role template template_editor_url text true type ui url user web widgets"
+      "keywords": "$http $rootscope $scope add addnewline admin angular api autologin block btn btn-danger btn-primary button carney cellclass celltemplate class coding coding-lines-add coding-lines-duplicate coding-lines-memorize coding-lines-remove codingcontroller col-xs-2 columndefs company comveyer config constant controller copy core cox current_package customize data directive dirty disabled duplicate duplicateline editmode editor editsite email employed enable enable_template_editor enablefiltering enormo example fa fa-copy fa-folder fa-lg fa-plus fa-trash false filter filterchanged filteruse firstname floating-label foreach form-control form-group fuelton function grid grid1 gridapi gridoptions homectrl html http it-autocomplete it-input it-label itesoft itesoft-showcase js key lastname length lines login login_input lorraine margin memorize modification module mydata mydatainit nancy ng-click ng-controller ng-model ngresource onregisterapi package password remove removed removenewline rest rest_editor_api_url rest_template_api_url role sample saved selectedoption skip skip_login style template template_editor_url template_user_auto_login text title totalitems translate true type ui ui-grid ui-grid-cell-contents uigridgroupingconstants url useexternalfiltering user v1 values var version waters web widgets wise zone-coding-lines-actions zone-firstname zone-grid-example"
     },
     {
       "section": "api",
@@ -100,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The Control Panel Block widgets provides a way to activate it-block edition",
-      "keywords": "$rootscope $scope activate angular api app block config constant control controller customize directive edit edition editor editsite enable_template_editor function homectrl html http it-block itesoft itesoft-showcase js module ngresource panel pilot readonly rest_editor_api_url rest_template_api_url template template_editor_url true url web widgets"
+      "keywords": "$rootscope $scope activate admin angular api app block config constant control controller current_package customize directive edit edition editor editsite enable_template_editor function homectrl html http it-block itesoft itesoft-showcase js module ngresource panel password pilot readonly rest_editor_api_url rest_template_api_url skip_login template template_editor_url template_user_auto_login true url v1 version web widgets"
     },
     {
       "section": "api",
@@ -128,6 +128,15 @@ NG_DOCS={
       "moduleName": "itesoft",
       "shortDescription": "The checkbox is no different than the HTML checkbox input,",
       "keywords": "api checkbox differently directive html input it-checkbox it-label itesoft module styled type"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.directive:itCircularBtn",
+      "shortName": "itCircularBtn",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Provide a circular button like for the full screen button",
+      "keywords": "$scope aec angular api button circular class controller directive fa fa-expand full function homectrl html itesoft itesoft-showcase js module ng-controller provide screen"
     },
     {
       "section": "api",
