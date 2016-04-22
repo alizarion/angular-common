@@ -49,7 +49,7 @@ in addition to allowing popups with completely custom content and look.</p>
          angular.module('itesoft')
          .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
 
-          $scope.showAlert = function(){
+              $scope.showAlert = function(){
                   var alertPopup = itPopup.alert({
                       title: "{{'POPUP_TITLE' | translate}}",
                       text: "{{'POPUP_CONTENT' | translate}}"
