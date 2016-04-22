@@ -64,6 +64,8 @@ IteSoft.directive('itBlockControlPanel',
                 '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
                 '<div class="block-control-panel-action-container">' +
                 '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa icon-stop"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa icon-play"></li></it-circular-btn>' +
                 /*
                 '<div ng-click="itBlockControlPanelController.editCSS()" class=" fa fa-css3 template-circle-btn template "></div>' +
                 '<div ng-click="itBlockControlPanelController.editJS()" class="fa fa-superscript template-circle-btn template-circle-text-btn"></div> ' +
@@ -174,49 +176,57 @@ IteSoft.directive('itBlockControlPanel',
                             PilotSiteSideService.fn.createPage()
                         };
 
-                        /*
-                         Capture du CTRL
-                         */
-                        $document.bind("keydown", function (event) {
-                            if (event.keyCode == 17 && !self.focusable) {
-                                $document.find("*").css("cursor", "crosshair");
+                        if(CONFIG.ENABLE_TEMPLATE_EDITOR) {
+                            /*
+                            We enable edit mode by default
+                             */
+                            $rootScope.editSite = true;
+                            $rootScope.autoRefreshTemplate = true;
 
-                                $log.log("keydown");
-                                self.focusable = true;
-                                self.blocks = [];
-                                self.hilightedBlock = undefined;
-                                self.hilightBlock(undefined);
-                            }
-                        });
+                            /*
+                             Capture du CTRL
+                             */
+                            $document.bind("keydown", function (event) {
+                                if (event.keyCode == 17 && !self.focusable) {
+                                    $document.find("*").addClass("crosshair");
 
-                        /**
-                         *
-                         */
-                        $document.bind("keyup", function (event) {
-                            if (event.keyCode == 17 && self.focusable) {
-                                $log.log("keyup");
-                                $document.find("*").css("cursor", "default");
-                                self.focusable = false;
-                            }
-                        });
+                                    $log.log("keydown");
+                                    self.focusable = true;
+                                    self.blocks = [];
+                                    self.hilightedBlock = undefined;
+                                    self.hilightBlock(undefined);
+                                }
+                            });
 
-                        /*
-                         Catch event send when over block
-                         */
-                        $rootScope.$on("selectBlock", function (event, block) {
-                            if (self.focusable && self.blocks.indexOf(block) == -1) {
-                                self.blocks.push(block)
-                            }
-                        });
+                            /**
+                             *
+                             */
+                            $document.bind("keyup", function (event) {
+                                if (event.keyCode == 17 && self.focusable) {
+                                    $log.log("keyup");
+                                    $document.find("*").removeClass("crosshair");
+                                    self.focusable = false;
+                                }
+                            });
 
-                        /**
-                         Catch event send when leave block
-                         */
-                        $rootScope.$on("unSelectBlock", function (event, block) {
-                            if (self.focusable && self.blocks.indexOf(block) != -1) {
-                                self.blocks.splice(self.blocks.indexOf(block), 1);
-                            }
-                        });
+                            /*
+                             Catch event send when over block
+                             */
+                            $rootScope.$on("selectBlock", function (event, block) {
+                                if (self.focusable && self.blocks.indexOf(block) == -1) {
+                                    self.blocks.push(block)
+                                }
+                            });
+
+                            /**
+                             Catch event send when leave block
+                             */
+                            $rootScope.$on("unSelectBlock", function (event, block) {
+                                if (self.focusable && self.blocks.indexOf(block) != -1) {
+                                    self.blocks.splice(self.blocks.indexOf(block), 1);
+                                }
+                            });
+                        }
 
                         /*
                          Do block edit action

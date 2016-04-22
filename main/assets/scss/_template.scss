@@ -64,7 +64,7 @@
 }
 
 .block-lists-element-hilight{
-  background-color: $primary !important;
+  background-color: $block-hilight !important;
 }
 
 .block-hilight *{
@@ -82,4 +82,9 @@
   0%{box-shadow:0px 0px 5px $block-hilight}
   50%{box-shadow:0px 0px 0px $block-hilight}
   100%{box-shadow:0px 0px 5px $block-hilight}
+}
+
+
+.crosshair {
+  cursor:crosshair !important;
 }

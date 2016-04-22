@@ -14,6 +14,10 @@ $modal-full-screen-animation : $animation-speed;
   opacity: .80;
 }
 
+.it-circular-button-container .btn {
+  cursor: pointer !important;
+}
+
 .it-modal-background {
   background-color: $modal-background;
 }
@@ -114,4 +118,8 @@ it-circular-btn{
 
 it-circular-btn a{
   color:rgba(0, 0, 0, 0.843137) !important ;
+}
+
+it-circular-btn:hover li,it-circular-btn:hover a {
+  color: $primary!important;
 }
