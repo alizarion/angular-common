@@ -1,5 +1,6 @@
 /**
  * Created by stephen on 03/04/2016.
+ * Service that pilot web site to editor communication
  */
 
 'use strict';
@@ -31,6 +32,7 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             transportFailure:undefined,
             error:undefined
         };
+
         PilotService.fields.dest = PilotService.DEST_EDITOR;
 
         // test connection with editor when websocket is open
@@ -60,10 +62,15 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             }
         };
 
+        /**
+         * Call when message on websocket
+         * @param response
+         */
         PilotService.on.message = function (response) {
             var responseText = response.responseBody;
             try {
                 var message = atmosphere.util.parseJSON(responseText);
+
                 if (message.dest == PilotService.DEST_ALL) {
                     switch (message.action) {
                         case PilotService.ACTION_CONNECT:
@@ -124,30 +131,53 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             }
         };
 
-        function _editBlock(block) {
+        /**
+         * Call when click on edit block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _editBlock(block,path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_EDIT_BLOCK,
-                params: [{'block': block}]
+                params: [{'block': block,'path':path}]
             }));
         }
 
-        function _removeBlock(block) {
+        /**
+         * Call when click on remove block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _removeBlock(block,path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_REMOVE_BLOCK,
-                params: [{'block': block}]
+                params: [{'block': block,'path':path}]
             }));
         }
 
-        function _createBlock(block) {
+        /**
+         * Call when click on create block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _createBlock(block,path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_CREATE_BLOCK,
-                params: [{'block': block}]
+                params: [{'block': block,'path':path}]
             }));
         }
 
+        /**
+         * Call when click on edit page
+         * @param page
+         * @private
+         */
         function _editPage(page) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
@@ -156,6 +186,11 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             }));
         }
 
+        /**
+         * Call when click on remove page
+         * @param page
+         * @private
+         */
         function _removePage(page) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
@@ -164,6 +199,11 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             }));
         }
 
+        /**
+         * Call when click on create page
+         * @param page
+         * @private
+         */
         function _createPage(page) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,

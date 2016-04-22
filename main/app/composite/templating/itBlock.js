@@ -17,7 +17,11 @@
  *
  * <h1>Config</h1>
  * ```config
- * CONFIG.TEMPLATE_EDITOR_URL = template web editor url
+ * REST_TEMPLATE_API_URL = url of template rest api
+ * TEMPLATE_EDITOR_URL = template web editor url
+ * TEMPLATE_USER_AUTO_LOGIN = login and password to use for autologin {login: "admin", password: "admin"}
+ * SKIP_LOGIN = true if you want to skip login
+ * CURRENT_PACKAGE = package used to saved modification (ex 10-PS)
  * ```
  *
  * ```html
@@ -27,26 +31,105 @@
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
- <div ng-controller="HomeCtrl">
- <it-block name="login_input" role="RD">
- <div class="form-group">
- <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
- </div>
- </it-block>
- </div>
+    <div ng-controller="HomeCtrl">
+         <it-block-control-panel></it-block-control-panel>
+         <it-block name="zone-coding-lines-actions" style="margin:10px">
+         <it-block name="login_input" role="RD">
+         <div class="form-group">
+         <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+         </div>
+         </it-block>
+         <it-block name="coding-lines-add">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
+         ng-click="codingController.addNewLine()">
+         <span class="fa fa-plus fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-remove">
+         <button class="btn btn-danger col-xs-2"
+         title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
+         ng-click="codingController.removeNewLine()">
+         <span class="fa fa-trash fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-duplicate">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
+         ng-click="codingController.duplicateLine()">
+         <span class="fa fa-copy fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-memorize" removed="true">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
+         ng-click=""
+         disabled>
+         <span class="fa fa-folder fa-lg"/>
+         </button>
+         </it-block>
+         </it-block>
+         <br/>
+         <br/>
+         <br/>
+         <br/>
+         <it-block name="zone-grid-example">
+            <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+         </it-block>
+    </div>
  </file>
  <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- .constant("CONFIG", {
-            "TEMPLATE_EDITOR_URL": "http://localhost:8080/"
-            });
+     angular.module('itesoft-showcase',['itesoft','ngResource'])
+     .constant("CONFIG", {
+                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
+                "ENABLE_TEMPLATE_EDITOR": true,
+                "SKIP_LOGIN" : true,
+                "CURRENT_PACKAGE" : "10-PS",
+                "VERSION": "v1",
+                });
  </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope','$rootScope',
- function($scope,$rootScope) {
-                   $rootScope.editSite = true;
-                }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope','$rootScope','$http','uiGridGroupingConstants',
+     function($scope,$rootScope,$http,uiGridGroupingConstants) {
+                       $rootScope.editSite = true;
+                       $scope.myData = [];
+            // sample values
+            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
+            angular.copy($scope.myDataInit,$scope.myData);
+            $scope.gridOptions = {
+                data:$scope.myData,
+                useExternalFiltering: true,
+                enableFiltering: true,
+                onRegisterApi: function(gridApi){
+                  $scope.gridApi = gridApi;
+                  //quick an dirty example of filter that use it-autocomplete
+                  $scope.gridApi.core.on.filterChanged($scope, function(){
+                            $scope.myData = [];
+                            var filterUse = false;
+                              angular.forEach($scope.myDataInit,function(item){
+                                    var added = false;
+                                    var key = '';
+                                    var value = '';
+                                    $scope.gridOptions.data = $scope.myData;
+                                    $scope.gridOptions.totalItems = $scope.myData.length;
+                              })
+                            });
+                        },
+                        columnDefs:[{
+                            name: 'firstName',
+                            cellClass: 'firstName',
+                            cellTemplate:' <div class="ui-grid-cell-contents"> <it-block name="zone-firstName">test</it-block> </div>'
+                            },{
+                            name: 'lastName',
+                            cellClass: 'lastName'
+                           }
+                        ]
+                    };
+                    $scope.selectedOption = "Lorraine";
+                    }]);
  </file>
  </example>
  */
@@ -57,15 +140,13 @@ IteSoft.directive('itBlock',
                 restrict: 'E',
                 scope: true,
                 transclude: true,
-                template: '<div ng-if="$root.editSite && itBlockController.activated && (position!=\'replace\' || content!= \'\')"' +
-                ' ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()"' +
-                ' ng-class="removed ? \'removed-block block\':\'block\'">' +
-                '<div ng-click="itBlockController.addBlock()" class="glyphicon glyphicon-plus block-btn template-add-block template-circle-btn "></div>' +
-                '<div ng-click="itBlockController.editBlock()" class="glyphicon glyphicon-pencil  block-btn  template-edit-block template-circle-btn "></div>' +
-                '<div ng-if="removed" ng-click="itBlockController.restoreBlock()" class="glyphicon glyphicon-eye-open block-btn  template-add-block template-circle-btn "></div>' +
-                '<div ng-if="!removed" ng-click="itBlockController.deleteBlock()" class="glyphicon glyphicon-trash  block-btn template-add-block template-circle-btn "></div>' +
-                '</div>' +
-                '<ng-transclude ng-class="removed ? \'removed-content block-content\':\'content\'" ng-mouseover="itBlockController.over()" ng-mouseleave="itBlockController.leave()" ng-if="!removed || $root.editSite "  ></ng-transclude>',
+                template:
+                '<ng-transclude  ' +
+                'class="{{itBlockController.hilightClass}}" ' +
+                'ng-mouseover="itBlockController.over()" ' +
+                'ng-mouseleave="itBlockController.leave()" ' +
+                'ng-if="!removed || $root.editSite"> ' +
+                '</ng-transclude>',
                 controllerAs: 'itBlockController',
                 link: function ($scope, element, attrs, ctrl, transclude) {
                     transclude($scope, function (content) {
@@ -77,117 +158,92 @@ IteSoft.directive('itBlock',
                         });
                         $scope.content = myContent;
                     });
+                    /**
+                     * Get attributes values
+                     */
                     $scope.ref = attrs["ref"];
                     $scope.role = attrs["role"];
                     $scope.position = attrs["position"];
                     $scope.name = attrs["name"];
                     $scope.removed = false;
-                    $scope.version =  attrs["version"];
+                    $scope.element = element;
+                    $scope.version = attrs["version"];
                     if (angular.isDefined(attrs["removed"])) {
                         $scope.removed = attrs["removed"];
                     }
                     this.fields = {};
+                    /**
+                     * Call when attributes are read
+                     */
+                    ctrl.onRegisterApi();
 
                 },
-                controller: ['$scope','$location','$log','$timeout','itPopup','BlockService','PilotSiteSideService',
-                    function ($scope,$location,$log,$timeout,itPopup,BlockService,PilotSiteSideService) {
+                controller: ['$scope','$rootScope', '$location', '$log', '$interval', '$timeout','$document', 'itPopup', 'BlockService', 'PilotSiteSideService',
+                    function ($scope,$rootScope, $location, $log, $interval,$timeout, $document, itPopup, BlockService, PilotSiteSideService) {
 
                         var self = this;
+                        self.focusable = false;
 
-                        self.activated = false;
-                        self.manyTimesOver =0;
-                        self.timer = 0;
-
-                        self.leave = function(){
-                            self.manyTimesOver =-1;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
-                        };
-
-                        self.over = function(){
-                            self.manyTimesOver =+1;
-                            self.activated = self.manyTimesOver > 0 ? true: false;
-                            self.timer = $timeout(function(){self.activated = self.manyTimesOver > 0 ? true: false;},100);
-                        };
-
-                        this.register = function (value) {
-                            $scope.content = value;
-                        };
-                        
-                        this.editBlock = function () {
-                            if (angular.isDefined($scope.ref) && $scope.ref != '') {
-                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
-
-                            } else {
-                                var block = BlockService.new('PS_replace' + $scope.name, $scope.name, 'replace', $scope.content, 'PS',1);
+                        /**
+                         * Call when block is selected by control panel
+                         */
+                        $rootScope.$on("hilightBlock",function(event,block){
+                            if(angular.isDefined(block) && block.name == self.block.name) {
+                                self.hilightClass="block-hilight";
+                            }else{
+                                if($scope.removed){
+                                    self.hilightClass = "block-removed";
+                                }else {
+                                    self.hilightClass = "";
+                                }
                             }
-                            PilotSiteSideService.fn.editBlock(block);
+                        });
+
+                        /**
+                         * Call when attributes are read
+                         */
+                        self.onRegisterApi = function(){
+                            self.block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role, $scope.version);
+                            self.block.removed= $scope.removed;
                         };
 
-                        this.addBlock = function () {
-                            if (angular.isDefined($scope.name) && $scope.name != '') {
-                                var block = BlockService.new('PS_new_' + $scope.name, $scope.name, 'before', $scope.content, 'PS',1);
-                                PilotSiteSideService.fn.createBlock(block);
-                            }
+                        /**
+                         * Call when mouse leave block
+                         */
+                        self.leave = function () {
+                            $rootScope.$emit("unSelectBlock",self.block);
                         };
 
-                        this.restoreBlock = function () {
-                            var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role,$scope.version);
-                            BlockService.restore.get({'name': block.name}, function () {
-                                BlockService.build.get(function () {
-                                    BlockService.build.get(function () {
-                                        location.reload();
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
-                                    })
-                                }, function () {
-                                    $log.error("Unable to restore block " + JSON.stringify(block));
-                                })
-                            })
+                        /**
+                         * Call when mouse is over block
+                         */
+                        self.over = function () {
+                            $rootScope.$emit("selectBlock",self.block);
                         };
 
-                        this.deleteBlock = function () {
-                            var confirmPopup = itPopup.confirm({
-                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
-                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
-                                buttons: [
-
-                                    {
-                                        text: 'Cancel',
-                                        type: '',
-                                        onTap: function () {
-                                            return false;
-                                        }
-                                    },
-                                    {
-                                        text: 'ok',
-                                        type: '',
-                                        onTap: function () {
-                                            return true;
-                                        }
+                        /**
+                         * Call when edit site mode changed
+                         */
+                        $rootScope.$watch('editSite',function()
+                        {
+                            if ($rootScope.editSite) {
+                                /**
+                                 * Need to change transclude content if block is removed or disabled
+                                 */
+                                $timeout(function () {
+                                    if ($scope.removed) {
+                                        self.hilightClass = "block-removed";
                                     }
-                                ]
-                            });
-                            confirmPopup.then(function (res) {
-                                var block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role);
-                                BlockService.custom.delete(block, function () {
-                                    BlockService.build.get(function () {
-                                        location.reload();
-                                    }, function () {
-                                        $log.error("Unable to build dist  ")
-                                    })
-                                }, function () {
-                                    $log.error("Unable to delete current block " + JSON.stringify(block))
-                                });
-                            }, function () {
-                                itNotifier.notifyError({
-                                    content: "{{'BLOCK_DELETED_KO' | translate}}"
-                                });
-                            });
-                        };
+                                }, 500);
+                                $timeout(function () {
+                                    if (angular.isDefined($scope.element.find("ng-transclude")[0])) {
+                                        $scope.element.find("ng-transclude")[0].children[0].disabled = false;
+                                    }
+                                }, 500);
+                            }
+                        });
                     }
                 ]
             }
         }]
 )
-
-
