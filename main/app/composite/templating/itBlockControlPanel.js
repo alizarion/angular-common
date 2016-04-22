@@ -64,8 +64,8 @@ IteSoft.directive('itBlockControlPanel',
                 '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
                 '<div class="block-control-panel-action-container">' +
                 '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa icon-stop"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa icon-play"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa fa-stop"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa fa-play"></li></it-circular-btn>' +
                 /*
                 '<div ng-click="itBlockControlPanelController.editCSS()" class=" fa fa-css3 template-circle-btn template "></div>' +
                 '<div ng-click="itBlockControlPanelController.editJS()" class="fa fa-superscript template-circle-btn template-circle-text-btn"></div> ' +
@@ -104,7 +104,7 @@ IteSoft.directive('itBlockControlPanel',
                         self.url =  CONFIG.REST_TEMPLATE_API_URL + '/export/'+CONFIG.CURRENT_PACKAGE;
                         this.refresh = function () {
                             BlockService.build.get(function () {
-                                location.reload();
+                                    location.reload();
                             }, function () {
                                 $log.error("Unable to refresh ")
                             });
@@ -263,7 +263,9 @@ IteSoft.directive('itBlockControlPanel',
                             BlockService.restore.get({'name': block.name}, function () {
                                 BlockService.build.get(function () {
                                     BlockService.build.get(function () {
-                                        location.reload();
+                                        if($rootScope.autoRefreshTemplate) {
+                                            location.reload();
+                                        }
                                     }, function () {
                                         $log.error("Unable to build dist  ")
                                     })
@@ -303,7 +305,9 @@ IteSoft.directive('itBlockControlPanel',
                             confirmPopup.then(function (res) {
                                 BlockService.all.delete({name: block.name}, function () {
                                     BlockService.build.get(function () {
-                                        location.reload();
+                                        if($rootScope.autoRefreshTemplate) {
+                                            location.reload();
+                                        }
                                     }, function () {
                                         $log.error("Unable to build dist  ")
                                     })
