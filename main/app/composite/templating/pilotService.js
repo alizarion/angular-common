@@ -1,8 +1,10 @@
 /**
  * Created by stephen on 03/04/2016.
+ * Service that pilot editor or web site web socket communication
  */
 
 'use strict';
+
 
 IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
     function ($resource, $log, CONFIG) {
@@ -53,6 +55,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             error:undefined
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onOpen = function (response) {
             self.fields.model.transport = response.transport;
             self.fields.model.connected = true;
@@ -62,6 +68,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onClientTimeout = function (response) {
             self.fields.model.connected = false;
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
@@ -70,6 +80,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }, self.fields.request.reconnectInterval);
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onReopen = function (response) {
             self.fields.model.connected = true;
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
@@ -78,7 +92,11 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }
         };
 
-        //For demonstration of how you can customize the fallbackTransport using the onTransportFailure function
+        /**
+         * Long polling Failure mode
+         * @param errorMsg
+         * @param request
+         */
         self.fields.request.onTransportFailure = function (errorMsg, request) {
             atmosphere.util.info(errorMsg);
             request.fallbackTransport = 'long-polling';
@@ -87,10 +105,18 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onMessage = function (response) {
             self.on.message(response);
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onClose = function (response) {
             self.fields.model.connected = false;
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
@@ -99,6 +125,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }
         };
 
+        /**
+         *
+         * @param response
+         */
         self.fields.request.onError = function (response) {
             self.fields.model.logged = false;
             if(angular.isDefined(self.on.error)){
@@ -106,16 +136,30 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             }
         };
 
+        /**
+         *
+         * @param request
+         * @param response
+         */
         self.fields.request.onReconnect = function (request, response) {
             self.fields.model.connected = false;
         };
 
-
+        /**
+         * Used to test connection between editor and website
+         * @param dest
+         * @private
+         */
         function _ping(dest) {
             $log.log("ping "+dest);
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
         }
 
+        /**
+         * Reply to ping
+         * @param dest
+         * @private
+         */
         function _pong(dest) {
             $log.log("pong "+dest);
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
