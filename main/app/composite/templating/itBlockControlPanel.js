@@ -110,7 +110,7 @@ IteSoft.directive('itBlockControlPanel',
                                 itNotifier.notifyError({
                                     content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                     dismissOnTimeout: false
-                                },error);
+                                },error.data.body);
                             });
                         };
                         self.interval = 0;
@@ -274,14 +274,14 @@ IteSoft.directive('itBlockControlPanel',
                                         itNotifier.notifyError({
                                                 content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                                 dismissOnTimeout: false
-                                            },error);
+                                            },error.data.body);
                                     })
                                 }, function (error) {
 
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error);
+                                    },error.data.body);
                                     $log.error("Unable to restore block " + JSON.stringify(block));
                                 })
                             })
@@ -314,6 +314,7 @@ IteSoft.directive('itBlockControlPanel',
                                     }
                                 ]
                             });
+
                             confirmPopup.then(function (res) {
                                 BlockService.all.delete({name: block.name}, function () {
                                     BlockService.build.get(function () {
@@ -324,13 +325,13 @@ IteSoft.directive('itBlockControlPanel',
                                         itNotifier.notifyError({
                                             content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                             dismissOnTimeout: false
-                                        },error);
+                                        },error.data.body);
                                     })
                                 }, function (error) {
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error);
+                                    },error.data.body);
                                 });
                             }, function () {
                                 itNotifier.notifyError({
