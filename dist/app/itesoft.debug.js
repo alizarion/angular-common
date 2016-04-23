@@ -24,6 +24,55 @@ var IteSoft = angular.module('itesoft', [
     'ui.codemirror'
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 /**
@@ -262,242 +311,6 @@ IteSoft
         }]);
 
 
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1344,6 +1157,242 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
+);
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
 );
 "use strict";
 /**
@@ -3622,45 +3671,6 @@ IteSoft
 }]);
 "use strict";
 /**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
-"use strict";
-/**
  * @ngdoc directive
  * @name itesoft.directive:itPrettyprint
 
@@ -3722,6 +3732,45 @@ IteSoft
                 };
             }
 
+        };
+    }]);
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
         };
     }]);
 'use strict';
@@ -3908,393 +3957,6 @@ IteSoft
  </file>
  </example>
  */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:true,
-            template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
-                    '</div>'+
-                '</div>'
-
-
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
- * @since 1.0
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : true,
-            template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
-
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-
-             </it-side-menu-header>
-
-             <it-side-menu>
-                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-
-
-                     <li it-collapsed-item=""   >
-                     <a href=""><h5>Menu</h5></a>
-                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                     <li >
-                     <a href="#/widget/itloader">SubMenu1</a>
-                     </li>
-                     <li >
-                     <a href="#/widget/itBottomGlue">SubMenu2</a>
-                     </li>
-                     </ul>
-                     </li>
-                     </ul>
-              </it-side-menu>
-
-
-             <it-side-menu-content>
-
-                 <h1>See on Plunker !</h1>
-
-             </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
 'use strict';
 /**
  * @ngdoc directive
@@ -5101,119 +4763,392 @@ IteSoft
 
 
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
 IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
         return {
             restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
                     }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
                 }
 
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
+                setActive();
 
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
+                scope.$on('$locationChangeSuccess', setActive);
             }
-        };
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:true,
+            template :
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="it-sidebar-inner">'+
+                        '<div class="nav navbar navbar-inverse">'+
+                        '<nav class="" ng-transclude ></nav>' +
+                        '</div>'+
+                    '</div>'+
+                '</div>'
 
+
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+ * @since 1.0
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : true,
+            template :
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                    '<div class="it-container it-fill" ng-transclude></div>'+
+                '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
     }]);
 
-
 'use strict';
-
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
 IteSoft
-    .directive('itViewMasterHeader',function(){
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
         return {
             restrict: 'E',
+            require : '^itSideMenus',
             transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
         }
-    });
+    }]);
 
 'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
 
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+
+             </it-side-menu-header>
+
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
 IteSoft
-    .directive('itViewPanel',function(){
+    .directive('itSideMenus',function(){
         return {
-            restrict: 'E',
+            restrict: 'ECA',
             transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
+});
 /**
  * Created by sza on 22/04/2016.
  */
@@ -5592,7 +5527,6 @@ IteSoft.directive('itBlockControlPanel',
                     function ($scope, $rootScope, $location, $log, $document ,$filter,
                               BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup,itNotifier) {
                         var self = this;
-
                         self.editorIsOpen = false;
                         self.CONFIG = CONFIG;
                         self.blocks = [];
@@ -5608,18 +5542,23 @@ IteSoft.directive('itBlockControlPanel',
                             });
                         };
                         self.interval = 0;
+                        _options();
                         PilotSiteSideService.on.pong = function (res) {
                             $log.debug("pong");
                             $scope.$applyAsync(function () {
                                 self.editorIsOpen = true;
+                                _options();
                             })
                         };
+
                         PilotSiteSideService.on.editorConnect = function (res) {
                             $log.debug("editorConnect");
                             $scope.$applyAsync(function () {
                                 self.editorIsOpen = true;
+                                _options();
                             })
                         };
+
                         PilotSiteSideService.on.editorDisconnect = function (res) {
                             $log.debug("editorDisconnect");
                             $scope.$applyAsync(function () {
@@ -5648,6 +5587,13 @@ IteSoft.directive('itBlockControlPanel',
 
                         PilotSiteSideService.on.reload = this.refresh;
 
+                        /**
+                         * senf option to editor
+                         * @private
+                         */
+                        function _options(){
+                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
+                        }
                         /**
                          *
                          */
@@ -5888,6 +5834,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
         self.ACTION_TIMEOUT = "timeout";
         self.ACTION_CONNECT = "connect";
         self.ACTION_RELOAD = "reload";
+        self.ACTION_OPTIONS = "options";
         self.DEST_EDITOR = "editor";
         self.DEST_SITE = "site";
         self.DEST_ALL = "all";
@@ -6058,6 +6005,7 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             editPage: _editPage,
             removePage: _removePage,
             createPage: _createPage,
+            options: _options,
             ping: PilotService.fn.ping
         };
 
@@ -6251,58 +6199,132 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             }));
         }
 
+        function _options(options) {
+            debugger;
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_OPTIONS,
+                params: [{'options': options}]
+            }));
+        }
+
         return self;
     }
 ]);
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
+'use strict';
 
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
 IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
                     }
-                    theUnicode = '&#x' + theUnicode + ";";
 
-                    unicodeString += theUnicode;
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
                 }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
 
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
 
 
 'use strict';
