@@ -22,6 +22,7 @@
  * TEMPLATE_USER_AUTO_LOGIN = login and password to use for autologin {login: "admin", password: "admin"}
  * SKIP_LOGIN = true if you want to skip login
  * CURRENT_PACKAGE = package used to saved modification (ex 10-PS)
+ * CURRENT_ROLE = user usrole used to managed block (PS, RD ...)
  * ```
  *
  * ```html
@@ -88,6 +89,7 @@
                 "ENABLE_TEMPLATE_EDITOR": true,
                 "SKIP_LOGIN" : true,
                 "CURRENT_PACKAGE" : "10-PS",
+                "CURRENT_ROLE" : "PS",
                 "VERSION": "v1",
                 });
  </file>
