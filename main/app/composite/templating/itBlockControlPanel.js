@@ -98,7 +98,6 @@ IteSoft.directive('itBlockControlPanel',
                     function ($scope, $rootScope, $location, $log, $document ,$filter,
                               BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup,itNotifier) {
                         var self = this;
-
                         self.editorIsOpen = false;
                         self.CONFIG = CONFIG;
                         self.blocks = [];
@@ -114,18 +113,23 @@ IteSoft.directive('itBlockControlPanel',
                             });
                         };
                         self.interval = 0;
+                        _options();
                         PilotSiteSideService.on.pong = function (res) {
                             $log.debug("pong");
                             $scope.$applyAsync(function () {
                                 self.editorIsOpen = true;
+                                _options();
                             })
                         };
+
                         PilotSiteSideService.on.editorConnect = function (res) {
                             $log.debug("editorConnect");
                             $scope.$applyAsync(function () {
                                 self.editorIsOpen = true;
+                                _options();
                             })
                         };
+
                         PilotSiteSideService.on.editorDisconnect = function (res) {
                             $log.debug("editorDisconnect");
                             $scope.$applyAsync(function () {
@@ -154,6 +158,13 @@ IteSoft.directive('itBlockControlPanel',
 
                         PilotSiteSideService.on.reload = this.refresh;
 
+                        /**
+                         * senf option to editor
+                         * @private
+                         */
+                        function _options(){
+                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
+                        }
                         /**
                          *
                          */
@@ -241,7 +252,7 @@ IteSoft.directive('itBlockControlPanel',
                                 PilotSiteSideService.fn.editBlock(block, $location.path());
 
                             } else {
-                                var replaceBlock = BlockService.new('PS_replace' + block.name, block.name, 'replace', block.content, 'PS', 1);
+                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_replace' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
                             }
                         };
@@ -253,7 +264,7 @@ IteSoft.directive('itBlockControlPanel',
                         this.addBlock = function (block) {
                             if (angular.isDefined(block.name) && block.name != '') {
                                 $log.debug("add block");
-                                var addBlock = BlockService.new('PS_new_' + block.name, block.name, 'before', '', 'PS', 1);
+                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_new_' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(addBlock, $location.path());
                             }
                         };
@@ -335,7 +346,7 @@ IteSoft.directive('itBlockControlPanel',
                                 });
                             }, function () {
                                 itNotifier.notifyError({
-                                    content: "{{'BLOCK_DELETED_KO' | translate}}"
+                                    content: "{{'GLOBAL.TEMPLACE.WS.BLOCK_DELETED_KO' | translate}}"
                                 });
                             });
                         };

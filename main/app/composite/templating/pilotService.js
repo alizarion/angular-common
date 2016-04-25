@@ -23,6 +23,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
         self.ACTION_TIMEOUT = "timeout";
         self.ACTION_CONNECT = "connect";
         self.ACTION_RELOAD = "reload";
+        self.ACTION_OPTIONS = "options";
         self.DEST_EDITOR = "editor";
         self.DEST_SITE = "site";
         self.DEST_ALL = "all";

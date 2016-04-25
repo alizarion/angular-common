@@ -19,6 +19,7 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             editPage: _editPage,
             removePage: _removePage,
             createPage: _createPage,
+            options: _options,
             ping: PilotService.fn.ping
         };
 
@@ -209,6 +210,14 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_CREATE_PAGE,
                 params: [{'page': page}]
+            }));
+        }
+
+        function _options(options) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_OPTIONS,
+                params: [{'options': options}]
             }));
         }
 
