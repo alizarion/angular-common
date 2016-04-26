@@ -24,6 +24,54 @@ var IteSoft = angular.module('itesoft', [
     'ui.codemirror'
 ]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -78,54 +126,6 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
 
 /**
  * @ngdoc directive
@@ -3622,45 +3622,6 @@ IteSoft
 }]);
 "use strict";
 /**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
-"use strict";
-/**
  * @ngdoc directive
  * @name itesoft.directive:itPrettyprint
 
@@ -3722,6 +3683,45 @@ IteSoft
                 };
             }
 
+        };
+    }]);
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
         };
     }]);
 'use strict';
@@ -5300,7 +5300,7 @@ IteSoft.directive('itBlock',
                     $scope.removed = false;
                     $scope.element = element;
                     $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"])) {
+                    if (angular.isDefined(attrs["removed"]) && $scope.removed == "true" ) {
                         $scope.removed = attrs["removed"];
                     }
                     this.fields = {};
@@ -5422,7 +5422,7 @@ IteSoft.directive('itBlock',
                 "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
                 "REST_EDITOR_API_URL": "http://localhost:8081/editor",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": true,
+                "ENABLE_TEMPLATE_EDITOR": false,
                 "SKIP_LOGIN" : true,
                 "CURRENT_PACKAGE" : "10-PS",
                 "VERSION": "v1",
@@ -5449,12 +5449,8 @@ IteSoft.directive('itBlockControlPanel',
                 '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
                 '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa fa-stop"></li></it-circular-btn>' +
                 '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa fa-play"></li></it-circular-btn>' +
-                /*
-                '<div ng-click="itBlockControlPanelController.editCSS()" class=" fa fa-css3 template-circle-btn template "></div>' +
-                '<div ng-click="itBlockControlPanelController.editJS()" class="fa fa-superscript template-circle-btn template-circle-text-btn"></div> ' +
-                '<div ng-click="itBlockControlPanelController.addFile()" class="fa fa-plus template-add-block template-circle-btn "></div>' + */
                 '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><li class="fa fa-floppy-o"></li></a></div>' +
-                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>'+
+                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>' +
                 '</div>' +
                 '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
                 '<span class="fa fa-exclamation glyphicon-align-left" aria-hidden="true"></span>' +
@@ -5475,107 +5471,104 @@ IteSoft.directive('itBlockControlPanel',
                 '</div>',
 
                 controllerAs: 'itBlockControlPanelController',
-                controller: ['$scope', '$rootScope', '$location','$log', '$document', '$filter',
+                controller: ['$scope', '$rootScope', '$location', '$log', '$document', '$filter',
                     'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
-                    function ($scope, $rootScope, $location, $log, $document ,$filter,
-                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup,itNotifier) {
+                    function ($scope, $rootScope, $location, $log, $document, $filter,
+                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup, itNotifier) {
                         var self = this;
-                        self.editorIsOpen = false;
-                        self.CONFIG = CONFIG;
-                        self.blocks = [];
-                        self.url =  CONFIG.REST_TEMPLATE_API_URL + '/export/'+CONFIG.CURRENT_PACKAGE;
-                        this.refresh = function () {
-                            BlockService.build.get(function () {
+                        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+                            self.editorIsOpen = false;
+                            self.CONFIG = CONFIG;
+                            self.blocks = [];
+                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/export/' + CONFIG.CURRENT_PACKAGE;
+                            this.refresh = function () {
+                                BlockService.build.get(function () {
                                     location.reload();
-                            }, function (error) {
-                                itNotifier.notifyError({
-                                    content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                    dismissOnTimeout: false
-                                },error.data.body);
-                            });
-                        };
-                        self.interval = 0;
-                        _options();
-                        PilotSiteSideService.on.pong = function (res) {
-                            $log.debug("pong");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = true;
-                                _options();
-                            })
-                        };
+                                }, function (error) {
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    }, error.data.body);
+                                });
+                            };
+                            self.interval = 0;
+                            _options();
+                            PilotSiteSideService.on.pong = function (res) {
+                                $log.debug("pong");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
 
-                        PilotSiteSideService.on.editorConnect = function (res) {
-                            $log.debug("editorConnect");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = true;
-                                _options();
-                            })
-                        };
+                            PilotSiteSideService.on.editorConnect = function (res) {
+                                $log.debug("editorConnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
 
-                        PilotSiteSideService.on.editorDisconnect = function (res) {
-                            $log.debug("editorDisconnect");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
+                            PilotSiteSideService.on.editorDisconnect = function (res) {
+                                $log.debug("editorDisconnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
 
-                        PilotSiteSideService.on.close = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.error = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.transportFailure = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
+                            PilotSiteSideService.on.close = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.error = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.transportFailure = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
 
-                        PilotSiteSideService.on.reload = this.refresh;
+                            PilotSiteSideService.on.reload = this.refresh;
 
-                        /**
-                         * senf option to editor
-                         * @private
-                         */
-                        function _options(){
-                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
-                        }
-                        /**
-                         *
-                         */
-                        this.editJS = function () {
-                            $log.debug("edit JS");
-                            PilotSiteSideService.fn.editPage({fileName: "js.blocks.js", fileType: "js", filePackage: CONFIG.CURRENT_PACKAGE})
-                        };
-                        /**
-                         *
-                         */
-                        this.editCSS = function () {
-                            $log.debug("edit CSS");
-                            PilotSiteSideService.fn.editPage({
-                                fileName: "css.blocks.css",
-                                fileType: "css",
-                                filePackage: CONFIG.CURRENT_PACKAGE
-                            })
-                        };
-                        /**
-                         *
-                         */
-                        this.addFile = function () {
-                            $log.debug("add File");
-                            PilotSiteSideService.fn.createPage()
-                        };
+                            /**
+                             *
+                             */
+                            self.editJS = function () {
+                                $log.debug("edit JS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "js.blocks.js",
+                                    fileType: "js",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.editCSS = function () {
+                                $log.debug("edit CSS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "css.blocks.css",
+                                    fileType: "css",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.addFile = function () {
+                                $log.debug("add File");
+                                PilotSiteSideService.fn.createPage()
+                            };
 
-                        if(CONFIG.ENABLE_TEMPLATE_EDITOR) {
                             /*
-                            We enable edit mode by default
+                             We enable edit mode by default
                              */
                             $rootScope.editSite = true;
                             $rootScope.autoRefreshTemplate = true;
@@ -5628,13 +5621,13 @@ IteSoft.directive('itBlockControlPanel',
                         /*
                          Do block edit action
                          */
-                        this.editBlock = function (block) {
+                        self.editBlock = function (block) {
                             $log.debug("edit block");
                             if (angular.isDefined(block.ref) && block.ref != '') {
                                 PilotSiteSideService.fn.editBlock(block, $location.path());
 
                             } else {
-                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_replace' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
+                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
                             }
                         };
@@ -5643,10 +5636,10 @@ IteSoft.directive('itBlockControlPanel',
                          * Do add block action
                          * @param block
                          */
-                        this.addBlock = function (block) {
+                        self.addBlock = function (block) {
                             if (angular.isDefined(block.name) && block.name != '') {
                                 $log.debug("add block");
-                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_new_' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
+                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(addBlock, $location.path());
                             }
                         };
@@ -5655,26 +5648,26 @@ IteSoft.directive('itBlockControlPanel',
                          * Do restore block action
                          * @param block
                          */
-                        this.restoreBlock = function (block) {
+                        self.restoreBlock = function (block) {
                             $log.debug("restore block");
                             BlockService.restore.get({'name': block.name}, function () {
                                 BlockService.build.get(function () {
                                     BlockService.build.get(function () {
-                                        if($rootScope.autoRefreshTemplate) {
+                                        if ($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
                                     }, function (error) {
                                         itNotifier.notifyError({
-                                                content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                                dismissOnTimeout: false
-                                            },error.data.body);
+                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                            dismissOnTimeout: false
+                                        }, error.data.body);
                                     })
                                 }, function (error) {
 
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error.data.body);
+                                    }, error.data.body);
                                     $log.error("Unable to restore block " + JSON.stringify(block));
                                 })
                             })
@@ -5684,7 +5677,7 @@ IteSoft.directive('itBlockControlPanel',
                          * Do delete block action
                          * @param block
                          */
-                        this.deleteBlock = function (block) {
+                        self.deleteBlock = function (block) {
                             $log.debug("delete block");
                             var confirmPopup = itPopup.confirm({
                                 title: "{{'DELETE_BLOCK_TITLE' | translate}}",
@@ -5708,23 +5701,23 @@ IteSoft.directive('itBlockControlPanel',
                                 ]
                             });
 
-                            confirmPopup.then(function (res) {
+                            confirmPopup.then(function () {
                                 BlockService.all.delete({name: block.name}, function () {
                                     BlockService.build.get(function () {
-                                        if($rootScope.autoRefreshTemplate) {
+                                        if ($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
                                     }, function (error) {
                                         itNotifier.notifyError({
                                             content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                             dismissOnTimeout: false
-                                        },error.data.body);
+                                        }, error.data.body);
                                     })
                                 }, function (error) {
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error.data.body);
+                                    }, error.data.body);
                                 });
                             }, function () {
                                 itNotifier.notifyError({
@@ -5753,6 +5746,15 @@ IteSoft.directive('itBlockControlPanel',
                             } else {
                                 return "";
                             }
+                        };
+
+
+                        /**
+                         * senf option to editor
+                         * @private
+                         */
+                        function _options() {
+                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
                         }
 
                     }
@@ -5930,7 +5932,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
         }
 
-        self.fields.socket = atmosphere.subscribe(self.fields.request);
+
+        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+            self.fields.socket = atmosphere.subscribe(self.fields.request);
+        }
         return self;
     }
 ]
@@ -5967,109 +5972,112 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
             pong: undefined,
             editorConnect: undefined,
             editorDisconnect: undefined,
-            close:undefined,
-            reopen:undefined,
-            transportFailure:undefined,
-            error:undefined
+            close: undefined,
+            reopen: undefined,
+            transportFailure: undefined,
+            error: undefined
         };
 
-        PilotService.fields.dest = PilotService.DEST_EDITOR;
 
-        // test connection with editor when websocket is open
-        PilotService.on.open = function (response) {
-            $log.log("WebSocket connection is opened");
-            self.fn.ping(PilotService.DEST_EDITOR);
-        };
+        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+            PilotService.fields.dest = PilotService.DEST_EDITOR;
 
-        PilotService.on.reopen = function (response) {
-            $log.log("WebSocket connection is reopened");
-            self.fn.ping(PilotService.DEST_EDITOR);
-        };
+            // test connection with editor when websocket is open
+            PilotService.on.open = function (response) {
+                $log.log("WebSocket connection is opened");
+                self.fn.ping(PilotService.DEST_EDITOR);
+            };
 
-        PilotService.on.close=function(){
-            if(angular.isDefined(self.on.close)){
-                self.on.close();
-            }
-        };
-        PilotService.on.error=function(){
-            if(angular.isDefined(self.on.error)){
-                self.on.error();
-            }
-        };
-        PilotService.on.transportFailure=function(){
-            if(angular.isDefined(self.on.transportFailure)){
-                self.on.transportFailure();
-            }
-        };
+            PilotService.on.reopen = function (response) {
+                $log.log("WebSocket connection is reopened");
+                self.fn.ping(PilotService.DEST_EDITOR);
+            };
 
-        /**
-         * Call when message on websocket
-         * @param response
-         */
-        PilotService.on.message = function (response) {
-            var responseText = response.responseBody;
-            try {
-                var message = atmosphere.util.parseJSON(responseText);
-
-                if (message.dest == PilotService.DEST_ALL) {
-                    switch (message.action) {
-                        case PilotService.ACTION_CONNECT:
-                            $log.log(PilotService.ACTION_CONNECT);
-                            if (angular.isDefined(self.on.editorConnect)) {
-                                self.on.editorConnect();
-                            }
-                            break;
-                        case PilotService.ACTION_DISCONNECT:
-                            $log.log(PilotService.ACTION_DISCONNECT);
-                            if (angular.isDefined(self.on.editorDisconnect)) {
-                                self.on.editorDisconnect();
-                            }
-                            break;
-                    }
+            PilotService.on.close = function () {
+                if (angular.isDefined(self.on.close)) {
+                    self.on.close();
                 }
-                if (message.dest == PilotService.DEST_SITE) {
-                    switch (message.action) {
-                        case PilotService.ACTION_RELOAD:
-                            $log.log(PilotService.ACTION_RELOAD);
-                            if (angular.isDefined(self.on.reload)) {
-                                self.on.reload();
-                            }
-                            break;
-                        case PilotService.ACTION_PING:
-                            $log.log(PilotService.ACTION_PING);
-                            PilotService.pong(PilotService.DEST_EDITOR);
-                            break;
-                        case PilotService.ACTION_PONG:
-                            $log.log(PilotService.ACTION_PONG);
-                            if (angular.isDefined(self.on.pong)) {
-                                self.on.pong();
-                            }
-                            break;
-                        case PilotService.ACTION_PONG:
-                            $log.log(PilotService.ACTION_PONG);
-                            if (angular.isDefined(self.on.pong)) {
-                                self.on.pong();
-                            }
-                            break;
-                        case PilotService.ACTION_DISCONNECT:
-                            $log.log(PilotService.ACTION_DISCONNECT);
-                            if (angular.isDefined(self.on.editorDisconnect)) {
-                                self.on.editorDisconnect();
-                            }
-                            break;
-                        case PilotService.ACTION_CONNECT:
-                            $log.log(PilotService.ACTION_CONNECT);
-                            if (angular.isDefined(self.on.editorConnect)) {
-                                self.on.editorConnect();
-                            }
-                            break;
-                    }
+            };
+            PilotService.on.error = function () {
+                if (angular.isDefined(self.on.error)) {
+                    self.on.error();
                 }
-            } catch (e) {
-                $log.error("Error parsing JSON: ", responseText);
-                throw e;
-            }
-        };
+            };
+            PilotService.on.transportFailure = function () {
+                if (angular.isDefined(self.on.transportFailure)) {
+                    self.on.transportFailure();
+                }
+            };
+
+            /**
+             * Call when message on websocket
+             * @param response
+             */
+            PilotService.on.message = function (response) {
+                var responseText = response.responseBody;
+                try {
+                    var message = atmosphere.util.parseJSON(responseText);
+
+                    if (message.dest == PilotService.DEST_ALL) {
+                        switch (message.action) {
+                            case PilotService.ACTION_CONNECT:
+                                $log.log(PilotService.ACTION_CONNECT);
+                                if (angular.isDefined(self.on.editorConnect)) {
+                                    self.on.editorConnect();
+                                }
+                                break;
+                            case PilotService.ACTION_DISCONNECT:
+                                $log.log(PilotService.ACTION_DISCONNECT);
+                                if (angular.isDefined(self.on.editorDisconnect)) {
+                                    self.on.editorDisconnect();
+                                }
+                                break;
+                        }
+                    }
+                    if (message.dest == PilotService.DEST_SITE) {
+                        switch (message.action) {
+                            case PilotService.ACTION_RELOAD:
+                                $log.log(PilotService.ACTION_RELOAD);
+                                if (angular.isDefined(self.on.reload)) {
+                                    self.on.reload();
+                                }
+                                break;
+                            case PilotService.ACTION_PING:
+                                $log.log(PilotService.ACTION_PING);
+                                PilotService.pong(PilotService.DEST_EDITOR);
+                                break;
+                            case PilotService.ACTION_PONG:
+                                $log.log(PilotService.ACTION_PONG);
+                                if (angular.isDefined(self.on.pong)) {
+                                    self.on.pong();
+                                }
+                                break;
+                            case PilotService.ACTION_PONG:
+                                $log.log(PilotService.ACTION_PONG);
+                                if (angular.isDefined(self.on.pong)) {
+                                    self.on.pong();
+                                }
+                                break;
+                            case PilotService.ACTION_DISCONNECT:
+                                $log.log(PilotService.ACTION_DISCONNECT);
+                                if (angular.isDefined(self.on.editorDisconnect)) {
+                                    self.on.editorDisconnect();
+                                }
+                                break;
+                            case PilotService.ACTION_CONNECT:
+                                $log.log(PilotService.ACTION_CONNECT);
+                                if (angular.isDefined(self.on.editorConnect)) {
+                                    self.on.editorConnect();
+                                }
+                                break;
+                        }
+                    }
+                } catch (e) {
+                    $log.error("Error parsing JSON: ", responseText);
+                    throw e;
+                }
+            };
+        }
 
         /**
          * Call when click on edit block
@@ -6077,11 +6085,11 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
          * @param path
          * @private
          */
-        function _editBlock(block,path) {
+        function _editBlock(block, path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_EDIT_BLOCK,
-                params: [{'block': block,'path':path}]
+                params: [{'block': block, 'path': path}]
             }));
         }
 
@@ -6091,11 +6099,11 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
          * @param path
          * @private
          */
-        function _removeBlock(block,path) {
+        function _removeBlock(block, path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_REMOVE_BLOCK,
-                params: [{'block': block,'path':path}]
+                params: [{'block': block, 'path': path}]
             }));
         }
 
@@ -6105,11 +6113,11 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
          * @param path
          * @private
          */
-        function _createBlock(block,path) {
+        function _createBlock(block, path) {
             PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
                 dest: PilotService.DEST_EDITOR,
                 action: PilotService.ACTION_CREATE_BLOCK,
-                params: [{'block': block,'path':path}]
+                params: [{'block': block, 'path': path}]
             }));
         }
 
@@ -6163,6 +6171,55 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
         return self;
     }
 ]);
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 
@@ -6277,55 +6334,6 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 
 'use strict';
@@ -6566,6 +6574,295 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
 'use strict';
 /**
  * @ngdoc service
@@ -6992,292 +7289,3 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
