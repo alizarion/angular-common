@@ -35,34 +35,34 @@
     <div ng-controller="HomeCtrl">
          <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
          <it-block-control-panel></it-block-control-panel>
-         <it-block name="zone-coding-lines-actions" style="margin:10px">
+         <it-block name="zone-coding-lines-actions3" style="margin:10px">
          <it-block name="login_input" role="RD">
          <div class="form-group">
          <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
          </div>
          </it-block>
-         <it-block name="coding-lines-add">
+         <it-block name="coding-lines-add3" removed="true">
          <button class="btn btn-primary col-xs-2"
          title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
          ng-click="codingController.addNewLine()">
          <span class="fa fa-plus fa-lg"/>
          </button>
          </it-block>
-         <it-block name="coding-lines-remove">
+         <it-block name="coding-lines-remove3">
          <button class="btn btn-danger col-xs-2"
          title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
          ng-click="codingController.removeNewLine()">
          <span class="fa fa-trash fa-lg"/>
          </button>
          </it-block>
-         <it-block name="coding-lines-duplicate">
+         <it-block name="coding-lines-duplicate3">
          <button class="btn btn-primary col-xs-2"
          title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
          ng-click="codingController.duplicateLine()">
          <span class="fa fa-copy fa-lg"/>
          </button>
          </it-block>
-         <it-block name="coding-lines-memorize" removed="true">
+         <it-block name="coding-lines-memorize3" removed="true">
          <button class="btn btn-primary col-xs-2"
          title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
          ng-click=""
@@ -171,7 +171,7 @@ IteSoft.directive('itBlock',
                     $scope.removed = false;
                     $scope.element = element;
                     $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"])) {
+                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
                         $scope.removed = attrs["removed"];
                     }
                     this.fields = {};

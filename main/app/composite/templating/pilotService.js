@@ -166,7 +166,10 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
             self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
         }
 
-        self.fields.socket = atmosphere.subscribe(self.fields.request);
+
+        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+            self.fields.socket = atmosphere.subscribe(self.fields.request);
+        }
         return self;
     }
 ]

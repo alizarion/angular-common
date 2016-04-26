@@ -40,7 +40,7 @@
                 "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
                 "REST_EDITOR_API_URL": "http://localhost:8081/editor",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": true,
+                "ENABLE_TEMPLATE_EDITOR": false,
                 "SKIP_LOGIN" : true,
                 "CURRENT_PACKAGE" : "10-PS",
                 "VERSION": "v1",
@@ -67,12 +67,8 @@ IteSoft.directive('itBlockControlPanel',
                 '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
                 '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa fa-stop"></li></it-circular-btn>' +
                 '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa fa-play"></li></it-circular-btn>' +
-                /*
-                '<div ng-click="itBlockControlPanelController.editCSS()" class=" fa fa-css3 template-circle-btn template "></div>' +
-                '<div ng-click="itBlockControlPanelController.editJS()" class="fa fa-superscript template-circle-btn template-circle-text-btn"></div> ' +
-                '<div ng-click="itBlockControlPanelController.addFile()" class="fa fa-plus template-add-block template-circle-btn "></div>' + */
                 '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><li class="fa fa-floppy-o"></li></a></div>' +
-                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>'+
+                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>' +
                 '</div>' +
                 '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
                 '<span class="fa fa-exclamation glyphicon-align-left" aria-hidden="true"></span>' +
@@ -93,107 +89,104 @@ IteSoft.directive('itBlockControlPanel',
                 '</div>',
 
                 controllerAs: 'itBlockControlPanelController',
-                controller: ['$scope', '$rootScope', '$location','$log', '$document', '$filter',
+                controller: ['$scope', '$rootScope', '$location', '$log', '$document', '$filter',
                     'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
-                    function ($scope, $rootScope, $location, $log, $document ,$filter,
-                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup,itNotifier) {
+                    function ($scope, $rootScope, $location, $log, $document, $filter,
+                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup, itNotifier) {
                         var self = this;
-                        self.editorIsOpen = false;
-                        self.CONFIG = CONFIG;
-                        self.blocks = [];
-                        self.url =  CONFIG.REST_TEMPLATE_API_URL + '/export/'+CONFIG.CURRENT_PACKAGE;
-                        this.refresh = function () {
-                            BlockService.build.get(function () {
+                        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+                            self.editorIsOpen = false;
+                            self.CONFIG = CONFIG;
+                            self.blocks = [];
+                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/export/' + CONFIG.CURRENT_PACKAGE;
+                            this.refresh = function () {
+                                BlockService.build.get(function () {
                                     location.reload();
-                            }, function (error) {
-                                itNotifier.notifyError({
-                                    content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                    dismissOnTimeout: false
-                                },error.data.body);
-                            });
-                        };
-                        self.interval = 0;
-                        _options();
-                        PilotSiteSideService.on.pong = function (res) {
-                            $log.debug("pong");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = true;
-                                _options();
-                            })
-                        };
+                                }, function (error) {
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    }, error.data.body);
+                                });
+                            };
+                            self.interval = 0;
+                            _options();
+                            PilotSiteSideService.on.pong = function (res) {
+                                $log.debug("pong");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
 
-                        PilotSiteSideService.on.editorConnect = function (res) {
-                            $log.debug("editorConnect");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = true;
-                                _options();
-                            })
-                        };
+                            PilotSiteSideService.on.editorConnect = function (res) {
+                                $log.debug("editorConnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
 
-                        PilotSiteSideService.on.editorDisconnect = function (res) {
-                            $log.debug("editorDisconnect");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
+                            PilotSiteSideService.on.editorDisconnect = function (res) {
+                                $log.debug("editorDisconnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
 
-                        PilotSiteSideService.on.close = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.error = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
-                        PilotSiteSideService.on.transportFailure = function () {
-                            $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                            $scope.$applyAsync(function () {
-                                self.editorIsOpen = false;
-                            })
-                        };
+                            PilotSiteSideService.on.close = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.error = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.transportFailure = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
 
-                        PilotSiteSideService.on.reload = this.refresh;
+                            PilotSiteSideService.on.reload = this.refresh;
 
-                        /**
-                         * senf option to editor
-                         * @private
-                         */
-                        function _options(){
-                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
-                        }
-                        /**
-                         *
-                         */
-                        this.editJS = function () {
-                            $log.debug("edit JS");
-                            PilotSiteSideService.fn.editPage({fileName: "js.blocks.js", fileType: "js", filePackage: CONFIG.CURRENT_PACKAGE})
-                        };
-                        /**
-                         *
-                         */
-                        this.editCSS = function () {
-                            $log.debug("edit CSS");
-                            PilotSiteSideService.fn.editPage({
-                                fileName: "css.blocks.css",
-                                fileType: "css",
-                                filePackage: CONFIG.CURRENT_PACKAGE
-                            })
-                        };
-                        /**
-                         *
-                         */
-                        this.addFile = function () {
-                            $log.debug("add File");
-                            PilotSiteSideService.fn.createPage()
-                        };
+                            /**
+                             *
+                             */
+                            self.editJS = function () {
+                                $log.debug("edit JS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "js.blocks.js",
+                                    fileType: "js",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.editCSS = function () {
+                                $log.debug("edit CSS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "css.blocks.css",
+                                    fileType: "css",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.addFile = function () {
+                                $log.debug("add File");
+                                PilotSiteSideService.fn.createPage()
+                            };
 
-                        if(CONFIG.ENABLE_TEMPLATE_EDITOR) {
                             /*
-                            We enable edit mode by default
+                             We enable edit mode by default
                              */
                             $rootScope.editSite = true;
                             $rootScope.autoRefreshTemplate = true;
@@ -246,13 +239,13 @@ IteSoft.directive('itBlockControlPanel',
                         /*
                          Do block edit action
                          */
-                        this.editBlock = function (block) {
+                        self.editBlock = function (block) {
                             $log.debug("edit block");
                             if (angular.isDefined(block.ref) && block.ref != '') {
                                 PilotSiteSideService.fn.editBlock(block, $location.path());
 
                             } else {
-                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_replace' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
+                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
                             }
                         };
@@ -261,10 +254,10 @@ IteSoft.directive('itBlockControlPanel',
                          * Do add block action
                          * @param block
                          */
-                        this.addBlock = function (block) {
+                        self.addBlock = function (block) {
                             if (angular.isDefined(block.name) && block.name != '') {
                                 $log.debug("add block");
-                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE+'_new_' + block.name+"_"+$filter('date')(new Date(),"yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
+                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(addBlock, $location.path());
                             }
                         };
@@ -273,26 +266,26 @@ IteSoft.directive('itBlockControlPanel',
                          * Do restore block action
                          * @param block
                          */
-                        this.restoreBlock = function (block) {
+                        self.restoreBlock = function (block) {
                             $log.debug("restore block");
                             BlockService.restore.get({'name': block.name}, function () {
                                 BlockService.build.get(function () {
                                     BlockService.build.get(function () {
-                                        if($rootScope.autoRefreshTemplate) {
+                                        if ($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
                                     }, function (error) {
                                         itNotifier.notifyError({
-                                                content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                                dismissOnTimeout: false
-                                            },error.data.body);
+                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                            dismissOnTimeout: false
+                                        }, error.data.body);
                                     })
                                 }, function (error) {
 
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error.data.body);
+                                    }, error.data.body);
                                     $log.error("Unable to restore block " + JSON.stringify(block));
                                 })
                             })
@@ -302,7 +295,7 @@ IteSoft.directive('itBlockControlPanel',
                          * Do delete block action
                          * @param block
                          */
-                        this.deleteBlock = function (block) {
+                        self.deleteBlock = function (block) {
                             $log.debug("delete block");
                             var confirmPopup = itPopup.confirm({
                                 title: "{{'DELETE_BLOCK_TITLE' | translate}}",
@@ -326,23 +319,23 @@ IteSoft.directive('itBlockControlPanel',
                                 ]
                             });
 
-                            confirmPopup.then(function (res) {
+                            confirmPopup.then(function () {
                                 BlockService.all.delete({name: block.name}, function () {
                                     BlockService.build.get(function () {
-                                        if($rootScope.autoRefreshTemplate) {
+                                        if ($rootScope.autoRefreshTemplate) {
                                             location.reload();
                                         }
                                     }, function (error) {
                                         itNotifier.notifyError({
                                             content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                             dismissOnTimeout: false
-                                        },error.data.body);
+                                        }, error.data.body);
                                     })
                                 }, function (error) {
                                     itNotifier.notifyError({
                                         content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
                                         dismissOnTimeout: false
-                                    },error.data.body);
+                                    }, error.data.body);
                                 });
                             }, function () {
                                 itNotifier.notifyError({
@@ -371,6 +364,15 @@ IteSoft.directive('itBlockControlPanel',
                             } else {
                                 return "";
                             }
+                        };
+
+
+                        /**
+                         * senf option to editor
+                         * @private
+                         */
+                        function _options() {
+                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
                         }
 
                     }
