@@ -73,6 +73,54 @@ IteSoft
 }]);
 
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -127,54 +175,6 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
 
 /**
  * @ngdoc directive
@@ -1394,1104 +1394,6 @@ IteSoft
         }
     }]
 );
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itAutocomplete
- * @module itesoft
- * @restrict ECA
- * @since 1.1
- * @description
- * The ItAutocomplete widgets provides suggestions while you type into the field
- *
- *
- * ```html
- *   <it-autocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-select
- *      </td>
- *      <td>
- *          Default option class
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-selected
- *      </td>
- *      <td>
- *          Selected option class
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-container
- *      </td>
- *      <td>
- *          Option container div
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-div
- *      </td>
- *      <td>
- *         parent  div
- *      </td>
- *  </tr>
- *  </table>
- *
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <style>
- .width300{width:300px};
- </style>
- <div ng-controller="HomeCtrl">
- <h1>Usage inside grid:</h1>
- <div id="grid1" ui-grid="gridOptions" class="grid"></div>
- <h1>Standalone usage:</h1>
- Selected Id:<input type="text" ng-model="selectedOption"/>
- <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
- <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope',function($scope) {
-            $scope.myData = [];
-            // sample values
-            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
-            $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
-            $scope.lastNameOptions = [{id:"Carney",value:"Carney"},{id:"Wise",value:"Wise"},{id:"Waters",value:"Waters"}];
-            angular.copy($scope.myDataInit,$scope.myData);
-            $scope.gridOptions = {
-                data:$scope.myData,
-                useExternalFiltering: true,
-                enableFiltering: true,
-                onRegisterApi: function(gridApi){
-                  $scope.gridApi = gridApi;
-                  //quick an dirty example of filter that use it-autocomplete
-                  $scope.gridApi.core.on.filterChanged($scope, function(){
-                      $scope.myData = [];
-                            var filterUse = false;
-                      angular.forEach($scope.myDataInit,function(item){
-                            var added = false;
-                            var key = '';
-                            var value = '';
-                            for (var i = 0; i < $scope.gridApi.grid.columns.length; i++) {
-                            if(!added){
-                                    key = $scope.gridApi.grid.columns[i].field;
-                                    for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
-                                            value = $scope.gridApi.grid.columns[i].filters[j].term;
-                                            if (value != undefined && value != '') {
-                                                if(item[key] == value &&  $scope.myData.push(item)){
-                                                    $scope.myData.push(item);
-                                                    added = true;
-                                                    filterUse = true;
-                                                 }
-                                            }
-                                         }
-                                    }
-                                    }
-                            if(! filterUse){
-                             //angular.copy($scope.myDataInit,$scope.myData);
-                            }
-                            $scope.gridOptions.data = $scope.myData;
-                            $scope.gridOptions.totalItems = $scope.myData.length;
-                      })
-                    });
-                },
-                columnDefs:[{
-                    name: 'firstName',
-                    cellClass: 'firstName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete placeholder="\'filter\'" items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
-                    filter:[{
-                      term: 1
-                      }]
-                    },
-                    {
-                    name: 'lastName',
-                    cellClass: 'lastName',
-                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-container-class="\'width300\'"></it-autocomplete></div>',
-                    filter:[{
-                      term: 1 }]
-                    }
-                ]
-            };
-            $scope.selectedOption = "Lorraine";
-     }
- ]);
- </file>
- </example>
- */
-
-IteSoft
-    .directive('itAutocomplete', function () {
-        return {
-            restrict: 'AE',
-            scope: {
-                /**
-                 * items list must contain id and value
-                 */
-                items: "=",
-                /**
-                 * selected item id
-                 */
-                selectedOption: "=",
-                /**
-                 * stylesheet class added on input filter
-                 */
-                inputClass: "=",
-                /**
-                 * stylesheet class added on option
-                 */
-                optionClass: "=",
-                /**
-                 * stylesheet class added on option container
-                 */
-                optionContainerClass: "=",
-                /**
-                 * input searchMode value= startsWith,contains default contains
-                 */
-                searchMode: "=",
-                /**
-                 * input placeHolder
-                 */
-                placeholder: "="
-            },
-            controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
-                function ($scope, $rootScope, $translate, $document, $timeout, $log) {
-
-                    var self = this;
-
-                    /****************************************************************************************
-                     *                                  DECLARATION
-                     **************************************************************************************/
-
-                    /**
-                     * public fields
-                     * @type {{}}
-                     */
-                    self.fields = {
-                        items: [],
-                        inputSearch: '',
-                        showItems: false,
-                        optionClass: $scope.optionClass,
-                        optionContainerClass: $scope.optionContainerClass,
-                        inputClass: $scope.inputClass,
-                        defaultSelectClass: '',
-                        selectedSelectClass: '',
-                        selectedItem: {},
-                        searchMode: $scope.searchMode,
-                        placeholder: $scope.placeholder
-                    };
-
-                    if(angular.isUndefined(self.fields.optionClass)){
-                        self.fields.optionClass = '';
-                    }
-                    if(angular.isUndefined(self.fields.optionContainerClass)){
-                        self.fields.optionContainerClass = '';
-                    }
-                    if(angular.isUndefined(self.fields.inputClass)){
-                        self.fields.inputClass = 'it-autocomplete-input-class';
-                    }
-                    if(angular.isUndefined(self.fields.placeholder)){
-                        self.fields.placeholder = '';
-                    }
-                    self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
-                    self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
-                    self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
-                    /**
-                     * Use unique id for container, all to find it if there are multiple itAutocomplete directive inside the same page
-                     * @type {string}
-                     */
-                    self.fields.optionContainerId = _generateID();
-
-
-                    /**
-                     * public function
-                     * @type {{}}
-                     */
-                    self.fn = {
-                        select: select,
-                        change: change,
-                        init: init,
-                        fullInit: fullInit,
-                        hideItems: hideItems,
-                        showItems: showItems,
-                        keyBoardInteration: keyBoardInteration,
-                    };
-
-                    /****************************************************************************************
-                     *                                  CODE
-                     **************************************************************************************/
-
-                    /**
-                     * initialize default data
-                     */
-                    fullInit();
-                    $scope.focusIndex = -1;
-                    //Apply default select
-                    _selectItemWithId($scope.selectedOption);
-
-                    /**
-                     * Watch items change to items to reload select if item is now present
-                     */
-                    $scope.$watch('items', function (newValue, oldValue) {
-                        $log.debug("itAutocomplete: items value changed");
-                        fullInit();
-                        _selectItemWithId($scope.selectedOption);
-                        hideItems();
-                    });
-
-                    /**
-                     * Watch selectedOption change to select option if value change outside this directive
-                     */
-                    $scope.$watch('selectedOption', function (newValue, oldValue) {
-
-                        $log.debug("itAutocomplete: selectedOption value changed");
-                        //if an oldValue is set
-                        if(angular.isDefined(oldValue)){
-                            _unselectItemWithId(oldValue);
-                        }
-                        if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
-                            _selectItemWithId(newValue);
-                            hideItems();
-                        }
-                    });
-
-                    /**
-                     * Keyboard interation
-                     */
-                    $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        $log.debug("itAutocomplete: focusIndex value changed");
-                        if (newValue != oldValue) {
-                            if (newValue < 0) {
-                                $scope.focusIndex = -1;
-                            } else if (newValue >= self.fields.items.length) {
-                                $scope.focusIndex = self.fields.items.length - 1;
-                            }
-                            if (angular.isDefined(self.fields.items)) {
-                                select(self.fields.items[$scope.focusIndex]);
-                            }
-                        }
-
-                    });
-
-                    /****************************************************************************************
-                     *                                  FUNCTION
-                     **************************************************************************************/
-
-                    /**
-                     * Select Item with it id
-                     * @param id
-                     * @private
-                     */
-                    function _selectItemWithId(id) {[]
-                        $log.debug("itAutocomplete: select with  id "+id);
-                        var selected = false;
-                        self.fields.selectedItem = {};
-                        if (angular.isDefined(id)) {
-                            angular.forEach(self.fields.items, function (item) {
-                                if (item.id == id) {
-                                    select(item);
-                                    selected = true;
-                                }
-                            });
-                            if (!selected) {
-                                init();
-                            }
-                        }
-                    }
-
-                    /**
-                     * Unselect Item with it id
-                     * @param id
-                     * @private
-                     */
-                    function _unselectItemWithId(id){
-                        $log.debug("itAutocomplete: unselect with id "+id);
-
-                        if (angular.isDefined(id)) {
-                            angular.forEach(self.fields.items, function (item) {
-                                if (item.id == id) {
-                                    unselect(item);
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * init + copy of externalItems
-                     */
-                    function fullInit() {
-                        $log.debug("itAutocomplete: copy option items");
-                        angular.copy($scope.items, self.fields.items);
-                        init();
-                    }
-
-                    /**
-                     * Style class and position initialization
-                     */
-                    function init() {
-                        var i = 0;
-                        angular.forEach(self.fields.items, function (item) {
-                            if (angular.isDefined(self.fields.selectedItem)){
-                                if (self.fields.selectedItem != item) {
-                                    unselect(item);
-                                } else {
-                                    select(item)
-                                }
-                            }
-                            item.position = i;
-                            i++;
-                        });
-                    }
-
-                    /**
-                     * Call when option is selected
-                     * @param id
-                     */
-                    function select(selectedItem) {
-                        $log.debug("itAutocomplete: select "+selectedItem.id);
-                        // reset last selectedItem class
-                        if (angular.isDefined(self.fields.selectedItem)) {
-                            unselect(self.fields.selectedItem);
-                        }
-                        if (angular.isDefined(selectedItem)) {
-                            $scope.focusIndex = selectedItem.position;
-                            self.fields.selectedItem = selectedItem;
-                            $scope.selectedOption = selectedItem.id;
-                            self.fields.selectedItem.class = self.fields.selectedSelectClass;
-                            var selectedDiv = $document[0].querySelector("#options_" + selectedItem.id);
-                            scrollTo(selectedDiv);
-                        }
-                    }
-
-                    /**
-                     * Unselect item
-                     * @param item
-                     */
-                    function unselect(item) {
-                        item.class = self.fields.defaultSelectClass;
-                    }
-
-                    /**
-                     * Scroll on selectedItem when user use keyboard to select an item
-                     * @param divId
-                     */
-                    function scrollTo(targetDiv) {
-                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
-                        if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
-                            && angular.isDefined(containerDiv) && containerDiv != null) {
-                            var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
-                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
-                            var pos = targetPosition - containerPosition;
-                            containerDiv.scrollTop = pos;
-                        }
-                    }
-
-                    /**
-                     * Hide option items
-                     */
-                    function hideItems($event) {
-                        // Si appelé lors du click sur la touche entrée
-                        if(angular.isUndefined($event) ){
-                            self.fields.showItems = false;
-                            self.fields.inputSearch = self.fields.selectedItem.value;
-                            // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
-                        } else if(! document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
-                            self.fields.showItems = false;
-                            self.fields.inputSearch = self.fields.selectedItem.value;
-
-                            //si il s'agit de la scrollbar, on annule le onblur en remettant le focus sur l'element
-                        }else{
-                            $scope.$applyAsync(function(){
-                                $event.srcElement.focus();
-                            })
-                        };
-                    }
-
-                    /**
-                     * Return internet explorer version
-                     * @returns {number}
-                     */
-                    function getInternetExplorerVersion()
-                    {
-                        var rv = -1;
-                        if (navigator.appName == 'Microsoft Internet Explorer')
-                        {
-                            var ua = navigator.userAgent;
-                            var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-                            if (re.exec(ua) != null)
-                                rv = parseFloat( RegExp.$1 );
-                        }
-                        else if (navigator.appName == 'Netscape')
-                        {
-                            var ua = navigator.userAgent;
-                            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
-                            if (re.exec(ua) != null)
-                                rv = parseFloat( RegExp.$1 );
-                        }
-                        return rv;
-                    }
-
-                    /**
-                     * Show option items
-                     */
-                    function showItems($event) {
-                        //refresh modal position on internet explorer because fixed position doesn't follow scroll
-                        if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
-                                var container = $event.srcElement.parentElement.children[1];
-                                var myParent = angular.element($event.srcElement.parentElement)[0];
-                            //only needed with ie and fixed positiion
-                            if( angular.isDefined(container) && angular.isDefined(myParent) && container.currentStyle["position"]== "fixed") {
-                                var newTop = (myParent.getBoundingClientRect().top + myParent.getBoundingClientRect().height);
-                                container.style.setProperty("top", newTop + "px");
-                            }
-                        }
-                        self.fields.showItems = true;
-                    }
-
-                    /**
-                     * Call when search input content change
-                     */
-                    function change() {
-                        $log.debug("itAutocomplete: input search change value")
-                        self.fields.items = [];
-                        if (self.fields.inputSearch == "") {
-                            fullInit();
-                        } else {
-                            var i = 0;
-                            angular.forEach($scope.items, function (item) {
-                                /**
-                                 * StartsWith
-                                 */
-                                if (self.fields.searchMode == "startsWith") {
-                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
-                                        self.fields.items.push(item);
-                                        self.fields.items[i].position = i;
-                                        i++;
-                                    }
-                                    /**
-                                     * Contains
-                                     */
-                                } else {
-                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
-                                        self.fields.items.push(item);
-                                        self.fields.items[i].position = i;
-                                        i++;
-                                    }
-                                }
-                            });
-                        }
-                        if (self.fields.items.length == 1) {
-                            select(self.fields.items[0]);
-                        }
-                        showItems();
-                    }
-
-                    /**
-                     * Manage keyboard interaction up down enter
-                     * @type {Array}
-                     */
-                    $scope.keys = [];
-
-                    const KEY_ENTER = 13;
-                    const KEY_DOWN = 38;
-                    const KEY_UP = 40;
-                    const KEY_BACK = 8;
-                    const KEY_DELETE = 8;
-
-                    $scope.keys.push({
-                        code: KEY_ENTER, action: function () {
-                            if (self.fields.showItems) {
-                                hideItems();
-                            } else {
-                                showItems();
-                                if (self.fields.inputSearch == "") {
-                                    $scope.focusIndex = -1;
-                                }
-                            }
-                        }
-                    });
-                    $scope.keys.push({
-                        code: KEY_DOWN, action: function () {
-                            showItems();
-                            $scope.focusIndex--;
-                        }
-                    });
-                    $scope.keys.push({
-                        code: KEY_UP, action: function () {
-                            showItems();
-                            $scope.focusIndex++;
-                        }
-                    });
-
-                    /**
-                     * Use to manage keyboard interaction
-                     * @param event
-                     */
-                    function keyBoardInteration(event) {
-                        var code = event.keyCode;
-                        $scope.keys.forEach(function (o) {
-                            if (o.code !== code) {
-                                return;
-                            }
-                            o.action();
-                        });
-                    };
-
-                    /**
-                     * Generate unique Id
-                     * @returns {string}
-                     */
-                    function _generateID() {
-                        var d = new Date().getTime();
-                        var uuid = 'option_container_xxxxxxxxxxxx4yxxxxx'.replace(/[xy]/g, function (c) {
-                            var r = (d + Math.random() * 16) % 16 | 0;
-                            d = Math.floor(d / 16);
-                            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                        });
-                        return uuid;
-                    };
-                }
-            ],
-            template: '<div class="col-xs-12 it-autocomplete-div">'+
-            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
-            'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '<div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
-            '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-            '<div ng-class="item.class" id="options_{{item.id}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    })
-;
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCheckbox
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * The checkbox is no different than the HTML checkbox input,
- * except it's styled differently.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-            <div>
-                 <input it-checkbox type="checkbox" it-label="Checkbox">
-            </div>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itCheckbox',function(){
-        return {
-            restrict: 'A',
-            transclude : true,
-            replace : true,
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-                input.wrap('<div class="checkbox"></div>');
-                input.wrap('<label></label>');
-                input.after('<span class="checkbox-material"><span class="check" style="margin-right:16px;width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itLabel || ''));
-            }
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itInput
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * Floating labels are just like Stacked Labels,
- * except that their labels animate, or "float" up whe
- * n text is entered in the input.
- *
- *
- * ```html
- *   <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
- *       <input it-input
- *              class="form-control floating-label"
- *              type="text"
- *              name="Email"
- *              ng-minlength="5"
- *              ng-maxlength="10"
- *              required=""
- *              it-label="Email"
- *              ng-model="user.email">
- *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
-         *            <div class="form-error" ng-message="required">This field is required.</div>
-         *            <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
-         *            <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
- *             </div>
- *   </form>
- * ```
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="HomeCtrl">
-               <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
-                <div class="form-group">
-                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
-                </div>
-                <div class="form-group">
-                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
-                </div>
-                  <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
-                      <div class="form-error" ng-message="required">This field is required.</div>
-                      <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
-                      <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
-                  </div>
-                  <button class="btn btn-primary" type="submit">submit</button>
-               </form>
-            </div>
-        </file>
-         <file name="Module.js">
-         angular.module('itesoft-showcase',['ngMessages','itesoft']);
-         </file>
-        <file name="controller.js">
-            angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
-                  $scope.user = {
-                      email : 'test@itesoft.com',
-                      firstName :''
-                     };
-
-                  $scope.submit = function(form){
-                       if(form.$valid){
-                         console.log('submit');
-                       }
-                  }
-            }]);
-        </file>
-
-    </example>
- */
-IteSoft
-    .directive('itInput',function(){
-        return {
-            restrict: 'A',
-            replace : true,
-            require: '?ngModel',
-            link : function (scope, element, attrs, ngModel ) {
-                // Check if ngModel is there else go out
-                if (!ngModel)
-                    return;
-                // Fix on input element
-                var input = angular.element(element[0]);
-                //If there is no floating-lbal do nothing
-                if (input.hasClass('floating-label')) {
-                    // Wrapper for material design
-                    input.wrap('<div class="form-control-wrapper"></div>');
-                    // If there is astatic placeholder use it
-                    var placeholder = input.attr('placeholder');
-                    if (placeholder) {
-                        input.after('<div class="floating-label">' +  placeholder + '</div');
-                    } else {
-                        // Else user data binding text 
-                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
-                        scope.$watch('itLabel', function(value) {
-                            scope.$applyAsync(function(){
-                                if (!input[0].offsetParent) {
-                                    return;
-                                }
-                                var elementDiv = input[0].offsetParent.children;
-                                angular.forEach(elementDiv, function(divHtml) {
-                                    var div = angular.element(divHtml);
-                                    if (div.hasClass('floating-label')) {
-                                        div.text(value);
-                                    }
-                                });
-                            })
-
-                        });
-                    }
-                    input.after('<span class="material-input"></span>');
-                    input.attr('placeholder', '').removeClass('floating-label');
-                }
-                // Check if error message is set
-                input.after('<small class="text-danger" style="display:none;"></small>');
-                scope.$watch('itError', function(value) {
-                    if (!input[0].offsetParent) {
-                        return;
-                    }
-                    var elementDiv = input[0].offsetParent.children;
-                    angular.forEach(elementDiv, function(divHtml) {
-                        var div = angular.element(divHtml);
-                        if (div.hasClass('text-danger')) {
-                            div.text(value);
-                            if (value != '' && value != undefined) {
-                                div.removeClass('ng-hide');
-                                div.addClass('ng-show');
-                                div.css('display','block');
-                            } else {
-                                div.removeClass('ng-show');
-                                div.addClass('ng-hide');
-                                div.css('display','none');
-                            }
-                        }
-                    });
-                });
-                if (input.val() === null || input.val() == "undefined" || input.val() === "") {
-                    input.addClass('empty');
-                }
-                // Watch value and update to move floating label
-                scope.$watch(function () {return ngModel.$modelValue; }, function(value,oldValue) {
-                    if (value === null || value == undefined || value ==="" ) {
-                        input.addClass('empty');
-                    } else {
-                        input.removeClass('empty');
-                    }
-                });
-
-                // wait for input
-                input.on('change', function() {
-                    if (input.val() === null || input.val() == "undefined" || input.val() === "") {
-                        input.addClass('empty');
-                    } else {
-                        input.removeClass('empty');
-                    }
-                });
-            },
-            scope : {
-                itError : '=',
-                itLabel : '@'
-            }
-        }
-});
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSearch
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
- *
- * You MUST pass an object `<input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ></input>`.
- * This object will be used as following:
- * <table class="table">
- *  <tr>
- *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
- *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
- *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
- *   <td>Method to filter in the grid or table according the choosen column fields.<br/>It returns the new rows to be displayed.</td>
- *  </tr>
- *  <tr>
- *   <td><code>searchControl.filterText</code></td>
- *   <td>This property of the scope has to be associated to the input<br/>(through ng-model).</td>
- *  </tr>
- * </table>
- * You MUST also pass a function `<input it-search ng-change="filter()"></input>`.
- * This function should call searchControl.multicolumnsFilter() to refresh the displayed data and has to be written in the application controller.
- *
- * @usage
- * <input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()">
- * </input>
- *
- * @example
- * <span><b>SEARCH IN UI-GRID</b></span>
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="SearchDemoControllerGrid">
- <div class="container-fluid">
- <div class="jumbotron">
- <div class="row">
- <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
- <form>
- <div class="form-group has-feedback" >
- <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
- </div>
- </form>
- <div ui-grid="latinGrid" id="latinGrid"></div>
- </div>
- </div>
- </div>
- </div>
- </file>
-
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="LatinService.js">
- angular.module('itesoft-showcase')
- .factory('Latin',['$resource', function($resource){
-                                                    return $resource('http://jsonplaceholder.typicode.com/posts');
-                                                }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
-                            $scope.searchControl = {
-                                columnDefs : [{field:'title'}, {field:'body'}]
-                            };
-
-                            $scope.dataSource = [];
-
-                            //---------------ONLY UI-GRID--------------------
-                            $scope.myDefs = [
-                                    {
-                                        field: 'id',
-                                        width: 50
-                                    },
-                                    {
-                                        field: 'title'
-                                    },
-                                    {
-                                        field: 'body'
-                                    }
-                            ];
-                            $scope.latinGrid = {
-                                data: 'dataSource',
-                                columnDefs: $scope.myDefs,
-                                onRegisterApi: function (gridApi) {
-                                    $scope.gridApi = gridApi;
-                                    $scope.gridApi.grid.registerRowsProcessor($scope.searchControl.multicolumnsFilter, 200);
-                                }
-                            };
-                            //---------------ONLY UI-GRID--------------------
-
-                            $scope.filter = function () {
-                                $scope.gridApi.grid.refresh();
-                            };
-
-                            $scope.loadDataGrid = function() {
-                                $scope.dataSource = [];
-
-                                Latin.query().$promise
-                                .then(function(data){
-                                    $scope.dataSource = data;
-                                });
-                            };
-                     }]);
- </file>
-
- </example>
-
- * <span><b>SEARCH IN TABLE</b></span>
- <example module="itesoft-showcase1">
- <file name="index.html">
- <div ng-controller="SearchDemoControllerTable">
- <div class="container-fluid">
- <div class="jumbotron">
- <div class="row">
- <button class="btn btn-primary" ng-click="loadDataTable()">DISPLAY DATA IN TABLE</button>
- <form>
- <div class="form-group has-feedback" >
- <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans TABLE" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
- </div>
- </form>
- <table class="table table-striped table-hover ">
- <thead>
- <tr><th>id</th><th>title</th><th>body</th></tr>
- </thead>
- <tbody>
- <tr ng-repeat="dataItem in data">
- <td>{{dataItem.id}}</td>
- <td>{{dataItem.title}}</td>
- <td>{{dataItem.body}}</td>
- </tr>
- </tbody>
- </table>
- </div>
- </div>
- </div>
- </div>
- </file>
- <file name="Module1.js">
- angular.module('itesoft-showcase1',['ngResource','itesoft']);
- </file>
- <file name="LatinService1.js">
- angular.module('itesoft-showcase1')
- .factory('Latin1',['$resource', function($resource){
-                                            return $resource('http://jsonplaceholder.typicode.com/posts');
-                                        }]);
- </file>
- <file name="Controller1.js">
- angular.module('itesoft-showcase1')
- .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
-                    $scope.searchControl = {};
-                    $scope.searchControl = {
-                        columnDefs : [{field:'title'}, {field:'body'}]
-                    };
-
-                    $scope.dataSource = [];
-                    $scope.data = [];
-
-                    $scope.filter = function () {
-                        $scope.data = $scope.searchControl.multicolumnsFilter($scope.dataSource);
-                    };
-
-                    $scope.loadDataTable = function() {
-                        $scope.dataSource = [];
-                        $scope.data = [];
-
-                        Latin1.query().$promise
-                        .then(function(data){
-                           $scope.dataSource = data;
-                           $scope.data = data;
-                        });
-                    };
-             }]);
- </file>
-
- </example>
- **/
-IteSoft
-    .directive('itSearch',function() {
-        return {
-            restrict: 'A',
-            replace : true,
-            scope: {
-                itSearchControl:'='
-            },
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-
-                input.after('<span class="glyphicon glyphicon-search form-control-feedback"/>');
-            },
-            controller : ['$scope',
-                function ($scope) {
-                    $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
-                        var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
-                        var renderableRowTable = [];
-                        var table = false;
-                        if ($scope.itSearchControl.columnDefs) {
-                            renderableRows.forEach(function (row) {
-                                var match = false;
-                                if (row.entity) {//UI-GRID
-                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
-                                        if (!match && row.entity[col.field]) {
-                                            var renderedData = row.entity[col.field].toString();
-                                            if (col.cellFilter) {
-                                                $scope.value = renderedData;
-                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
-                                            }
-                                            if(typeof renderedData !== 'undefined' && renderedData != null){
-                                                if (renderedData.match(matcher)) {
-                                                    match = true;
-                                                }
-                                            }
-                                        }
-                                    });
-                                    if (!match) {
-                                        row.visible = false;
-                                    }
-                                }
-                                else {//TABLE
-                                    table = true;
-                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
-                                        if (!match && row[col.field] && row[col.field].toString().match(matcher)) {
-                                            match = true;
-                                        }
-                                    });
-                                    if (match) {
-                                        renderableRowTable.push(row);
-                                    }
-                                }
-                            });
-                        }
-                        if (table){
-                            renderableRows = renderableRowTable;
-                        }
-                        return renderableRows;
-                    };
-                }]
-        }
-    });
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itToggle
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * A toggle is an animated switch which binds a given model to a boolean.
- * Allows dragging of the switch's nub.
- *
- *
- * ```html
- *     <input  it-toggle type="checkbox" it-label="Toggle button">
- * ```
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-            <div>
-                <input  it-toggle type="checkbox" ng-model="data" it-label="Toggle button">
-            </div>
-        </file>
-
-    </example>
- */
-IteSoft
-    .directive('itToggle',['$compile',function($compile){
-        return {
-            restrict: 'A',
-            transclude : true,
-            link : function (scope, element, attrs ) {
-                var input = angular.element(element[0]);
-                input.wrap('<div class="togglebutton"></div>');
-                if (scope.itLabel == undefined) {
-                    input.wrap('<label></label>');
-                    input.after('<span class="toggle"></span>');
-                } else {
-                    input.wrap('<label></label>');
-                    input.after('<span class="toggle"></span><span>'+(scope.itLabel || '')+'</span>');
-
-                    scope.$watch('itLabel', function(value) {
-                        if ((value) && (input.context)) {
-                            var label = angular.element(input.context.parentNode);
-                            if ((label) && (attrs.itLabel)) {
-                                var labelText = angular.element(label.get(0).firstChild);
-                                labelText.get(0).textContent = value+'  ';
-                            }
-                        }
-                    });
-                }
-            },
-            scope: {
-                itLabel: '@'
-            }
-        }
-}]);
 "use strict";
 /**
  * @ngdoc directive
@@ -3708,6 +2610,1104 @@ IteSoft
             }
         };
     }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itAutocomplete
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.1
+ * @description
+ * The ItAutocomplete widgets provides suggestions while you type into the field
+ *
+ *
+ * ```html
+ *   <it-autocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-select
+ *      </td>
+ *      <td>
+ *          Default option class
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-selected
+ *      </td>
+ *      <td>
+ *          Selected option class
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-container
+ *      </td>
+ *      <td>
+ *          Option container div
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-div
+ *      </td>
+ *      <td>
+ *         parent  div
+ *      </td>
+ *  </tr>
+ *  </table>
+ *
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <style>
+ .width300{width:300px};
+ </style>
+ <div ng-controller="HomeCtrl">
+ <h1>Usage inside grid:</h1>
+ <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+ <h1>Standalone usage:</h1>
+ Selected Id:<input type="text" ng-model="selectedOption"/>
+ <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
+ <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope',function($scope) {
+            $scope.myData = [];
+            // sample values
+            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
+            $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
+            $scope.lastNameOptions = [{id:"Carney",value:"Carney"},{id:"Wise",value:"Wise"},{id:"Waters",value:"Waters"}];
+            angular.copy($scope.myDataInit,$scope.myData);
+            $scope.gridOptions = {
+                data:$scope.myData,
+                useExternalFiltering: true,
+                enableFiltering: true,
+                onRegisterApi: function(gridApi){
+                  $scope.gridApi = gridApi;
+                  //quick an dirty example of filter that use it-autocomplete
+                  $scope.gridApi.core.on.filterChanged($scope, function(){
+                      $scope.myData = [];
+                            var filterUse = false;
+                      angular.forEach($scope.myDataInit,function(item){
+                            var added = false;
+                            var key = '';
+                            var value = '';
+                            for (var i = 0; i < $scope.gridApi.grid.columns.length; i++) {
+                            if(!added){
+                                    key = $scope.gridApi.grid.columns[i].field;
+                                    for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
+                                            value = $scope.gridApi.grid.columns[i].filters[j].term;
+                                            if (value != undefined && value != '') {
+                                                if(item[key] == value &&  $scope.myData.push(item)){
+                                                    $scope.myData.push(item);
+                                                    added = true;
+                                                    filterUse = true;
+                                                 }
+                                            }
+                                         }
+                                    }
+                                    }
+                            if(! filterUse){
+                             //angular.copy($scope.myDataInit,$scope.myData);
+                            }
+                            $scope.gridOptions.data = $scope.myData;
+                            $scope.gridOptions.totalItems = $scope.myData.length;
+                      })
+                    });
+                },
+                columnDefs:[{
+                    name: 'firstName',
+                    cellClass: 'firstName',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete placeholder="\'filter\'" items="grid.appScope.firstNameOptions" selected-option="colFilter.term" input-class="\'firstNameFilter\'" option-container-class="\'width300\'" ></it-autocomplete></div>',
+                    filter:[{
+                      term: 1
+                      }]
+                    },
+                    {
+                    name: 'lastName',
+                    cellClass: 'lastName',
+                    filterHeaderTemplate: '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"><it-autocomplete items="grid.appScope.lastNameOptions" selected-option="colFilter.term" input-class="\'lastNameFilter\'" option-container-class="\'width300\'"></it-autocomplete></div>',
+                    filter:[{
+                      term: 1 }]
+                    }
+                ]
+            };
+            $scope.selectedOption = "Lorraine";
+     }
+ ]);
+ </file>
+ </example>
+ */
+
+IteSoft
+    .directive('itAutocomplete', function () {
+        return {
+            restrict: 'AE',
+            scope: {
+                /**
+                 * items list must contain id and value
+                 */
+                items: "=",
+                /**
+                 * selected item id
+                 */
+                selectedOption: "=",
+                /**
+                 * stylesheet class added on input filter
+                 */
+                inputClass: "=",
+                /**
+                 * stylesheet class added on option
+                 */
+                optionClass: "=",
+                /**
+                 * stylesheet class added on option container
+                 */
+                optionContainerClass: "=",
+                /**
+                 * input searchMode value= startsWith,contains default contains
+                 */
+                searchMode: "=",
+                /**
+                 * input placeHolder
+                 */
+                placeholder: "="
+            },
+            controllerAs: 'itAutocompleteCtrl',
+            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
+                function ($scope, $rootScope, $translate, $document, $timeout, $log) {
+
+                    var self = this;
+
+                    /****************************************************************************************
+                     *                                  DECLARATION
+                     **************************************************************************************/
+
+                    /**
+                     * public fields
+                     * @type {{}}
+                     */
+                    self.fields = {
+                        items: [],
+                        inputSearch: '',
+                        showItems: false,
+                        optionClass: $scope.optionClass,
+                        optionContainerClass: $scope.optionContainerClass,
+                        inputClass: $scope.inputClass,
+                        defaultSelectClass: '',
+                        selectedSelectClass: '',
+                        selectedItem: {},
+                        searchMode: $scope.searchMode,
+                        placeholder: $scope.placeholder
+                    };
+
+                    if(angular.isUndefined(self.fields.optionClass)){
+                        self.fields.optionClass = '';
+                    }
+                    if(angular.isUndefined(self.fields.optionContainerClass)){
+                        self.fields.optionContainerClass = '';
+                    }
+                    if(angular.isUndefined(self.fields.inputClass)){
+                        self.fields.inputClass = 'it-autocomplete-input-class';
+                    }
+                    if(angular.isUndefined(self.fields.placeholder)){
+                        self.fields.placeholder = '';
+                    }
+                    self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
+                    self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
+                    self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
+                    /**
+                     * Use unique id for container, all to find it if there are multiple itAutocomplete directive inside the same page
+                     * @type {string}
+                     */
+                    self.fields.optionContainerId = _generateID();
+
+
+                    /**
+                     * public function
+                     * @type {{}}
+                     */
+                    self.fn = {
+                        select: select,
+                        change: change,
+                        init: init,
+                        fullInit: fullInit,
+                        hideItems: hideItems,
+                        showItems: showItems,
+                        keyBoardInteration: keyBoardInteration,
+                    };
+
+                    /****************************************************************************************
+                     *                                  CODE
+                     **************************************************************************************/
+
+                    /**
+                     * initialize default data
+                     */
+                    fullInit();
+                    $scope.focusIndex = -1;
+                    //Apply default select
+                    _selectItemWithId($scope.selectedOption);
+
+                    /**
+                     * Watch items change to items to reload select if item is now present
+                     */
+                    $scope.$watch('items', function (newValue, oldValue) {
+                        $log.debug("itAutocomplete: items value changed");
+                        fullInit();
+                        _selectItemWithId($scope.selectedOption);
+                        hideItems();
+                    });
+
+                    /**
+                     * Watch selectedOption change to select option if value change outside this directive
+                     */
+                    $scope.$watch('selectedOption', function (newValue, oldValue) {
+
+                        $log.debug("itAutocomplete: selectedOption value changed");
+                        //if an oldValue is set
+                        if(angular.isDefined(oldValue)){
+                            _unselectItemWithId(oldValue);
+                        }
+                        if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
+                            _selectItemWithId(newValue);
+                            hideItems();
+                        }
+                    });
+
+                    /**
+                     * Keyboard interation
+                     */
+                    $scope.$watch('focusIndex', function (newValue, oldValue) {
+                        $log.debug("itAutocomplete: focusIndex value changed");
+                        if (newValue != oldValue) {
+                            if (newValue < 0) {
+                                $scope.focusIndex = -1;
+                            } else if (newValue >= self.fields.items.length) {
+                                $scope.focusIndex = self.fields.items.length - 1;
+                            }
+                            if (angular.isDefined(self.fields.items)) {
+                                select(self.fields.items[$scope.focusIndex]);
+                            }
+                        }
+
+                    });
+
+                    /****************************************************************************************
+                     *                                  FUNCTION
+                     **************************************************************************************/
+
+                    /**
+                     * Select Item with it id
+                     * @param id
+                     * @private
+                     */
+                    function _selectItemWithId(id) {[]
+                        $log.debug("itAutocomplete: select with  id "+id);
+                        var selected = false;
+                        self.fields.selectedItem = {};
+                        if (angular.isDefined(id)) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == id) {
+                                    select(item);
+                                    selected = true;
+                                }
+                            });
+                            if (!selected) {
+                                init();
+                            }
+                        }
+                    }
+
+                    /**
+                     * Unselect Item with it id
+                     * @param id
+                     * @private
+                     */
+                    function _unselectItemWithId(id){
+                        $log.debug("itAutocomplete: unselect with id "+id);
+
+                        if (angular.isDefined(id)) {
+                            angular.forEach(self.fields.items, function (item) {
+                                if (item.id == id) {
+                                    unselect(item);
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * init + copy of externalItems
+                     */
+                    function fullInit() {
+                        $log.debug("itAutocomplete: copy option items");
+                        angular.copy($scope.items, self.fields.items);
+                        init();
+                    }
+
+                    /**
+                     * Style class and position initialization
+                     */
+                    function init() {
+                        var i = 0;
+                        angular.forEach(self.fields.items, function (item) {
+                            if (angular.isDefined(self.fields.selectedItem)){
+                                if (self.fields.selectedItem != item) {
+                                    unselect(item);
+                                } else {
+                                    select(item)
+                                }
+                            }
+                            item.position = i;
+                            i++;
+                        });
+                    }
+
+                    /**
+                     * Call when option is selected
+                     * @param id
+                     */
+                    function select(selectedItem) {
+                        $log.debug("itAutocomplete: select "+selectedItem.id);
+                        // reset last selectedItem class
+                        if (angular.isDefined(self.fields.selectedItem)) {
+                            unselect(self.fields.selectedItem);
+                        }
+                        if (angular.isDefined(selectedItem)) {
+                            $scope.focusIndex = selectedItem.position;
+                            self.fields.selectedItem = selectedItem;
+                            $scope.selectedOption = selectedItem.id;
+                            self.fields.selectedItem.class = self.fields.selectedSelectClass;
+                            var selectedDiv = $document[0].querySelector("#options_" + selectedItem.id);
+                            scrollTo(selectedDiv);
+                        }
+                    }
+
+                    /**
+                     * Unselect item
+                     * @param item
+                     */
+                    function unselect(item) {
+                        item.class = self.fields.defaultSelectClass;
+                    }
+
+                    /**
+                     * Scroll on selectedItem when user use keyboard to select an item
+                     * @param divId
+                     */
+                    function scrollTo(targetDiv) {
+                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
+                        if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
+                            && angular.isDefined(containerDiv) && containerDiv != null) {
+                            var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
+                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
+                            var pos = targetPosition - containerPosition;
+                            containerDiv.scrollTop = pos;
+                        }
+                    }
+
+                    /**
+                     * Hide option items
+                     */
+                    function hideItems($event) {
+                        // Si appelé lors du click sur la touche entrée
+                        if(angular.isUndefined($event) ){
+                            self.fields.showItems = false;
+                            self.fields.inputSearch = self.fields.selectedItem.value;
+                            // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
+                        } else if(! document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
+                            self.fields.showItems = false;
+                            self.fields.inputSearch = self.fields.selectedItem.value;
+
+                            //si il s'agit de la scrollbar, on annule le onblur en remettant le focus sur l'element
+                        }else{
+                            $scope.$applyAsync(function(){
+                                $event.srcElement.focus();
+                            })
+                        };
+                    }
+
+                    /**
+                     * Return internet explorer version
+                     * @returns {number}
+                     */
+                    function getInternetExplorerVersion()
+                    {
+                        var rv = -1;
+                        if (navigator.appName == 'Microsoft Internet Explorer')
+                        {
+                            var ua = navigator.userAgent;
+                            var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                            if (re.exec(ua) != null)
+                                rv = parseFloat( RegExp.$1 );
+                        }
+                        else if (navigator.appName == 'Netscape')
+                        {
+                            var ua = navigator.userAgent;
+                            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
+                            if (re.exec(ua) != null)
+                                rv = parseFloat( RegExp.$1 );
+                        }
+                        return rv;
+                    }
+
+                    /**
+                     * Show option items
+                     */
+                    function showItems($event) {
+                        //refresh modal position on internet explorer because fixed position doesn't follow scroll
+                        if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
+                                var container = $event.srcElement.parentElement.children[1];
+                                var myParent = angular.element($event.srcElement.parentElement)[0];
+                            //only needed with ie and fixed positiion
+                            if( angular.isDefined(container) && angular.isDefined(myParent) && container.currentStyle["position"]== "fixed") {
+                                var newTop = (myParent.getBoundingClientRect().top + myParent.getBoundingClientRect().height);
+                                container.style.setProperty("top", newTop + "px");
+                            }
+                        }
+                        self.fields.showItems = true;
+                    }
+
+                    /**
+                     * Call when search input content change
+                     */
+                    function change() {
+                        $log.debug("itAutocomplete: input search change value")
+                        self.fields.items = [];
+                        if (self.fields.inputSearch == "") {
+                            fullInit();
+                        } else {
+                            var i = 0;
+                            angular.forEach($scope.items, function (item) {
+                                /**
+                                 * StartsWith
+                                 */
+                                if (self.fields.searchMode == "startsWith") {
+                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
+                                        self.fields.items.push(item);
+                                        self.fields.items[i].position = i;
+                                        i++;
+                                    }
+                                    /**
+                                     * Contains
+                                     */
+                                } else {
+                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
+                                        self.fields.items.push(item);
+                                        self.fields.items[i].position = i;
+                                        i++;
+                                    }
+                                }
+                            });
+                        }
+                        if (self.fields.items.length == 1) {
+                            select(self.fields.items[0]);
+                        }
+                        showItems();
+                    }
+
+                    /**
+                     * Manage keyboard interaction up down enter
+                     * @type {Array}
+                     */
+                    $scope.keys = [];
+
+                    const KEY_ENTER = 13;
+                    const KEY_DOWN = 38;
+                    const KEY_UP = 40;
+                    const KEY_BACK = 8;
+                    const KEY_DELETE = 8;
+
+                    $scope.keys.push({
+                        code: KEY_ENTER, action: function () {
+                            if (self.fields.showItems) {
+                                hideItems();
+                            } else {
+                                showItems();
+                                if (self.fields.inputSearch == "") {
+                                    $scope.focusIndex = -1;
+                                }
+                            }
+                        }
+                    });
+                    $scope.keys.push({
+                        code: KEY_DOWN, action: function () {
+                            showItems();
+                            $scope.focusIndex--;
+                        }
+                    });
+                    $scope.keys.push({
+                        code: KEY_UP, action: function () {
+                            showItems();
+                            $scope.focusIndex++;
+                        }
+                    });
+
+                    /**
+                     * Use to manage keyboard interaction
+                     * @param event
+                     */
+                    function keyBoardInteration(event) {
+                        var code = event.keyCode;
+                        $scope.keys.forEach(function (o) {
+                            if (o.code !== code) {
+                                return;
+                            }
+                            o.action();
+                        });
+                    };
+
+                    /**
+                     * Generate unique Id
+                     * @returns {string}
+                     */
+                    function _generateID() {
+                        var d = new Date().getTime();
+                        var uuid = 'option_container_xxxxxxxxxxxx4yxxxxx'.replace(/[xy]/g, function (c) {
+                            var r = (d + Math.random() * 16) % 16 | 0;
+                            d = Math.floor(d / 16);
+                            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                        });
+                        return uuid;
+                    };
+                }
+            ],
+            template: '<div class="col-xs-12 it-autocomplete-div">'+
+            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
+            'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '<div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
+            '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
+            '<div ng-class="item.class" id="options_{{item.id}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    })
+;
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCheckbox
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * The checkbox is no different than the HTML checkbox input,
+ * except it's styled differently.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+            <div>
+                 <input it-checkbox type="checkbox" it-label="Checkbox">
+            </div>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itCheckbox',function(){
+        return {
+            restrict: 'A',
+            transclude : true,
+            replace : true,
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+                input.wrap('<div class="checkbox"></div>');
+                input.wrap('<label></label>');
+                input.after('<span class="checkbox-material"><span class="check" style="margin-right:16px;width: '+attrs.width+';height:'+ attrs.height+';"></span></span>&nbsp;'+(attrs.itLabel || ''));
+            }
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itInput
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * Floating labels are just like Stacked Labels,
+ * except that their labels animate, or "float" up whe
+ * n text is entered in the input.
+ *
+ *
+ * ```html
+ *   <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
+ *       <input it-input
+ *              class="form-control floating-label"
+ *              type="text"
+ *              name="Email"
+ *              ng-minlength="5"
+ *              ng-maxlength="10"
+ *              required=""
+ *              it-label="Email"
+ *              ng-model="user.email">
+ *              <div class="form-errors" ng-messages="myForm.Email.$error" style="color: red;">
+         *            <div class="form-error" ng-message="required">This field is required.</div>
+         *            <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+         *            <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+ *             </div>
+ *   </form>
+ * ```
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="HomeCtrl">
+               <form class="form-group"  novalidate name="myForm" ng-submit="submit(myForm)">
+                <div class="form-group">
+                        <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email">
+                </div>
+                <div class="form-group">
+                        <input it-input class="form-control floating-label"   required="" ng-minlength="5"  ng-maxlength="10" type="text" it-label="Prénom" name="Prenom" ng-model="user.firstName">
+                </div>
+                  <div class="form-errors" ng-messages="myForm.Prenom.$error" style="color: red;">
+                      <div class="form-error" ng-message="required">This field is required.</div>
+                      <div class="form-error" ng-message="minlength">This field is must be at least 5 characters.</div>
+                      <div class="form-error" ng-message="maxlength">This field is must be less than 50 characters</div>
+                  </div>
+                  <button class="btn btn-primary" type="submit">submit</button>
+               </form>
+            </div>
+        </file>
+         <file name="Module.js">
+         angular.module('itesoft-showcase',['ngMessages','itesoft']);
+         </file>
+        <file name="controller.js">
+            angular.module('itesoft-showcase').controller('HomeCtrl',['$scope', function($scope) {
+                  $scope.user = {
+                      email : 'test@itesoft.com',
+                      firstName :''
+                     };
+
+                  $scope.submit = function(form){
+                       if(form.$valid){
+                         console.log('submit');
+                       }
+                  }
+            }]);
+        </file>
+
+    </example>
+ */
+IteSoft
+    .directive('itInput',function(){
+        return {
+            restrict: 'A',
+            replace : true,
+            require: '?ngModel',
+            link : function (scope, element, attrs, ngModel ) {
+                // Check if ngModel is there else go out
+                if (!ngModel)
+                    return;
+                // Fix on input element
+                var input = angular.element(element[0]);
+                //If there is no floating-lbal do nothing
+                if (input.hasClass('floating-label')) {
+                    // Wrapper for material design
+                    input.wrap('<div class="form-control-wrapper"></div>');
+                    // If there is astatic placeholder use it
+                    var placeholder = input.attr('placeholder');
+                    if (placeholder) {
+                        input.after('<div class="floating-label">' +  placeholder + '</div');
+                    } else {
+                        // Else user data binding text 
+                        input.after('<div class="floating-label">' +  scope.itLabel + '</div');
+                        scope.$watch('itLabel', function(value) {
+                            scope.$applyAsync(function(){
+                                if (!input[0].offsetParent) {
+                                    return;
+                                }
+                                var elementDiv = input[0].offsetParent.children;
+                                angular.forEach(elementDiv, function(divHtml) {
+                                    var div = angular.element(divHtml);
+                                    if (div.hasClass('floating-label')) {
+                                        div.text(value);
+                                    }
+                                });
+                            })
+
+                        });
+                    }
+                    input.after('<span class="material-input"></span>');
+                    input.attr('placeholder', '').removeClass('floating-label');
+                }
+                // Check if error message is set
+                input.after('<small class="text-danger" style="display:none;"></small>');
+                scope.$watch('itError', function(value) {
+                    if (!input[0].offsetParent) {
+                        return;
+                    }
+                    var elementDiv = input[0].offsetParent.children;
+                    angular.forEach(elementDiv, function(divHtml) {
+                        var div = angular.element(divHtml);
+                        if (div.hasClass('text-danger')) {
+                            div.text(value);
+                            if (value != '' && value != undefined) {
+                                div.removeClass('ng-hide');
+                                div.addClass('ng-show');
+                                div.css('display','block');
+                            } else {
+                                div.removeClass('ng-show');
+                                div.addClass('ng-hide');
+                                div.css('display','none');
+                            }
+                        }
+                    });
+                });
+                if (input.val() === null || input.val() == "undefined" || input.val() === "") {
+                    input.addClass('empty');
+                }
+                // Watch value and update to move floating label
+                scope.$watch(function () {return ngModel.$modelValue; }, function(value,oldValue) {
+                    if (value === null || value == undefined || value ==="" ) {
+                        input.addClass('empty');
+                    } else {
+                        input.removeClass('empty');
+                    }
+                });
+
+                // wait for input
+                input.on('change', function() {
+                    if (input.val() === null || input.val() == "undefined" || input.val() === "") {
+                        input.addClass('empty');
+                    } else {
+                        input.removeClass('empty');
+                    }
+                });
+            },
+            scope : {
+                itError : '=',
+                itLabel : '@'
+            }
+        }
+});
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSearch
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Attribute providing on an input a single filter box that searches across multiple columns in a grid (ui-grid) or a table.
+ *
+ * You MUST pass an object `<input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ></input>`.
+ * This object will be used as following:
+ * <table class="table">
+ *  <tr>
+ *   <td><code>searchControl = { <br/> columnDefs : [{field:'field1'}, {field:'field2'}, {field:'field3'}]  <br/>}</code></td>
+ *   <td>Object passed to the multicolumns function filter inside the component to let it know on which columns to apply the filter.
+ *   <br>This object is based on the columnDefs defined for the UI-GRID. Only property field and cellFilter are used.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.multicolumnsFilter(renderableRows)</code></td>
+ *   <td>Method to filter in the grid or table according the choosen column fields.<br/>It returns the new rows to be displayed.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>searchControl.filterText</code></td>
+ *   <td>This property of the scope has to be associated to the input<br/>(through ng-model).</td>
+ *  </tr>
+ * </table>
+ * You MUST also pass a function `<input it-search ng-change="filter()"></input>`.
+ * This function should call searchControl.multicolumnsFilter() to refresh the displayed data and has to be written in the application controller.
+ *
+ * @usage
+ * <input it-search it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()">
+ * </input>
+ *
+ * @example
+ * <span><b>SEARCH IN UI-GRID</b></span>
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerGrid">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataGrid()">DISPLAY DATA IN UI-GRID</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans UI-GRID" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <div ui-grid="latinGrid" id="latinGrid"></div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService.js">
+ angular.module('itesoft-showcase')
+ .factory('Latin',['$resource', function($resource){
+                                                    return $resource('http://jsonplaceholder.typicode.com/posts');
+                                                }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('SearchDemoControllerGrid',['$scope','Latin', function($scope,Latin) {
+                            $scope.searchControl = {
+                                columnDefs : [{field:'title'}, {field:'body'}]
+                            };
+
+                            $scope.dataSource = [];
+
+                            //---------------ONLY UI-GRID--------------------
+                            $scope.myDefs = [
+                                    {
+                                        field: 'id',
+                                        width: 50
+                                    },
+                                    {
+                                        field: 'title'
+                                    },
+                                    {
+                                        field: 'body'
+                                    }
+                            ];
+                            $scope.latinGrid = {
+                                data: 'dataSource',
+                                columnDefs: $scope.myDefs,
+                                onRegisterApi: function (gridApi) {
+                                    $scope.gridApi = gridApi;
+                                    $scope.gridApi.grid.registerRowsProcessor($scope.searchControl.multicolumnsFilter, 200);
+                                }
+                            };
+                            //---------------ONLY UI-GRID--------------------
+
+                            $scope.filter = function () {
+                                $scope.gridApi.grid.refresh();
+                            };
+
+                            $scope.loadDataGrid = function() {
+                                $scope.dataSource = [];
+
+                                Latin.query().$promise
+                                .then(function(data){
+                                    $scope.dataSource = data;
+                                });
+                            };
+                     }]);
+ </file>
+
+ </example>
+
+ * <span><b>SEARCH IN TABLE</b></span>
+ <example module="itesoft-showcase1">
+ <file name="index.html">
+ <div ng-controller="SearchDemoControllerTable">
+ <div class="container-fluid">
+ <div class="jumbotron">
+ <div class="row">
+ <button class="btn btn-primary" ng-click="loadDataTable()">DISPLAY DATA IN TABLE</button>
+ <form>
+ <div class="form-group has-feedback" >
+ <input it-search class="form-control" type="text" placeholder="Recherche multicolonnes dans TABLE" it-search-control="searchControl" ng-model="searchControl.filterText" ng-change="filter()"/>
+ </div>
+ </form>
+ <table class="table table-striped table-hover ">
+ <thead>
+ <tr><th>id</th><th>title</th><th>body</th></tr>
+ </thead>
+ <tbody>
+ <tr ng-repeat="dataItem in data">
+ <td>{{dataItem.id}}</td>
+ <td>{{dataItem.title}}</td>
+ <td>{{dataItem.body}}</td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module1.js">
+ angular.module('itesoft-showcase1',['ngResource','itesoft']);
+ </file>
+ <file name="LatinService1.js">
+ angular.module('itesoft-showcase1')
+ .factory('Latin1',['$resource', function($resource){
+                                            return $resource('http://jsonplaceholder.typicode.com/posts');
+                                        }]);
+ </file>
+ <file name="Controller1.js">
+ angular.module('itesoft-showcase1')
+ .controller('SearchDemoControllerTable',['$scope','Latin1', function($scope,Latin1) {
+                    $scope.searchControl = {};
+                    $scope.searchControl = {
+                        columnDefs : [{field:'title'}, {field:'body'}]
+                    };
+
+                    $scope.dataSource = [];
+                    $scope.data = [];
+
+                    $scope.filter = function () {
+                        $scope.data = $scope.searchControl.multicolumnsFilter($scope.dataSource);
+                    };
+
+                    $scope.loadDataTable = function() {
+                        $scope.dataSource = [];
+                        $scope.data = [];
+
+                        Latin1.query().$promise
+                        .then(function(data){
+                           $scope.dataSource = data;
+                           $scope.data = data;
+                        });
+                    };
+             }]);
+ </file>
+
+ </example>
+ **/
+IteSoft
+    .directive('itSearch',function() {
+        return {
+            restrict: 'A',
+            replace : true,
+            scope: {
+                itSearchControl:'='
+            },
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+
+                input.after('<span class="glyphicon glyphicon-search form-control-feedback"/>');
+            },
+            controller : ['$scope',
+                function ($scope) {
+                    $scope.itSearchControl.multicolumnsFilter = function (renderableRows) {
+                        var matcher = new RegExp($scope.itSearchControl.filterText, 'i');
+                        var renderableRowTable = [];
+                        var table = false;
+                        if ($scope.itSearchControl.columnDefs) {
+                            renderableRows.forEach(function (row) {
+                                var match = false;
+                                if (row.entity) {//UI-GRID
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row.entity[col.field]) {
+                                            var renderedData = row.entity[col.field].toString();
+                                            if (col.cellFilter) {
+                                                $scope.value = renderedData;
+                                                renderedData = $scope.$eval('value | ' + col.cellFilter);
+                                            }
+                                            if(typeof renderedData !== 'undefined' && renderedData != null){
+                                                if (renderedData.match(matcher)) {
+                                                    match = true;
+                                                }
+                                            }
+                                        }
+                                    });
+                                    if (!match) {
+                                        row.visible = false;
+                                    }
+                                }
+                                else {//TABLE
+                                    table = true;
+                                    $scope.itSearchControl.columnDefs.forEach(function (col) {
+                                        if (!match && row[col.field] && row[col.field].toString().match(matcher)) {
+                                            match = true;
+                                        }
+                                    });
+                                    if (match) {
+                                        renderableRowTable.push(row);
+                                    }
+                                }
+                            });
+                        }
+                        if (table){
+                            renderableRows = renderableRowTable;
+                        }
+                        return renderableRows;
+                    };
+                }]
+        }
+    });
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itToggle
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * A toggle is an animated switch which binds a given model to a boolean.
+ * Allows dragging of the switch's nub.
+ *
+ *
+ * ```html
+ *     <input  it-toggle type="checkbox" it-label="Toggle button">
+ * ```
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+            <div>
+                <input  it-toggle type="checkbox" ng-model="data" it-label="Toggle button">
+            </div>
+        </file>
+
+    </example>
+ */
+IteSoft
+    .directive('itToggle',['$compile',function($compile){
+        return {
+            restrict: 'A',
+            transclude : true,
+            link : function (scope, element, attrs ) {
+                var input = angular.element(element[0]);
+                input.wrap('<div class="togglebutton"></div>');
+                if (scope.itLabel == undefined) {
+                    input.wrap('<label></label>');
+                    input.after('<span class="toggle"></span>');
+                } else {
+                    input.wrap('<label></label>');
+                    input.after('<span class="toggle"></span><span>'+(scope.itLabel || '')+'</span>');
+
+                    scope.$watch('itLabel', function(value) {
+                        if ((value) && (input.context)) {
+                            var label = angular.element(input.context.parentNode);
+                            if ((label) && (attrs.itLabel)) {
+                                var labelText = angular.element(label.get(0).firstChild);
+                                labelText.get(0).textContent = value+'  ';
+                            }
+                        }
+                    });
+                }
+            },
+            scope: {
+                itLabel: '@'
+            }
+        }
+}]);
 "use strict";
 /**
  * @ngdoc directive
@@ -4344,6 +4344,811 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanel
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container element for side panel and its Header, Content and Footer
+ *
+ * <table class="table">
+ *   <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-col="3">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *          <it-side-panel it-z-index="700">
+ *          </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-icon-class="fa-star-o">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-height-mode="auto | window | full">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set "Height Mode" of the Side Panel.
+ *          <ul>
+ *              <li><b>auto</b> :
+ *                  <ul>
+ *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
+ *                      <li>Else the height of Side Panel is equal to its content</li>
+ *                  </ul>
+ *                </li>
+ *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
+ *              <li><b>full</b>
+*                   <ul>
+ *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
+ *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
+ *                  </ul>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-top-position="XX | none">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set css top position of the Side Panel. Default value is "none" mode
+ *          <ul>
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-side-panel>
+ *      <it-side-panel-header>
+ *          <!--Header of Side Panel -->
+ *      </it-side-panel-header>
+ *      <it-side-panel-content>
+ *          <!--Content Side Panel-->
+ *      </it-side-panel-content>
+ *      <it-side-panel-footer>
+ *          <!--Footer Side Panel-->
+ *      </it-side-panel-footer>
+ * </it-side-panel>
+ * ```
+ * @example
+ <example module="itesoft">
+ <file name="custom.css">
+
+     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+       background-color: blue;
+     }
+
+     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+       background-color: green;
+     }
+
+     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+       background-color: gray;
+     }
+
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+        text-align: center;
+        display: table;
+        width: 100%;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+        display: table-cell;
+        vertical-align:middle;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+        margin:0px;
+     }
+
+ </file>
+ <file name="index.html">
+
+ <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
+ <it-side-panel-header>
+ <div><h1>Favorites</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Favorite 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Favorite 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 4</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 5</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 6</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 7</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 8</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 9</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 10</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 11</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 12</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 13</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 14</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 15</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 16</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+ <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
+ <it-side-panel-header>
+ <div><h1>Silicon Valley</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Paragraph 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Paragraph 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Paragraph 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+
+ <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
+ <it-side-panel-header>
+ <div><h1>Search</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Search 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Search 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Search 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+ </file>
+ </example>
+ */
+IteSoft
+    .directive('itSidePanel', ['$window', function ($window) {
+
+
+        function _link(scope, element, attrs) {
+
+            scope.itSidePanelElement = element;
+
+            scope.setIconClass(scope, attrs);
+
+            scope.setZIndexes(element, attrs);
+
+            scope.setColMd(attrs);
+
+            scope.setHeightMode(attrs);
+
+            scope.setTopPosition(attrs);
+
+        }
+
+        return {
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            controller: '$sidePanelCtrl',
+            scope : true,
+            template:
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+                    '<span class="fa {{itIconClass}}"></span>' +
+                '</div>'+
+                '<div class="it-side-panel" ng-transclude></div>'+
+            '</div>'
+
+        };
+    }]);
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelContent
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel content, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-content>
+ * </it-side-panel-content>
+ */
+IteSoft
+    .directive('itSidePanelContent', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require: '^itSidePanel',
+            template:
+                '<div class="it-side-panel-content" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .controller("$sidePanelCtrl", [
+        '$scope',
+        '$window',
+        '$document',
+        '$timeout',
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
+
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
+
+            var Z_INDEX_CSS_KEY = 'z-index';
+
+            var IT_HEIGHT_MODE_WINDOW = 'window';
+            var IT_HEIGHT_MODE_FULL = 'full';
+            var IT_HEIGHT_MODE_AUTO = 'auto';
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+
+            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
+            var DEFAULT_COL_MD = 4;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
+            var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
+
+            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
+            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
+            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
+            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
+            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
+            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
+
+            var _self = this;
+            _self.scope = $scope;
+            _self.scope.showPanel = false;
+
+            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+            //Set default col-md(s) to the scope
+            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
+
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
+
+
+            var w = angular.element($window);
+
+
+            /**
+             * Get window Dimensions
+             * @returns {{height: Number, width: Number}}
+             */
+            _self.scope.getWindowDimensions = function () {
+                return {
+                    'height': $window.innerHeight,
+                    'width': $window.innerWidth
+                };
+            };
+
+            /**
+             * Watch the resizing of window Dimensions
+             */
+            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
+
+                _self.scope.windowHeight = newValue.height;
+                _self.scope.windowWidth = newValue.width;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+
+                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
+
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if(Math.abs(top) < _self.scope.windowHeight){
+
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if(_self.scope.isNoneTopPosition()){
+                            itTopPosition = 0;
+                        }
+
+                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
+
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
+                }
+
+
+                if(_self.scope.showPanel){
+                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                //if its the firt time initialise all components width an right
+                }else {
+                    _self.scope.modifySidePanelCssProperties();
+                }
+
+            }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function (){
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
+
+            w.bind('resize', function () {
+                _self.scope.$apply();
+            });
+
+            /**
+             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
+             */
+            _self.scope.toggleSidePanel = function () {
+                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if(_self.scope.showPanel){
+
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function(){
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    },50);
+
+
+                } else {
+
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                }
+            };
+
+            _self.scope.setItSidePanelElement = function(element){
+                _self.scope.itSidePanelElement = element;
+            };
+
+
+            /**
+             * Set the Side Panel Height Mode from "it-height-mode" attributes
+             * @param attrs directive attributes object
+             */
+            _self.scope.setHeightMode = function (attrs){
+                _self.scope.itHeightMode = attrs.itHeightMode;
+
+                //If attribute is not defined set the default height Mode
+                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
+                    //Get the provided mode
+                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
+                } else{
+
+                    //If height mode is defined but unknown set to the default  height mode
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
+                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                }
+
+                //Set height of header, content and footer
+                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                sidePanelHeader.css('height','10%');
+
+                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                sidePanelFooter.css('height','10%');
+
+                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                sidePanelContent.css('height', '80%');
+
+
+
+                //Configure height of Side Panel elements depending on the provided height mode
+                switch(_self.scope.itHeightMode) {
+                    case IT_HEIGHT_MODE_FULL:
+
+                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
+
+                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                            sidePanelContainer.css('height', '100%');
+                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                            sidePanel.css('height', '100%');
+                        }
+                        break;
+                    case IT_HEIGHT_MODE_AUTO:
+                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
+                        break;
+                    case IT_HEIGHT_MODE_WINDOW:
+
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', '100%');
+
+                        //set overflow : auto to the Side Panel Content
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('overflow', 'auto');
+                        break;
+                    default:
+                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                }
+            };
+
+            /**
+             * Retrieve provided iconClass and put the value it in scope
+             * @param scope the scope
+             * @param attrs the attributes provided by directive
+             * @private
+             */
+            _self.scope.setIconClass = function (scope, attrs) {
+                var defaultIconClass = DEFAULT_ICON_CLASS;
+                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
+                    _self.scope.itIconClass = defaultIconClass;
+                } else {
+                    _self.scope.itIconClass = attrs.itIconClass;
+                }
+            };
+
+            /**
+             * Handle col-md of directive.
+             * If itCol is provided to the directive apply its col-md-X
+             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setColMd = function (attrs) {
+                var colMd = DEFAULT_COL_MD;
+                if (!isNaN(parseInt(attrs.itCol))) {
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                }
+            };
+
+            /**
+             * Handle z indexes of directive.
+             * If itZIndex is provided to the directive apply its z-index
+             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setZIndexes = function (element, attrs) {
+
+                var zindex = null;
+                if (!isNaN(parseInt(attrs.itZIndex))) {
+                    zindex = parseInt(attrs.itZIndex);
+                }
+
+                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (zindex !== null) {
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
+                } else {
+
+                    var highestZIndex = _self.scope.findHighestZIndex();
+                    var newHighestZIndex = highestZIndex + 100;
+
+                    //set the zindex to side panel element
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
+
+                    //set the zindex to the icon button of the side panel element
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
+
+                }
+            };
+
+            /**
+             * Get Dom element from its class
+             * @param element dom element in which the class search will be performed
+             * @param className className. Using 'querySelector' selector convention
+             * @private
+             */
+            _self.scope.getElementFromClass = function (element, className) {
+                var content = angular.element(element[0].querySelector(className));
+                var sidePanel = angular.element(content[0]);
+                return sidePanel;
+            };
+
+            /**
+             * Find the highest z-index of the DOM
+             * @returns {number} the highest z-index value
+             * @private
+             */
+            _self.scope.findHighestZIndex = function () {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            };
+
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
+
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                }
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
+            };
+        }
+    ]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelFooter
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel footer, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-footer>
+ * </it-side-panel-footer>
+ */
+IteSoft
+    .directive('itSidePanelFooter', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-footer" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelHeader
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel header, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-header>
+ * </it-side-panel-header>
+ */
+IteSoft
+    .directive('itSidePanelHeader', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-header text-center" ng-transclude></div>'
+        };
+    });
+
+
 /**
  * Created by sza on 22/04/2016.
  */
@@ -4414,7 +5219,7 @@ IteSoft
          <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
          </div>
          </it-block>
-         <it-block name="coding-lines-add3">
+         <it-block name="coding-lines-add3" removed="true">
          <button class="btn btn-primary col-xs-2"
          title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
          ng-click="codingController.addNewLine()">
@@ -4544,7 +5349,7 @@ IteSoft.directive('itBlock',
                     $scope.removed = false;
                     $scope.element = element;
                     $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"]) && $scope.removed == "true" ) {
+                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
                         $scope.removed = attrs["removed"];
                     }
                     this.fields = {};
@@ -5417,811 +6222,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
 ]);
 
 'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanel
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container element for side panel and its Header, Content and Footer
- *
- * <table class="table">
- *   <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-col="3">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *          <it-side-panel it-z-index="700">
- *          </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-icon-class="fa-star-o">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-height-mode="auto | window | full">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set "Height Mode" of the Side Panel.
- *          <ul>
- *              <li><b>auto</b> :
- *                  <ul>
- *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
- *                      <li>Else the height of Side Panel is equal to its content</li>
- *                  </ul>
- *                </li>
- *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
- *              <li><b>full</b>
-*                   <ul>
- *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
- *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
- *                  </ul>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-top-position="XX | none">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set css top position of the Side Panel. Default value is "none" mode
- *          <ul>
- *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
- *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-side-panel>
- *      <it-side-panel-header>
- *          <!--Header of Side Panel -->
- *      </it-side-panel-header>
- *      <it-side-panel-content>
- *          <!--Content Side Panel-->
- *      </it-side-panel-content>
- *      <it-side-panel-footer>
- *          <!--Footer Side Panel-->
- *      </it-side-panel-footer>
- * </it-side-panel>
- * ```
- * @example
- <example module="itesoft">
- <file name="custom.css">
-
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
-       background-color: blue;
-     }
-
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
-       background-color: green;
-     }
-
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
-       background-color: gray;
-     }
-
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
-        text-align: center;
-        display: table;
-        width: 100%;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
-        display: table-cell;
-        vertical-align:middle;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
-        margin:0px;
-     }
-
- </file>
- <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
-
- <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
- <it-side-panel-header>
- <div><h1>Search</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Search 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Search 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Search 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
- </file>
- </example>
- */
-IteSoft
-    .directive('itSidePanel', ['$window', function ($window) {
-
-
-        function _link(scope, element, attrs) {
-
-            scope.itSidePanelElement = element;
-
-            scope.setIconClass(scope, attrs);
-
-            scope.setZIndexes(element, attrs);
-
-            scope.setColMd(attrs);
-
-            scope.setHeightMode(attrs);
-
-            scope.setTopPosition(attrs);
-
-        }
-
-        return {
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
-            '</div>'
-
-        };
-    }]);
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelContent
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel content, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-content>
- * </it-side-panel-content>
- */
-IteSoft
-    .directive('itSidePanelContent', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require: '^itSidePanel',
-            template:
-                '<div class="it-side-panel-content" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .controller("$sidePanelCtrl", [
-        '$scope',
-        '$window',
-        '$document',
-        '$timeout',
-        '$log',
-        function ($scope, $window, $document, $timeout, $log) {
-
-
-            var COL_MD_NAME = 'it-col';
-            var HEIGHT_MODE_NAME = 'it-height-mode';
-            var TOP_POSITION_NAME = 'it-top-position';
-
-            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
-
-            var Z_INDEX_CSS_KEY = 'z-index';
-
-            var IT_HEIGHT_MODE_WINDOW = 'window';
-            var IT_HEIGHT_MODE_FULL = 'full';
-            var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
-
-            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
-
-
-            var DEFAULT_COL_MD = 4;
-            var MAX_COL_MD = 12;
-            var MIN_COL_MD = 1;
-
-            var DEFAULT_ICON_CLASS = 'fa-search';
-
-
-            var DEFAULT_TOP_POSITION = 'none';
-            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
-
-            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
-            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
-            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
-            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
-            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
-            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
-            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
-
-            var _self = this;
-            _self.scope = $scope;
-            _self.scope.showPanel = false;
-
-            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-            //Set default col-md(s) to the scope
-            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-
-            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
-
-            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
-
-            _self.scope.sidePanelContainerWidth = null;
-            _self.scope.sidePanelContainerRight = null;
-            _self.scope.sidePanelButtonRight = null;
-
-
-            var w = angular.element($window);
-
-
-            /**
-             * Get window Dimensions
-             * @returns {{height: Number, width: Number}}
-             */
-            _self.scope.getWindowDimensions = function () {
-                return {
-                    'height': $window.innerHeight,
-                    'width': $window.innerWidth
-                };
-            };
-
-            /**
-             * Watch the resizing of window Dimensions
-             */
-            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
-
-                _self.scope.windowHeight = newValue.height;
-                _self.scope.windowWidth = newValue.width;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-
-                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-
-                    var top = sidePanelContainer[0].getBoundingClientRect().top;
-
-                    //Do not update side panel height property when
-                    // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if(Math.abs(top) < _self.scope.windowHeight){
-
-                        var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if(_self.scope.isNoneTopPosition()){
-                            itTopPosition = 0;
-                        }
-
-                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
-
-                        var heightHeader = (newHeight*0.10);
-                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height',heightHeader+'px');
-
-                        var heightFooter = (newHeight*0.10);
-                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height',heightFooter+'px');
-
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight*0.8)+'px');
-
-                    }
-                }
-
-
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
-                    _self.scope.sidePanelContainerWidth = newWidth;
-                    sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
-                    _self.scope.modifySidePanelCssProperties();
-                }
-
-            }, true);
-
-            /**
-             * Update Side panel Css properties (right and width)
-             */
-            _self.scope.modifySidePanelCssProperties = function (){
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
-                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
-
-                _self.scope.sidePanelContainerWidth = newWidth;
-                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
-                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                //update side panel container right and width properties
-                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
-                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-
-                //update side panel button right right property
-                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
-            };
-
-            w.bind('resize', function () {
-                _self.scope.$apply();
-            });
-
-            /**
-             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
-             */
-            _self.scope.toggleSidePanel = function () {
-                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if(_self.scope.showPanel){
-
-                    //Reset the right property of Side panel button
-                    iconButtonElement.css('right', "");
-
-                    //Do the transition in order to the side panel be visible
-                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
-                        _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
-
-
-                } else {
-
-                    var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
-                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
-                }
-            };
-
-            _self.scope.setItSidePanelElement = function(element){
-                _self.scope.itSidePanelElement = element;
-            };
-
-
-            /**
-             * Set the Side Panel Height Mode from "it-height-mode" attributes
-             * @param attrs directive attributes object
-             */
-            _self.scope.setHeightMode = function (attrs){
-                _self.scope.itHeightMode = attrs.itHeightMode;
-
-                //If attribute is not defined set the default height Mode
-                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
-                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
-                    //Get the provided mode
-                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
-
-                    //If height mode is defined but unknown set to the default  height mode
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
-                }
-
-                //Set height of header, content and footer
-                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
-
-                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
-
-                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css('height', '80%');
-
-
-
-                //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
-                    case IT_HEIGHT_MODE_FULL:
-
-                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css('height');
-
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
-                            sidePanelContainer.css('height', '100%');
-                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css('height', '100%');
-                        }
-                        break;
-                    case IT_HEIGHT_MODE_AUTO:
-                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
-                        break;
-                    case IT_HEIGHT_MODE_WINDOW:
-
-                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css('height', '100%');
-
-                        //set overflow : auto to the Side Panel Content
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('overflow', 'auto');
-                        break;
-                    default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
-                }
-            };
-
-            /**
-             * Retrieve provided iconClass and put the value it in scope
-             * @param scope the scope
-             * @param attrs the attributes provided by directive
-             * @private
-             */
-            _self.scope.setIconClass = function (scope, attrs) {
-                var defaultIconClass = DEFAULT_ICON_CLASS;
-                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
-                    _self.scope.itIconClass = defaultIconClass;
-                } else {
-                    _self.scope.itIconClass = attrs.itIconClass;
-                }
-            };
-
-            /**
-             * Handle col-md of directive.
-             * If itCol is provided to the directive apply its col-md-X
-             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setColMd = function (attrs) {
-                var colMd = DEFAULT_COL_MD;
-                if (!isNaN(parseInt(attrs.itCol))) {
-
-                    if (attrs.itCol > MAX_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
-                            '(' + MAX_COL_MD + '). The maximum value is taken.');
-                    } else if (attrs.itCol < MIN_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
-                            '(' + MIN_COL_MD + '). The minimum value is taken.');
-                    } else {
-                        _self.scope.itSidePanelcolMd = attrs.itCol;
-                    }
-                } else {
-                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
-                }
-            };
-
-            /**
-             * Handle z indexes of directive.
-             * If itZIndex is provided to the directive apply its z-index
-             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setZIndexes = function (element, attrs) {
-
-                var zindex = null;
-                if (!isNaN(parseInt(attrs.itZIndex))) {
-                    zindex = parseInt(attrs.itZIndex);
-                }
-
-                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (zindex !== null) {
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
-                } else {
-
-                    var highestZIndex = _self.scope.findHighestZIndex();
-                    var newHighestZIndex = highestZIndex + 100;
-
-                    //set the zindex to side panel element
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
-
-                    //set the zindex to the icon button of the side panel element
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
-
-                }
-            };
-
-            /**
-             * Get Dom element from its class
-             * @param element dom element in which the class search will be performed
-             * @param className className. Using 'querySelector' selector convention
-             * @private
-             */
-            _self.scope.getElementFromClass = function (element, className) {
-                var content = angular.element(element[0].querySelector(className));
-                var sidePanel = angular.element(content[0]);
-                return sidePanel;
-            };
-
-            /**
-             * Find the highest z-index of the DOM
-             * @returns {number} the highest z-index value
-             * @private
-             */
-            _self.scope.findHighestZIndex = function () {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            };
-
-            _self.scope.setTopPosition = function (attrs) {
-                var topPosition = attrs.itTopPosition;
-                if (!isNaN(parseInt(topPosition))) {
-                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
-                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
-
-                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
-
-                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
-                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
-                }
-            };
-
-            /**
-             *
-             * @returns {boolean}
-             */
-            _self.scope.isNoneTopPosition = function () {
-                return _self.scope.itSidePanelTopPosition === 'none';
-            };
-        }
-    ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelFooter
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel footer, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-footer>
- * </it-side-panel-footer>
- */
-IteSoft
-    .directive('itSidePanelFooter', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-footer" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelHeader
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel header, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-header>
- * </it-side-panel-header>
- */
-IteSoft
-    .directive('itSidePanelHeader', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-header text-center" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
 
 IteSoft
     .directive('itFillHeight', ['$window', '$document', function($window, $document) {
@@ -6574,6 +6574,295 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
 'use strict';
 /**
  * @ngdoc service
@@ -7000,292 +7289,3 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
