@@ -100,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The Control Panel Block widgets provides a way to activate it-block edition",
-      "keywords": "$rootscope $scope activate admin angular api app block bottom class config constant control controller current_package customize directive edit edition editor editsite enable_template_editor false function homectrl html http it-block itesoft itesoft-showcase js left module ngresource panel password pilot readonly rest_editor_api_url rest_template_api_url skip_login style template template_editor_url template_user_auto_login toaster true url v1 version web widgets"
+      "keywords": "$rootscope $scope activate admin angular api app block bottom class config confirm constant control controller current_package customize delete directive edit edition editor editsite enable_template_editor false function global homectrl html http it-block itesoft itesoft-showcase js left module ngresource panel password pilot readonly rest_editor_api_url rest_template_api_url skip_login style template template_editor_url template_user_auto_login title toaster true url v1 version web widgets"
     },
     {
       "section": "api",
