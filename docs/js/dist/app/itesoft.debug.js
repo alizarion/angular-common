@@ -5392,10 +5392,8 @@ IteSoft.directive('itBlock',
  *
  * <h1>Translate</h1>
  * ```config
- * GLOBAL.TEMPLATE.BLOCK.EDIT
- * GLOBAL.TEMPLATE.BLOCK.READONLY
- * GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE
- * GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM
+ * TEMPLATE.BLOCK.EDIT
+ * TEMPLATE.BLOCK.READONLY
  * ```
  *
  * <h1>Config</h1>
@@ -5443,31 +5441,30 @@ IteSoft.directive('itBlockControlPanel',
             return {
                 restrict: 'EA',
                 scope: true,
-                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="itBlockControlPanelController.editorIsOpen" class="col-xs-12"/> ' +
-                '<div class="block-control-panel-action-container col-xs-12">' +
-                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true" ><i class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false" ><i class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i class="fa fa-stop"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i class="fa fa-play"></i></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><i class="fa fa-floppy-o"></i></a></it-circular-btn>' +
-                '<span ng-if="!itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Press Ctrl and move your mouse over a block)</span>' +
-                '<span ng-if="itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Release Ctrl over an element to select it)</span>' +
+                template: '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> ' +
+                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
+                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
+                '<div class="block-control-panel-action-container">' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa fa-stop"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa fa-play"></li></it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><li class="fa fa-floppy-o"></li></a></div>' +
+                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>' +
                 '</div>' +
                 '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
-                '<span class="fa fa-exclamation" aria-hidden="true"></span>' +
-                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
+                '<span class="fa fa-exclamation glyphicon-align-left" aria-hidden="true"></span>' +
+                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
                 '</div>' +
                 '<div class="block-lists"  ng-if="$root.editSite">' +
                 '<div ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
                 ' class="{{itBlockControlPanelController.getClass(block)}}">' +
                 '<div class="block-lists-name">{{block.name}}</div>' +
                 '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i  class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i  class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i  class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><li class="fa fa-plus "></li></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><li  class="fa fa-pencil"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><li  class="fa fa-eye"></li></it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><li  class="fa fa-eye-slash block-btn"></li></it-circular-btn>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -5683,8 +5680,8 @@ IteSoft.directive('itBlockControlPanel',
                         self.deleteBlock = function (block) {
                             $log.debug("delete block");
                             var confirmPopup = itPopup.confirm({
-                                title: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE' | translate}}",
-                                text: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM' | translate}}",
+                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
+                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
                                 buttons: [
 
                                     {
@@ -6404,7 +6401,6 @@ IteSoft
 
                 }])
         .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
-            $translate.use('fr_FR');
             $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
 
             // new language setting returned by a callback function.
@@ -6544,6 +6540,10 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                 }
             },
             getDefaultLocale: function (lang) {
+                if (!lang) {
+                    lang = $translate.preferredLanguage();
+                }
+
                 switch (lang) {
                     case "en":
                         return "en_GB";
@@ -6552,7 +6552,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     default:
                     case "fr":
                         return "fr_FR";
-
                 }
             },
             getLanguageCode: function (locale) {
@@ -6577,295 +6576,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
 'use strict';
 /**
  * @ngdoc service
@@ -7292,3 +7002,292 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
