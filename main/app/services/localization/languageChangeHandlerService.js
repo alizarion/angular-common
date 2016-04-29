@@ -64,7 +64,6 @@
 
                 }])
         .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
-            $translate.use('fr_FR');
             $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
 
             // new language setting returned by a callback function.
@@ -204,6 +203,10 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                 }
             },
             getDefaultLocale: function (lang) {
+                if (!lang) {
+                    lang = $translate.preferredLanguage();
+                }
+
                 switch (lang) {
                     case "en":
                         return "en_GB";
@@ -212,7 +215,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     default:
                     case "fr":
                         return "fr_FR";
-
                 }
             },
             getLanguageCode: function (locale) {
