@@ -26,6 +26,7 @@
                           "checked": false
                         };
                       }]);
+
      </file>
  </example>
  */
