@@ -81,6 +81,54 @@ IteSoft.directive('itCircularBtn',
 
 /**
  * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
+/**
+ * @ngdoc directive
  * @name itesoft.directive:itModalFullScreen
  * @module itesoft
  * @restrict EA
@@ -1060,6 +1108,242 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
+);
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
 );
 "use strict";
 /**
@@ -2238,54 +2522,6 @@ IteSoft
         }
 
     });
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
 
 'use strict';
 /**
@@ -3385,241 +3621,293 @@ IteSoft
         }
 }]);
 "use strict";
-
 /**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
+ * You do not talk about FIGHT CLUB!!
+ */
 IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
         return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
         };
     }]);
 "use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
 
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
+'use strict';
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itLoader
+ * @name itesoft.directive:itBottomGlue
  * @module itesoft
- * @restrict EA
+ * @restrict A
  * @since 1.0
  * @description
- * Simple loading spinner that handle http request pending.
+ * Simple directive to fill height.
  *
  *
  * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
                  </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
+             </div>
          </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
+     </example>
+ */
 IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
 
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
 
-                    }
-                });
-
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
             }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
         }
-    }]
-);
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * @ngdoc directive
@@ -4812,45 +5100,6 @@ IteSoft
     });
 
 
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 /**
  * Created by sza on 22/04/2016.
  */
@@ -6037,255 +6286,55 @@ IteSoft
         }
     });
 
-"use strict";
 /**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
  * @module itesoft
  * @restrict EA
- * @parent itesoft
  * @since 1.0
  * @description
- * A container for display source code in browser with syntax highlighting.
+ * Simple filter that escape string to unicode.
  *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
  *
  * @example
     <example module="itesoft">
         <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
         </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
     </example>
  */
 IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
                 }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
+                return unicodeString;
             }
-
+            return $sce.trustAsHtml(_toUnicode(input));
         };
-    }]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
 }]);
-'use strict';
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 
 'use strict';
 /**
@@ -6319,6 +6368,8 @@ IteSoft
  *   <br />onChangePopup:
  *   <br />title: title of popup confirmation
  *   <br />text: text of popup confirmation
+ *   <br />buttonCancelLabel: label text for the cancel button
+ *   <br />buttonOkLabel: label text for the ok button
  *   </td>
  *  </tr>
  *  <tr>
@@ -6387,7 +6438,9 @@ IteSoft.provider('itLanguageChangeHandler', function () {
         displayConfirm: true,// true | false
         onChangePopup: {
             title: "Confirm language change",
-            text: "By modifying the language any recent changes may be lost. Continue?"
+            text: "By modifying the language any recent changes may be lost. Continue?",
+            buttonCancelLabel: 'NO',
+            buttonOkLabel: 'YES'
         }
     };
 
@@ -6407,23 +6460,8 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     var confirmPopup = itPopup.confirm({
                         title: self.options.onChangePopup.title,
                         text: self.options.onChangePopup.text,
-                        buttons: [
-
-                            {
-                                text: 'Cancel',
-                                type: '',
-                                onTap: function () {
-                                    return false;
-                                }
-                            },
-                            {
-                                text: 'ok',
-                                type: '',
-                                onTap: function () {
-                                    return true;
-                                }
-                            }
-                        ]
+                        cancelText: self.options.onChangePopup.buttonCancelLabel,
+                        okText: self.options.onChangePopup.buttonOkLabel
                     });
                     (function (data) {
                         var locale = data;
@@ -7242,51 +7280,3 @@ IteSoft
         }
         return itPopup;
     }]);
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
