@@ -10,8 +10,10 @@
  *
  * <h1>Translate</h1>
  * ```config
- * TEMPLATE.BLOCK.EDIT
- * TEMPLATE.BLOCK.READONLY
+ * GLOBAL.TEMPLATE.BLOCK.EDIT
+ * GLOBAL.TEMPLATE.BLOCK.READONLY
+ * GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE
+ * GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM
  * ```
  *
  * <h1>Config</h1>
@@ -59,30 +61,31 @@ IteSoft.directive('itBlockControlPanel',
             return {
                 restrict: 'EA',
                 scope: true,
-                template: '<div class="block-control-panel" ng-show="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="itBlockControlPanelController.editorIsOpen"/> ' +
-                '<div ng-if="!$root.editSite" class="btn btn-primary" ng-click="$root.editSite=true" >{{\'TEMPLATE.BLOCK.EDIT\' | translate}}</div>' +
-                '<div ng-if="$root.editSite"  class="btn btn-primary" ng-click="$root.editSite=false" >{{\'TEMPLATE.BLOCK.READONLY\' | translate}}</div>' +
-                '<div class="block-control-panel-action-container">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><li class="fa fa-refresh"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><li class="fa fa-stop"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><li class="fa fa-play"></li></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><li class="fa fa-floppy-o"></li></a></div>' +
-                '<span class="block-control-panel-help">(Press Ctrl and move your mouse over a block to select it)</span>' +
+                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                '<div ng-if="itBlockControlPanelController.editorIsOpen" class="col-xs-12"/> ' +
+                '<div class="block-control-panel-action-container col-xs-12">' +
+                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true" ><i class="fa fa-pencil"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false" ><i class="fa fa-eye"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i class="fa fa-stop"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i class="fa fa-play"></i></it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><i class="fa fa-floppy-o"></i></a></it-circular-btn>' +
+                '<span ng-if="!itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Press Ctrl and move your mouse over a block)</span>' +
+                '<span ng-if="itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Release Ctrl over an element to select it)</span>' +
                 '</div>' +
                 '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
-                '<span class="fa fa-exclamation glyphicon-align-left" aria-hidden="true"></span>' +
-                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
+                '<span class="fa fa-exclamation" aria-hidden="true"></span>' +
+                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
                 '</div>' +
                 '<div class="block-lists"  ng-if="$root.editSite">' +
                 '<div ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
                 ' class="{{itBlockControlPanelController.getClass(block)}}">' +
                 '<div class="block-lists-name">{{block.name}}</div>' +
                 '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><li class="fa fa-plus "></li></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><li  class="fa fa-pencil"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><li  class="fa fa-eye"></li></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><li  class="fa fa-eye-slash block-btn"></li></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i  class="fa fa-pencil"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i  class="fa fa-eye"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i  class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -298,8 +301,8 @@ IteSoft.directive('itBlockControlPanel',
                         self.deleteBlock = function (block) {
                             $log.debug("delete block");
                             var confirmPopup = itPopup.confirm({
-                                title: "{{'DELETE_BLOCK_TITLE' | translate}}",
-                                text: "{{'DELETE_BLOCK_CONFIRM' | translate}}",
+                                title: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE' | translate}}",
+                                text: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM' | translate}}",
                                 buttons: [
 
                                     {

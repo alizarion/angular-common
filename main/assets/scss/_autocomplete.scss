@@ -50,5 +50,6 @@
   background-color: white;
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 2000;
   @include box-shadow(1px 1px 1px #666);
 }

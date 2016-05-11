@@ -1,4 +1,3 @@
-
 'use strict';
 /**
  * @ngdoc directive
@@ -13,6 +12,91 @@
  * ```html
  *   <it-autocomplete items="[{id=1,value='premiere option'}]" selected-option="selectedId" search-mode="'contains'"  />
  * ```
+ *
+ * <h1>Event</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          event-select
+ *      </td>
+ *      <td>
+ *          Name of event to emit when value is selected
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          event-refresh
+ *      </td>
+ *      <td>
+ *          Name of event to emit to force autocomplete to refresh items
+ *      </td>
+ *  </tr>
+ *  </table>
+ *
+ *
+ * <h1>Options</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *           items-getter
+ *      </td>
+ *      <td>
+ *          Getter that return list of items to show in autocomplete
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *           items
+ *      </td>
+ *      <td>
+ *          List of items to show in autocomplete
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          options
+ *      </td>
+ *      <td>
+ *          Reference to autocomplete object :
+ *
+ *          $scope.options = {
+ *              // call when lazyGrid is instantiate
+ *              onRegisterApi: function (autocomplete) {
+ *                  $scope.autocomplete = autocomplete;
+ *                   // Call when user click
+ *                  $scope.autocomplete.fn.searchPredicate= function(inputValue,itemToTest){
+ *                      return (itemToTest.id.indexOf(inputValue) !== -1 || itemToTest.value.indexOf(inputValue) !== -1);
+ *                  }
+ *              }
+ *          }
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          selected-option
+ *      </td>
+ *      <td>
+ *          Reference to the selected item id
+ *      </td>
+ *  </tr>
+ *  </table>
+ *
  *
  * <h1>Skinning</h1>
  * Following is the list of structural style classes:
@@ -58,6 +142,16 @@
  *         parent  div
  *      </td>
  *  </tr>
+ *  <tr>
+ *      <td>
+ *          search-mode
+ *      </td>
+ *      <td>
+ *         allow to specify a searchMode (startsWith,custom) see below. Default filter is contains
+ *      </td>
+ *  </tr>
+ *
+ *
  *  </table>
  *
  *
@@ -72,7 +166,64 @@
  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
  <h1>Standalone usage:</h1>
  Selected Id:<input type="text" ng-model="selectedOption"/>
- <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'" ></it-autocomplete>
+
+ <div class="row">
+ <div  class="col-xs-3"> StartsWith:</div>
+ <div  class="col-xs-9">
+ <it-autocomplete items="firstNameOptions" selected-option="selectedOption" search-mode="'startsWith'"></it-autocomplete>
+ </div>
+ </div>
+ <div class="row">
+ </div>
+
+ <h1>Custom search method</h1>
+     <div class="row">
+         <div class="col-xs-12">
+                <span class="text" >
+                You can use a custom filter method by adding search-mode="'custom'" parameter
+                </span>
+         </div>
+     </div>
+ <div class="row">
+     <div class="col-xs-3">Custom predicate:</div>
+
+ <div  class="col-xs-3">
+   <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'custom'" selected-option="firstRate"  options="options" ></it-autocomplete>
+ </div>
+ <div class="row">
+    <div class="col-xs-3">Starts with:</div>
+    <div  class="col-xs-3">
+        <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'startsWith'" selected-option="firstRate"  options="options" ></it-autocomplete>
+    </div>
+ </div>
+ <h1>Linked autocomplete</h1>
+ <div class="row">
+ <div class="col-xs-12">
+ <span class="text" >
+ You can link autocomplete together by adding event-select and event-refresh params
+ </span>
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ Taux
+ </div>
+ <div  class="col-xs-3">
+ Code
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items-getter="getRate(param)" name="'firstRate'"   event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+ </div>
+
+ <div  class="col-xs-3">
+ <it-autocomplete   items-getter="getCode(param)"  name="'firstCode'"   event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
  <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
  </div>
  </file>
@@ -81,13 +232,59 @@
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope',function($scope) {
+ ['$scope','$log',function($scope,$log) {
             $scope.myData = [];
             // sample values
             $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
             $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
             $scope.lastNameOptions = [{id:"Carney",value:"Carney"},{id:"Wise",value:"Wise"},{id:"Waters",value:"Waters"}];
+            $scope.customOptions = [
+            {id:20,value:"FR_20"},{id:19.6,value:"FR_19.6"},{id:7,value:"FR_7"},{id:"10",value:"FR_10"},{id:"19",value:"DE_19"},{id:"7",value:"DE_7"},{id:"0",value:"NO"},
+            {id:"22",value:"FR_22"},{id:"23",value:"FR_23"},{id:"24",value:"FR_24"},{id:"25",value:"FR_25"},{id:"26",value:"DE_26"},{id:"27",value:"DE_27"},{id:"28",value:"28"}
+            ];
+            $scope.tvas = [{rate:"19.6",code:"TVA_FR_OLD"},{rate:"20",code:"TVA_FR"}];
+
             angular.copy($scope.myDataInit,$scope.myData);
+
+
+            $scope.options = {
+                // call when lazyGrid is instantiate
+                onRegisterApi: function (autocomplete) {
+                    $scope.autocomplete = autocomplete;
+                     // Call when user click
+                    $scope.autocomplete.fn.searchPredicate= function(inputValue,itemToTest){
+                        return (itemToTest.id.indexOf(inputValue) !== -1 || itemToTest.value.indexOf(inputValue) !== -1);
+                    }
+                }
+            }
+
+            $scope.firstRate ="";
+            $scope.firstCode ="";
+            $scope.secondRate ="";
+            $scope.secondCode ="";
+
+            $scope.getRate = function(code){
+                $log.debug("getRate with code: "+code);
+                var result = [];
+                angular.forEach($scope.tvas, function(tva){
+                    if( angular.isUndefined(code) || code == '' || tva.code==code){
+                    result.push({id:tva.rate,value:tva.rate})
+                    }
+                })
+                return result;
+            };
+
+            $scope.getCode = function(rate){
+                $log.debug("getCode with rate: "+rate);
+                var result = [];
+                angular.forEach($scope.tvas, function(tva){
+                    if( angular.isUndefined(rate) || rate == '' ||  tva.rate==rate){
+                    result.push({id:tva.code,value:tva.code})
+                    }
+                })
+                return result;
+            };
+
             $scope.gridOptions = {
                 data:$scope.myData,
                 useExternalFiltering: true,
@@ -107,12 +304,15 @@
                                     key = $scope.gridApi.grid.columns[i].field;
                                     for (var j = 0; j < $scope.gridApi.grid.columns[i].filters.length; j++) {
                                             value = $scope.gridApi.grid.columns[i].filters[j].term;
-                                            if (value != undefined && value != '') {
-                                                if(item[key] == value &&  $scope.myData.push(item)){
-                                                    $scope.myData.push(item);
-                                                    added = true;
-                                                    filterUse = true;
-                                                 }
+                                            if (value != undefined && value != '' && item[key] == value) {
+                                                $scope.myData.push(item);
+                                                added = true;
+                                                filterUse = true;
+                                            }
+                                            if (value == undefined) {
+                                                $scope.myData.push(item);
+                                                added = true;
+                                                filterUse = true;
                                             }
                                          }
                                     }
@@ -149,6 +349,7 @@
  </example>
  */
 
+
 IteSoft
     .directive('itAutocomplete', function () {
         return {
@@ -158,6 +359,10 @@ IteSoft
                  * items list must contain id and value
                  */
                 items: "=",
+                /**
+                 * items list must contain id and value
+                 */
+                itemsGetter: "&?",
                 /**
                  * selected item id
                  */
@@ -181,13 +386,37 @@ IteSoft
                 /**
                  * input placeHolder
                  */
-                placeholder: "="
+                placeholder: "=",
+                /**
+                 * register
+                 */
+                options: "=",
+                /**
+                 * change
+                 */
+                onChange: "&",
+
+                /**
+                 * eventToEmit
+                 */
+                eventSelect: "=",
+                /**
+                 * event to
+                 */
+                eventRefresh: "=",
+                /**
+                 * name
+                 */
+                name: "="
+
             },
             controllerAs: 'itAutocompleteCtrl',
             controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
                 function ($scope, $rootScope, $translate, $document, $timeout, $log) {
 
                     var self = this;
+
+                    self.options = $scope.options;
 
                     /****************************************************************************************
                      *                                  DECLARATION
@@ -208,21 +437,32 @@ IteSoft
                         selectedSelectClass: '',
                         selectedItem: {},
                         searchMode: $scope.searchMode,
-                        placeholder: $scope.placeholder
+                        placeholder: $scope.placeholder,
+                        debug:false,
+                        event: {
+                            refresh:{
+                                name: $scope.eventRefresh,
+                                value:undefined
+
+                            },
+                            select: $scope.eventSelect
+                        }
                     };
 
-                    if(angular.isUndefined(self.fields.optionClass)){
+                    if (angular.isUndefined(self.fields.optionClass)) {
                         self.fields.optionClass = '';
                     }
-                    if(angular.isUndefined(self.fields.optionContainerClass)){
+                    if (angular.isUndefined(self.fields.optionContainerClass)) {
                         self.fields.optionContainerClass = '';
                     }
-                    if(angular.isUndefined(self.fields.inputClass)){
+                    if (angular.isUndefined(self.fields.inputClass)) {
                         self.fields.inputClass = 'it-autocomplete-input-class';
                     }
-                    if(angular.isUndefined(self.fields.placeholder)){
+                    if (angular.isUndefined(self.fields.placeholder)) {
                         self.fields.placeholder = '';
                     }
+
+
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
                     self.fields.selectedSelectClass = self.fields.defaultSelectClass + " it-autocomplete-selected";
@@ -232,7 +472,107 @@ IteSoft
                      */
                     self.fields.optionContainerId = _generateID();
 
+                    self.cleanDomRef = {
+                        _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+                        encode: function (e) {
+                            var t = "";
+                            var n, r, i, s, o, u, a;
+                            var f = 0;
+                            e = self.cleanDomRef._utf8_encode(e);
+                            while (f < e.length) {
+                                n = e.charCodeAt(f++);
+                                r = e.charCodeAt(f++);
+                                i = e.charCodeAt(f++);
+                                s = n >> 2;
+                                o = (n & 3) << 4 | r >> 4;
+                                u = (r & 15) << 2 | i >> 6;
+                                a = i & 63;
+                                if (isNaN(r)) {
+                                    u = a = 64
+                                } else if (isNaN(i)) {
+                                    a = 64
+                                }
+                                t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                            }
+                            return t
+                        },
+                        decode: function (e) {
+                            var t = "";
+                            var n, r, i;
+                            var s, o, u, a;
+                            var f = 0;
+                            if(e.replace) {
+                                e = e.replace(/[^A-Za-z0-9+/=]/g, "");
+                                while (f < e.length) {
+                                    s = this._keyStr.indexOf(e.charAt(f++));
+                                    o = this._keyStr.indexOf(e.charAt(f++));
+                                    u = this._keyStr.indexOf(e.charAt(f++));
+                                    a = this._keyStr.indexOf(e.charAt(f++));
+                                    n = s << 2 | o >> 4;
+                                    r = (o & 15) << 4 | u >> 2;
+                                    i = (u & 3) << 6 | a;
+                                    t = t + String.fromCharCode(n);
+                                    if (u != 64) {
+                                        t = t + String.fromCharCode(r)
+                                    }
+                                    if (a != 64) {
+                                        t = t + String.fromCharCode(i)
+                                    }
+                                }
+                            }
+                            t = cleanDomRef._utf8_decode(t);
+                            return t
+                        },
+                        _utf8_encode: function (e) {
+                            var t = "";
+                            if(e.replace) {
+                                e = e.replace(/rn/g, "n");
+                                for (var n = 0; n < e.length; n++) {
+                                    var r = e.charCodeAt(n);
+                                    if (r < 128) {
+                                        t += String.fromCharCode(r)
+                                    } else if (r > 127 && r < 2048) {
+                                        t += String.fromCharCode(r >> 6 | 192);
+                                        t += String.fromCharCode(r & 63 | 128)
+                                    } else {
+                                        t += String.fromCharCode(r >> 12 | 224);
+                                        t += String.fromCharCode(r >> 6 & 63 | 128);
+                                        t += String.fromCharCode(r & 63 | 128)
+                                    }
+                                }
+                            }
+                            return t
+                        },
+                        _utf8_decode: function (e) {
+                            var t = "";
+                            var n = 0;
+                            var r = c1 = c2 = 0;
+                            while (n < e.length) {
+                                r = e.charCodeAt(n);
+                                if (r < 128) {
+                                    t += String.fromCharCode(r);
+                                    n++
+                                } else if (r > 191 && r < 224) {
+                                    c2 = e.charCodeAt(n + 1);
+                                    t += String.fromCharCode((r & 31) << 6 | c2 & 63);
+                                    n += 2
+                                } else {
+                                    c2 = e.charCodeAt(n + 1);
+                                    c3 = e.charCodeAt(n + 2);
+                                    t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+                                    n += 3
+                                }
+                            }
+                            return t
+                        }
+                    }
 
+                    /**
+                     * Create a random name to have an autogenerate id for log
+                     */
+                    if (angular.isUndefined($scope.name)) {
+                        $scope.name = self.fields.optionContainerId;
+                    }
                     /**
                      * public function
                      * @type {{}}
@@ -240,12 +580,33 @@ IteSoft
                     self.fn = {
                         select: select,
                         change: change,
-                        init: init,
-                        fullInit: fullInit,
+                        init: initSelect,
+                        fullInit: initItems,
                         hideItems: hideItems,
                         showItems: showItems,
-                        keyBoardInteration: keyBoardInteration,
+                        keyBoardInteration: keyBoardInteration
                     };
+
+                    /**
+                     * Listener
+                     * @type {{}}
+                     */
+                    self.on = {};
+
+
+                    if (angular.isDefined($scope.items) && angular.isDefined($scope.itemsGetter)) {
+                        $log.error($scope.name + " Autocomplete must use items or items-getter, you are not allowed to use both")
+                    }
+
+                    if (angular.isUndefined($scope.items) && angular.isUndefined($scope.itemsGetter)) {
+                        $log.error($scope.name + " Autocomplete must use items or items-getter, you need to add one parameter")
+                    }
+                    /**
+                     * Call register function to give ref of current autocomplete to the controller
+                     */
+                    if (angular.isDefined(self.options) && angular.isDefined(self.options.onRegisterApi)) {
+                        self.options.onRegisterApi(self);
+                    }
 
                     /****************************************************************************************
                      *                                  CODE
@@ -254,77 +615,104 @@ IteSoft
                     /**
                      * initialize default data
                      */
-                    fullInit();
+                    initItems();
+                    initSelect();
                     $scope.focusIndex = -1;
+                    updateIndex();
                     //Apply default select
                     _selectItemWithId($scope.selectedOption);
 
                     /**
-                     * Watch items change to items to reload select if item is now present
+                     * Listern refresh event to refresh component when throw
                      */
-                    $scope.$watch('items', function (newValue, oldValue) {
-                        $log.debug("itAutocomplete: items value changed");
-                        fullInit();
-                        _selectItemWithId($scope.selectedOption);
-                        hideItems();
-                    });
+                    if (self.fields.event.refresh.name) {
+                        $rootScope.$on(self.fields.event.refresh.name, function (event, value) {
+
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: refresh event emit, calling refresh items ");}
+                            self.fields.event.refresh.value = value;
+                            initItems();
+                            hideItems();
+                            initSelect();
+                        });
+
+                    } else {
+                        /**
+                         * Watch items change to items to reload select if item is now present
+                         */
+
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: refresh event is not defined, add watch to items");}
+                        $scope.$watch('items', function (newValue, oldValue) {
+                            if (newValue != self.fields.item) {
+
+                                if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);}
+                                initItems();
+                                initSelect();
+                                _selectItemWithId($scope.selectedOption);
+                                hideItems();
+                            }
+                        });
+                    }
+
 
                     /**
                      * Watch selectedOption change to select option if value change outside this directive
                      */
                     $scope.$watch('selectedOption', function (newValue, oldValue) {
+                        if ($scope.onChange) {
+                            $scope.onChange();
+                        }
 
-                        $log.debug("itAutocomplete: selectedOption value changed");
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);}
                         //if an oldValue is set
-                        if(angular.isDefined(oldValue)){
+                        if (angular.isDefined(oldValue)) {
                             _unselectItemWithId(oldValue);
                         }
+
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
                             _selectItemWithId(newValue);
-                            hideItems();
                         }
                     });
 
                     /**
                      * Keyboard interation
                      */
-                    $scope.$watch('focusIndex', function (newValue, oldValue) {
-                        $log.debug("itAutocomplete: focusIndex value changed");
-                        if (newValue != oldValue) {
-                            if (newValue < 0) {
-                                $scope.focusIndex = -1;
-                            } else if (newValue >= self.fields.items.length) {
-                                $scope.focusIndex = self.fields.items.length - 1;
-                            }
-                            if (angular.isDefined(self.fields.items)) {
+                    function updateIndex() {
+
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);}
+                        if ($scope.focusIndex < 0) {
+                            $scope.focusIndex = -1;
+                        } else if ($scope.focusIndex >= self.fields.items.length) {
+                            $scope.focusIndex = self.fields.items.length - 1;
+                        }
+                        if (angular.isDefined(self.fields.items)) {
+                            if (self.fields.items[$scope.focusIndex] != self.selectedItem) {
                                 select(self.fields.items[$scope.focusIndex]);
                             }
                         }
-
-                    });
+                    };
 
                     /****************************************************************************************
                      *                                  FUNCTION
                      **************************************************************************************/
-
                     /**
                      * Select Item with it id
                      * @param id
                      * @private
                      */
-                    function _selectItemWithId(id) {[]
-                        $log.debug("itAutocomplete: select with  id "+id);
+                    function _selectItemWithId(id) {
+
                         var selected = false;
                         self.fields.selectedItem = {};
                         if (angular.isDefined(id)) {
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select with  id " + id);}
                             angular.forEach(self.fields.items, function (item) {
                                 if (item.id == id) {
-                                    select(item);
+                                    applySelection(item);
                                     selected = true;
                                 }
                             });
                             if (!selected) {
-                                init();
+                                initSelect();
                             }
                         }
                     }
@@ -334,10 +722,9 @@ IteSoft
                      * @param id
                      * @private
                      */
-                    function _unselectItemWithId(id){
-                        $log.debug("itAutocomplete: unselect with id "+id);
-
+                    function _unselectItemWithId(id) {
                         if (angular.isDefined(id)) {
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: unselect with id " + id);}
                             angular.forEach(self.fields.items, function (item) {
                                 if (item.id == id) {
                                     unselect(item);
@@ -349,24 +736,33 @@ IteSoft
                     /**
                      * init + copy of externalItems
                      */
-                    function fullInit() {
-                        $log.debug("itAutocomplete: copy option items");
-                        angular.copy($scope.items, self.fields.items);
-                        init();
+                    function initItems() {
+                        if (angular.isDefined($scope.items)) {
+                            self.fields.items = angular.copy($scope.items);
+                        } else {
+                            self.fields.items = angular.copy($scope.itemsGetter({param: self.fields.event.refresh.value}));
+                        }
+                        self.fields.initialItems = angular.copy(self.fields.items);
+
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: copy option items " + self.fields.initialItems);}
                     }
 
                     /**
                      * Style class and position initialization
                      */
-                    function init() {
+                    function initSelect() {
+
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: init select ");}
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
-                            if (angular.isDefined(self.fields.selectedItem)){
-                                if (self.fields.selectedItem != item) {
-                                    unselect(item);
-                                } else {
+                            if (angular.isDefined(self.fields.selectedItem)) {
+                                if (self.fields.selectedItem == item) {
                                     select(item)
+                                }else{
+                                    unselect(item);
                                 }
+                            } else {
+                                unselect(item);
                             }
                             item.position = i;
                             i++;
@@ -378,18 +774,43 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        $log.debug("itAutocomplete: select "+selectedItem.id);
                         // reset last selectedItem class
                         if (angular.isDefined(self.fields.selectedItem)) {
                             unselect(self.fields.selectedItem);
                         }
                         if (angular.isDefined(selectedItem)) {
-                            $scope.focusIndex = selectedItem.position;
-                            self.fields.selectedItem = selectedItem;
+
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));}
                             $scope.selectedOption = selectedItem.id;
+                        } else {
+
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select empty");}
+                            $scope.selectedOption = undefined;
+                        }
+                        if (self.fields.event.select) {
+
+                            if(self.fields.debug) { $log.debug($scope.name + " itAutocomplete: emit select event " + $scope.selectedOption);}
+                            $rootScope.$emit(self.fields.event.select, $scope.selectedOption);
+                        }
+                    }
+
+
+                    function applySelection(selectedItem) {
+                        if (angular.isDefined(selectedItem)) {
+
+                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));}
+                            if ($scope.focusIndex != selectedItem.position) {
+                                $scope.focusIndex = selectedItem.position;
+                                updateIndex();
+                            }
+                            self.fields.selectedItem = selectedItem;
                             self.fields.selectedItem.class = self.fields.selectedSelectClass;
-                            var selectedDiv = $document[0].querySelector("#options_" + selectedItem.id);
+                            var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(self.fields.selectedItem.id+""));
                             scrollTo(selectedDiv);
+                        } else {
+                            self.fields.selectedItem = undefined;
+                            $scope.focusIndex = -1;
+                            updateIndex();
                         }
                     }
 
@@ -406,13 +827,23 @@ IteSoft
                      * @param divId
                      */
                     function scrollTo(targetDiv) {
-                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId);
+
+                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId+"");
+
+                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: scrollTo "+"#" + self.fields.optionContainerId+" to: "+targetDiv);}
                         if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
                             && angular.isDefined(containerDiv) && containerDiv != null) {
                             var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
                             var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
                             var pos = targetPosition - containerPosition;
                             containerDiv.scrollTop = pos;
+                            if(self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: scrollTo parent " + containerDiv.parentElement.getBoundingClientRect().top);
+                                $log.debug($scope.name + " itAutocomplete: scrollTo container " + containerDiv.getBoundingClientRect().top);
+                                $log.debug($scope.name + " itAutocomplete: scrollTo targetDiv " + targetDiv.getBoundingClientRect().top);
+                            }
+                        }else{
+                            $log.error($scope.name + " itAutocomplete: scrollTo unable to scroll target div");
                         }
                     }
 
@@ -420,43 +851,46 @@ IteSoft
                      * Hide option items
                      */
                     function hideItems($event) {
+                        $log.debug($scope.name + " itAutocomplete: hide");
                         // Si appelé lors du click sur la touche entrée
-                        if(angular.isUndefined($event) ){
+                        if (angular.isUndefined($event)) {
                             self.fields.showItems = false;
-                            self.fields.inputSearch = self.fields.selectedItem.value;
+                            if (angular.isDefined(self.fields.selectedItem)) {
+                                self.fields.inputSearch = self.fields.selectedItem.value;
+                            }
                             // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
-                        } else if(! document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
+                        } else if (!document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
                             self.fields.showItems = false;
-                            self.fields.inputSearch = self.fields.selectedItem.value;
+                            if (angular.isDefined(self.fields.selectedItem)) {
+                                self.fields.inputSearch = self.fields.selectedItem.value;
+                            }
 
                             //si il s'agit de la scrollbar, on annule le onblur en remettant le focus sur l'element
-                        }else{
-                            $scope.$applyAsync(function(){
+                        } else {
+                            $scope.$applyAsync(function () {
                                 $event.srcElement.focus();
                             })
-                        };
+                        }
+                        ;
                     }
 
                     /**
                      * Return internet explorer version
                      * @returns {number}
                      */
-                    function getInternetExplorerVersion()
-                    {
+                    function getInternetExplorerVersion() {
                         var rv = -1;
-                        if (navigator.appName == 'Microsoft Internet Explorer')
-                        {
+                        if (navigator.appName == 'Microsoft Internet Explorer') {
                             var ua = navigator.userAgent;
-                            var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                            var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
                             if (re.exec(ua) != null)
-                                rv = parseFloat( RegExp.$1 );
+                                rv = parseFloat(RegExp.$1);
                         }
-                        else if (navigator.appName == 'Netscape')
-                        {
+                        else if (navigator.appName == 'Netscape') {
                             var ua = navigator.userAgent;
-                            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
+                            var re = new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})");
                             if (re.exec(ua) != null)
-                                rv = parseFloat( RegExp.$1 );
+                                rv = parseFloat(RegExp.$1);
                         }
                         return rv;
                     }
@@ -466,11 +900,11 @@ IteSoft
                      */
                     function showItems($event) {
                         //refresh modal position on internet explorer because fixed position doesn't follow scroll
-                        if(angular.isDefined($event) && getInternetExplorerVersion() != -1){
-                                var container = $event.srcElement.parentElement.children[1];
-                                var myParent = angular.element($event.srcElement.parentElement)[0];
+                        if (angular.isDefined($event) && getInternetExplorerVersion() != -1) {
+                            var container = $event.srcElement.parentElement.children[1];
+                            var myParent = angular.element($event.srcElement.parentElement)[0];
                             //only needed with ie and fixed positiion
-                            if( angular.isDefined(container) && angular.isDefined(myParent) && container.currentStyle["position"]== "fixed") {
+                            if (angular.isDefined(container) && angular.isDefined(myParent) && container.currentStyle["position"] == "fixed") {
                                 var newTop = (myParent.getBoundingClientRect().top + myParent.getBoundingClientRect().height);
                                 container.style.setProperty("top", newTop + "px");
                             }
@@ -481,19 +915,32 @@ IteSoft
                     /**
                      * Call when search input content change
                      */
-                    function change() {
-                        $log.debug("itAutocomplete: input search change value")
+                    function change(event) {
+                        $log.debug($scope.name + " itAutocomplete: input search change value "+event+"->"+self.fields.inputSearch)
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
-                            fullInit();
+                            select(undefined);
+                            initItems();
+                            initSelect();
                         } else {
                             var i = 0;
-                            angular.forEach($scope.items, function (item) {
+                            angular.forEach(self.fields.initialItems, function (item) {
                                 /**
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
-                                    if (item.value.toLowerCase().startsWith(self.fields.inputSearch.toLowerCase())) {
+                                    if (_getLower(item.value).startsWith(_getLower(self.fields.inputSearch))) {
+                                        self.fields.items.push(item);
+                                        self.fields.items[i].position = i;
+                                        i++;
+                                    }
+                                    /**
+                                     * Contains
+                                     */
+                                } else if (self.fields.searchMode == "custom") {
+                                    if (angular.isUndefined(self.fn.searchPredicate)) {
+                                        $log.error($scope.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
+                                    } else if (self.fn.searchPredicate(self.fields.inputSearch, item)) {
                                         self.fields.items.push(item);
                                         self.fields.items[i].position = i;
                                         i++;
@@ -502,16 +949,16 @@ IteSoft
                                      * Contains
                                      */
                                 } else {
-                                    if (item.value.toLowerCase().search(self.fields.inputSearch.toLowerCase()) != -1) {
+                                    if (_getLower(item.value).search(_getLower(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
                                         self.fields.items[i].position = i;
                                         i++;
                                     }
                                 }
                             });
-                        }
-                        if (self.fields.items.length == 1) {
-                            select(self.fields.items[0]);
+                            if (self.fields.items.length == 1) {
+                                select(self.fields.items[0]);
+                            }
                         }
                         showItems();
                     }
@@ -536,6 +983,7 @@ IteSoft
                                 showItems();
                                 if (self.fields.inputSearch == "") {
                                     $scope.focusIndex = -1;
+                                    updateIndex();
                                 }
                             }
                         }
@@ -544,12 +992,14 @@ IteSoft
                         code: KEY_DOWN, action: function () {
                             showItems();
                             $scope.focusIndex--;
+                            updateIndex();
                         }
                     });
                     $scope.keys.push({
                         code: KEY_UP, action: function () {
                             showItems();
                             $scope.focusIndex++;
+                            updateIndex();
                         }
                     });
 
@@ -580,16 +1030,34 @@ IteSoft
                         });
                         return uuid;
                     };
+
+                    /**
+                     *
+                     * @param value
+                     * @returns {string}
+                     * @private
+                     */
+                    function _getLower(value) {
+                        var result = "";
+                        if (value.toLowerCase) {
+                            result += value.toLowerCase();
+                        } else {
+                            result += value;
+                        }
+                        return result;
+                    }
+
                 }
             ],
-            template: '<div class="col-xs-12 it-autocomplete-div">'+
-            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
-            'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change()" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '<div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
-            '<div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-            '<div ng-class="item.class" id="options_{{item.id}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
-            '</div>' +
-            '</div>' +
+            template: '<div class="col-xs-12 it-autocomplete-div">' +
+            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
+            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
+            'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
+            '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
+            '          <div ng-class="item.class" id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(item.id)}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
+            '       </div>' +
+            '   </div>' +
             '</div>'
         }
     })
