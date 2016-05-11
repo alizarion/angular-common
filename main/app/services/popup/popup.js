@@ -181,7 +181,7 @@ IteSoft
                 scope: self.scope,
                 template : MODAL_TPLS,
 
-                controller :['$scope' ,'$modalInstance',function($scope, $modalInstance) {
+                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
                    // $scope.data = {};
                     $scope.itButtonAction= function(event, button ) {
                         var todo = (button.onTap || _noop)(event,$scope);

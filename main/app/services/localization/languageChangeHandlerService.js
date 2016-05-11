@@ -31,6 +31,8 @@
  *   <br />onChangePopup:
  *   <br />title: title of popup confirmation
  *   <br />text: text of popup confirmation
+ *   <br />buttonCancelLabel: label text for the cancel button
+ *   <br />buttonOkLabel: label text for the ok button
  *   </td>
  *  </tr>
  *  <tr>
@@ -99,7 +101,9 @@ IteSoft.provider('itLanguageChangeHandler', function () {
         displayConfirm: true,// true | false
         onChangePopup: {
             title: "Confirm language change",
-            text: "By modifying the language any recent changes may be lost. Continue?"
+            text: "By modifying the language any recent changes may be lost. Continue?",
+            buttonCancelLabel: 'NO',
+            buttonOkLabel: 'YES'
         }
     };
 
@@ -119,23 +123,8 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     var confirmPopup = itPopup.confirm({
                         title: self.options.onChangePopup.title,
                         text: self.options.onChangePopup.text,
-                        buttons: [
-
-                            {
-                                text: 'Cancel',
-                                type: '',
-                                onTap: function () {
-                                    return false;
-                                }
-                            },
-                            {
-                                text: 'ok',
-                                type: '',
-                                onTap: function () {
-                                    return true;
-                                }
-                            }
-                        ]
+                        cancelText: self.options.onChangePopup.buttonCancelLabel,
+                        okText: self.options.onChangePopup.buttonOkLabel
                     });
                     (function (data) {
                         var locale = data;
