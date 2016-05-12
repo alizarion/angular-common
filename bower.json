@@ -26,6 +26,8 @@
     "jsonlint": "https://gitlab.com/itesoft/jsonlint.git",
     "css-lint": "https://gitlab.com/itesoft/css-lint.git#master",
     "jshint": "2.9.1",
-    "angular-atmosphere": "https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js"
+    "angular-atmosphere": "https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js",
+    "libtiff": "https://gitlab.com/itesoft/tiff.js.git",
+    "pdfjs-dist": "https://gitlab.com/itesoft/pdfjs.dist.git"
   }
 }
