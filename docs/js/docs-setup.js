@@ -239,6 +239,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itMediaViewer",
+      "shortName": "itMediaViewer",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "Provide a circular button like for the full screen button",
+      "keywords": "$scope aec angular api button circular controller custom directive fit_height full function homectrl html http initialscale itesoft itesoft-showcase js module ng-controller odata options pdf provide provider screen showtoolbar src true v2"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itModalFullScreen",
       "shortName": "itModalFullScreen",
       "type": "directive",
@@ -418,7 +427,10 @@ NG_DOCS={
     "scripts": [
       "js/marked.js",
       "js/dist/assets/lib/vendor.min.js",
-      "js/dist/app/itesoft.debug.js"
+      "js/dist/app/itesoft.debug.js",
+      "js/dist/assets/lib/pdf.worker.js",
+      "js/dist/assets/lib/pdf.js",
+      "js/dist/assets/lib/tiff.min.js"
     ],
     "styles": [
       "css/dist/assets/fonts/itesoft-bundle.min.css"
@@ -442,7 +454,10 @@ NG_DOCS={
   "scripts": [
     "js/marked.js",
     "js/dist/assets/lib/vendor.min.js",
-    "js/dist/app/itesoft.debug.js"
+    "js/dist/app/itesoft.debug.js",
+    "js/dist/assets/lib/pdf.worker.js",
+    "js/dist/assets/lib/pdf.js",
+    "js/dist/assets/lib/tiff.min.js"
   ],
   "styles": [
     "css/dist/assets/fonts/itesoft-bundle.min.css"

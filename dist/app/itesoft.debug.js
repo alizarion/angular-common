@@ -1,6 +1,15 @@
 /**
  *
  */
+
+var itMultiPagesViewer = angular.module('it-multi-pages-viewer', []);
+
+var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer']);
+
+var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer']);
+
+var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']); 
+
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.bootstrap.tabs',
@@ -21,57 +30,11 @@ var IteSoft = angular.module('itesoft', [
     'ngToast',
     'mgcrea.ngStrap.datepicker',
     'mgcrea.ngStrap.tooltip',
-    'ui.codemirror'
+    'ui.codemirror',
+    'it-pdf-viewer',
+    'it-image-viewer',
+    'it-tiff-viewer'
 ]);
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 'use strict';
 
@@ -175,6 +138,141 @@ IteSoft
             };
         }]);
     }]);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
 
 'use strict';
 /**
@@ -1023,141 +1121,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 
 /**
@@ -2858,7 +2821,6 @@ IteSoft
                 return result;
             };
 
-
             $scope.gridOptions = {
                 data:$scope.myData,
                 useExternalFiltering: true,
@@ -4138,6 +4100,262 @@ IteSoft
             }
         }
 }]);
+'use strict';
+/**
+ * TODO itInclude desc
+ */
+IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *     <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" >
+     <it-media-viewer src="'http://clisla/Sparda-AngularJS/data/VSOne - Custom OData Provider V2.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height' }"></it-media-viewer>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("src", function(value){
+            if(value){
+                var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+
+                if(typeof value === typeof ""){
+                    scope.ext = _splitLast(value, '.').toLowerCase();
+                    switch (scope.ext) {
+                        case 'pdf':
+                            scope.pdfSrc = value;
+                            itScriptService.LoadScripts([
+                                pathJs + '/pdf.js'
+                            ]).then(function() {
+                                //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                                PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                                scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                            });
+                            break;
+                        case 'png':
+                        case 'jpeg':
+                            scope.imageSrc = value;
+                            scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                            break;
+                        case 'tif':
+                        case 'tiff':
+                            scope.tiffSrc = value;
+                            itScriptService.LoadScripts([
+                                pathJs + '/tiff.min.js'
+                            ]).then(function() {
+                                scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                            });
+                            break;
+                        default :
+                            scope.template = 'No template found for extension : '  + scope.ext;
+                            break;
+                    }
+                }else{
+                    scope.template = 'Only string type supported for now : '  + typeof value;
+                }
+            }else {
+                scope.template = null;
+            }
+        });
+    };
+
+    return {
+        scope: {
+            src : '=',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 "use strict";
 /**
  * @ngdoc directive
@@ -4201,45 +4419,6 @@ IteSoft
                 };
             }
 
-        };
-    }]);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
         };
     }]);
 'use strict';
@@ -5618,120 +5797,6 @@ IteSoft
     });
 
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
 /**
  * Created by sza on 22/04/2016.
  */
@@ -6807,6 +6872,169 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 
 'use strict';
 /**
@@ -7751,4 +7979,1877 @@ IteSoft
             }, opts || {}));
         }
         return itPopup;
+    }]);
+
+'use strict';
+/**
+ * TODO Image implementation desc
+ */
+itImageViewer
+    .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
+
+    function IMAGEPage(pageIndex, img, view) {
+        this.base = MultiPagesPage;
+        this.base(pageIndex, view);
+        this.img = img;
+    }
+
+    IMAGEPage.prototype = new MultiPagesPage;
+
+    IMAGEPage.prototype.render = function (callback) {
+        var self = this;
+        if(this.rendered) {
+            if(callback) {
+                callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+            }
+            return;
+        };
+
+        this.rendered = true;
+
+        if(this.canvasRendered){
+            self.container.append(self.canvas);
+        }else {
+            self.container.append(self.canvas);
+
+            var ctx = self.canvas[0].getContext('2d');
+            ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+
+            if(callback) {
+                callback(self, MultiPagesConstants.PAGE_RENDERED);
+            }
+        }
+    };
+
+    return (IMAGEPage);
+}])
+
+    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
+        function IMAGEViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new MultiPagesViewerAPI(this), element);
+        }
+
+        IMAGEViewer.prototype = new MultiPagesViewer;
+
+        IMAGEViewer.prototype.open = function(url, initialScale, pageMargin) {
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            var self = this;
+
+            if (url !== undefined && url !== null && url !== '') {
+                self.getAllPages(url, function(pageList) {
+                    self.pages = pageList;
+
+                    self.setContainerSize(initialScale);
+                });
+            }
+        };
+        IMAGEViewer.prototype.getAllPages = function(url, callback) {
+            var pageList = [],
+                self = this;
+
+            pageList.push({});
+
+            var img = new Image;
+            img.onprogress = angular.bind(this, self.downloadProgress);
+            img.onload = function(){
+                var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
+                pageList[0] = page;
+
+                self.element.append(page.container);
+
+                callback(pageList);
+            };
+            img.src = url;
+        };
+
+        return (IMAGEViewer);
+    }])
+
+    .directive("imageViewer", ['$log', 'IMAGEViewer', function ($log, IMAGEViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                api: "=",
+                initialScale: "@",
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                var viewer = new IMAGEViewer($element); ;
+
+                $scope.api = viewer.getAPI();
+
+                $scope.onSrcChanged = function () {
+                    $element.empty();
+                    viewer.open(this.src, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope, $scope.initialScale);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', function (src) {
+                    scope.onSrcChanged();
+                });
+            }
+        };
+    }]);
+
+
+'use strict';
+/**
+ * TODO itImageViewer desc
+ */
+itImageViewer.directive('itImageViewer', ['$sce', function($sce){
+    var linker = function (scope, element, attrs) {
+        scope.trustSrc = function(src) {
+            return $sce.trustAsResourceUrl(src);
+        };
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    '<image-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
+ * TODO itProgressbarViewer desc
+ */
+itMultiPagesViewer.directive('itProgressbarViewer', [function(){
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="loader" >' +
+        '<div class="progress-bar">' +
+        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
+        '</div>' +
+        '</div>'
+    };
+}]);
+'use strict';
+/**
+ * TODO itToolbarViewer desc
+ */
+itMultiPagesViewer.directive('itToolbarViewer', [function(){
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("api.getZoomLevel()", function (value) {
+            scope.scale = value;
+        });
+
+        scope.$watch("api.getCurrentPage()", function (value) {
+            scope.currentPage = value;
+        });
+
+        scope.onZoomLevelChanged = function() {
+            scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onPageChanged = function() {
+            scope.api.goToPage(scope.currentPage);
+        };
+
+        scope.zoomIn = function() {
+            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+
+        scope.zoomOut = function() {
+            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+    };
+
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="toolbar">' +
+        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+        '<button ng-click="zoomOut()">-</button> ' +
+        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
+        '</select> ' +
+        '<button ng-click="zoomIn()">+</button> ' +
+        '</div>' +
+
+        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+        '<span>Page : </span>' +
+        '<button ng-click="api.goToPrevPage()"><</button> ' +
+        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+        '<button ng-click="api.goToNextPage()">></button> ' +
+        '<span> of {{api.getNumPages()}}</span>' +
+        '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesConstants desc
+ */
+itMultiPagesViewer.constant("MultiPagesConstants", {
+    PAGE_RENDER_FAILED : -1,
+    PAGE_RENDER_CANCELLED : 0,
+    PAGE_RENDERED : 1,
+    PAGE_ALREADY_RENDERED : 2,
+    ZOOM_LEVELS_LUT : [
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
+        2.0, 2.2, 2.4, 2.6, 2.8,
+        3.0, 3.3, 3.6, 3.9,
+        4.0, 4.5,
+        5.0],
+    ZOOM_FIT_WIDTH : "fit_width",
+    ZOOM_FIT_PAGE : "fit_page",
+    ZOOM_FIT_HEIGHT : "fit_height"
+})
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+
+    function MultiPagesPage(pageIndex, view) {
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page'></div>");
+        this.container.attr("id", "page_" + pageIndex);
+
+        this.canvasRendered = false;
+        this.rendered = false;
+
+        //transform
+        this.view = view;
+
+    }
+
+    MultiPagesPage.prototype = {
+        clear: function () {
+            this.rendered = false;
+            this.container.empty();
+        },
+        getViewport: function (scale) {
+            return new PageViewport(this.view, scale, 0, 0, 0);
+        },
+        resize: function (scale) {
+            this.viewport = this.getViewport(scale);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
+
+            this.container.css("width", this.viewport.width + "px");
+            this.container.css("height", this.viewport.height + "px");
+        },
+        isVisible: function () {
+            var pageContainer = this.container[0];
+            var parentContainer = this.container.parent()[0];
+
+            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+            var pageBottom = pageTop + pageContainer.offsetHeight;
+
+            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+        },
+        render: function (callback) {
+            throw "NotImplementedError - render";
+        }
+    };
+
+    return (MultiPagesPage);
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesViewer desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+    function getElementInnerSize(element, margin) {
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
+
+        element.append(tallTempElement);
+
+        var w = tallTempElement[0].offsetWidth;
+
+        tallTempElement.remove();
+
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
+
+        w -= 2 * margin;
+        h -= 2 * margin;
+
+        return {
+            width: w,
+            height: h
+        };
+    }
+
+    function MultiPagesViewer(api, element) {
+        this.pages = [];
+        this.scaleItem = null;
+        this.fitWidthScale = 1.0;
+        this.fitHeightScale = 1.0;
+        this.fitPageScale = 1.0;
+        this.element = element;
+        this.pageMargin = 0;
+        this.currentPage = 0;
+        this.lastScrollDir = 0;
+
+        this.api = api;
+
+        // Hooks for the client...
+        this.onPageRendered = null;
+        this.onDataDownloaded = null;
+        this.onCurrentPageChanged = null;
+    }
+
+    MultiPagesViewer.prototype = {
+        getAPI: function () {
+            return this.api;
+        },
+        setContainerSize: function (initialScale) {
+            if(this.pages.length > 0){
+                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                this.api.zoomLevels = [];
+                var lastScale = 0.1;
+                do {
+                    var curScale = this.api.getNextZoomInScale(lastScale);
+                    if(curScale.value=== lastScale) {
+                        break;
+                    }
+
+                    if(curScale.value === 100){
+                        this.defaultScale = curScale;
+                    }
+
+                    if(this.scaleItem == undefined && curScale.id === initialScale){
+                        this.scaleItem = curScale;
+                    }
+
+                    this.api.zoomLevels.push(curScale);
+
+                    lastScale = curScale.value;
+                } while(true);
+
+                this.setScale(this.scaleItem);
+            }
+        },
+        setScale: function (scaleItem) {
+            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+
+            var numPages = this.pages.length;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                // Clear the page's contents...
+                this.pages[iPage].clear();
+
+                // Resize to current scaleItem...
+                this.pages[iPage].resize(si.value);
+            }
+
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        calcScale: function (desiredScale) {
+            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                // Find the widest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxWidth = this.pages[0].getViewport(1.0).width;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                }
+
+                return this.containerSize.width / maxWidth;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                // Find the highest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxHeight = this.pages[0].getViewport(1.0).height;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                }
+
+                return this.containerSize.height / maxHeight;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                // Find the smaller dimension of the container and fit the 1st page to it.
+                var page0Viewport = this.pages[0].getViewport(1.0);
+
+                if(this.containerSize.height < this.containerSize.width) {
+                    return this.containerSize.height / page0Viewport.height;
+                }
+
+                return this.containerSize.width / page0Viewport.width;
+            }
+
+            var scale = parseFloat(desiredScale);
+            if(isNaN(scale)) {
+                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                return 1.0;
+            }
+
+            return scale;
+        },
+        removeDistantPages: function (curPageID, distance) {
+            var numPages = this.pages.length;
+
+            var firstActivePageID = Math.max(curPageID - distance, 0);
+            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+
+            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                this.pages[iPage].clear();
+            }
+
+            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                this.pages[iPage].clear();
+            }
+        },
+        renderAllVisiblePages: function (scrollDir) {
+            if(scrollDir != undefined){
+                this.lastScrollDir = scrollDir;
+            }
+
+            var self = this;
+            var numPages = this.pages.length;
+            var currentPageID = 0;
+            var atLeastOnePageInViewport = false;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+
+                if(page.isVisible()) {
+                    var parentContainer = page.container.parent()[0];
+                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
+                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                        currentPageID = iPage;
+                    }
+
+                    atLeastOnePageInViewport = true;
+                    page.render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                } else {
+                    if(atLeastOnePageInViewport) {
+                        break;
+                    }
+                }
+            }
+
+            if(this.lastScrollDir !== 0) {
+                var nextPageID = currentPageID + this.lastScrollDir;
+                if(nextPageID >= 0 && nextPageID < numPages) {
+                    this.pages[nextPageID].render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                }
+            }
+
+            this.removeDistantPages(currentPageID, 2);
+
+            this.currentPage = currentPageID + 1;
+            if(this.onCurrentPageChanged){
+                this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        hookScope: function(scope, initialScale) {
+            var self = this;
+            var lastScrollY = 0;
+            var watcher = new SizeWatcher(self.element[0], 200);
+            scope.$watchGroup(watcher.group, function(values) {
+                self.setContainerSize(initialScale);
+            });
+
+            var onProgress = function(operation, state, value, total, message) {
+                if (operation === "render" && value === 1) {
+                    if (state === "success") {
+                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                    }
+                    else {
+                        $log.debug("Failed to render 1st page!\n\n" + message);
+                    }
+                }
+                else if (operation === "download" && state === "loading") {
+                    self.api.downloadProgress = (value / total) * 100.0;
+                }
+                else {
+                    if (state === "failed") {
+                        $log.debug("Something went really bad!\n\n" + message);
+                    }
+                }
+            };
+
+            scope.onPageRendered = function(status, pageID, numPages, message) {
+                onProgress("render", status, pageID, numPages, message);
+            };
+
+            scope.onDataDownloaded = function(status, loaded, total, message) {
+                onProgress("download", status, loaded, total, message);
+            };
+
+            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+            scope.$on('$destroy', function() {
+                if(self.onDestroy != null){
+                    try	{
+
+                    }catch (ex)
+                    {
+                        $log.log(ex);
+                    }
+                    self.onDestroy();
+                }
+                watcher.cancel();
+                self.element.empty();
+                $log.debug("viewer destroyed");
+            });
+
+            self.element.bind("scroll", function(event) {
+                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
+                scope.scrollTimeout = $timeout(function() {
+                    var scrollTop = self.element[0].scrollTop;
+
+                    var scrollDir = scrollTop - lastScrollY;
+                    lastScrollY = scrollTop;
+
+                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                }, 350);
+            });
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        }
+    };
+
+    return (MultiPagesViewer);
+}]);
+'use strict';
+/**
+ * TODO MultiPagesViewerAPI desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+
+        function MultiPagesViewerAPI(viewer) {
+            this.viewer = viewer;
+            this.scaleItems = {};
+            this.zoomLevels = [];
+        };
+
+        MultiPagesViewerAPI.prototype = {
+            getNextZoomInScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                }else {
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            getNextZoomOutScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = numZoomLevels - 1; i >= 0;--i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                } else{
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            zoomTo: function (scaleItem) {
+                if(scaleItem != undefined){
+                    this.viewer.setScale(scaleItem);
+                }
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            goToPage: function (pageIndex) {
+                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                    return;
+                }
+
+                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            },
+            goToNextPage: function () {
+                this.goToPage(this.viewer.currentPage + 1);
+            },
+            goToPrevPage: function () {
+                this.goToPage(this.viewer.currentPage - 1);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            }
+        };
+
+        return (MultiPagesViewerAPI);
+    }]);
+
+'use strict';
+/**
+ * TODO PageViewport desc
+ */
+itMultiPagesViewer.factory('PageViewport', [function() {
+
+        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+            this.viewBox = viewBox;
+            this.scale = scale;
+            this.rotation = rotation;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+
+            // creating transform to convert pdf coordinate system to the normal
+            // canvas like coordinates taking in account scale and rotation
+            var centerX = (viewBox[2] + viewBox[0]) / 2;
+            var centerY = (viewBox[3] + viewBox[1]) / 2;
+            var rotateA, rotateB, rotateC, rotateD;
+            rotation = rotation % 360;
+            rotation = rotation < 0 ? rotation + 360 : rotation;
+            switch (rotation) {
+                case 180:
+                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                    break;
+                case 90:
+                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                    break;
+                case 270:
+                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                    break;
+                //case 0:
+                default:
+                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                    break;
+            }
+
+            if (dontFlip) {
+                rotateC = -rotateC; rotateD = -rotateD;
+            }
+
+            var offsetCanvasX, offsetCanvasY;
+            var width, height;
+            if (rotateA === 0) {
+                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            } else {
+                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            }
+            // creating transform for the following operations:
+            // translate(-centerX, -centerY), rotate and flip vertically,
+            // scale, and translate(offsetCanvasX, offsetCanvasY)
+            this.transform = [
+                rotateA * scale,
+                rotateB * scale,
+                rotateC * scale,
+                rotateD * scale,
+                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+            ];
+
+            this.width = width;
+            this.height = height;
+            this.fontScale = scale;
+        }
+        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+            /**
+             * Clones viewport with additional properties.
+             * @param args {Object} (optional) If specified, may contain the 'scale' or
+             * 'rotation' properties to override the corresponding properties in
+             * the cloned viewport.
+             * @returns {PDFJS.PageViewport} Cloned viewport.
+             */
+            clone: function PageViewPort_clone(args) {
+                args = args || {};
+                var scale = 'scale' in args ? args.scale : this.scale;
+                var rotation = 'rotation' in args ? args.rotation : this.rotation;
+                return new PageViewport(this.viewBox.slice(), scale, rotation,
+                    this.offsetX, this.offsetY, args.dontFlip);
+            },
+            /**
+             * Converts PDF point to the viewport coordinates. For examples, useful for
+             * converting PDF location into canvas pixel coordinates.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the viewport coordinate space.
+             * @see {@link convertToPdfPoint}
+             * @see {@link convertToViewportRectangle}
+             */
+            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+                return Util.applyTransform([x, y], this.transform);
+            },
+            /**
+             * Converts PDF rectangle to the viewport coordinates.
+             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+             * @returns {Array} Contains corresponding coordinates of the rectangle
+             * in the viewport coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToViewportRectangle:
+                function PageViewport_convertToViewportRectangle(rect) {
+                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                    return [tl[0], tl[1], br[0], br[1]];
+                },
+            /**
+             * Converts viewport coordinates to the PDF location. For examples, useful
+             * for converting canvas pixel location into PDF one.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the PDF coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+                return Util.applyInverseTransform([x, y], this.transform);
+            }
+        };
+
+        return (PageViewport);
+    }]);
+
+'use strict';
+/**
+ * TODO SizeWatcher desc
+ */
+itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
+        return function (element, rate) {
+            var self = this;
+            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
+            self.monitor = $interval(self.update, rate);
+            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
+            self.cancel = function() { $interval.cancel(self.monitor); };
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO CustomStyle desc
+ */
+itPdfViewer.factory('CustomStyle', [function () {
+        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
+        //              animate-css-transforms-firefox-webkit.html
+        // in some versions of IE9 it is critical that ms appear in this list
+        // before Moz
+        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
+        var _cache = {};
+
+        function CustomStyle() {}
+
+        CustomStyle.getProp = function get(propName, element) {
+            // check cache only when no element is given
+            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
+                return _cache[propName];
+            }
+
+            element = element || document.documentElement;
+            var style = element.style, prefixed, uPropName;
+
+            // test standard property first
+            if (typeof style[propName] === 'string') {
+                return (_cache[propName] = propName);
+            }
+
+            // capitalize
+            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+
+            // test vendor specific properties
+            for (var i = 0, l = prefixes.length; i < l; i++) {
+                prefixed = prefixes[i] + uPropName;
+                if (typeof style[prefixed] === 'string') {
+                    return (_cache[propName] = prefixed);
+                }
+            }
+
+            //if all fails then set to undefined
+            return (_cache[propName] = 'undefined');
+        };
+
+        CustomStyle.setProp = function set(propName, element, str) {
+            var prop = this.getProp(propName);
+            if (prop !== 'undefined') {
+                element.style[prop] = str;
+            }
+        };
+
+        return (CustomStyle);
+    }]);
+
+'use strict';
+/**
+ * TODO itPdfViewer desc
+ */
+itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
+	var linker = function (scope, element, attrs) {
+		scope.onPassword = function (reason) {
+			return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+		};
+
+		scope.trustSrc = function(src) {
+			return $sce.trustAsResourceUrl(src);
+		};
+	};
+
+	return {
+		scope: {
+			src: "=",
+			options: "="
+		},
+		restrict: 'E',
+		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+					'<pdf-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="true" password-callback="onPassword(reason)"></pdf-viewer>',
+		link: linker
+	};
+}]);
+'use strict';
+/**
+ * TODO Pdf implementation desc
+ */
+itPdfViewer
+    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function PDFViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        PDFViewerAPI.prototype.findNext = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
+            if(nextHighlightID >= this.viewer.searchResults.length) {
+                nextHighlightID = 0;
+            }
+
+            this.viewer.highlightSearchResult(nextHighlightID);
+        };
+
+        PDFViewerAPI.prototype.findPrev = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
+            if(prevHighlightID < 0) {
+                prevHighlightID = this.viewer.searchResults.length - 1;
+            }
+
+            this.viewer.highlightSearchResult(prevHighlightID);
+        };
+
+        return (PDFViewerAPI);
+    }])
+
+    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+
+        function PDFPage(pdfPage, textContent) {
+            this.base = MultiPagesPage;
+            this.base(pdfPage.pageIndex);
+
+            this.pdfPage = pdfPage;
+            this.textContent = textContent;
+            this.renderTask = null;
+        }
+
+        PDFPage.prototype = new MultiPagesPage;
+
+        PDFPage.prototype.clear = function () {
+            if(this.renderTask !== null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
+        PDFPage.prototype.getViewport = function (scale) {
+            return this.pdfPage.getViewport(scale);
+        };
+        PDFPage.prototype.resize = function (scale) {
+            MultiPagesPage.prototype.resize.call(this, scale);
+
+            this.textLayer = angular.element("<div class='text-layer'></div>");
+            this.textLayer.css("width", this.viewport.width + "px");
+            this.textLayer.css("height", this.viewport.height + "px");
+        };
+        PDFPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(this.renderTask === null) {
+                    if(callback) {
+                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                    }
+                } else {
+                    this.renderTask.then(function () {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                        }
+                    }, function (reason) {
+                        $log.debug('stopped ' + reason);
+                    });
+                }
+
+                return;
+            }
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+                self.container.append(self.textLayer);
+            }else{
+                this.renderTask = this.pdfPage.render({
+                    canvasContext: this.canvas[0].getContext('2d'),
+                    viewport: this.viewport
+                });
+
+                self.container.append(self.canvas);
+
+                this.renderTask.then(function () {
+                    self.rendered = true;
+                    self.renderTask = null;
+                    self.canvasRendered = true;
+                    //self.container.append(self.canvas);
+
+                    if(self.textContent) {
+                        // Render the text layer...
+                        var textLayerBuilder = new TextLayerBuilder({
+                            textLayerDiv: self.textLayer[0],
+                            pageIndex: self.id,
+                            viewport: self.viewport
+                        });
+
+                        textLayerBuilder.setTextContent(self.textContent);
+                        textLayerBuilder.renderLayer();
+                        self.container.append(self.textLayer);
+                    }
+
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                }, function (message) {
+                    self.rendered = false;
+                    self.renderTask = null;
+
+                    if(message === "cancelled") {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                        }
+                    } else {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
+                        }
+                    }
+                });
+            }
+        };
+
+        return (PDFPage);
+    }])
+
+    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
+        function PDFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new PDFViewerAPI(this), element);
+
+            this.pdf = null;
+            // Hooks for the client...
+            this.passwordCallback = null;
+        }
+
+        PDFViewer.prototype = new MultiPagesViewer;
+
+        PDFViewer.prototype.open = function (url, initialScale, renderTextLayer, pageMargin) {
+            if(this.getDocumentTask != undefined){
+                var self = this;
+                this.getDocumentTask.destroy().then(function (){
+                    self.setUrl(url, initialScale, renderTextLayer, pageMargin);
+                });
+            }else{
+                this.setUrl(url, initialScale, renderTextLayer, pageMargin);
+            }
+        };
+        PDFViewer.prototype.setUrl = function (url, initialScale, renderTextLayer, pageMargin) {
+            this.pages = [];
+            this.hasTextLayer = renderTextLayer;
+            this.pageMargin = pageMargin;
+            if (url !== undefined && url !== null && url !== '') {
+                var self = this;
+                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+                this.getDocumentTask.then(function (pdf) {
+                    self.pdf = pdf;
+
+                    self.getAllPages( function (pageList, pagesRefMap) {
+                        self.pages = pageList;
+                        self.pagesRefMap = pagesRefMap;
+
+                        // Append all page containers to the $element...
+                        for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                            self.element.append(pageList[iPage].container);
+                        }
+
+                        self.setContainerSize(initialScale);
+                    });
+                }, function (message) {
+                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                });
+            }
+        };
+        PDFViewer.prototype.setFile = function (file, initialScale, renderTextLayer, pageMargin) {
+            this.resetSearch();
+            this.pages = [];
+            this.hasTextLayer = renderTextLayer;
+            this.pageMargin = pageMargin;
+
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                self.pages = [];
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
+                    self.pdf = pdf;
+
+                    self.getAllPages(function (pageList, pagesRefMap) {
+                        self.pages = pageList;
+                        self.pagesRefMap = pagesRefMap;
+
+                        // Append all page containers to the $element...
+                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
+                            element.append(pageList[iPage].container);
+                        }
+
+                        self.setContainerSize(initialScale);
+                    });
+                }, function (message) {
+                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                });
+            };
+
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
+
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
+                    }
+
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+        PDFViewer.prototype.getAllPages = function (callback) {
+            var pageList = [],
+                pagesRefMap = {},
+                numPages = this.pdf.numPages,
+                remainingPages = numPages;
+
+            if(this.hasTextLayer) {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        // Page reference map. Required by the annotation layer.
+                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                        pagesRefMap[refStr] = page.pageIndex + 1;
+
+                        var pdfPage = new PDFPage(page, null);
+                        pageList[page.pageIndex] = pdfPage;
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+
+                        page.getTextContent().then(function (textContent) {
+                            pdfPage.textContent = textContent;
+                        });
+                    });
+                }
+            } else {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        pageList[page.pageIndex] = new PDFPage(page, null);
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+                    });
+                }
+            }
+        };
+        PDFViewer.prototype.onDestroy = function () {
+            if(this.getDocumentTask){
+                this.getDocumentTask.destroy();
+                this.getDocumentTask = null;
+            }
+        };
+
+        return (PDFViewer);
+    }])
+
+    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                api: "=",
+                initialScale: "@",
+                renderTextLayer: "@",
+                passwordCallback: "&"
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                $scope.getPassword = function (passwordFunc, reason) {
+                    if(this.passwordCallback) {
+                        var self = this;
+                        this.$apply(function () {
+                            var password = self.passwordCallback({reason: reason});
+
+                            if(password !== "" && password !== undefined && password !== null) {
+                                passwordFunc(password);
+                            } else {
+                                $log.log("A password is required to read this document.");
+                            }
+                        });
+                    } else {
+                        $log.log("A password is required to read this document.");
+                    }
+                };
+
+                var viewer = new PDFViewer($element);
+                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.shouldRenderTextLayer = function () {
+                    if(this.renderTextLayer === "" || this.renderTextLayer === undefined || this.renderTextLayer === null || this.renderTextLayer.toLowerCase() === "false") {
+                        return false;
+                    }
+
+                    return true;
+                };
+
+                $scope.onSrcChanged = function () {
+                    $element.empty();
+                    viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                };
+
+                viewer.hookScope($scope, $scope.initialScale);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', function (src) {
+                    scope.onSrcChanged();
+                });
+            }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO TextLayerBuilder desc
+ */
+itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
+        var MAX_TEXT_DIVS_TO_RENDER = 100000;
+
+        var NonWhitespaceRegexp = /\S/;
+
+        function isAllWhitespace(str) {
+            return !NonWhitespaceRegexp.test(str);
+        }
+
+        function TextLayerBuilder(options) {
+            this.textLayerDiv = options.textLayerDiv;
+            this.renderingDone = false;
+            this.divContentDone = false;
+            this.pageIdx = options.pageIndex;
+            this.pageNumber = this.pageIdx + 1;
+            this.matches = [];
+            this.viewport = options.viewport;
+            this.textDivs = [];
+            this.findController = options.findController || null;
+        }
+
+        TextLayerBuilder.prototype = {
+            _finishRendering: function TextLayerBuilder_finishRendering() {
+                this.renderingDone = true;
+
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('textlayerrendered', true, true, {
+                    pageNumber: this.pageNumber
+                });
+                this.textLayerDiv.dispatchEvent(event);
+            },
+
+            renderLayer: function TextLayerBuilder_renderLayer() {
+                var textLayerFrag = document.createDocumentFragment();
+                var textDivs = this.textDivs;
+                var textDivsLength = textDivs.length;
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+
+                // No point in rendering many divs as it would make the browser
+                // unusable even after the divs are rendered.
+                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
+                    this._finishRendering();
+                    return;
+                }
+
+                var lastFontSize;
+                var lastFontFamily;
+                for (var i = 0; i < textDivsLength; i++) {
+                    var textDiv = textDivs[i];
+                    if (textDiv.dataset.isWhitespace !== undefined) {
+                        continue;
+                    }
+
+                    var fontSize = textDiv.style.fontSize;
+                    var fontFamily = textDiv.style.fontFamily;
+
+                    // Only build font string and set to context if different from last.
+                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
+                        ctx.font = fontSize + ' ' + fontFamily;
+                        lastFontSize = fontSize;
+                        lastFontFamily = fontFamily;
+                    }
+
+                    var width = ctx.measureText(textDiv.textContent).width;
+                    if (width > 0) {
+                        textLayerFrag.appendChild(textDiv);
+                        var transform;
+                        if (textDiv.dataset.canvasWidth !== undefined) {
+                            // Dataset values come of type string.
+                            var textScale = textDiv.dataset.canvasWidth / width;
+                            transform = 'scaleX(' + textScale + ')';
+                        } else {
+                            transform = '';
+                        }
+                        var rotation = textDiv.dataset.angle;
+                        if (rotation) {
+                            transform = 'rotate(' + rotation + 'deg) ' + transform;
+                        }
+                        if (transform) {
+                            CustomStyle.setProp('transform' , textDiv, transform);
+                        }
+                    }
+                }
+
+                this.textLayerDiv.appendChild(textLayerFrag);
+                this._finishRendering();
+                this.updateMatches();
+            },
+
+            /**
+             * Renders the text layer.
+             * @param {number} timeout (optional) if specified, the rendering waits
+             *   for specified amount of ms.
+             */
+            render: function TextLayerBuilder_render(timeout) {
+                if (!this.divContentDone || this.renderingDone) {
+                    return;
+                }
+
+                if (this.renderTimer) {
+                    clearTimeout(this.renderTimer);
+                    this.renderTimer = null;
+                }
+
+                if (!timeout) { // Render right away
+                    this.renderLayer();
+                } else { // Schedule
+                    var self = this;
+                    this.renderTimer = setTimeout(function() {
+                        self.renderLayer();
+                        self.renderTimer = null;
+                    }, timeout);
+                }
+            },
+
+            appendText: function TextLayerBuilder_appendText(geom, styles) {
+                var style = styles[geom.fontName];
+                var textDiv = document.createElement('div');
+                this.textDivs.push(textDiv);
+                if (isAllWhitespace(geom.str)) {
+                    textDiv.dataset.isWhitespace = true;
+                    return;
+                }
+                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
+                var angle = Math.atan2(tx[1], tx[0]);
+                if (style.vertical) {
+                    angle += Math.PI / 2;
+                }
+                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+                var fontAscent = fontHeight;
+                if (style.ascent) {
+                    fontAscent = style.ascent * fontAscent;
+                } else if (style.descent) {
+                    fontAscent = (1 + style.descent) * fontAscent;
+                }
+
+                var left;
+                var top;
+                if (angle === 0) {
+                    left = tx[4];
+                    top = tx[5] - fontAscent;
+                } else {
+                    left = tx[4] + (fontAscent * Math.sin(angle));
+                    top = tx[5] - (fontAscent * Math.cos(angle));
+                }
+                textDiv.style.left = left + 'px';
+                textDiv.style.top = top + 'px';
+                textDiv.style.fontSize = fontHeight + 'px';
+                textDiv.style.fontFamily = style.fontFamily;
+
+                textDiv.textContent = geom.str;
+                // |fontName| is only used by the Font Inspector. This test will succeed
+                // when e.g. the Font Inspector is off but the Stepper is on, but it's
+                // not worth the effort to do a more accurate test.
+                if (PDFJS.pdfBug) {
+                    textDiv.dataset.fontName = geom.fontName;
+                }
+                // Storing into dataset will convert number into string.
+                if (angle !== 0) {
+                    textDiv.dataset.angle = angle * (180 / Math.PI);
+                }
+                // We don't bother scaling single-char text divs, because it has very
+                // little effect on text highlighting. This makes scrolling on docs with
+                // lots of such divs a lot faster.
+                if (textDiv.textContent.length > 1) {
+                    if (style.vertical) {
+                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
+                    } else {
+                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
+                    }
+                }
+            },
+
+            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+                this.textContent = textContent;
+
+                var textItems = textContent.items;
+                for (var i = 0, len = textItems.length; i < len; i++) {
+                    this.appendText(textItems[i], textContent.styles);
+                }
+                this.divContentDone = true;
+            },
+
+            convertMatches: function TextLayerBuilder_convertMatches(matches) {
+                var i = 0;
+                var iIndex = 0;
+                var bidiTexts = this.textContent.items;
+                var end = bidiTexts.length - 1;
+                var queryLen = (this.findController === null ?
+                    0 : this.findController.state.query.length);
+                var ret = [];
+
+                for (var m = 0, len = matches.length; m < len; m++) {
+                    // Calculate the start position.
+                    var matchIdx = matches[m];
+
+                    // Loop over the divIdxs.
+                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    if (i === bidiTexts.length) {
+                        console.error('Could not find a matching mapping');
+                    }
+
+                    var match = {
+                        begin: {
+                            divIdx: i,
+                            offset: matchIdx - iIndex
+                        }
+                    };
+
+                    // Calculate the end position.
+                    matchIdx += queryLen;
+
+                    // Somewhat the same array as above, but use > instead of >= to get
+                    // the end position right.
+                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    match.end = {
+                        divIdx: i,
+                        offset: matchIdx - iIndex
+                    };
+                    ret.push(match);
+                }
+
+                return ret;
+            },
+
+            renderMatches: function TextLayerBuilder_renderMatches(matches) {
+                // Early exit if there is nothing to render.
+                if (matches.length === 0) {
+                    return;
+                }
+
+                var bidiTexts = this.textContent.items;
+                var textDivs = this.textDivs;
+                var prevEnd = null;
+                var pageIdx = this.pageIdx;
+                var isSelectedPage = (this.findController === null ?
+                    false : (pageIdx === this.findController.selected.pageIdx));
+                var selectedMatchIdx = (this.findController === null ?
+                    -1 : this.findController.selected.matchIdx);
+                var highlightAll = (this.findController === null ?
+                    false : this.findController.state.highlightAll);
+                var infinity = {
+                    divIdx: -1,
+                    offset: undefined
+                };
+
+                function beginText(begin, className) {
+                    var divIdx = begin.divIdx;
+                    textDivs[divIdx].textContent = '';
+                    appendTextToDiv(divIdx, 0, begin.offset, className);
+                }
+
+                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+                    var div = textDivs[divIdx];
+                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+                    var node = document.createTextNode(content);
+                    if (className) {
+                        var span = document.createElement('span');
+                        span.className = className;
+                        span.appendChild(node);
+                        div.appendChild(span);
+                        return;
+                    }
+                    div.appendChild(node);
+                }
+
+                var i0 = selectedMatchIdx, i1 = i0 + 1;
+                if (highlightAll) {
+                    i0 = 0;
+                    i1 = matches.length;
+                } else if (!isSelectedPage) {
+                    // Not highlighting all and this isn't the selected page, so do nothing.
+                    return;
+                }
+
+                for (var i = i0; i < i1; i++) {
+                    var match = matches[i];
+                    var begin = match.begin;
+                    var end = match.end;
+                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
+                    var highlightSuffix = (isSelected ? ' selected' : '');
+
+                    if (this.findController) {
+                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
+                            begin.divIdx, end.divIdx);
+                    }
+
+                    // Match inside new div.
+                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+                        // If there was a previous div, then add the text at the end.
+                        if (prevEnd !== null) {
+                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                        }
+                        // Clear the divs and set the content until the starting point.
+                        beginText(begin);
+                    } else {
+                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+                    }
+
+                    if (begin.divIdx === end.divIdx) {
+                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
+                            'highlight' + highlightSuffix);
+                    } else {
+                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
+                            'highlight begin' + highlightSuffix);
+                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+                        }
+                        beginText(end, 'highlight end' + highlightSuffix);
+                    }
+                    prevEnd = end;
+                }
+
+                if (prevEnd) {
+                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                }
+            },
+
+            updateMatches: function TextLayerBuilder_updateMatches() {
+                // Only show matches when all rendering is done.
+                if (!this.renderingDone) {
+                    return;
+                }
+
+                // Clear all matches.
+                var matches = this.matches;
+                var textDivs = this.textDivs;
+                var bidiTexts = this.textContent.items;
+                var clearedUntilDivIdx = -1;
+
+                // Clear all current matches.
+                for (var i = 0, len = matches.length; i < len; i++) {
+                    var match = matches[i];
+                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+                        var div = textDivs[n];
+                        div.textContent = bidiTexts[n].str;
+                        div.className = '';
+                    }
+                    clearedUntilDivIdx = match.end.divIdx + 1;
+                }
+
+                if (this.findController === null || !this.findController.active) {
+                    return;
+                }
+
+                // Convert the matches on the page controller into the match format
+                // used for the textLayer.
+                this.matches = this.convertMatches(this.findController === null ?
+                    [] : (this.findController.pageMatches[this.pageIdx] || []));
+                this.renderMatches(this.matches);
+            }
+        };
+
+        return (TextLayerBuilder);
+    }]);
+
+'use strict';
+/**
+ * TODO itTiffViewer desc
+ */
+itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
+	var linker = function(scope, element, attrs) {
+
+		scope.trustSrc = function(src) {
+			return $sce.trustAsResourceUrl(src);
+		};
+	};
+
+	return {
+		scope: {
+			src: "=",
+			options: "="
+		},
+		restrict: 'E',
+		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+					'<tiff-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
+		link: linker
+
+	};
+}]);
+'use strict';
+/**
+ * TODO Tiff implementation desc
+ */
+itTiffViewer
+    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
+
+        function TIFFPage(pageIndex, src, view) {
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
+
+            this.src = src;
+        }
+
+        TIFFPage.prototype = new MultiPagesPage;
+
+        TIFFPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+            }else {
+                self.container.append(self.canvas);
+
+                var ctx = self.canvas[0].getContext('2d');
+                var img = new Image;
+                img.onload = function(){
+                    ctx.drawImage(img,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                };
+                img.src = this.src;
+            }
+        };
+
+        return (TIFFPage);
+    }])
+
+    .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
+        //Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+
+        function TIFFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new MultiPagesViewerAPI(this), element);
+
+            this.tiff = null;
+        }
+
+        TIFFViewer.prototype = new MultiPagesViewer;
+
+        TIFFViewer.prototype.open = function(url, initialScale, pageMargin) {
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            if (url !== undefined && url !== null && url !== '') {
+
+                var self = this;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.responseType = 'arraybuffer';
+                xhr.onprogress =  angular.bind(this, self.downloadProgress);
+                xhr.onload = function (e) {
+                    var buffer = xhr.response;
+                    self.onDestroy();
+                    Tiff.initialize({TOTAL_MEMORY:16777216*5});
+                    self.tiff = new Tiff({buffer: buffer});
+                    self.getAllPages(function(pageList) {
+                        self.pages = pageList;
+
+                        self.setContainerSize(initialScale);
+                    });
+                };
+                xhr.send();
+            }
+        };
+        TIFFViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.tiff.countDirectory(),
+                remainingPages = numPages;
+
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                this.tiff.setDirectory(iPage);
+                var src = this.tiff.toDataURL();
+                var page =  new TIFFPage(iPage, src, [0,0,this.tiff.width(),this.tiff.height()]);
+                pageList[iPage] = page;
+
+                this.element.append(page.container);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        TIFFViewer.prototype.onDestroy = function () {
+            if(self.tiff != null){
+                self.tiff.close();
+                self.tiff = null;
+            }
+        };
+
+        return (TIFFViewer);
+    }])
+
+    .directive("tiffViewer", ['$log' , 'TIFFViewer', function($log, TIFFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope:
+            {
+                src: "@",
+                file: "=",
+                api: "=",
+                initialScale: "@"
+
+            },
+            controller: ['$scope', '$element', function($scope, $element) {
+
+                var viewer = new TIFFViewer($element);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.onSrcChanged = function() {
+                    $element.empty();
+                    viewer.open(this.src, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope, $scope.initialScale);
+            }],
+            link: function(scope, element, attrs) {
+                attrs.$observe('src', function(src) {
+                    scope.onSrcChanged();
+                });
+            }
+        };
     }]);
