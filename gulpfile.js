@@ -1,6 +1,7 @@
 /**
  * Les dépendences du builder
  */
+
 var pkg = require('./package.json');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -24,6 +25,7 @@ var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
 var karma = require('gulp-karma');
 var serve = require('gulp-serve');
+var chmod = require('gulp-chmod');
 
 /**
  * Execute les actions de build dans l'ordre
@@ -31,7 +33,7 @@ var serve = require('gulp-serve');
 gulp.task('build', function(callback) {
     runSequence('clean','sass','less',
         'css',
-        ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js'],
+        ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js', 'copy-rename-files'],
         callback);
 });
 
@@ -162,10 +164,16 @@ gulp.task('uglify-debug', function() {
 });
 
 gulp.task('docs', function () {
+    var scripts = ['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'];
+    for (var i = 0; i < buildConfig.fileToCopyAndRename.length; i++) {
+        var fileToCopy = buildConfig.fileToCopyAndRename[i];
+        scripts.push('./dist/' + fileToCopy.dest);
+    }
+
     var options = {
         html5Mode: false,
         styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'],
+        scripts:scripts,
         loadDefaults: {
             angular:false,
             angularAnimate: false
@@ -330,6 +338,21 @@ gulp.task('git-check', function(done) {
     }
     done();
 });
+
+/**
+ * File to copy an d rename to dist
+ */
+gulp.task('copy-rename-files', function () {
+        for (var i = 0; i < buildConfig.fileToCopyAndRename.length; i++) {
+            var fileToCopy = buildConfig.fileToCopyAndRename[i];
+            gulp.src(fileToCopy.src)
+                .pipe(chmod(755))
+                .pipe(rename(fileToCopy.dest))
+                .pipe(gulp.dest(buildConfig.dist));
+            //return true;
+        }
+    }
+);
 
 /**
  * Simple function to remove item from array by value.
