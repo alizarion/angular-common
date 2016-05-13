@@ -18,7 +18,7 @@
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" >
-     <it-media-viewer src="'http://clisla/Sparda-AngularJS/data/15_the-big-free-edition-2014.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height' }"></it-media-viewer>
+     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
      </div>
  </file>
  <file name="Module.js">
