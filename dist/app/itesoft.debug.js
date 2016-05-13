@@ -4144,7 +4144,7 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" >
-     <it-media-viewer src="'http://clisla/Sparda-AngularJS/data/VSOne - Custom OData Provider V2.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height' }"></it-media-viewer>
+     <it-media-viewer src="'http://clisla/Sparda-AngularJS/data/15_the-big-free-edition-2014.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height' }"></it-media-viewer>
      </div>
  </file>
  <file name="Module.js">
@@ -4167,54 +4167,65 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
     };
 
     var linker = function (scope, element, attrs) {
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js'
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    scope.template = 'No template found for extension : '  + ext;
+                    break;
+            }
+        };
 
-        scope.$watch("src", function(value){
+        var _setValue = function(value) {
             if(value){
-                var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
-
                 if(typeof value === typeof ""){
                     scope.ext = _splitLast(value, '.').toLowerCase();
-                    switch (scope.ext) {
-                        case 'pdf':
-                            scope.pdfSrc = value;
-                            itScriptService.LoadScripts([
-                                pathJs + '/pdf.js'
-                            ]).then(function() {
-                                //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                                PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                                scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                            });
-                            break;
-                        case 'png':
-                        case 'jpeg':
-                            scope.imageSrc = value;
-                            scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                            break;
-                        case 'tif':
-                        case 'tiff':
-                            scope.tiffSrc = value;
-                            itScriptService.LoadScripts([
-                                pathJs + '/tiff.min.js'
-                            ]).then(function() {
-                                scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                            });
-                            break;
-                        default :
-                            scope.template = 'No template found for extension : '  + scope.ext;
-                            break;
+                    _setTemplate(scope.ext, value);
+                }else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type, value);
+                    }else{
+                        scope.template = 'must specify type when using stream';
                     }
-                }else{
-                    scope.template = 'Only string type supported for now : '  + typeof value;
                 }
             }else {
                 scope.template = null;
             }
-        });
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
     };
 
     return {
         scope: {
             src : '=',
+            file: '=',
+            type: '@',
             options : '=',
         },
         restrict: 'E',
@@ -7983,6 +7994,148 @@ IteSoft
 
 'use strict';
 /**
+ * TODO Image implementation desc
+ */
+itImageViewer
+    .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
+
+    function IMAGEPage(pageIndex, img, view) {
+        this.base = MultiPagesPage;
+        this.base(pageIndex, view);
+        this.img = img;
+    }
+
+    IMAGEPage.prototype = new MultiPagesPage;
+
+    IMAGEPage.prototype.render = function (callback) {
+        var self = this;
+        if(this.rendered) {
+            if(callback) {
+                callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+            }
+            return;
+        };
+
+        this.rendered = true;
+
+        if(this.canvasRendered){
+            self.container.append(self.canvas);
+        }else {
+            self.container.append(self.canvas);
+
+            var ctx = self.canvas[0].getContext('2d');
+            ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+
+            if(callback) {
+                callback(self, MultiPagesConstants.PAGE_RENDERED);
+            }
+        }
+    };
+
+    return (IMAGEPage);
+}])
+
+    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
+        function IMAGEViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new MultiPagesViewerAPI(this), element);
+        }
+
+        IMAGEViewer.prototype = new MultiPagesViewer;
+
+        IMAGEViewer.prototype.open = function(url, initialScale, pageMargin) {
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            var self = this;
+
+            if (url !== undefined && url !== null && url !== '') {
+                self.getAllPages(url, function(pageList) {
+                    self.pages = pageList;
+
+                    self.setContainerSize(initialScale);
+                });
+            }
+        };
+        IMAGEViewer.prototype.getAllPages = function(url, callback) {
+            var pageList = [],
+                self = this;
+
+            pageList.push({});
+
+            var img = new Image;
+            img.onprogress = angular.bind(this, self.downloadProgress);
+            img.onload = function(){
+                var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
+                pageList[0] = page;
+
+                self.element.append(page.container);
+
+                callback(pageList);
+            };
+            img.src = url;
+        };
+
+        return (IMAGEViewer);
+    }])
+
+    .directive("imageViewer", ['$log', 'IMAGEViewer', function ($log, IMAGEViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                api: "=",
+                initialScale: "@",
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                var viewer = new IMAGEViewer($element); ;
+
+                $scope.api = viewer.getAPI();
+
+                $scope.onSrcChanged = function () {
+                    $element.empty();
+                    viewer.open(this.src, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope, $scope.initialScale);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', function (src) {
+                    scope.onSrcChanged();
+                });
+            }
+        };
+    }]);
+
+
+'use strict';
+/**
+ * TODO itImageViewer desc
+ */
+itImageViewer.directive('itImageViewer', ['$sce', function($sce){
+    var linker = function (scope, element, attrs) {
+        scope.trustSrc = function(src) {
+            return $sce.trustAsResourceUrl(src);
+        };
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    '<image-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
  * TODO itProgressbarViewer desc
  */
 itMultiPagesViewer.directive('itProgressbarViewer', [function(){
@@ -8781,6 +8934,14 @@ itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
 			return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
 		};
 
+		scope.$watch("src", function (src) {
+			if(typeof src === typeof ""){
+				scope.url = src;
+			}else{
+				scope.file = src;
+			}
+		});
+
 		scope.trustSrc = function(src) {
 			return $sce.trustAsResourceUrl(src);
 		};
@@ -8794,7 +8955,7 @@ itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
 		restrict: 'E',
 		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
 					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<pdf-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="true" password-callback="onPassword(reason)"></pdf-viewer>',
+					'<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="true" password-callback="onPassword(reason)"></pdf-viewer>',
 		link: linker
 	};
 }]);
@@ -8958,14 +9119,23 @@ itPdfViewer
 
         PDFViewer.prototype = new MultiPagesViewer;
 
-        PDFViewer.prototype.open = function (url, initialScale, renderTextLayer, pageMargin) {
+        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
+            var isFile = typeof obj != typeof "";
             if(this.getDocumentTask != undefined){
                 var self = this;
                 this.getDocumentTask.destroy().then(function (){
-                    self.setUrl(url, initialScale, renderTextLayer, pageMargin);
+                    if(isFile){
+                        self.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                    }else {
+                        self.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                    }
                 });
-            }else{
-                this.setUrl(url, initialScale, renderTextLayer, pageMargin);
+            }else {
+                if(isFile){
+                    this.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                }else {
+                    this.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                }
             }
         };
         PDFViewer.prototype.setUrl = function (url, initialScale, renderTextLayer, pageMargin) {
@@ -8995,7 +9165,6 @@ itPdfViewer
             }
         };
         PDFViewer.prototype.setFile = function (file, initialScale, renderTextLayer, pageMargin) {
-            this.resetSearch();
             this.pages = [];
             this.hasTextLayer = renderTextLayer;
             this.pageMargin = pageMargin;
@@ -9005,7 +9174,6 @@ itPdfViewer
             reader.onload = function(e) {
                 var arrayBuffer = e.target.result;
                 var uint8Array = new Uint8Array(arrayBuffer);
-                self.pages = [];
                 var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
                 getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
@@ -9016,7 +9184,7 @@ itPdfViewer
 
                         // Append all page containers to the $element...
                         for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                            element.append(pageList[iPage].container);
+                            self.element.append(pageList[iPage].container);
                         }
 
                         self.setContainerSize(initialScale);
@@ -9120,6 +9288,7 @@ itPdfViewer
             restrict: "E",
             scope: {
                 src: "@",
+                file: "=",
                 api: "=",
                 initialScale: "@",
                 renderTextLayer: "@",
@@ -9162,11 +9331,22 @@ itPdfViewer
                     viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
                 };
 
+                $scope.onPDFFileChanged = function () {
+                    $element.empty();
+                    viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                };
+
                 viewer.hookScope($scope, $scope.initialScale);
             }],
             link: function (scope, element, attrs) {
                 attrs.$observe('src', function (src) {
                     scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    if(scope.file !== undefined && scope.file !== null) {
+                        scope.onPDFFileChanged();
+                    }
                 });
             }
         };
@@ -9541,148 +9721,6 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 
         return (TextLayerBuilder);
     }]);
-
-'use strict';
-/**
- * TODO Image implementation desc
- */
-itImageViewer
-    .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
-
-    function IMAGEPage(pageIndex, img, view) {
-        this.base = MultiPagesPage;
-        this.base(pageIndex, view);
-        this.img = img;
-    }
-
-    IMAGEPage.prototype = new MultiPagesPage;
-
-    IMAGEPage.prototype.render = function (callback) {
-        var self = this;
-        if(this.rendered) {
-            if(callback) {
-                callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-            }
-            return;
-        };
-
-        this.rendered = true;
-
-        if(this.canvasRendered){
-            self.container.append(self.canvas);
-        }else {
-            self.container.append(self.canvas);
-
-            var ctx = self.canvas[0].getContext('2d');
-            ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
-
-            if(callback) {
-                callback(self, MultiPagesConstants.PAGE_RENDERED);
-            }
-        }
-    };
-
-    return (IMAGEPage);
-}])
-
-    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
-        function IMAGEViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new MultiPagesViewerAPI(this), element);
-        }
-
-        IMAGEViewer.prototype = new MultiPagesViewer;
-
-        IMAGEViewer.prototype.open = function(url, initialScale, pageMargin) {
-            this.pages = [];
-            this.pageMargin = pageMargin;
-            var self = this;
-
-            if (url !== undefined && url !== null && url !== '') {
-                self.getAllPages(url, function(pageList) {
-                    self.pages = pageList;
-
-                    self.setContainerSize(initialScale);
-                });
-            }
-        };
-        IMAGEViewer.prototype.getAllPages = function(url, callback) {
-            var pageList = [],
-                self = this;
-
-            pageList.push({});
-
-            var img = new Image;
-            img.onprogress = angular.bind(this, self.downloadProgress);
-            img.onload = function(){
-                var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
-                pageList[0] = page;
-
-                self.element.append(page.container);
-
-                callback(pageList);
-            };
-            img.src = url;
-        };
-
-        return (IMAGEViewer);
-    }])
-
-    .directive("imageViewer", ['$log', 'IMAGEViewer', function ($log, IMAGEViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope: {
-                src: "@",
-                api: "=",
-                initialScale: "@",
-            },
-            controller: ['$scope', '$element', function ($scope, $element) {
-
-                var viewer = new IMAGEViewer($element); ;
-
-                $scope.api = viewer.getAPI();
-
-                $scope.onSrcChanged = function () {
-                    $element.empty();
-                    viewer.open(this.src, this.initialScale, pageMargin);
-                };
-
-                viewer.hookScope($scope, $scope.initialScale);
-            }],
-            link: function (scope, element, attrs) {
-                attrs.$observe('src', function (src) {
-                    scope.onSrcChanged();
-                });
-            }
-        };
-    }]);
-
-
-'use strict';
-/**
- * TODO itImageViewer desc
- */
-itImageViewer.directive('itImageViewer', ['$sce', function($sce){
-    var linker = function (scope, element, attrs) {
-        scope.trustSrc = function(src) {
-            return $sce.trustAsResourceUrl(src);
-        };
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    '<image-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
-        link: linker
-    };
-}]);
 
 'use strict';
 /**
