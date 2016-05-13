@@ -84,6 +84,9 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             }
         },
         setScale: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.scaleItem = scaleItem;
+            }
             var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
 
             var numPages = this.pages.length;

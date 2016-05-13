@@ -158,14 +158,23 @@ itPdfViewer
 
         PDFViewer.prototype = new MultiPagesViewer;
 
-        PDFViewer.prototype.open = function (url, initialScale, renderTextLayer, pageMargin) {
+        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
+            var isFile = typeof obj != typeof "";
             if(this.getDocumentTask != undefined){
                 var self = this;
                 this.getDocumentTask.destroy().then(function (){
-                    self.setUrl(url, initialScale, renderTextLayer, pageMargin);
+                    if(isFile){
+                        self.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                    }else {
+                        self.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                    }
                 });
-            }else{
-                this.setUrl(url, initialScale, renderTextLayer, pageMargin);
+            }else {
+                if(isFile){
+                    this.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                }else {
+                    this.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                }
             }
         };
         PDFViewer.prototype.setUrl = function (url, initialScale, renderTextLayer, pageMargin) {
@@ -195,7 +204,6 @@ itPdfViewer
             }
         };
         PDFViewer.prototype.setFile = function (file, initialScale, renderTextLayer, pageMargin) {
-            this.resetSearch();
             this.pages = [];
             this.hasTextLayer = renderTextLayer;
             this.pageMargin = pageMargin;
@@ -205,7 +213,6 @@ itPdfViewer
             reader.onload = function(e) {
                 var arrayBuffer = e.target.result;
                 var uint8Array = new Uint8Array(arrayBuffer);
-                self.pages = [];
                 var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
                 getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
@@ -216,7 +223,7 @@ itPdfViewer
 
                         // Append all page containers to the $element...
                         for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                            element.append(pageList[iPage].container);
+                            self.element.append(pageList[iPage].container);
                         }
 
                         self.setContainerSize(initialScale);
@@ -320,6 +327,7 @@ itPdfViewer
             restrict: "E",
             scope: {
                 src: "@",
+                file: "=",
                 api: "=",
                 initialScale: "@",
                 renderTextLayer: "@",
@@ -362,11 +370,22 @@ itPdfViewer
                     viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
                 };
 
+                $scope.onPDFFileChanged = function () {
+                    $element.empty();
+                    viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                };
+
                 viewer.hookScope($scope, $scope.initialScale);
             }],
             link: function (scope, element, attrs) {
                 attrs.$observe('src', function (src) {
                     scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    if(scope.file !== undefined && scope.file !== null) {
+                        scope.onPDFFileChanged();
+                    }
                 });
             }
         };
