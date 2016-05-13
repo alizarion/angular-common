@@ -37,52 +37,53 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 /**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
  * @module itesoft
  * @restrict EA
  * @since 1.0
  * @description
- * This directive can evaluate and transclude an expression in a scope context.
+ * Simple filter that escape string to unicode.
+ *
  *
  * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
              </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
 
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
+         </file>
+    </example>
  */
 IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
                     }
-                );
-            };
-        }]);
-    }]);
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 
@@ -138,6 +139,54 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
 
 /**
  * @ngdoc directive
@@ -2535,6 +2584,7 @@ IteSoft
 
     });
 'use strict';
+
 /**
  * @ngdoc directive
  * @name itesoft.directive:itAutocomplete
@@ -2625,6 +2675,20 @@ IteSoft
  *  </tr>
  *  <tr>
  *      <td>
+ *           converter
+ *      </td>
+ *      <td>
+ *          Converter to transform object to id or label
+ *           implements:
+ *           {
+ *           getIdFromObject,
+ *           getLabelFromObject,
+ *           getObjectFromId
+ *           }
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
  *          selected-option
  *      </td>
  *      <td>
@@ -2698,6 +2762,7 @@ IteSoft
  .width300{width:300px};
  </style>
  <div ng-controller="HomeCtrl">
+
  <h1>Usage inside grid:</h1>
  <div id="grid1" ui-grid="gridOptions" class="grid"></div>
  <h1>Standalone usage:</h1>
@@ -2713,54 +2778,88 @@ IteSoft
  </div>
 
  <h1>Custom search method</h1>
-     <div class="row">
-         <div class="col-xs-12">
-                <span class="text" >
-                You can use a custom filter method by adding search-mode="'custom'" parameter
-                </span>
-         </div>
-     </div>
- <div class="row">
-     <div class="col-xs-3">Custom predicate:</div>
-
- <div  class="col-xs-3">
-   <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'custom'" selected-option="firstRate"  options="options" ></it-autocomplete>
- </div>
- <div class="row">
-    <div class="col-xs-3">Starts with:</div>
-    <div  class="col-xs-3">
-        <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'startsWith'" selected-option="firstRate"  options="options" ></it-autocomplete>
-    </div>
- </div>
- <h1>Linked autocomplete</h1>
  <div class="row">
  <div class="col-xs-12">
  <span class="text" >
- You can link autocomplete together by adding event-select and event-refresh params
+ You can use a custom filter method by adding search-mode="'custom'" parameter
  </span>
  </div>
  </div>
  <div class="row">
- <div  class="col-xs-3">
- Taux
- </div>
- <div  class="col-xs-3">
- Code
- </div>
- </div>
- <div class="row">
- <div  class="col-xs-3">
- <it-autocomplete  items-getter="getRate(param)" name="'firstRate'"   event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
- </div>
+ <div class="col-xs-3">Custom predicate:</div>
 
  <div  class="col-xs-3">
- <it-autocomplete   items-getter="getCode(param)"  name="'firstCode'"   event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+ <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'custom'" selected-option="firstRate"  options="options" ></it-autocomplete>
+ </div>
+ <div class="row">
+ <div class="col-xs-3">Starts with:</div>
+ <div  class="col-xs-3">
+ <it-autocomplete  items="firstNameOptions" name="'customPredicate'"  search-mode="'startsWith'" selected-option="firstRate"  options="options" ></it-autocomplete>
  </div>
  </div>
+ <h1>Linked autocomplete</h1>
+ <div class="row">
+     <div class="col-xs-12">
+     <span class="text" >
+     You can link autocomplete together by adding event-select and event-refresh params
+     </span>
+     </div>
  </div>
+
+ <div class="row">
+     <div  class="col-xs-3">
+     Taux
+     </div>
+     <div  class="col-xs-3">
+     Code
+     </div>
  </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+     </div>
+
+     <div  class="col-xs-3">
+     <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+     </div>
  </div>
- <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br> <br>
+
+ <div class="row">
+     <div  class="col-xs-3">
+     {{rate}}
+     </div>
+     <div  class="col-xs-3">
+     {{code}}
+     </div>
+ </div>
+ <div class="row">
+    <div class="col-xs-12">
+        <h1>Autocomplete map with object</h1>
+    </div>
+ </div>
+ <div class="row">
+    <div class="col-xs-12">
+        <span class="text" >
+        You can map object directly inside autocomplete
+        </span>
+     </div>
+ </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     Taux
+     </div>
+     <div  class="col-xs-3">
+     Code
+     </div>
+ </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
+     </div>
+     <div  class="col-xs-3">
+     {{selectedtax}}
+    </div>
+ </div>
  </div>
  </file>
  <file name="Module.js">
@@ -2768,8 +2867,9 @@ IteSoft
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope','$log',function($scope,$log) {
+ ['$scope','$log','$timeout',function($scope,$log,$timeout) {
             $scope.myData = [];
+            $scope.availablesTax = [];
             // sample values
             $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
             $scope.firstNameOptions = [{id:"Cox",value:"Cox"},{id:"Lorraine",value:"Lorraine"},{id:"Enormo",value:"Enormo"},{id:"Enormo1",value:"Enormo1"},{id:"Enormo2",value:"Enormo2"},{id:"Enormo3",value:"Enormo3"},{id:"Enormo4",value:"Enormo4"},{id:"Enormo5",value:"Enormo5"},{id:"Enormo6",value:"Enormo6"},{id:"Enormo7",value:"Enormo7"},{id:"Enormo8",value:"Enormo8"},{id:"Enormo9",value:"Enormo9"},{id:"Enormo10",value:"Enormo10"},{id:"Enormo11",value:"Enormo12"}];
@@ -2778,8 +2878,23 @@ IteSoft
             {id:20,value:"FR_20"},{id:19.6,value:"FR_19.6"},{id:7,value:"FR_7"},{id:"10",value:"FR_10"},{id:"19",value:"DE_19"},{id:"7",value:"DE_7"},{id:"0",value:"NO"},
             {id:"22",value:"FR_22"},{id:"23",value:"FR_23"},{id:"24",value:"FR_24"},{id:"25",value:"FR_25"},{id:"26",value:"DE_26"},{id:"27",value:"DE_27"},{id:"28",value:"28"}
             ];
+
+            $scope.rate = "";
+            $scope.code = "";
+
+
             $scope.tvas = [{rate:"19.6",code:"TVA_FR_OLD"},{rate:"20",code:"TVA_FR"}];
 
+
+            $timeout(function(){
+                $scope.availablesTax =[
+                {"id":1,"companyId":1,"code":"D5.5","name":"TVA 5,5% Biens & Services Débit","rate":5.5,"content":{"JURIDICTION":"FR/FR","ACCOUNT":"445200","END_DATE":1522627200000,"START_DATE":1522627200000,"OFFSET_TAX":"","OFFSET_ACCOUNT":""}},
+                {"id":2,"companyId":1,"code":"D20","name":"TVA 20% Biens & Services Débit","rate":20,"content":{"JURIDICTION":"FR/FR","ACCOUNT":"445100","END_DATE":1522627200000,"START_DATE":1522627200000,"OFFSET_TAX":"","OFFSET_ACCOUNT":""}}
+                ];
+
+                $scope.selectedtax =  {"id":1,"companyId":1,"code":"D5.5","name":"TVA 5,5% Biens & Services Débit","rate":5.5,"content":{"JURIDICTION":"FR/FR","ACCOUNT":"445200","END_DATE":1522627200000,"START_DATE":1522627200000,"OFFSET_TAX":"","OFFSET_ACCOUNT":""}}          ;
+            },1000);
+;
             angular.copy($scope.myDataInit,$scope.myData);
 
 
@@ -2794,38 +2909,71 @@ IteSoft
                 }
             }
 
+            $scope.taxConverter={
+                getObjectFromId : function(id,items){
+                    items.forEach(function(item){
+                        if(item.id == id){
+                            return item;
+                        }
+                    })
+                },
+                getIdFromObject: function(object){
+                    if(angular.isDefined(object)){
+                    return object.id;
+                    }else{
+                        $log.error("unable to get id of null object");
+                    }
+                },
+                getLabelFromObject: function(object){
+                    if(angular.isDefined(object)){
+                        return object.code;
+                    }else{
+                        return "";
+                    }
+                }
+            }
+
             $scope.firstRate ="";
             $scope.firstCode ="";
             $scope.secondRate ="";
             $scope.secondCode ="";
 
             $scope.getRate = function(code){
-                $log.debug("getRate with code: "+code);
                 var result = [];
-                angular.forEach($scope.tvas, function(tva){
-                    if( angular.isUndefined(code) || code == '' || tva.code==code){
-                    result.push({id:tva.rate,value:tva.rate})
-                    }
-                })
+                    $log.debug("getRate with code: "+code);
+                    angular.forEach($scope.tvas, function(tva){
+                        if( angular.isUndefined(code) || code == '' || tva.code==code){
+                        result.push({id:tva.rate,value:tva.rate})
+                        }
+                    })
+                  return result;
+            };
+
+
+            $scope.getCode = function(tax){
+                 var result = [];
+                if(angular.isDefined(tax)){
+                    $log.debug("getCode with rate: "+tax);
+                    angular.forEach($scope.tvas, function(tva){
+                        if( angular.isUndefined(tax) || tax == '' ||  tva.rate==tax){
+                        result.push({id:tva.code,value:tva.code})
+                        }
+                    })
+                }else{
+                    angular.forEach($scope.tvas, function(tva){
+                        result.push({id:tva.rate,value:tva.rate})
+                    })
+                }
                 return result;
             };
 
-            $scope.getCode = function(rate){
-                $log.debug("getCode with rate: "+rate);
-                var result = [];
-                angular.forEach($scope.tvas, function(tva){
-                    if( angular.isUndefined(rate) || rate == '' ||  tva.rate==rate){
-                    result.push({id:tva.code,value:tva.code})
-                    }
-                })
-                return result;
-            };
 
             $scope.gridOptions = {
                 data:$scope.myData,
                 useExternalFiltering: true,
                 enableFiltering: true,
                 onRegisterApi: function(gridApi){
+
                   $scope.gridApi = gridApi;
                   //quick an dirty example of filter that use it-autocomplete
                   $scope.gridApi.core.on.filterChanged($scope, function(){
@@ -2916,6 +3064,15 @@ IteSoft
                  */
                 optionContainerClass: "=",
                 /**
+                 * converter to transform object to id or label
+                 * {
+                 *           getIdFromObject : undefined,
+                 *           getLabelFromObject : undefined,
+                 *           getObjectFromId : undefined
+                 *       }
+                 */
+                converter: "=",
+                /**
                  * input searchMode value= startsWith,contains default contains
                  */
                 searchMode: "=",
@@ -2974,11 +3131,12 @@ IteSoft
                         selectedItem: {},
                         searchMode: $scope.searchMode,
                         placeholder: $scope.placeholder,
-                        debug:false,
+                        debug: true,
+                        converter: $scope.converter,
                         event: {
-                            refresh:{
+                            refresh: {
                                 name: $scope.eventRefresh,
-                                value:undefined
+                                value: undefined
 
                             },
                             select: $scope.eventSelect
@@ -3011,33 +3169,37 @@ IteSoft
                     self.cleanDomRef = {
                         _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
                         encode: function (e) {
-                            var t = "";
-                            var n, r, i, s, o, u, a;
-                            var f = 0;
-                            e = self.cleanDomRef._utf8_encode(e);
-                            while (f < e.length) {
-                                n = e.charCodeAt(f++);
-                                r = e.charCodeAt(f++);
-                                i = e.charCodeAt(f++);
-                                s = n >> 2;
-                                o = (n & 3) << 4 | r >> 4;
-                                u = (r & 15) << 2 | i >> 6;
-                                a = i & 63;
-                                if (isNaN(r)) {
-                                    u = a = 64
-                                } else if (isNaN(i)) {
-                                    a = 64
+                            if (e) {
+                                var t = "";
+                                {
                                 }
-                                t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                                var n, r, i, s, o, u, a;
+                                var f = 0;
+                                e = self.cleanDomRef._utf8_encode(e);
+                                while (f < e.length) {
+                                    n = e.charCodeAt(f++);
+                                    r = e.charCodeAt(f++);
+                                    i = e.charCodeAt(f++);
+                                    s = n >> 2;
+                                    o = (n & 3) << 4 | r >> 4;
+                                    u = (r & 15) << 2 | i >> 6;
+                                    a = i & 63;
+                                    if (isNaN(r)) {
+                                        u = a = 64
+                                    } else if (isNaN(i)) {
+                                        a = 64
+                                    }
+                                    t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                                }
+                                return t
                             }
-                            return t
                         },
                         decode: function (e) {
                             var t = "";
                             var n, r, i;
                             var s, o, u, a;
                             var f = 0;
-                            if(e.replace) {
+                            if (e.replace) {
                                 e = e.replace(/[^A-Za-z0-9+/=]/g, "");
                                 while (f < e.length) {
                                     s = this._keyStr.indexOf(e.charAt(f++));
@@ -3061,7 +3223,7 @@ IteSoft
                         },
                         _utf8_encode: function (e) {
                             var t = "";
-                            if(e.replace) {
+                            if (e.replace) {
                                 e = e.replace(/rn/g, "n");
                                 for (var n = 0; n < e.length; n++) {
                                     var r = e.charCodeAt(n);
@@ -3120,7 +3282,10 @@ IteSoft
                         fullInit: initItems,
                         hideItems: hideItems,
                         showItems: showItems,
+                        getIdFromObject: _getIdFromObject,
+                        getLabelFromObject: _getLabelFromObject,
                         keyBoardInteration: keyBoardInteration
+
                     };
 
                     /**
@@ -3164,7 +3329,9 @@ IteSoft
                     if (self.fields.event.refresh.name) {
                         $rootScope.$on(self.fields.event.refresh.name, function (event, value) {
 
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: refresh event emit, calling refresh items ");}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: refresh event emit, calling refresh items ");
+                            }
                             self.fields.event.refresh.value = value;
                             initItems();
                             hideItems();
@@ -3176,11 +3343,15 @@ IteSoft
                          * Watch items change to items to reload select if item is now present
                          */
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: refresh event is not defined, add watch to items");}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: refresh event is not defined, add watch to items");
+                        }
                         $scope.$watch('items', function (newValue, oldValue) {
                             if (newValue != self.fields.item) {
 
-                                if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);}
+                                if (self.fields.debug) {
+                                    $log.debug($scope.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);
+                                }
                                 initItems();
                                 initSelect();
                                 _selectItemWithId($scope.selectedOption);
@@ -3198,13 +3369,15 @@ IteSoft
                             $scope.onChange();
                         }
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
+                        }
                         //if an oldValue is set
                         if (angular.isDefined(oldValue)) {
                             _unselectItemWithId(oldValue);
                         }
 
-                        if (angular.isUndefined(self.fields.selectedItem) || newValue != self.fields.selectedItem.id) {
+                        if (angular.isUndefined(self.fields.selectedItem) || newValue != _getIdFromObject(self.fields.selectedItem)) {
                             _selectItemWithId(newValue);
                         }
                     });
@@ -3214,7 +3387,9 @@ IteSoft
                      */
                     function updateIndex() {
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);
+                        }
                         if ($scope.focusIndex < 0) {
                             $scope.focusIndex = -1;
                         } else if ($scope.focusIndex >= self.fields.items.length) {
@@ -3237,12 +3412,17 @@ IteSoft
                      */
                     function _selectItemWithId(id) {
 
+                        id = _getIdFromObject(id);
+
+
                         var selected = false;
                         self.fields.selectedItem = {};
                         if (angular.isDefined(id)) {
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select with  id " + id);}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: select with  id " + id);
+                            }
                             angular.forEach(self.fields.items, function (item) {
-                                if (item.id == id) {
+                                if (_getIdFromObject(item) == id) {
                                     applySelection(item);
                                     selected = true;
                                 }
@@ -3260,9 +3440,11 @@ IteSoft
                      */
                     function _unselectItemWithId(id) {
                         if (angular.isDefined(id)) {
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: unselect with id " + id);}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: unselect with id " + id);
+                            }
                             angular.forEach(self.fields.items, function (item) {
-                                if (item.id == id) {
+                                if (_getIdFromObject(item) == id) {
                                     unselect(item);
                                 }
                             });
@@ -3280,7 +3462,9 @@ IteSoft
                         }
                         self.fields.initialItems = angular.copy(self.fields.items);
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: copy option items " + self.fields.initialItems);}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: copy option items " + self.fields.initialItems);
+                        }
                     }
 
                     /**
@@ -3288,13 +3472,15 @@ IteSoft
                      */
                     function initSelect() {
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: init select ");}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: init select ");
+                        }
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
                             if (angular.isDefined(self.fields.selectedItem)) {
                                 if (self.fields.selectedItem == item) {
                                     select(item)
-                                }else{
+                                } else {
                                     unselect(item);
                                 }
                             } else {
@@ -3316,16 +3502,26 @@ IteSoft
                         }
                         if (angular.isDefined(selectedItem)) {
 
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));}
-                            $scope.selectedOption = selectedItem.id;
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
+                            }
+                            if(self.fields.converter){
+                                $scope.selectedOption = selectedItem;
+                            }else{
+                                $scope.selectedOption = _getIdFromObject(selectedItem);
+                            }
                         } else {
 
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: select empty");}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: select empty");
+                            }
                             $scope.selectedOption = undefined;
                         }
                         if (self.fields.event.select) {
 
-                            if(self.fields.debug) { $log.debug($scope.name + " itAutocomplete: emit select event " + $scope.selectedOption);}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: emit select event " + $scope.selectedOption);
+                            }
                             $rootScope.$emit(self.fields.event.select, $scope.selectedOption);
                         }
                     }
@@ -3334,14 +3530,18 @@ IteSoft
                     function applySelection(selectedItem) {
                         if (angular.isDefined(selectedItem)) {
 
-                            if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));}
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
+                            }
                             if ($scope.focusIndex != selectedItem.position) {
                                 $scope.focusIndex = selectedItem.position;
                                 updateIndex();
                             }
+                            self.fields.inputSearch = _getLabelFromObject(selectedItem);
                             self.fields.selectedItem = selectedItem;
                             self.fields.selectedItem.class = self.fields.selectedSelectClass;
-                            var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(self.fields.selectedItem.id+""));
+
+                            var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
                             scrollTo(selectedDiv);
                         } else {
                             self.fields.selectedItem = undefined;
@@ -3364,21 +3564,23 @@ IteSoft
                      */
                     function scrollTo(targetDiv) {
 
-                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId+"");
+                        var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId + "");
 
-                        if(self.fields.debug) {$log.debug($scope.name + " itAutocomplete: scrollTo "+"#" + self.fields.optionContainerId+" to: "+targetDiv);}
+                        if (self.fields.debug) {
+                            $log.debug($scope.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
+                        }
                         if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
                             && angular.isDefined(containerDiv) && containerDiv != null) {
                             var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
                             var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
                             var pos = targetPosition - containerPosition;
                             containerDiv.scrollTop = pos;
-                            if(self.fields.debug) {
+                            if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: scrollTo parent " + containerDiv.parentElement.getBoundingClientRect().top);
                                 $log.debug($scope.name + " itAutocomplete: scrollTo container " + containerDiv.getBoundingClientRect().top);
                                 $log.debug($scope.name + " itAutocomplete: scrollTo targetDiv " + targetDiv.getBoundingClientRect().top);
                             }
-                        }else{
+                        } else {
                             $log.error($scope.name + " itAutocomplete: scrollTo unable to scroll target div");
                         }
                     }
@@ -3387,18 +3589,19 @@ IteSoft
                      * Hide option items
                      */
                     function hideItems($event) {
-                        $log.debug($scope.name + " itAutocomplete: hide");
+                        $log.debug($scope.name + " itAutocomplete: hide "+self.fields.selectedItem);
                         // Si appelé lors du click sur la touche entrée
                         if (angular.isUndefined($event)) {
                             self.fields.showItems = false;
                             if (angular.isDefined(self.fields.selectedItem)) {
-                                self.fields.inputSearch = self.fields.selectedItem.value;
+                                self.fields.inputSearch = _getLabelFromObject(self.fields.selectedItem)
+
                             }
                             // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
                         } else if (!document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
                             self.fields.showItems = false;
                             if (angular.isDefined(self.fields.selectedItem)) {
-                                self.fields.inputSearch = self.fields.selectedItem.value;
+                                self.fields.inputSearch = _getLabelFromObject(self.fields.selectedItem);
                             }
 
                             //si il s'agit de la scrollbar, on annule le onblur en remettant le focus sur l'element
@@ -3452,7 +3655,7 @@ IteSoft
                      * Call when search input content change
                      */
                     function change(event) {
-                        $log.debug($scope.name + " itAutocomplete: input search change value "+event+"->"+self.fields.inputSearch)
+                        $log.debug($scope.name + " itAutocomplete: input search change value " + event + "->" + self.fields.inputSearch)
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
                             select(undefined);
@@ -3461,11 +3664,12 @@ IteSoft
                         } else {
                             var i = 0;
                             angular.forEach(self.fields.initialItems, function (item) {
+                                item.class = self.fields.defaultSelectClass;
                                 /**
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
-                                    if (_getLower(item.value).startsWith(_getLower(self.fields.inputSearch))) {
+                                    if (_getLower(_getLabelFromObject(item)).startsWith(_getLower(self.fields.inputSearch))) {
                                         self.fields.items.push(item);
                                         self.fields.items[i].position = i;
                                         i++;
@@ -3485,7 +3689,7 @@ IteSoft
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(item.value).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
                                         self.fields.items[i].position = i;
                                         i++;
@@ -3575,12 +3779,48 @@ IteSoft
                      */
                     function _getLower(value) {
                         var result = "";
-                        if (value.toLowerCase) {
+                        if (angular.isDefined(value) && value.toLowerCase) {
                             result += value.toLowerCase();
                         } else {
                             result += value;
                         }
                         return result;
+                    }
+
+                    /**
+                     *  Return label from current object by using converter,
+                     *  if converter doesn't exists, return object.value
+                     * @param selectedItem
+                     * @returns {string}
+                     * @private
+                     */
+                    function _getLabelFromObject(item) {
+                        var result = "";
+                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getLabelFromObject) {
+                            result = self.fields.converter.getLabelFromObject(item);
+                        } else {
+                            result = item.value;
+                        }
+                        return result;
+                    }
+
+                    /**
+                     *  Return id from current object by using converter,
+                     *  if converter doesn't exists, return object.id if not null
+                     * @param object
+                     * @returns {string}
+                     * @private
+                     */
+                    function _getIdFromObject(objectToTransform) {
+                        var id = "";
+                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getObjectFromId) {
+                            id = self.fields.converter.getIdFromObject(objectToTransform);
+                        } else if (typeof objectToTransform === "object") {
+                            id = objectToTransform.id;
+                        } else {
+                            return objectToTransform;
+                        }
+                        return id;
                     }
 
                 }
@@ -3590,8 +3830,12 @@ IteSoft
             'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
-            '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items">' +
-            '          <div ng-class="item.class" id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(item.id)}}"  ng-mousedown="itAutocompleteCtrl.fn.select(item)">{{item.value | translate}}</div>' +
+            '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
+            '          <div ng-class="item.class" ' +
+            '               id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
+            '               ng-mousedown="itAutocompleteCtrl.fn.select(item)">' +
+            '               {{itAutocompleteCtrl.fn.getLabelFromObject(item)}}' +
+            '           </div>' +
             '       </div>' +
             '   </div>' +
             '</div>'
@@ -6996,55 +7240,6 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 
 'use strict';
