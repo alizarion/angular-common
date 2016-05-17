@@ -37,109 +37,6 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCircularBtn
- * @module itesoft
- * @since 1.1
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *   <it-circular-btn></it-circular-btn>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl">
-     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope',
-     function($scope) {
-
-                        }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itCircularBtn',
-    [
-        function () {
-            return {
-                restrict: 'ACE',
-                scope: false,
-                transclude: true,
-                template:'<span class="it-circular-button-container ">' +
-                '<button class="btn  pull-right" > ' +
-                '<div class="it-animated-circular-button">' +
-                '<ng-transclude></ng-transclude>' +
-                '</div>' +
-                '</button> '+
-                '</span>'
-
-            }
-        }]
-);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-'use strict';
 /**
  * Service that provide RSQL query
  */
@@ -236,12 +133,13 @@ IteSoft.factory('itAmountCleanerService', [function () {
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
                 if(angular.isDefined(currency)){
-
-                    if(currency === 'TND'){
+                    //met en Uppercase la devise
+                    currency=$filter('uppercase')(currency);
+                    if(angular.equals(currency ,'TND')){
                         // 3 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
 
-                    }else if(currency === 'YEN'){
+                    }else if(angular.equals(currency ,'JPY')){
                         // 0 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
 
@@ -1009,6 +907,189 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 "use strict";
 
 /**
@@ -1245,141 +1326,6 @@ IteSoft
         }
     }]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 /**
  * @ngdoc directive
@@ -2557,6 +2503,289 @@ IteSoft
         }
 
     });
+'use strict';
+/**
+ * TODO itInclude desc
+ */
+IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *     <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" >
+     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js'
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    scope.template = 'No template found for extension : '  + ext;
+                    break;
+            }
+        };
+
+        var _setValue = function(value) {
+            if(value){
+                if(typeof value === typeof ""){
+                    scope.ext = _splitLast(value, '.').toLowerCase();
+                    _setTemplate(scope.ext, value);
+                }else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type, value);
+                    }else{
+                        scope.template = 'must specify type when using stream';
+                    }
+                }
+            }else {
+                scope.template = null;
+            }
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
+    };
+
+    return {
+        scope: {
+            src : '=',
+            file: '=',
+            type: '@',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCircularBtn
+ * @module itesoft
+ * @since 1.1
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *   <it-circular-btn></it-circular-btn>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl">
+     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope',
+     function($scope) {
+
+                        }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itCircularBtn',
+    [
+        function () {
+            return {
+                restrict: 'ACE',
+                scope: false,
+                transclude: true,
+                template:'<span class="it-circular-button-container ">' +
+                '<button class="btn  pull-right" > ' +
+                '<div class="it-animated-circular-button">' +
+                '<ng-transclude></ng-transclude>' +
+                '</div>' +
+                '</button> '+
+                '</span>'
+
+            }
+        }]
+);
+
 'use strict';
 
 /**
@@ -4298,234 +4527,6 @@ IteSoft
             }
         }
 }]);
-'use strict';
-/**
- * TODO itInclude desc
- */
-IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
-    var linker = function (scope, element, attrs) {
-        var currentScope;
-        scope.$watch(attrs.itInclude, function (template) {
-            $timeout(function () {
-                if(currentScope){
-                    currentScope.$destroy();
-                }
-                currentScope = scope.$new();
-                element.html( template || '');
-                $compile(element.contents())(currentScope);
-            }, 50);
-        });
-    };
-    return {
-        restrict: 'AE',
-        link: linker
-    };
-}]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMediaViewer
- * @module itesoft
- * @since 1.2
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *     <it-media-viewer></it-media-viewer>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl" >
-     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
-
-    var _splitLast = function (word, character) {
-        if(word != undefined){
-            var words = word.split(character);
-            return words[words.length - 1];
-        }
-        return word;
-    };
-
-    var linker = function (scope, element, attrs) {
-        var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
-            switch (ext) {
-                case 'pdf':
-                    scope.pdfSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/pdf.js'
-                    ]).then(function() {
-                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                    });
-                    break;
-                case 'png':
-                case 'jpeg':
-                    scope.imageSrc = value;
-                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                    break;
-                case 'tif':
-                case 'tiff':
-                    scope.tiffSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/tiff.min.js'
-                    ]).then(function() {
-                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                    });
-                    break;
-                default :
-                    scope.template = 'No template found for extension : '  + ext;
-                    break;
-            }
-        };
-
-        var _setValue = function(value) {
-            if(value){
-                if(typeof value === typeof ""){
-                    scope.ext = _splitLast(value, '.').toLowerCase();
-                    _setTemplate(scope.ext, value);
-                }else {
-                    if(attrs.type) {
-                        _setTemplate(attrs.type, value);
-                    }else{
-                        scope.template = 'must specify type when using stream';
-                    }
-                }
-            }else {
-                scope.template = null;
-            }
-        };
-
-        scope.$watch("src", _setValue);
-        scope.$watch("file", _setValue);
-    };
-
-    return {
-        scope: {
-            src : '=',
-            file: '=',
-            type: '@',
-            options : '=',
-        },
-        restrict: 'E',
-        template :  '<div it-include="template"></div>',
-        link: linker
-    };
-}]);
-
-
-'use strict';
-/**
- * TODO ScriptService desc
- */
-IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
-    var _scipts = {};
-    var _css = {};
-    var defaultScriptPromise = $q.defer();
-    var defaultScriptsPromise = $q.defer();
-
-    //JS
-    var _loadScripJs = function (js) {
-        if(js){
-            if(_scipts[js] != undefined){
-                return _scipts[js];
-            }else {
-                var deferred = $q.defer();
-                var script = document.createElement('script');
-                _scipts[js] = deferred.promise;
-                script.src = js;
-                script.type = 'text/javascript';
-                script.onload = function () {
-                    deferred.resolve(script);
-                };
-                document.head.appendChild(script);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsJs = function (scriptJs) {
-        if(typeof scriptJs == typeof ""){
-            return _loadScripJs(scriptJs);
-        }else if(typeof scriptJs == typeof []){
-            var promises = [];
-            angular.forEach(scriptJs, function(js){
-                promises.push(_loadScripJs(js));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //CSS
-    var _loadScriptCss = function (css) {
-        if(css){
-            if(_css[css] != undefined){
-                return _css[css];
-            }else {
-                var deferred = $q.defer();
-                var link = document.createElement('link');
-                _css[css] = deferred.promise;
-                link.href = css;
-                link.rel ='stylesheet';
-                link.type = 'text/css';
-                link.onload = function () {
-                    deferred.resolve(link);
-                };
-                document.head.appendChild(link);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsCss = function (scriptCss) {
-        if(typeof scriptCss == typeof ""){
-            return _loadScriptCss(scriptCss);
-        }else if(typeof scriptCss == typeof []){
-            var promises = [];
-            angular.forEach(scriptCss, function(css){
-                promises.push(_loadScriptCss(css));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //Scripts
-    var _loadScripts = function (js, css) {
-        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
-    };
-
-    return {
-        LoadScripts : _loadScripts
-    };
-}]);
-
 "use strict";
 /**
  * You do not talk about FIGHT CLUB!!
@@ -4565,255 +4566,6 @@ IteSoft
             }
         };
     }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- * @since 1.0
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -5202,924 +4954,189 @@ IteSoft
         }
 });
 'use strict';
+
 /**
  * @ngdoc directive
- * @name itesoft.directive:itSidePanel
+ * @name itesoft.directive:itBottomGlue
  * @module itesoft
- * @restrict E
+ * @restrict A
  * @since 1.0
  * @description
- * A container element for side panel and its Header, Content and Footer
+ * Simple directive to fill height.
  *
- * <table class="table">
- *   <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-col="3">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *          <it-side-panel it-z-index="700">
- *          </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-icon-class="fa-star-o">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-height-mode="auto | window | full">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set "Height Mode" of the Side Panel.
- *          <ul>
- *              <li><b>auto</b> :
- *                  <ul>
- *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
- *                      <li>Else the height of Side Panel is equal to its content</li>
- *                  </ul>
- *                </li>
- *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
- *              <li><b>full</b>
-*                   <ul>
- *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
- *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
- *                  </ul>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-top-position="XX | none">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set css top position of the Side Panel. Default value is "none" mode
- *          <ul>
- *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
- *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- * </table>
  *
- * ```html
- * <it-side-panel>
- *      <it-side-panel-header>
- *          <!--Header of Side Panel -->
- *      </it-side-panel-header>
- *      <it-side-panel-content>
- *          <!--Content Side Panel-->
- *      </it-side-panel-content>
- *      <it-side-panel-footer>
- *          <!--Footer Side Panel-->
- *      </it-side-panel-footer>
- * </it-side-panel>
- * ```
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
  * @example
  <example module="itesoft">
- <file name="custom.css">
-
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
-       background-color: blue;
-     }
-
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
-       background-color: green;
-     }
-
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
-       background-color: gray;
-     }
-
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
-        text-align: center;
-        display: table;
-        width: 100%;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
-        display: table-cell;
-        vertical-align:middle;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
-        margin:0px;
-     }
-
- </file>
  <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
-
- <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
- <it-side-panel-header>
- <div><h1>Search</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Search 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Search 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Search 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
  </file>
  </example>
  */
-IteSoft
-    .directive('itSidePanel', ['$window', function ($window) {
-
-
-        function _link(scope, element, attrs) {
-
-            scope.itSidePanelElement = element;
-
-            scope.setIconClass(scope, attrs);
-
-            scope.setZIndexes(element, attrs);
-
-            scope.setColMd(attrs);
-
-            scope.setHeightMode(attrs);
-
-            scope.setTopPosition(attrs);
-
-        }
-
-        return {
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
-            '</div>'
-
-        };
-    }]);
-
-
 'use strict';
+
 /**
  * @ngdoc directive
- * @name itesoft.directive:itSidePanelContent
+ * @name itesoft.directive:rowHeight
  * @module itesoft
- * @restrict E
- * @since 1.0
+ * @restrict A
+ * @since 1.1
  * @description
- * A container for a Side Panel content, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-content>
- * </it-side-panel-content>
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
  */
-IteSoft
-    .directive('itSidePanelContent', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require: '^itSidePanel',
-            template:
-                '<div class="it-side-panel-content" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .controller("$sidePanelCtrl", [
-        '$scope',
-        '$window',
-        '$document',
-        '$timeout',
-        '$log',
-        function ($scope, $window, $document, $timeout, $log) {
-
-
-            var COL_MD_NAME = 'it-col';
-            var HEIGHT_MODE_NAME = 'it-height-mode';
-            var TOP_POSITION_NAME = 'it-top-position';
-
-            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
-
-            var Z_INDEX_CSS_KEY = 'z-index';
-
-            var IT_HEIGHT_MODE_WINDOW = 'window';
-            var IT_HEIGHT_MODE_FULL = 'full';
-            var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
-
-            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
-
-
-            var DEFAULT_COL_MD = 4;
-            var MAX_COL_MD = 12;
-            var MIN_COL_MD = 1;
-
-            var DEFAULT_ICON_CLASS = 'fa-search';
-
-
-            var DEFAULT_TOP_POSITION = 'none';
-            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
-
-            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
-            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
-            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
-            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
-            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
-            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
-            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
-
-            var _self = this;
-            _self.scope = $scope;
-            _self.scope.showPanel = false;
-
-            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-            //Set default col-md(s) to the scope
-            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-
-            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
-
-            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
-
-            _self.scope.sidePanelContainerWidth = null;
-            _self.scope.sidePanelContainerRight = null;
-            _self.scope.sidePanelButtonRight = null;
-
-
-            var w = angular.element($window);
-
-
-            /**
-             * Get window Dimensions
-             * @returns {{height: Number, width: Number}}
-             */
-            _self.scope.getWindowDimensions = function () {
-                return {
-                    'height': $window.innerHeight,
-                    'width': $window.innerWidth
-                };
-            };
-
-            /**
-             * Watch the resizing of window Dimensions
-             */
-            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
-
-                _self.scope.windowHeight = newValue.height;
-                _self.scope.windowWidth = newValue.width;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-
-                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-
-                    var top = sidePanelContainer[0].getBoundingClientRect().top;
-
-                    //Do not update side panel height property when
-                    // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if(Math.abs(top) < _self.scope.windowHeight){
-
-                        var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if(_self.scope.isNoneTopPosition()){
-                            itTopPosition = 0;
-                        }
-
-                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
-
-                        var heightHeader = (newHeight*0.10);
-                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height',heightHeader+'px');
-
-                        var heightFooter = (newHeight*0.10);
-                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height',heightFooter+'px');
-
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight*0.8)+'px');
-
-                    }
-                }
-
-
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
-                    _self.scope.sidePanelContainerWidth = newWidth;
-                    sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
-                    _self.scope.modifySidePanelCssProperties();
-                }
-
-            }, true);
-
-            /**
-             * Update Side panel Css properties (right and width)
-             */
-            _self.scope.modifySidePanelCssProperties = function (){
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
-                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
-
-                _self.scope.sidePanelContainerWidth = newWidth;
-                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
-                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                //update side panel container right and width properties
-                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
-                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-
-                //update side panel button right right property
-                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
-            };
-
-            w.bind('resize', function () {
-                _self.scope.$apply();
-            });
-
-            /**
-             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
-             */
-            _self.scope.toggleSidePanel = function () {
-                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if(_self.scope.showPanel){
-
-                    //Reset the right property of Side panel button
-                    iconButtonElement.css('right', "");
-
-                    //Do the transition in order to the side panel be visible
-                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
-                        _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
-
-
-                } else {
-
-                    var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
-                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
-                }
-            };
-
-            _self.scope.setItSidePanelElement = function(element){
-                _self.scope.itSidePanelElement = element;
-            };
-
-
-            /**
-             * Set the Side Panel Height Mode from "it-height-mode" attributes
-             * @param attrs directive attributes object
-             */
-            _self.scope.setHeightMode = function (attrs){
-                _self.scope.itHeightMode = attrs.itHeightMode;
-
-                //If attribute is not defined set the default height Mode
-                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
-                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
-                    //Get the provided mode
-                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
-
-                    //If height mode is defined but unknown set to the default  height mode
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
-                }
-
-                //Set height of header, content and footer
-                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
-
-                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
-
-                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css('height', '80%');
-
-
-
-                //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
-                    case IT_HEIGHT_MODE_FULL:
-
-                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css('height');
-
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
-                            sidePanelContainer.css('height', '100%');
-                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css('height', '100%');
-                        }
-                        break;
-                    case IT_HEIGHT_MODE_AUTO:
-                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
-                        break;
-                    case IT_HEIGHT_MODE_WINDOW:
-
-                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css('height', '100%');
-
-                        //set overflow : auto to the Side Panel Content
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('overflow', 'auto');
-                        break;
-                    default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
-                }
-            };
-
-            /**
-             * Retrieve provided iconClass and put the value it in scope
-             * @param scope the scope
-             * @param attrs the attributes provided by directive
-             * @private
-             */
-            _self.scope.setIconClass = function (scope, attrs) {
-                var defaultIconClass = DEFAULT_ICON_CLASS;
-                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
-                    _self.scope.itIconClass = defaultIconClass;
-                } else {
-                    _self.scope.itIconClass = attrs.itIconClass;
-                }
-            };
-
-            /**
-             * Handle col-md of directive.
-             * If itCol is provided to the directive apply its col-md-X
-             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setColMd = function (attrs) {
-                var colMd = DEFAULT_COL_MD;
-                if (!isNaN(parseInt(attrs.itCol))) {
-
-                    if (attrs.itCol > MAX_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
-                            '(' + MAX_COL_MD + '). The maximum value is taken.');
-                    } else if (attrs.itCol < MIN_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
-                            '(' + MIN_COL_MD + '). The minimum value is taken.');
-                    } else {
-                        _self.scope.itSidePanelcolMd = attrs.itCol;
-                    }
-                } else {
-                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
-                }
-            };
-
-            /**
-             * Handle z indexes of directive.
-             * If itZIndex is provided to the directive apply its z-index
-             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setZIndexes = function (element, attrs) {
-
-                var zindex = null;
-                if (!isNaN(parseInt(attrs.itZIndex))) {
-                    zindex = parseInt(attrs.itZIndex);
-                }
-
-                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (zindex !== null) {
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
-                } else {
-
-                    var highestZIndex = _self.scope.findHighestZIndex();
-                    var newHighestZIndex = highestZIndex + 100;
-
-                    //set the zindex to side panel element
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
-
-                    //set the zindex to the icon button of the side panel element
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
-
-                }
-            };
-
-            /**
-             * Get Dom element from its class
-             * @param element dom element in which the class search will be performed
-             * @param className className. Using 'querySelector' selector convention
-             * @private
-             */
-            _self.scope.getElementFromClass = function (element, className) {
-                var content = angular.element(element[0].querySelector(className));
-                var sidePanel = angular.element(content[0]);
-                return sidePanel;
-            };
-
-            /**
-             * Find the highest z-index of the DOM
-             * @returns {number} the highest z-index value
-             * @private
-             */
-            _self.scope.findHighestZIndex = function () {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            };
-
-            _self.scope.setTopPosition = function (attrs) {
-                var topPosition = attrs.itTopPosition;
-                if (!isNaN(parseInt(topPosition))) {
-                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
-                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
-
-                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
-
-                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
-                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
-                }
-            };
-
-            /**
-             *
-             * @returns {boolean}
-             */
-            _self.scope.isNoneTopPosition = function () {
-                return _self.scope.itSidePanelTopPosition === 'none';
-            };
-        }
-    ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelFooter
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel footer, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-footer>
- * </it-side-panel-footer>
- */
-IteSoft
-    .directive('itSidePanelFooter', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-footer" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelHeader
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel header, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-header>
- * </it-side-panel-header>
- */
-IteSoft
-    .directive('itSidePanelHeader', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-header text-center" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
 /**
  * Created by sza on 22/04/2016.
  */
@@ -7195,54 +6212,989 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
+'use strict';
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanel
  * @module itesoft
- * @restrict EA
+ * @restrict E
  * @since 1.0
  * @description
- * Simple filter that escape string to unicode.
+ * A container element for side panel and its Header, Content and Footer
  *
+ * <table class="table">
+ *   <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-col="3">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *          <it-side-panel it-z-index="700">
+ *          </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-icon-class="fa-star-o">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-height-mode="auto | window | full">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set "Height Mode" of the Side Panel.
+ *          <ul>
+ *              <li><b>auto</b> :
+ *                  <ul>
+ *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
+ *                      <li>Else the height of Side Panel is equal to its content</li>
+ *                  </ul>
+ *                </li>
+ *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
+ *              <li><b>full</b>
+*                   <ul>
+ *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
+ *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
+ *                  </ul>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-top-position="XX | none">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set css top position of the Side Panel. Default value is "none" mode
+ *          <ul>
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-side-panel>
+ *      <it-side-panel-header>
+ *          <!--Header of Side Panel -->
+ *      </it-side-panel-header>
+ *      <it-side-panel-content>
+ *          <!--Content Side Panel-->
+ *      </it-side-panel-content>
+ *      <it-side-panel-footer>
+ *          <!--Footer Side Panel-->
+ *      </it-side-panel-footer>
+ * </it-side-panel>
+ * ```
+ * @example
+ <example module="itesoft">
+ <file name="custom.css">
+
+     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+       background-color: blue;
+     }
+
+     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+       background-color: green;
+     }
+
+     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+       background-color: gray;
+     }
+
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+        text-align: center;
+        display: table;
+        width: 100%;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+        display: table-cell;
+        vertical-align:middle;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+        margin:0px;
+     }
+
+ </file>
+ <file name="index.html">
+
+ <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
+ <it-side-panel-header>
+ <div><h1>Favorites</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Favorite 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Favorite 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 4</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 5</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 6</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 7</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 8</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 9</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 10</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 11</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 12</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 13</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 14</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 15</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 16</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+ <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
+ <it-side-panel-header>
+ <div><h1>Silicon Valley</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Paragraph 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Paragraph 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Paragraph 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+
+ <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
+ <it-side-panel-header>
+ <div><h1>Search</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Search 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Search 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Search 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+ </file>
+ </example>
+ */
+IteSoft
+    .directive('itSidePanel', ['$window', function ($window) {
+
+
+        function _link(scope, element, attrs) {
+
+            scope.itSidePanelElement = element;
+
+            scope.setIconClass(scope, attrs);
+
+            scope.setZIndexes(element, attrs);
+
+            scope.setColMd(attrs);
+
+            scope.setHeightMode(attrs);
+
+            scope.setTopPosition(attrs);
+
+        }
+
+        return {
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            controller: '$sidePanelCtrl',
+            scope : true,
+            template:
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+                    '<span class="fa {{itIconClass}}"></span>' +
+                '</div>'+
+                '<div class="it-side-panel" ng-transclude></div>'+
+            '</div>'
+
+        };
+    }]);
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelContent
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel content, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-content>
+ * </it-side-panel-content>
+ */
+IteSoft
+    .directive('itSidePanelContent', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require: '^itSidePanel',
+            template:
+                '<div class="it-side-panel-content" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .controller("$sidePanelCtrl", [
+        '$scope',
+        '$window',
+        '$document',
+        '$timeout',
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
+
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
+
+            var Z_INDEX_CSS_KEY = 'z-index';
+
+            var IT_HEIGHT_MODE_WINDOW = 'window';
+            var IT_HEIGHT_MODE_FULL = 'full';
+            var IT_HEIGHT_MODE_AUTO = 'auto';
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+
+            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
+            var DEFAULT_COL_MD = 4;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
+            var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
+
+            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
+            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
+            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
+            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
+            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
+            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
+
+            var _self = this;
+            _self.scope = $scope;
+            _self.scope.showPanel = false;
+
+            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+            //Set default col-md(s) to the scope
+            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
+
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
+
+
+            var w = angular.element($window);
+
+
+            /**
+             * Get window Dimensions
+             * @returns {{height: Number, width: Number}}
+             */
+            _self.scope.getWindowDimensions = function () {
+                return {
+                    'height': $window.innerHeight,
+                    'width': $window.innerWidth
+                };
+            };
+
+            /**
+             * Watch the resizing of window Dimensions
+             */
+            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
+
+                _self.scope.windowHeight = newValue.height;
+                _self.scope.windowWidth = newValue.width;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+
+                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
+
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if(Math.abs(top) < _self.scope.windowHeight){
+
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if(_self.scope.isNoneTopPosition()){
+                            itTopPosition = 0;
+                        }
+
+                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
+
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
+                }
+
+
+                if(_self.scope.showPanel){
+                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                //if its the firt time initialise all components width an right
+                }else {
+                    _self.scope.modifySidePanelCssProperties();
+                }
+
+            }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function (){
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
+
+            w.bind('resize', function () {
+                _self.scope.$apply();
+            });
+
+            /**
+             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
+             */
+            _self.scope.toggleSidePanel = function () {
+                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if(_self.scope.showPanel){
+
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function(){
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    },50);
+
+
+                } else {
+
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                }
+            };
+
+            _self.scope.setItSidePanelElement = function(element){
+                _self.scope.itSidePanelElement = element;
+            };
+
+
+            /**
+             * Set the Side Panel Height Mode from "it-height-mode" attributes
+             * @param attrs directive attributes object
+             */
+            _self.scope.setHeightMode = function (attrs){
+                _self.scope.itHeightMode = attrs.itHeightMode;
+
+                //If attribute is not defined set the default height Mode
+                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
+                    //Get the provided mode
+                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
+                } else{
+
+                    //If height mode is defined but unknown set to the default  height mode
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
+                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                }
+
+                //Set height of header, content and footer
+                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                sidePanelHeader.css('height','10%');
+
+                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                sidePanelFooter.css('height','10%');
+
+                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                sidePanelContent.css('height', '80%');
+
+
+
+                //Configure height of Side Panel elements depending on the provided height mode
+                switch(_self.scope.itHeightMode) {
+                    case IT_HEIGHT_MODE_FULL:
+
+                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
+
+                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                            sidePanelContainer.css('height', '100%');
+                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                            sidePanel.css('height', '100%');
+                        }
+                        break;
+                    case IT_HEIGHT_MODE_AUTO:
+                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
+                        break;
+                    case IT_HEIGHT_MODE_WINDOW:
+
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', '100%');
+
+                        //set overflow : auto to the Side Panel Content
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('overflow', 'auto');
+                        break;
+                    default:
+                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                }
+            };
+
+            /**
+             * Retrieve provided iconClass and put the value it in scope
+             * @param scope the scope
+             * @param attrs the attributes provided by directive
+             * @private
+             */
+            _self.scope.setIconClass = function (scope, attrs) {
+                var defaultIconClass = DEFAULT_ICON_CLASS;
+                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
+                    _self.scope.itIconClass = defaultIconClass;
+                } else {
+                    _self.scope.itIconClass = attrs.itIconClass;
+                }
+            };
+
+            /**
+             * Handle col-md of directive.
+             * If itCol is provided to the directive apply its col-md-X
+             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setColMd = function (attrs) {
+                var colMd = DEFAULT_COL_MD;
+                if (!isNaN(parseInt(attrs.itCol))) {
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                }
+            };
+
+            /**
+             * Handle z indexes of directive.
+             * If itZIndex is provided to the directive apply its z-index
+             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setZIndexes = function (element, attrs) {
+
+                var zindex = null;
+                if (!isNaN(parseInt(attrs.itZIndex))) {
+                    zindex = parseInt(attrs.itZIndex);
+                }
+
+                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (zindex !== null) {
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
+                } else {
+
+                    var highestZIndex = _self.scope.findHighestZIndex();
+                    var newHighestZIndex = highestZIndex + 100;
+
+                    //set the zindex to side panel element
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
+
+                    //set the zindex to the icon button of the side panel element
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
+
+                }
+            };
+
+            /**
+             * Get Dom element from its class
+             * @param element dom element in which the class search will be performed
+             * @param className className. Using 'querySelector' selector convention
+             * @private
+             */
+            _self.scope.getElementFromClass = function (element, className) {
+                var content = angular.element(element[0].querySelector(className));
+                var sidePanel = angular.element(content[0]);
+                return sidePanel;
+            };
+
+            /**
+             * Find the highest z-index of the DOM
+             * @returns {number} the highest z-index value
+             * @private
+             */
+            _self.scope.findHighestZIndex = function () {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            };
+
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
+
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                }
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
+            };
+        }
+    ]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelFooter
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel footer, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-footer>
+ * </it-side-panel-footer>
+ */
+IteSoft
+    .directive('itSidePanelFooter', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-footer" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelHeader
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel header, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-header>
+ * </it-side-panel-header>
+ */
+IteSoft
+    .directive('itSidePanelHeader', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-header text-center" ng-transclude></div>'
+        };
+    });
+
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
  *
  * @example
     <example module="itesoft">
         <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
         </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
     </example>
  */
 IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
                 }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
 
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
 
 
 'use strict';
@@ -7474,295 +7426,54 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
-'use strict';
 /**
- * @ngdoc service
- * @name itesoft.service:itPopup
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
  * @module itesoft
+ * @restrict EA
  * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
  * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
+ * Simple filter that escape string to unicode.
+ *
  *
  * @example
     <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
 
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
+                 {{stringToEscape | itUnicode}}
              </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
          </file>
-     </example>
+    </example>
  */
-
 IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
 
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
         };
+}]);
 
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
 
 'use strict';
 /**
@@ -8192,6 +7903,296 @@ IteSoft.provider('itNotifier', [ function () {
 }]);
 'use strict';
 /**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
+
+'use strict';
+/**
  * TODO Image implementation desc
  */
 itImageViewer
@@ -8331,743 +8332,6 @@ itImageViewer.directive('itImageViewer', ['$sce', function($sce){
         link: linker
     };
 }]);
-
-'use strict';
-/**
- * TODO itProgressbarViewer desc
- */
-itMultiPagesViewer.directive('itProgressbarViewer', [function(){
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="loader" >' +
-        '<div class="progress-bar">' +
-        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
-        '</div>' +
-        '</div>'
-    };
-}]);
-'use strict';
-/**
- * TODO itToolbarViewer desc
- */
-itMultiPagesViewer.directive('itToolbarViewer', [function(){
-    var linker = function (scope, element, attrs) {
-
-        scope.$watch("api.getZoomLevel()", function (value) {
-            scope.scale = value;
-        });
-
-        scope.$watch("api.getCurrentPage()", function (value) {
-            scope.currentPage = value;
-        });
-
-        scope.onZoomLevelChanged = function() {
-            scope.api.zoomTo(scope.scale);
-        };
-
-        scope.onPageChanged = function() {
-            scope.api.goToPage(scope.currentPage);
-        };
-
-        scope.zoomIn = function() {
-            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-
-        scope.zoomOut = function() {
-            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-    };
-
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
-        '</select> ' +
-        '<button ng-click="zoomIn()">+</button> ' +
-        '</div>' +
-
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span>' +
-        '</div>' +
-        '</div>',
-        link: linker
-    };
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesConstants desc
- */
-itMultiPagesViewer.constant("MultiPagesConstants", {
-    PAGE_RENDER_FAILED : -1,
-    PAGE_RENDER_CANCELLED : 0,
-    PAGE_RENDERED : 1,
-    PAGE_ALREADY_RENDERED : 2,
-    ZOOM_LEVELS_LUT : [
-        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
-        2.0, 2.2, 2.4, 2.6, 2.8,
-        3.0, 3.3, 3.6, 3.9,
-        4.0, 4.5,
-        5.0],
-    ZOOM_FIT_WIDTH : "fit_width",
-    ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
-})
-
-'use strict';
-/**
- * TODO MultiPagesPage desc
- */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
-
-    function MultiPagesPage(pageIndex, view) {
-        this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page'></div>");
-        this.container.attr("id", "page_" + pageIndex);
-
-        this.canvasRendered = false;
-        this.rendered = false;
-
-        //transform
-        this.view = view;
-
-    }
-
-    MultiPagesPage.prototype = {
-        clear: function () {
-            this.rendered = false;
-            this.container.empty();
-        },
-        getViewport: function (scale) {
-            return new PageViewport(this.view, scale, 0, 0, 0);
-        },
-        resize: function (scale) {
-            this.viewport = this.getViewport(scale);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
-
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
-        },
-        isVisible: function () {
-            var pageContainer = this.container[0];
-            var parentContainer = this.container.parent()[0];
-
-            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-            var pageBottom = pageTop + pageContainer.offsetHeight;
-
-            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
-        },
-        render: function (callback) {
-            throw "NotImplementedError - render";
-        }
-    };
-
-    return (MultiPagesPage);
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesViewer desc
- */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
-    function getElementInnerSize(element, margin) {
-        var tallTempElement = angular.element("<div></div>");
-        tallTempElement.css("height", "10000px");
-
-        element.append(tallTempElement);
-
-        var w = tallTempElement[0].offsetWidth;
-
-        tallTempElement.remove();
-
-        var h = element[0].offsetHeight;
-        if(h === 0) {
-            // TODO: Should we get the parent height?
-            h = 2 * margin;
-        }
-
-        w -= 2 * margin;
-        h -= 2 * margin;
-
-        return {
-            width: w,
-            height: h
-        };
-    }
-
-    function MultiPagesViewer(api, element) {
-        this.pages = [];
-        this.scaleItem = null;
-        this.fitWidthScale = 1.0;
-        this.fitHeightScale = 1.0;
-        this.fitPageScale = 1.0;
-        this.element = element;
-        this.pageMargin = 0;
-        this.currentPage = 0;
-        this.lastScrollDir = 0;
-
-        this.api = api;
-
-        // Hooks for the client...
-        this.onPageRendered = null;
-        this.onDataDownloaded = null;
-        this.onCurrentPageChanged = null;
-    }
-
-    MultiPagesViewer.prototype = {
-        getAPI: function () {
-            return this.api;
-        },
-        setContainerSize: function (initialScale) {
-            if(this.pages.length > 0){
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.api.zoomLevels = [];
-                var lastScale = 0.1;
-                do {
-                    var curScale = this.api.getNextZoomInScale(lastScale);
-                    if(curScale.value=== lastScale) {
-                        break;
-                    }
-
-                    if(curScale.value === 100){
-                        this.defaultScale = curScale;
-                    }
-
-                    if(this.scaleItem == undefined && curScale.id === initialScale){
-                        this.scaleItem = curScale;
-                    }
-
-                    this.api.zoomLevels.push(curScale);
-
-                    lastScale = curScale.value;
-                } while(true);
-
-                this.setScale(this.scaleItem);
-            }
-        },
-        setScale: function (scaleItem) {
-            if(scaleItem != undefined) {
-                this.scaleItem = scaleItem;
-            }
-            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
-
-            var numPages = this.pages.length;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                // Clear the page's contents...
-                this.pages[iPage].clear();
-
-                // Resize to current scaleItem...
-                this.pages[iPage].resize(si.value);
-            }
-
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
-        },
-        calcScale: function (desiredScale) {
-            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
-                // Find the widest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxWidth = this.pages[0].getViewport(1.0).width;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
-                }
-
-                return this.containerSize.width / maxWidth;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
-                // Find the highest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxHeight = this.pages[0].getViewport(1.0).height;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
-                }
-
-                return this.containerSize.height / maxHeight;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
-                // Find the smaller dimension of the container and fit the 1st page to it.
-                var page0Viewport = this.pages[0].getViewport(1.0);
-
-                if(this.containerSize.height < this.containerSize.width) {
-                    return this.containerSize.height / page0Viewport.height;
-                }
-
-                return this.containerSize.width / page0Viewport.width;
-            }
-
-            var scale = parseFloat(desiredScale);
-            if(isNaN(scale)) {
-                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
-                return 1.0;
-            }
-
-            return scale;
-        },
-        removeDistantPages: function (curPageID, distance) {
-            var numPages = this.pages.length;
-
-            var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
-
-            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
-                this.pages[iPage].clear();
-            }
-
-            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
-                this.pages[iPage].clear();
-            }
-        },
-        renderAllVisiblePages: function (scrollDir) {
-            if(scrollDir != undefined){
-                this.lastScrollDir = scrollDir;
-            }
-
-            var self = this;
-            var numPages = this.pages.length;
-            var currentPageID = 0;
-            var atLeastOnePageInViewport = false;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-
-                if(page.isVisible()) {
-                    var parentContainer = page.container.parent()[0];
-                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
-                    if(pageTop <= parentContainer.offsetHeight / 2) {
-                        currentPageID = iPage;
-                    }
-
-                    atLeastOnePageInViewport = true;
-                    page.render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                } else {
-                    if(atLeastOnePageInViewport) {
-                        break;
-                    }
-                }
-            }
-
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = currentPageID + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
-            }
-
-            this.removeDistantPages(currentPageID, 2);
-
-            this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
-                this.onCurrentPageChanged( currentPageID + 1);
-            }
-        },
-        hookScope: function(scope, initialScale) {
-            var self = this;
-            var lastScrollY = 0;
-            var watcher = new SizeWatcher(self.element[0], 200);
-            scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(initialScale);
-            });
-
-            var onProgress = function(operation, state, value, total, message) {
-                if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
-                    }
-                    else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
-                    }
-                }
-                else if (operation === "download" && state === "loading") {
-                    self.api.downloadProgress = (value / total) * 100.0;
-                }
-                else {
-                    if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
-                    }
-                }
-            };
-
-            scope.onPageRendered = function(status, pageID, numPages, message) {
-                onProgress("render", status, pageID, numPages, message);
-            };
-
-            scope.onDataDownloaded = function(status, loaded, total, message) {
-                onProgress("download", status, loaded, total, message);
-            };
-
-            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
-            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
-
-            scope.$on('$destroy', function() {
-                if(self.onDestroy != null){
-                    try	{
-
-                    }catch (ex)
-                    {
-                        $log.log(ex);
-                    }
-                    self.onDestroy();
-                }
-                watcher.cancel();
-                self.element.empty();
-                $log.debug("viewer destroyed");
-            });
-
-            self.element.bind("scroll", function(event) {
-                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
-                scope.scrollTimeout = $timeout(function() {
-                    var scrollTop = self.element[0].scrollTop;
-
-                    var scrollDir = scrollTop - lastScrollY;
-                    lastScrollY = scrollTop;
-
-                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
-                    self.renderAllVisiblePages(normalizedScrollDir);
-                }, 350);
-            });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
-        }
-    };
-
-    return (MultiPagesViewer);
-}]);
-'use strict';
-/**
- * TODO MultiPagesViewerAPI desc
- */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-
-        function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
-
-        MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
-            }
-        };
-
-        return (MultiPagesViewerAPI);
-    }]);
-
-'use strict';
-/**
- * TODO PageViewport desc
- */
-itMultiPagesViewer.factory('PageViewport', [function() {
-
-        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
-            this.viewBox = viewBox;
-            this.scale = scale;
-            this.rotation = rotation;
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-
-            // creating transform to convert pdf coordinate system to the normal
-            // canvas like coordinates taking in account scale and rotation
-            var centerX = (viewBox[2] + viewBox[0]) / 2;
-            var centerY = (viewBox[3] + viewBox[1]) / 2;
-            var rotateA, rotateB, rotateC, rotateD;
-            rotation = rotation % 360;
-            rotation = rotation < 0 ? rotation + 360 : rotation;
-            switch (rotation) {
-                case 180:
-                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
-                    break;
-                case 90:
-                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
-                    break;
-                case 270:
-                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
-                    break;
-                //case 0:
-                default:
-                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
-                    break;
-            }
-
-            if (dontFlip) {
-                rotateC = -rotateC; rotateD = -rotateD;
-            }
-
-            var offsetCanvasX, offsetCanvasY;
-            var width, height;
-            if (rotateA === 0) {
-                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
-                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
-                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
-            } else {
-                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
-                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
-                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
-            }
-            // creating transform for the following operations:
-            // translate(-centerX, -centerY), rotate and flip vertically,
-            // scale, and translate(offsetCanvasX, offsetCanvasY)
-            this.transform = [
-                rotateA * scale,
-                rotateB * scale,
-                rotateC * scale,
-                rotateD * scale,
-                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
-                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
-            ];
-
-            this.width = width;
-            this.height = height;
-            this.fontScale = scale;
-        }
-        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
-            /**
-             * Clones viewport with additional properties.
-             * @param args {Object} (optional) If specified, may contain the 'scale' or
-             * 'rotation' properties to override the corresponding properties in
-             * the cloned viewport.
-             * @returns {PDFJS.PageViewport} Cloned viewport.
-             */
-            clone: function PageViewPort_clone(args) {
-                args = args || {};
-                var scale = 'scale' in args ? args.scale : this.scale;
-                var rotation = 'rotation' in args ? args.rotation : this.rotation;
-                return new PageViewport(this.viewBox.slice(), scale, rotation,
-                    this.offsetX, this.offsetY, args.dontFlip);
-            },
-            /**
-             * Converts PDF point to the viewport coordinates. For examples, useful for
-             * converting PDF location into canvas pixel coordinates.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the viewport coordinate space.
-             * @see {@link convertToPdfPoint}
-             * @see {@link convertToViewportRectangle}
-             */
-            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
-                return Util.applyTransform([x, y], this.transform);
-            },
-            /**
-             * Converts PDF rectangle to the viewport coordinates.
-             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
-             * @returns {Array} Contains corresponding coordinates of the rectangle
-             * in the viewport coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToViewportRectangle:
-                function PageViewport_convertToViewportRectangle(rect) {
-                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
-                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
-                    return [tl[0], tl[1], br[0], br[1]];
-                },
-            /**
-             * Converts viewport coordinates to the PDF location. For examples, useful
-             * for converting canvas pixel location into PDF one.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the PDF coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
-                return Util.applyInverseTransform([x, y], this.transform);
-            }
-        };
-
-        return (PageViewport);
-    }]);
-
-'use strict';
-/**
- * TODO SizeWatcher desc
- */
-itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
-        return function (element, rate) {
-            var self = this;
-            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
-            self.monitor = $interval(self.update, rate);
-            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
-            self.cancel = function() { $interval.cancel(self.monitor); };
-        };
-    }]);
 
 'use strict';
 /**
@@ -10090,5 +9354,742 @@ itTiffViewer
                     scope.onSrcChanged();
                 });
             }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO itProgressbarViewer desc
+ */
+itMultiPagesViewer.directive('itProgressbarViewer', [function(){
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="loader" >' +
+        '<div class="progress-bar">' +
+        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
+        '</div>' +
+        '</div>'
+    };
+}]);
+'use strict';
+/**
+ * TODO itToolbarViewer desc
+ */
+itMultiPagesViewer.directive('itToolbarViewer', [function(){
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("api.getZoomLevel()", function (value) {
+            scope.scale = value;
+        });
+
+        scope.$watch("api.getCurrentPage()", function (value) {
+            scope.currentPage = value;
+        });
+
+        scope.onZoomLevelChanged = function() {
+            scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onPageChanged = function() {
+            scope.api.goToPage(scope.currentPage);
+        };
+
+        scope.zoomIn = function() {
+            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+
+        scope.zoomOut = function() {
+            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+    };
+
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="toolbar">' +
+        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+        '<button ng-click="zoomOut()">-</button> ' +
+        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
+        '</select> ' +
+        '<button ng-click="zoomIn()">+</button> ' +
+        '</div>' +
+
+        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+        '<span>Page : </span>' +
+        '<button ng-click="api.goToPrevPage()"><</button> ' +
+        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+        '<button ng-click="api.goToNextPage()">></button> ' +
+        '<span> of {{api.getNumPages()}}</span>' +
+        '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesConstants desc
+ */
+itMultiPagesViewer.constant("MultiPagesConstants", {
+    PAGE_RENDER_FAILED : -1,
+    PAGE_RENDER_CANCELLED : 0,
+    PAGE_RENDERED : 1,
+    PAGE_ALREADY_RENDERED : 2,
+    ZOOM_LEVELS_LUT : [
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
+        2.0, 2.2, 2.4, 2.6, 2.8,
+        3.0, 3.3, 3.6, 3.9,
+        4.0, 4.5,
+        5.0],
+    ZOOM_FIT_WIDTH : "fit_width",
+    ZOOM_FIT_PAGE : "fit_page",
+    ZOOM_FIT_HEIGHT : "fit_height"
+})
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+
+    function MultiPagesPage(pageIndex, view) {
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page'></div>");
+        this.container.attr("id", "page_" + pageIndex);
+
+        this.canvasRendered = false;
+        this.rendered = false;
+
+        //transform
+        this.view = view;
+
+    }
+
+    MultiPagesPage.prototype = {
+        clear: function () {
+            this.rendered = false;
+            this.container.empty();
+        },
+        getViewport: function (scale) {
+            return new PageViewport(this.view, scale, 0, 0, 0);
+        },
+        resize: function (scale) {
+            this.viewport = this.getViewport(scale);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
+
+            this.container.css("width", this.viewport.width + "px");
+            this.container.css("height", this.viewport.height + "px");
+        },
+        isVisible: function () {
+            var pageContainer = this.container[0];
+            var parentContainer = this.container.parent()[0];
+
+            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+            var pageBottom = pageTop + pageContainer.offsetHeight;
+
+            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+        },
+        render: function (callback) {
+            throw "NotImplementedError - render";
+        }
+    };
+
+    return (MultiPagesPage);
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesViewer desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+    function getElementInnerSize(element, margin) {
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
+
+        element.append(tallTempElement);
+
+        var w = tallTempElement[0].offsetWidth;
+
+        tallTempElement.remove();
+
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
+
+        w -= 2 * margin;
+        h -= 2 * margin;
+
+        return {
+            width: w,
+            height: h
+        };
+    }
+
+    function MultiPagesViewer(api, element) {
+        this.pages = [];
+        this.scaleItem = null;
+        this.fitWidthScale = 1.0;
+        this.fitHeightScale = 1.0;
+        this.fitPageScale = 1.0;
+        this.element = element;
+        this.pageMargin = 0;
+        this.currentPage = 0;
+        this.lastScrollDir = 0;
+
+        this.api = api;
+
+        // Hooks for the client...
+        this.onPageRendered = null;
+        this.onDataDownloaded = null;
+        this.onCurrentPageChanged = null;
+    }
+
+    MultiPagesViewer.prototype = {
+        getAPI: function () {
+            return this.api;
+        },
+        setContainerSize: function (initialScale) {
+            if(this.pages.length > 0){
+                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                this.api.zoomLevels = [];
+                var lastScale = 0.1;
+                do {
+                    var curScale = this.api.getNextZoomInScale(lastScale);
+                    if(curScale.value=== lastScale) {
+                        break;
+                    }
+
+                    if(curScale.value === 100){
+                        this.defaultScale = curScale;
+                    }
+
+                    if(this.scaleItem == undefined && curScale.id === initialScale){
+                        this.scaleItem = curScale;
+                    }
+
+                    this.api.zoomLevels.push(curScale);
+
+                    lastScale = curScale.value;
+                } while(true);
+
+                this.setScale(this.scaleItem);
+            }
+        },
+        setScale: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.scaleItem = scaleItem;
+            }
+            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+
+            var numPages = this.pages.length;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                // Clear the page's contents...
+                this.pages[iPage].clear();
+
+                // Resize to current scaleItem...
+                this.pages[iPage].resize(si.value);
+            }
+
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        calcScale: function (desiredScale) {
+            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                // Find the widest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxWidth = this.pages[0].getViewport(1.0).width;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                }
+
+                return this.containerSize.width / maxWidth;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                // Find the highest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxHeight = this.pages[0].getViewport(1.0).height;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                }
+
+                return this.containerSize.height / maxHeight;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                // Find the smaller dimension of the container and fit the 1st page to it.
+                var page0Viewport = this.pages[0].getViewport(1.0);
+
+                if(this.containerSize.height < this.containerSize.width) {
+                    return this.containerSize.height / page0Viewport.height;
+                }
+
+                return this.containerSize.width / page0Viewport.width;
+            }
+
+            var scale = parseFloat(desiredScale);
+            if(isNaN(scale)) {
+                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                return 1.0;
+            }
+
+            return scale;
+        },
+        removeDistantPages: function (curPageID, distance) {
+            var numPages = this.pages.length;
+
+            var firstActivePageID = Math.max(curPageID - distance, 0);
+            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+
+            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                this.pages[iPage].clear();
+            }
+
+            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                this.pages[iPage].clear();
+            }
+        },
+        renderAllVisiblePages: function (scrollDir) {
+            if(scrollDir != undefined){
+                this.lastScrollDir = scrollDir;
+            }
+
+            var self = this;
+            var numPages = this.pages.length;
+            var currentPageID = 0;
+            var atLeastOnePageInViewport = false;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+
+                if(page.isVisible()) {
+                    var parentContainer = page.container.parent()[0];
+                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
+                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                        currentPageID = iPage;
+                    }
+
+                    atLeastOnePageInViewport = true;
+                    page.render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                } else {
+                    if(atLeastOnePageInViewport) {
+                        break;
+                    }
+                }
+            }
+
+            if(this.lastScrollDir !== 0) {
+                var nextPageID = currentPageID + this.lastScrollDir;
+                if(nextPageID >= 0 && nextPageID < numPages) {
+                    this.pages[nextPageID].render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                }
+            }
+
+            this.removeDistantPages(currentPageID, 2);
+
+            this.currentPage = currentPageID + 1;
+            if(this.onCurrentPageChanged){
+                this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        hookScope: function(scope, initialScale) {
+            var self = this;
+            var lastScrollY = 0;
+            var watcher = new SizeWatcher(self.element[0], 200);
+            scope.$watchGroup(watcher.group, function(values) {
+                self.setContainerSize(initialScale);
+            });
+
+            var onProgress = function(operation, state, value, total, message) {
+                if (operation === "render" && value === 1) {
+                    if (state === "success") {
+                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                    }
+                    else {
+                        $log.debug("Failed to render 1st page!\n\n" + message);
+                    }
+                }
+                else if (operation === "download" && state === "loading") {
+                    self.api.downloadProgress = (value / total) * 100.0;
+                }
+                else {
+                    if (state === "failed") {
+                        $log.debug("Something went really bad!\n\n" + message);
+                    }
+                }
+            };
+
+            scope.onPageRendered = function(status, pageID, numPages, message) {
+                onProgress("render", status, pageID, numPages, message);
+            };
+
+            scope.onDataDownloaded = function(status, loaded, total, message) {
+                onProgress("download", status, loaded, total, message);
+            };
+
+            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+            scope.$on('$destroy', function() {
+                if(self.onDestroy != null){
+                    try	{
+
+                    }catch (ex)
+                    {
+                        $log.log(ex);
+                    }
+                    self.onDestroy();
+                }
+                watcher.cancel();
+                self.element.empty();
+                $log.debug("viewer destroyed");
+            });
+
+            self.element.bind("scroll", function(event) {
+                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
+                scope.scrollTimeout = $timeout(function() {
+                    var scrollTop = self.element[0].scrollTop;
+
+                    var scrollDir = scrollTop - lastScrollY;
+                    lastScrollY = scrollTop;
+
+                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                }, 350);
+            });
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        }
+    };
+
+    return (MultiPagesViewer);
+}]);
+'use strict';
+/**
+ * TODO MultiPagesViewerAPI desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+
+        function MultiPagesViewerAPI(viewer) {
+            this.viewer = viewer;
+            this.scaleItems = {};
+            this.zoomLevels = [];
+        };
+
+        MultiPagesViewerAPI.prototype = {
+            getNextZoomInScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                }else {
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            getNextZoomOutScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = numZoomLevels - 1; i >= 0;--i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                } else{
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            zoomTo: function (scaleItem) {
+                if(scaleItem != undefined){
+                    this.viewer.setScale(scaleItem);
+                }
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            goToPage: function (pageIndex) {
+                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                    return;
+                }
+
+                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            },
+            goToNextPage: function () {
+                this.goToPage(this.viewer.currentPage + 1);
+            },
+            goToPrevPage: function () {
+                this.goToPage(this.viewer.currentPage - 1);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            }
+        };
+
+        return (MultiPagesViewerAPI);
+    }]);
+
+'use strict';
+/**
+ * TODO PageViewport desc
+ */
+itMultiPagesViewer.factory('PageViewport', [function() {
+
+        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+            this.viewBox = viewBox;
+            this.scale = scale;
+            this.rotation = rotation;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+
+            // creating transform to convert pdf coordinate system to the normal
+            // canvas like coordinates taking in account scale and rotation
+            var centerX = (viewBox[2] + viewBox[0]) / 2;
+            var centerY = (viewBox[3] + viewBox[1]) / 2;
+            var rotateA, rotateB, rotateC, rotateD;
+            rotation = rotation % 360;
+            rotation = rotation < 0 ? rotation + 360 : rotation;
+            switch (rotation) {
+                case 180:
+                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                    break;
+                case 90:
+                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                    break;
+                case 270:
+                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                    break;
+                //case 0:
+                default:
+                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                    break;
+            }
+
+            if (dontFlip) {
+                rotateC = -rotateC; rotateD = -rotateD;
+            }
+
+            var offsetCanvasX, offsetCanvasY;
+            var width, height;
+            if (rotateA === 0) {
+                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            } else {
+                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            }
+            // creating transform for the following operations:
+            // translate(-centerX, -centerY), rotate and flip vertically,
+            // scale, and translate(offsetCanvasX, offsetCanvasY)
+            this.transform = [
+                rotateA * scale,
+                rotateB * scale,
+                rotateC * scale,
+                rotateD * scale,
+                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+            ];
+
+            this.width = width;
+            this.height = height;
+            this.fontScale = scale;
+        }
+        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+            /**
+             * Clones viewport with additional properties.
+             * @param args {Object} (optional) If specified, may contain the 'scale' or
+             * 'rotation' properties to override the corresponding properties in
+             * the cloned viewport.
+             * @returns {PDFJS.PageViewport} Cloned viewport.
+             */
+            clone: function PageViewPort_clone(args) {
+                args = args || {};
+                var scale = 'scale' in args ? args.scale : this.scale;
+                var rotation = 'rotation' in args ? args.rotation : this.rotation;
+                return new PageViewport(this.viewBox.slice(), scale, rotation,
+                    this.offsetX, this.offsetY, args.dontFlip);
+            },
+            /**
+             * Converts PDF point to the viewport coordinates. For examples, useful for
+             * converting PDF location into canvas pixel coordinates.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the viewport coordinate space.
+             * @see {@link convertToPdfPoint}
+             * @see {@link convertToViewportRectangle}
+             */
+            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+                return Util.applyTransform([x, y], this.transform);
+            },
+            /**
+             * Converts PDF rectangle to the viewport coordinates.
+             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+             * @returns {Array} Contains corresponding coordinates of the rectangle
+             * in the viewport coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToViewportRectangle:
+                function PageViewport_convertToViewportRectangle(rect) {
+                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                    return [tl[0], tl[1], br[0], br[1]];
+                },
+            /**
+             * Converts viewport coordinates to the PDF location. For examples, useful
+             * for converting canvas pixel location into PDF one.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the PDF coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+                return Util.applyInverseTransform([x, y], this.transform);
+            }
+        };
+
+        return (PageViewport);
+    }]);
+
+'use strict';
+/**
+ * TODO SizeWatcher desc
+ */
+itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
+        return function (element, rate) {
+            var self = this;
+            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
+            self.monitor = $interval(self.update, rate);
+            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
+            self.cancel = function() { $interval.cancel(self.monitor); };
         };
     }]);
