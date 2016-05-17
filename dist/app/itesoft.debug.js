@@ -1357,1183 +1357,6 @@ IteSoft
         }
     }]
 );
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetail',[function() {
-        return {
-            restrict: 'EA',
-            require: '^itMasterDetail',
-            transclude: true,
-            scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
-                '   ng-if="currentItemWrapper.currentItem" ' +
-                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
-                ' <div class="it-fill" ng-transclude>' +
-                '</div>' +
-                '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
-                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
-                'ng-if="!currentItemWrapper.currentItem">' +
-                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
-                '</div>'
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailContent
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailContent',function() {
-        return {
-            restrict: 'EA',
-            require: '^itDetail',
-            transclude: true,
-            scope:false,
-            template : '<div class="row it-fill">' +
-                ' <div class="col-md-12  it-fill" ng-transclude>'+
-
-                            '</div>'+
-                       '</div>'
-
-        }
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailHeader',function() {
-        return {
-            restrict: 'EA',
-            require : '^itDetail',
-            scope : false,
-            transclude: true,
-            template : '<div class="fluid-container"><div class="row it-md-header">'+
-                '<div class="col-md-2 it-fill  col-xs-2">' +
-                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
-                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
-                '</span>' +
-                ' </a>'+
-                '</div>'+
-                '<div class="col-md-10 col-xs-10 it-fill ">'+
-                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'
-        }
-
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMaster
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Most important part of master-detail component, that
- *
- * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- * <table class="table">
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- *
- */
-IteSoft
-    .directive('itMaster',function(){
-        return {
-            restrict : 'EA',
-            require : '^itMasterDetail',
-            priority : -1,
-            transclude : true,
-            scope : {
-                itMasterData : '=',
-                itLang:'=',
-                itCol:'=',
-                itMasterDetailControl:'=',
-                itLockOnChange: '=',
-                itNoDataMsg: '@',
-                itNoDetailMsg:'@'
-            },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
-                '<div class="row" ng-transclude>'+
-                '</div>'+
-                '<div class="row it-master-grid it-fill" >'+
-                '<div class="col-md-12 it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
-                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            controller : ['$scope',
-                '$filter',
-                '$q',
-                '$timeout',
-                'itPopup',
-                '$templateCache',
-                '$route',
-                '$window',
-                function ($scope,
-                          $filter,
-                          $q,
-                          $timeout,
-                          itPopup,
-                          $templateCache,
-                          $route,
-                          $window){
-
-                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
-                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
-                        ' ng-checked="row.isSelected"></div>');
-
-                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
-                        '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
-
-                    function ItemWrapper(item){
-                        var _self = this;
-                        angular.forEach($scope.itMasterData,function(entry,index){
-
-                            if(angular.equals(entry,item)) {
-                                _self.index = index;
-                            }
-                        });
-                        _self.originalItem = item;
-                        _self.currentItem = angular.copy(item);
-                        _self.hasChanged = false;
-                        _self.isWatched = false;
-                        _self.unlockOnEquals = true;
-                    }
-
-                    $scope.$parent.$masterCol = $scope.itCol;
-                    ItemWrapper.prototype.unlockCurrent = function(){
-                        this.hasChanged = false;
-                        this.isWatched = false;
-                    };
-
-                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
-                        this.hasChanged = true;
-                        this.isWatched = true;
-                        this.unlockOnEquals = !autoUnlock;
-                    };
-
-
-
-                    $scope.$parent.currentItemWrapper = null;
-
-                    function _selectionChangedHandler(row){
-                        if(!$scope.itMasterDetailControl.disableMultiSelect){
-                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
-                                $scope.$parent.currentItemWrapper = null;
-                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
-                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
-                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
-                            }
-                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }else {
-//                            _displayDetail(row.entity);
-//                            _scrollToEntity(row.entity);
-                        }
-                    }
-
-                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-
-                    $scope.gridOptions  = {
-                        rowHeight: 40,
-                        data : $scope.itMasterData,
-                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
-                        showGridFooter: true,
-                        enableMinHeightCheck :true,
-                        enableColumnResizing: true,
-                        enableHorizontalScrollbar : 0,
-                        enableVerticalScrollbar : 2,
-                        onRegisterApi : function(gridApi){
-                            $scope.gridApi = gridApi;
-                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-
-                        },
-                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
-                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
-                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
-                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
-                            '</div>',
-                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
-                            '</div>'
-                    };
-
-                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
-                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
-                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
-                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
-                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
-                                '<span ui-grid-visible="col.sort.direction" ' +
-                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
-                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
-                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
-                                ' </div> <div ui-grid-filter></div> </div>';
-                        },true)
-                    }
-
-                    $scope.gridOptions.columnDefs =
-                        $scope.itMasterDetailControl.columnDefs;
-
-                    function _displayDetail(item) {
-                        var deferred = $q.defer();
-                        if($scope.$parent.currentItemWrapper != null){
-                            if($scope.$parent.currentItemWrapper.hasChanged &&
-                                $scope.itLockOnChange){
-                                deferred.reject('undo or save before change');
-                                return deferred.promise;
-                            }
-                        }
-                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
-                        deferred.resolve('');
-                        return deferred.promise;
-                    }
-
-                    $scope.onRowClick = function(row,col) {
-                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
-                            _displayDetail(col.entity).then(function (msg) {
-                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
-                                    $scope.gridApi.selection.clearSelectedRows();
-                                    if ($scope.$parent.$parent.mobile) {
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                }
-                                $scope.gridApi.selection.toggleRowSelection(col.entity);
-                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
-                            }, function (msg) {
-                                itPopup.alert($scope.itMasterDetailControl.navAlert);
-                            });
-                        }
-                    };
-
-
-                    function _scrollToEntity(entity){
-                        $scope.gridApi.core.scrollTo(entity);
-                    }
-
-                    $scope.itMasterDetailControl.selectItem =function (item){
-                        $scope.onRowClick(null,{entity:item});
-                    };
-
-                    /**
-                     * Method to filter rows
-                     */
-                    $scope.refreshData = function() {
-                        var renderableEntities = $filter('itUIGridGlobalFilter')
-                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
-
-                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
-                            var match = false;
-                            renderableEntities.forEach(function(entity){
-
-                                if(angular.equals(row.entity,entity)){
-                                    match  = true;
-                                }
-                            });
-                            if ( !match ){
-                                $scope.gridApi.core.setRowInvisible(row);
-                            } else {
-                                $scope.gridApi.core.clearRowInvisible(row);
-                            }
-                        });
-                    };
-
-
-                    function _unlockCurrent(){
-                        $scope.$applyAsync(function(){
-                            if($scope.$parent.currentItemWrapper!==null){
-                                $scope.$parent.currentItemWrapper.hasChanged = false;
-                                $scope.$parent.currentItemWrapper.isWatched = false;
-                            }
-                        });
-
-                    }
-
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            _unlockCurrent();
-                        }
-                    };
-
-                    $scope.$on('unlockCurrentItem',function(){
-                        _unlockCurrent();
-                    });
-
-                    /**
-                     * Method to scroll to specific item.
-                     * @param entity item to scroll to.
-                     */
-                    $scope.itMasterDetailControl.scrollToItem =function (entity){
-                        _scrollToEntity(entity);
-                    };
-
-                    /**
-                     * Method to get Selected items.
-                     * @returns {Array} of selected items
-                     */
-                    $scope.itMasterDetailControl.getSelectedItems = function(){
-                        if(typeof $scope.gridApi !== 'undefined' ) {
-                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
-                                return $scope.gridApi.selection.getSelectedRows();
-                            }
-                        }
-                        return [];
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     * @deprecated
-                     */
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     */
-                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
-                        return   $scope.$parent.currentItemWrapper;
-                    };
-
-                    /**
-                     * Method to get filtered items.
-                     * @returns {Array} of filtered items.
-                     */
-                    $scope.itMasterDetailControl.getFilteredItems = function(){
-                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
-                        var entities  = [];
-                        angular.forEach(rows,function(row){
-                            entities.push(row.entity);
-                        });
-                        return entities;
-                    };
-
-
-                    /**
-                     * Method to select the current Item.
-                     * @param entity item to select.
-                     * @returns {deferred.promise|*} success if the item is found.
-                     */
-                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
-
-                        var deferred = $q.defer();
-                        $scope.gridApi.selection.clearSelectedRows();
-                        _displayDetail(entity).then(function(){
-                            $timeout(function() {
-                                var entityIndex = $scope.itMasterData.indexOf(entity);
-                                if(entityIndex>=0) {
-
-                                    $scope.gridApi.selection.selectRow(entity);
-                                    _scrollToEntity(entity);
-                                    if( $scope.$parent.$parent.mobile){
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                    deferred.resolve();
-                                } else {
-                                    deferred.reject();
-                                }
-
-                            });
-                        },function(){
-                            deferred.reject();
-                        });
-                        return deferred.promise;
-                    };
-
-                    /**
-                     * Method to undo changes on the current item.
-                     */
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        }
-                    };
-
-                    /**
-                     * Method to fill windows height to the master part.
-                     */
-                    $scope.itMasterDetailControl.fillHeight = function(){
-                        //  evalLayout.fillHeight();
-                    };
-
-
-                    /**
-                     * Handler to unlock the current item.
-                     */
-                    $scope.$on('unlockCurrentItem',function(){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        });
-                    });
-
-                    /**
-                     * Handler to lock the current item.
-                     */
-                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
-                        });
-                    });
-
-                    function confirmLeavePage(e) {
-                        if($scope.$parent.currentItemWrapper!=null){
-                            if ( $scope.$parent.currentItemWrapper.hasChanged
-                                && $scope.itLockOnChange ) {
-                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
-                                e.preventDefault();
-                            }
-                        }
-                    }
-                    $scope.itAppScope = $scope.$parent;
-
-                    //  $scope.itAppScope.$navAlert = {};
-
-                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
-
-                    var w = angular.element($window);
-                    w.bind('resize', function () {
-                        $scope.gridApi.core.handleWindowResize();
-                    });
-
-                    $scope.itMasterDetailControl.initState = true;
-                    $scope.$on("$locationChangeStart", confirmLeavePage);
-                    $scope.itMasterDetailControl = angular.extend({navAlert:{
-                        text:'Please save or revert your pending change',
-                        title:'Unsaved changes',
-                        buttons: [
-                            {
-                                text: 'OK',
-                                type: 'btn-info',
-                                onTap: function () {
-                                    return false;
-                                }
-                            }]
-                    }}, $scope.itMasterDetailControl );
-
-
-                    /*  watchers */
-                    $scope.$watch('itLang',function(){
-                        $scope.gridApi.grid.refresh();
-                    });
-
-                    $scope.$watch('itMasterData',function(){
-                        $scope.gridOptions.data = [];
-                        $scope.itMasterData.forEach(function(entry){
-                            $scope.gridOptions.data.push(entry);
-                        });
-
-                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
-                            $scope.$parent.currentItemWrapper = null;
-                        } else {
-                            if( $scope.itMasterData.length === 0){
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }
-                        $scope.gridApi.grid.refresh();
-                        if($scope.itMasterDetailControl !== null){
-                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
-                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
-
-                                $scope.$applyAsync(function(){
-                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
-                                });
-                            }
-                        }
-                        $scope.refreshData();
-
-                    },true);
-
-                   $timeout(function(){
-                        var event = document.createEvent('Event');
-                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                        $window.dispatchEvent(event);
-                    },250);
-
-                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-
-                        if($scope.$parent.currentItemWrapper != null ){
-                            if(!$scope.$parent.currentItemWrapper.isWatched)
-                            {
-                                $scope.$parent.currentItemWrapper.isWatched = true;
-                            }
-                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
-                                $scope.$parent.currentItemWrapper.hasChanged =
-                                    !angular.equals(newValue,
-                                        $scope.$parent.currentItemWrapper.originalItem);
-                            } else   {
-                                $scope.$parent.currentItemWrapper.hasChanged = true;
-                            }
-                        }
-                    }, true);
-
-                    $scope.$watch('filterText',function(){
-                        $scope.refreshData();
-                    },true);
-
-                    $scope.$watch('itNoDetailMsg',function(){
-                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-                    });
-                }]
-
-
-        }
-    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
-        return function(data, grid, query) {
-            var matches = [];
-            //no filter defined so bail
-            if (query === undefined || query === '') {
-                return data;
-            }
-            query = query.toLowerCase();
-
-            function _deepFind(obj, path) {
-                var paths = path.split('.')
-                    , current = obj
-                    , i;
-
-                for (i = 0; i < paths.length; ++i) {
-                    if (current[paths[i]] == undefined) {
-                        return undefined;
-                    } else {
-                        current = current[paths[i]];
-                    }
-                }
-                return current;
-            }
-
-            var scope = $rootScope.$new(true);
-            for (var i = 0; i < data.length; i++) {
-                for (var j = 0; j < grid.columnDefs.length; j++) {
-                    var dataItem = data[i];
-
-                    var fieldName = grid.columnDefs[j].field;
-                    var renderedData = _deepFind(dataItem,fieldName);
-                    // apply cell filter
-                    if (grid.columnDefs[j].cellFilter) {
-                        scope.value = renderedData;
-                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
-                    }
-                    //as soon as search term is found, add to match and move to next dataItem
-                    if(typeof renderedData !== 'undefined' && renderedData != null){
-                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
-                            matches.push(dataItem);
-                            break;
-                        }
-                    }
-                }
-            }
-            scope.$destroy();
-            return matches;
-        };
-    }] );
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master-detail main content.
- *
- * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
- * and have 2 child elements: 1 `<it-master>` for the list selectable content,
- * and `<it-detail>` that display the content of the selected item.
- *
- * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
- * this object will
- *
- * <table class="table">
- *  <tr>
- *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
- *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
- *  </tr>
- *  <tr>
- *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
- *   <td>Disable | Enable  multiple row selection for entire grid .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *
- *   <tr>
- *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
- *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- * @example
-    <example module="itesoft">
-         <file name="index.html">
-             <div ng-controller="MasterDetailController">
-                 <it-master-detail >
-                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
-                 <it-master-header it-search-placeholder="Recherche" >
-                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-                 </it-master-header>
-                 </it-master>
-                 <it-detail>
-                 <it-detail-header>
-                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-                 <span class="fa fa-floppy-o fa-lg"></span>
-                 </button>
-                 <button class=" btn btn-info" title="Check">
-                 <span class="fa fa-file-code-o fa-lg"></span>
-                 </button>
-                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-                 <span class="fa fa-undo fa-lg"></span>
-                 </button>
-
-                 </it-detail-header>
-                 <it-detail-content>
-                 <it-modal-full-screen>
-                             <div class="form-group">
-                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                     it-label="code"
-                                     ng-model="currentItemWrapper.currentItem.code"
-                                     name=""
-                                     ng-required="true"/>
-                             </div>
-                             <div class="form-group">
-                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                 it-label="description"
-                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
-                             </div>
-                             <div class="form-group">
-                             <input type="checkbox"
-                                 it-toggle
-                                 ng-model="currentItemWrapper.currentItem.enabledde"
-                                 it-label="tete"/>
-                             </div>
-                 </it-modal-full-screen>
-                 </it-detail-content>
-                 </it-detail>
-                 </it-master-detail>
-             </div>
-         </file>
-         <file name="controller.js">
-             angular.module('itesoft')
-              .controller('MasterDetailController', ['$scope', function($scope) {
-
-                                            $scope.data =
-                                               [
-                                                    {
-                                                        "code" : "Code 1",
-                                                        "description": "Description 1",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 2",
-                                                        "description": "Description 2",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 3",
-                                                        "description": "Description 3",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 4",
-                                                        "description": "Description 4",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 5",
-                                                        "description": "Description 5",
-                                                        "enabledde" : true
-                                                    }
-                                                ];
-
-                                            $scope.masterDetails = {};
-
-                                            $scope.masterDetails = {
-                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
-                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
-                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
-                                            };
-
-                                             $scope.masterDetails.disableMultiSelect = false;
-                                            $scope.masterDetails.navAlert = {
-                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                                title:'{{\'FOO\' | translate}}',
-                                                buttons: [
-                                                        {
-                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
-                                                            type:  'btn-warning',
-                                                            onTap: function() {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
-                                                            type: 'btn-primary',
-                                                            onTap: function () {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span class="fa fa-undo fa-lg"></span>',
-                                                            type: 'btn-success',
-                                                            onTap: function () {
-                                                                $scope.undoChange();
-                                                                return true;
-
-                                                            }
-                                                        }
-                                                    ]
-                                            };
-
-                                            function _removeItems(items,dataList){
-                                                angular.forEach(items,function(entry){
-                                                    var index = dataList.indexOf(entry);
-                                                    dataList.splice(index, 1);
-                                                })
-                                            }
-
-                                            $scope.deleteSelectedItems = function(){
-                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                                            };
-
-
-                                            $scope.saveCurrentItem = function(){
-                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
-
-                                                    $scope.$broadcast('unlockCurrentItem');
-                                                };
-
-                                            $scope.undoChange = function(){
-                                                $scope.masterDetails.undoChangeCurrentItem();
-                                                $scope.masterDetails.fillHeight();
-                                            };
-
-                                            $scope.addNewItem = function(){
-                                                var newItem =  {
-                                                    "code" : "Code " + ($scope.data.length+1) ,
-                                                    "description": "Description " + ($scope.data.length+1),
-                                                    "enabledde" : true
-                                                };
-                                                $scope.data.push(newItem);
-                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                                                    $scope.$broadcast('lockCurrentItem',false);
-                                                },function(error){
-
-                                                });
-                                            };
-
-                                            $scope.hasChanged = function(){
-                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
-                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }]);
-          </file>
-         <file src="test.css">
-         </file>
-    </example>
- */
-IteSoft
-    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
-        return {
-            restrict: 'EA',
-            transclude : true,
-            scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
-            controller : [
-                '$scope',
-                'screenSize',
-                function(
-                    $scope,
-                    screenSize
-                    )
-                {
-                    $scope.activeState = 'master';
-                    $scope.desktop = screenSize.on('md, lg', function(match){
-                        $scope.desktop = match;
-
-                    });
-
-                    $scope.mobile = screenSize.on('xs, sm', function(match){
-                        $scope.mobile = match;
-                    });
-
-                    $scope.goToDetail = function(){
-                        $scope.activeState = 'detail';
-                    };
-
-                    $scope.$watch('mobile',function(){
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            $scope.activeState = 'detail';
-                        } else {
-                            $scope.activeState = 'master';
-                        }
-                    });
-
-                    $scope.$watch('$$childHead.currentItemWrapper',function() {
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
-                                ||  $scope.$$childHead.currentItemWrapper === null )){
-                            $scope.activeState = 'master';
-                        } else {
-                            if($scope.mobile &&
-                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
-                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
-                                $scope.activeState = 'master';
-                            }
-                        }
-                    });
-
-                    $scope.goToMaster = function(){
-
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
-                                $scope.$$childHead.$$childHead.itLockOnChange){
-                                itPopup.alert(  $scope.$$childHead.$navAlert);
-                            } else {
-                                $scope.activeState = 'master';
-                                $timeout(function(){
-                                    $window.dispatchEvent(new Event('resize'));
-                                },300)
-
-                            }
-                        } else {
-                            $scope.activeState = 'master';
-                            $timeout(function(){
-                                $window.dispatchEvent(new Event('resize'));
-                            },300)
-
-                        }
-
-                    };
-                }]
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
- * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *
- *       </it-detail-header>
- *
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itMasterHeader',function() {
-        return {
-            restrict: 'EA',
-            require: '^itMaster',
-            scope: false,
-            transclude : true,
-            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
-                '<div class="btn-toolbar it-fill" ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '<div class="col-xs-12 col-md-12 pull-right">'+
-                '<div>'+
-                '<form>'+
-                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
-                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
-                '</div>'+
-                '</form>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            link: function (scope, element, attrs) {
-                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
-                    scope.placeholderText = newVal;
-                });
-            }
-        }
-
-    });
 'use strict';
 
 /**
@@ -4275,6 +3098,1183 @@ IteSoft
             }
         }
 }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetail',[function() {
+        return {
+            restrict: 'EA',
+            require: '^itMasterDetail',
+            transclude: true,
+            scope: false,
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
+                '   ng-if="currentItemWrapper.currentItem" ' +
+                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
+                ' <div class="it-fill" ng-transclude>' +
+                '</div>' +
+                '</div>' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
+                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
+                'ng-if="!currentItemWrapper.currentItem">' +
+                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
+                '</div>'
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailContent
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailContent',function() {
+        return {
+            restrict: 'EA',
+            require: '^itDetail',
+            transclude: true,
+            scope:false,
+            template : '<div class="row it-fill">' +
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
+
+                            '</div>'+
+                       '</div>'
+
+        }
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailHeader',function() {
+        return {
+            restrict: 'EA',
+            require : '^itDetail',
+            scope : false,
+            transclude: true,
+            template : '<div class="fluid-container"><div class="row it-md-header">'+
+                '<div class="col-md-2 it-fill  col-xs-2">' +
+                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
+                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
+                '</span>' +
+                ' </a>'+
+                '</div>'+
+                '<div class="col-md-10 col-xs-10 it-fill ">'+
+                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'
+        }
+
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMaster
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Most important part of master-detail component, that
+ *
+ * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ * <table class="table">
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ *
+ */
+IteSoft
+    .directive('itMaster',function(){
+        return {
+            restrict : 'EA',
+            require : '^itMasterDetail',
+            priority : -1,
+            transclude : true,
+            scope : {
+                itMasterData : '=',
+                itLang:'=',
+                itCol:'=',
+                itMasterDetailControl:'=',
+                itLockOnChange: '=',
+                itNoDataMsg: '@',
+                itNoDetailMsg:'@'
+            },
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
+                '<div class="row" ng-transclude>'+
+                '</div>'+
+                '<div class="row it-master-grid it-fill" >'+
+                '<div class="col-md-12 it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
+                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            controller : ['$scope',
+                '$filter',
+                '$q',
+                '$timeout',
+                'itPopup',
+                '$templateCache',
+                '$route',
+                '$window',
+                function ($scope,
+                          $filter,
+                          $q,
+                          $timeout,
+                          itPopup,
+                          $templateCache,
+                          $route,
+                          $window){
+
+                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
+                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
+                        ' ng-checked="row.isSelected"></div>');
+
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
+                        '<input type="checkbox" ' +
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
+
+                    function ItemWrapper(item){
+                        var _self = this;
+                        angular.forEach($scope.itMasterData,function(entry,index){
+
+                            if(angular.equals(entry,item)) {
+                                _self.index = index;
+                            }
+                        });
+                        _self.originalItem = item;
+                        _self.currentItem = angular.copy(item);
+                        _self.hasChanged = false;
+                        _self.isWatched = false;
+                        _self.unlockOnEquals = true;
+                    }
+
+                    $scope.$parent.$masterCol = $scope.itCol;
+                    ItemWrapper.prototype.unlockCurrent = function(){
+                        this.hasChanged = false;
+                        this.isWatched = false;
+                    };
+
+                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
+                        this.hasChanged = true;
+                        this.isWatched = true;
+                        this.unlockOnEquals = !autoUnlock;
+                    };
+
+
+
+                    $scope.$parent.currentItemWrapper = null;
+
+                    function _selectionChangedHandler(row){
+                        if(!$scope.itMasterDetailControl.disableMultiSelect){
+                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
+                                $scope.$parent.currentItemWrapper = null;
+                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
+                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
+                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
+                            }
+                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }else {
+//                            _displayDetail(row.entity);
+//                            _scrollToEntity(row.entity);
+                        }
+                    }
+
+                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+
+                    $scope.gridOptions  = {
+                        rowHeight: 40,
+                        data : $scope.itMasterData,
+                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
+                        showGridFooter: true,
+                        enableMinHeightCheck :true,
+                        enableColumnResizing: true,
+                        enableHorizontalScrollbar : 0,
+                        enableVerticalScrollbar : 2,
+                        onRegisterApi : function(gridApi){
+                            $scope.gridApi = gridApi;
+                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+
+                        },
+                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
+                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
+                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
+                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
+                            '</div>',
+                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
+                            '</div>'
+                    };
+
+                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
+                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
+                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
+                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
+                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
+                                '<span ui-grid-visible="col.sort.direction" ' +
+                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
+                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
+                                ' </div> <div ui-grid-filter></div> </div>';
+                        },true)
+                    }
+
+                    $scope.gridOptions.columnDefs =
+                        $scope.itMasterDetailControl.columnDefs;
+
+                    function _displayDetail(item) {
+                        var deferred = $q.defer();
+                        if($scope.$parent.currentItemWrapper != null){
+                            if($scope.$parent.currentItemWrapper.hasChanged &&
+                                $scope.itLockOnChange){
+                                deferred.reject('undo or save before change');
+                                return deferred.promise;
+                            }
+                        }
+                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
+                        deferred.resolve('');
+                        return deferred.promise;
+                    }
+
+                    $scope.onRowClick = function(row,col) {
+                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
+                            _displayDetail(col.entity).then(function (msg) {
+                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
+                                    $scope.gridApi.selection.clearSelectedRows();
+                                    if ($scope.$parent.$parent.mobile) {
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                }
+                                $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
+                            }, function (msg) {
+                                itPopup.alert($scope.itMasterDetailControl.navAlert);
+                            });
+                        }
+                    };
+
+
+                    function _scrollToEntity(entity){
+                        $scope.gridApi.core.scrollTo(entity);
+                    }
+
+                    $scope.itMasterDetailControl.selectItem =function (item){
+                        $scope.onRowClick(null,{entity:item});
+                    };
+
+                    /**
+                     * Method to filter rows
+                     */
+                    $scope.refreshData = function() {
+                        var renderableEntities = $filter('itUIGridGlobalFilter')
+                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
+
+                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
+                            var match = false;
+                            renderableEntities.forEach(function(entity){
+
+                                if(angular.equals(row.entity,entity)){
+                                    match  = true;
+                                }
+                            });
+                            if ( !match ){
+                                $scope.gridApi.core.setRowInvisible(row);
+                            } else {
+                                $scope.gridApi.core.clearRowInvisible(row);
+                            }
+                        });
+                    };
+
+
+                    function _unlockCurrent(){
+                        $scope.$applyAsync(function(){
+                            if($scope.$parent.currentItemWrapper!==null){
+                                $scope.$parent.currentItemWrapper.hasChanged = false;
+                                $scope.$parent.currentItemWrapper.isWatched = false;
+                            }
+                        });
+
+                    }
+
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            _unlockCurrent();
+                        }
+                    };
+
+                    $scope.$on('unlockCurrentItem',function(){
+                        _unlockCurrent();
+                    });
+
+                    /**
+                     * Method to scroll to specific item.
+                     * @param entity item to scroll to.
+                     */
+                    $scope.itMasterDetailControl.scrollToItem =function (entity){
+                        _scrollToEntity(entity);
+                    };
+
+                    /**
+                     * Method to get Selected items.
+                     * @returns {Array} of selected items
+                     */
+                    $scope.itMasterDetailControl.getSelectedItems = function(){
+                        if(typeof $scope.gridApi !== 'undefined' ) {
+                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
+                                return $scope.gridApi.selection.getSelectedRows();
+                            }
+                        }
+                        return [];
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     * @deprecated
+                     */
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     */
+                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
+                        return   $scope.$parent.currentItemWrapper;
+                    };
+
+                    /**
+                     * Method to get filtered items.
+                     * @returns {Array} of filtered items.
+                     */
+                    $scope.itMasterDetailControl.getFilteredItems = function(){
+                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
+                        var entities  = [];
+                        angular.forEach(rows,function(row){
+                            entities.push(row.entity);
+                        });
+                        return entities;
+                    };
+
+
+                    /**
+                     * Method to select the current Item.
+                     * @param entity item to select.
+                     * @returns {deferred.promise|*} success if the item is found.
+                     */
+                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
+
+                        var deferred = $q.defer();
+                        $scope.gridApi.selection.clearSelectedRows();
+                        _displayDetail(entity).then(function(){
+                            $timeout(function() {
+                                var entityIndex = $scope.itMasterData.indexOf(entity);
+                                if(entityIndex>=0) {
+
+                                    $scope.gridApi.selection.selectRow(entity);
+                                    _scrollToEntity(entity);
+                                    if( $scope.$parent.$parent.mobile){
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                    deferred.resolve();
+                                } else {
+                                    deferred.reject();
+                                }
+
+                            });
+                        },function(){
+                            deferred.reject();
+                        });
+                        return deferred.promise;
+                    };
+
+                    /**
+                     * Method to undo changes on the current item.
+                     */
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        }
+                    };
+
+                    /**
+                     * Method to fill windows height to the master part.
+                     */
+                    $scope.itMasterDetailControl.fillHeight = function(){
+                        //  evalLayout.fillHeight();
+                    };
+
+
+                    /**
+                     * Handler to unlock the current item.
+                     */
+                    $scope.$on('unlockCurrentItem',function(){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        });
+                    });
+
+                    /**
+                     * Handler to lock the current item.
+                     */
+                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
+                        });
+                    });
+
+                    function confirmLeavePage(e) {
+                        if($scope.$parent.currentItemWrapper!=null){
+                            if ( $scope.$parent.currentItemWrapper.hasChanged
+                                && $scope.itLockOnChange ) {
+                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                    $scope.itAppScope = $scope.$parent;
+
+                    //  $scope.itAppScope.$navAlert = {};
+
+                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
+
+                    var w = angular.element($window);
+                    w.bind('resize', function () {
+                        $scope.gridApi.core.handleWindowResize();
+                    });
+
+                    $scope.itMasterDetailControl.initState = true;
+                    $scope.$on("$locationChangeStart", confirmLeavePage);
+                    $scope.itMasterDetailControl = angular.extend({navAlert:{
+                        text:'Please save or revert your pending change',
+                        title:'Unsaved changes',
+                        buttons: [
+                            {
+                                text: 'OK',
+                                type: 'btn-info',
+                                onTap: function () {
+                                    return false;
+                                }
+                            }]
+                    }}, $scope.itMasterDetailControl );
+
+
+                    /*  watchers */
+                    $scope.$watch('itLang',function(){
+                        $scope.gridApi.grid.refresh();
+                    });
+
+                    $scope.$watch('itMasterData',function(){
+                        $scope.gridOptions.data = [];
+                        $scope.itMasterData.forEach(function(entry){
+                            $scope.gridOptions.data.push(entry);
+                        });
+
+                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
+                            $scope.$parent.currentItemWrapper = null;
+                        } else {
+                            if( $scope.itMasterData.length === 0){
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }
+                        $scope.gridApi.grid.refresh();
+                        if($scope.itMasterDetailControl !== null){
+                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
+                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
+
+                                $scope.$applyAsync(function(){
+                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
+                                });
+                            }
+                        }
+                        $scope.refreshData();
+
+                    },true);
+
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                    },250);
+
+                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
+
+                        if($scope.$parent.currentItemWrapper != null ){
+                            if(!$scope.$parent.currentItemWrapper.isWatched)
+                            {
+                                $scope.$parent.currentItemWrapper.isWatched = true;
+                            }
+                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
+                                $scope.$parent.currentItemWrapper.hasChanged =
+                                    !angular.equals(newValue,
+                                        $scope.$parent.currentItemWrapper.originalItem);
+                            } else   {
+                                $scope.$parent.currentItemWrapper.hasChanged = true;
+                            }
+                        }
+                    }, true);
+
+                    $scope.$watch('filterText',function(){
+                        $scope.refreshData();
+                    },true);
+
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
+                }]
+
+
+        }
+    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
+        return function(data, grid, query) {
+            var matches = [];
+            //no filter defined so bail
+            if (query === undefined || query === '') {
+                return data;
+            }
+            query = query.toLowerCase();
+
+            function _deepFind(obj, path) {
+                var paths = path.split('.')
+                    , current = obj
+                    , i;
+
+                for (i = 0; i < paths.length; ++i) {
+                    if (current[paths[i]] == undefined) {
+                        return undefined;
+                    } else {
+                        current = current[paths[i]];
+                    }
+                }
+                return current;
+            }
+
+            var scope = $rootScope.$new(true);
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < grid.columnDefs.length; j++) {
+                    var dataItem = data[i];
+
+                    var fieldName = grid.columnDefs[j].field;
+                    var renderedData = _deepFind(dataItem,fieldName);
+                    // apply cell filter
+                    if (grid.columnDefs[j].cellFilter) {
+                        scope.value = renderedData;
+                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
+                    }
+                    //as soon as search term is found, add to match and move to next dataItem
+                    if(typeof renderedData !== 'undefined' && renderedData != null){
+                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
+                            matches.push(dataItem);
+                            break;
+                        }
+                    }
+                }
+            }
+            scope.$destroy();
+            return matches;
+        };
+    }] );
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master-detail main content.
+ *
+ * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 `<it-master>` for the list selectable content,
+ * and `<it-detail>` that display the content of the selected item.
+ *
+ * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
+ * this object will
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
+ *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
+ *   <td>Disable | Enable  multiple row selection for entire grid .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *
+ *   <tr>
+ *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
+ *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ * @example
+    <example module="itesoft">
+         <file name="index.html">
+             <div ng-controller="MasterDetailController">
+                 <it-master-detail >
+                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+                 <it-master-header it-search-placeholder="Recherche" >
+                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+                 </it-master-header>
+                 </it-master>
+                 <it-detail>
+                 <it-detail-header>
+                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+                 <span class="fa fa-floppy-o fa-lg"></span>
+                 </button>
+                 <button class=" btn btn-info" title="Check">
+                 <span class="fa fa-file-code-o fa-lg"></span>
+                 </button>
+                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+                 <span class="fa fa-undo fa-lg"></span>
+                 </button>
+
+                 </it-detail-header>
+                 <it-detail-content>
+                 <it-modal-full-screen>
+                             <div class="form-group">
+                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+                                     it-label="code"
+                                     ng-model="currentItemWrapper.currentItem.code"
+                                     name=""
+                                     ng-required="true"/>
+                             </div>
+                             <div class="form-group">
+                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+                                 it-label="description"
+                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                             </div>
+                             <div class="form-group">
+                             <input type="checkbox"
+                                 it-toggle
+                                 ng-model="currentItemWrapper.currentItem.enabledde"
+                                 it-label="tete"/>
+                             </div>
+                 </it-modal-full-screen>
+                 </it-detail-content>
+                 </it-detail>
+                 </it-master-detail>
+             </div>
+         </file>
+         <file name="controller.js">
+             angular.module('itesoft')
+              .controller('MasterDetailController', ['$scope', function($scope) {
+
+                                            $scope.data =
+                                               [
+                                                    {
+                                                        "code" : "Code 1",
+                                                        "description": "Description 1",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 2",
+                                                        "description": "Description 2",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 3",
+                                                        "description": "Description 3",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 4",
+                                                        "description": "Description 4",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 5",
+                                                        "description": "Description 5",
+                                                        "enabledde" : true
+                                                    }
+                                                ];
+
+                                            $scope.masterDetails = {};
+
+                                            $scope.masterDetails = {
+                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
+                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
+                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+
+                                            };
+
+                                             $scope.masterDetails.disableMultiSelect = false;
+                                            $scope.masterDetails.navAlert = {
+                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
+                                                title:'{{\'FOO\' | translate}}',
+                                                buttons: [
+                                                        {
+                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                            type:  'btn-warning',
+                                                            onTap: function() {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                            type: 'btn-primary',
+                                                            onTap: function () {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span class="fa fa-undo fa-lg"></span>',
+                                                            type: 'btn-success',
+                                                            onTap: function () {
+                                                                $scope.undoChange();
+                                                                return true;
+
+                                                            }
+                                                        }
+                                                    ]
+                                            };
+
+                                            function _removeItems(items,dataList){
+                                                angular.forEach(items,function(entry){
+                                                    var index = dataList.indexOf(entry);
+                                                    dataList.splice(index, 1);
+                                                })
+                                            }
+
+                                            $scope.deleteSelectedItems = function(){
+                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+                                            };
+
+
+                                            $scope.saveCurrentItem = function(){
+                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+
+                                                    $scope.$broadcast('unlockCurrentItem');
+                                                };
+
+                                            $scope.undoChange = function(){
+                                                $scope.masterDetails.undoChangeCurrentItem();
+                                                $scope.masterDetails.fillHeight();
+                                            };
+
+                                            $scope.addNewItem = function(){
+                                                var newItem =  {
+                                                    "code" : "Code " + ($scope.data.length+1) ,
+                                                    "description": "Description " + ($scope.data.length+1),
+                                                    "enabledde" : true
+                                                };
+                                                $scope.data.push(newItem);
+                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
+                                                    $scope.$broadcast('lockCurrentItem',false);
+                                                },function(error){
+
+                                                });
+                                            };
+
+                                            $scope.hasChanged = function(){
+                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
+                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
+                                                } else {
+                                                    return false;
+                                                }
+                                            }
+                                        }]);
+          </file>
+         <file src="test.css">
+         </file>
+    </example>
+ */
+IteSoft
+    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
+        return {
+            restrict: 'EA',
+            transclude : true,
+            scope :true,
+            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
+            controller : [
+                '$scope',
+                'screenSize',
+                function(
+                    $scope,
+                    screenSize
+                    )
+                {
+                    $scope.activeState = 'master';
+                    $scope.desktop = screenSize.on('md, lg', function(match){
+                        $scope.desktop = match;
+
+                    });
+
+                    $scope.mobile = screenSize.on('xs, sm', function(match){
+                        $scope.mobile = match;
+                    });
+
+                    $scope.goToDetail = function(){
+                        $scope.activeState = 'detail';
+                    };
+
+                    $scope.$watch('mobile',function(){
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            $scope.activeState = 'detail';
+                        } else {
+                            $scope.activeState = 'master';
+                        }
+                    });
+
+                    $scope.$watch('$$childHead.currentItemWrapper',function() {
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
+                                ||  $scope.$$childHead.currentItemWrapper === null )){
+                            $scope.activeState = 'master';
+                        } else {
+                            if($scope.mobile &&
+                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
+                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
+                                $scope.activeState = 'master';
+                            }
+                        }
+                    });
+
+                    $scope.goToMaster = function(){
+
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
+                                itPopup.alert(  $scope.$$childHead.$navAlert);
+                            } else {
+                                $scope.activeState = 'master';
+                                $timeout(function(){
+                                    $window.dispatchEvent(new Event('resize'));
+                                },300)
+
+                            }
+                        } else {
+                            $scope.activeState = 'master';
+                            $timeout(function(){
+                                $window.dispatchEvent(new Event('resize'));
+                            },300)
+
+                        }
+
+                    };
+                }]
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
+ * can contain the action buttons of selected items.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *
+ *       </it-detail-header>
+ *
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itMasterHeader',function() {
+        return {
+            restrict: 'EA',
+            require: '^itMaster',
+            scope: false,
+            transclude : true,
+            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
+                '<div class="btn-toolbar it-fill" ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '<div class="col-xs-12 col-md-12 pull-right">'+
+                '<div>'+
+                '<form>'+
+                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
+                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
+                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
+                '</div>'+
+                '</form>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            link: function (scope, element, attrs) {
+                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
+                    scope.placeholderText = newVal;
+                });
+            }
+        }
+
+    });
 'use strict';
 /**
  * TODO itInclude desc
