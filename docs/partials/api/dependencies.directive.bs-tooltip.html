@@ -1,0 +1,57 @@
+<h1><code ng:non-bindable="">bs-tooltip</code>
+<div><span class="hint">directive in module <code ng:non-bindable="">dependencies</code>
+<code ng:non-bindable=""><a target="_blank" href="https://github.com/alizarion/angular-common/releases/tag/v1.0"> since v1.0</a></code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="dependencies-directive-page dependencies-directive-bs-tooltip-page"><p>AngularStrap Tooltip : Add small overlays of content on hover, to any element for housing secondary information.
+See more :  <a href="http://mgcrea.github.io/angular-strap/#/tooltips">mgcrea-tooltips</a></p>
+</div></div>
+<h2 id="usage">Usage</h2>
+<div class="usage">as element:<pre class="prettyprint linenums">&lt;bs-tooltip&gt;
+&lt;/bs-tooltip&gt;</pre>
+as attribute<pre class="prettyprint linenums">&lt;ANY bs-tooltip&gt;
+   ...
+&lt;/ANY&gt;</pre>
+</div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="dependencies-directive-page dependencies-directive-bs-tooltip-page"><h4 id="example_source">Source</h4>
+<div source-edit="itesoft" source-edit-deps="angular.js Controller.js" source-edit-html="index.html-26" source-edit-css="" source-edit-js="Controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-26" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
+<script type="text/ng-template" id="index.html-26">
+   <div ng-controller="mainController">
+        <p>Tight pants next level keffiyeh <a href data-animation="am-flip-x" bs-tooltip="tooltip">you probably</a> haven't heard of them. Photo booth beard raw denim letterpress vegan messenger bag stumptown.</p>
+
+        <div class="input-group col-xs-5">
+        <span class="input-group-btn">
+        <!-- You can also use data-attrs to assign scope variables -->
+        <button class="btn btn-primary" type="button" data-trigger="click" data-type="success" data-title="{{tooltip.title}}" bs-tooltip>Click me</button>
+        </span>
+        <input type="text" class="form-control" data-placement="right" data-type="info" data-container="body" placeholder="Focus to toggle tooltip" data-trigger="focus" bs-tooltip="tooltip">
+        </div>
+        <div class="checkbox">
+        <label data-placement="bottom-left" data-type="info" data-animation="am-fade-and-scale" bs-tooltip="tooltip" bs-enabled="tooltip.checked">
+        <input type="checkbox" ng-model="tooltip.checked"> Check me to enable my tooltip
+        </label>
+        </div>
+   </div>
+</script>
+</div>
+<div class="tab-pane" title="Controller.js">
+<pre class="prettyprint linenums" ng-set-text="Controller.js"></pre>
+<script type="text/ng-template" id="Controller.js">
+angular.module('itesoft')
+.controller('mainController', ['$scope', function ($scope) {
+           $scope.tooltip = {
+             "title": "Hello Tooltip This is a multiline message!",
+             "checked": false
+           };
+         }]);
+</script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-26" ng-eval-javascript="Controller.js"></div>
+</div></div>
+</div>
