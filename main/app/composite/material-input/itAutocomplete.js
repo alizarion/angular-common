@@ -90,6 +90,20 @@
  *  </tr>
  *  <tr>
  *      <td>
+ *           converter
+ *      </td>
+ *      <td>
+ *          Converter to transform object to id or label
+ *           implements:
+ *           {
+ *           getIdFromObject,
+ *           getLabelFromObject,
+ *           getObject
+ *           }
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
  *          selected-option
  *      </td>
  *      <td>
@@ -200,61 +214,66 @@
  </div>
  <h1>Linked autocomplete</h1>
  <div class="row">
- <div class="col-xs-12">
- <span class="text" >
- You can link autocomplete together by adding event-select and event-refresh params
- </span>
- </div>
- </div>
- <div class="row">
- <div  class="col-xs-3">
- Taux
- </div>
- <div  class="col-xs-3">
- Code
- </div>
- </div>
- <div class="row">
- <div  class="col-xs-3">
- <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+     <div class="col-xs-12">
+     <span class="text" >
+     You can link autocomplete together by adding event-select and event-refresh params
+     </span>
+     </div>
  </div>
 
- <div  class="col-xs-3">
- <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
- </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     Taux
+     </div>
+     <div  class="col-xs-3">
+     Code
+     </div>
  </div>
  <div class="row">
- <div  class="col-xs-3">
- {{rate}}
- </div>
- <div  class="col-xs-3">
- {{code}}
- </div>
- </div>
- <h1>Autocomplete map with object</h1>
- <div class="row">
- <div class="col-xs-12">
- <span class="text" >
- You can map object directly inside autocomplete
- </span>
- </div>
- </div>
- <div class="row">
- <div  class="col-xs-3">
- Taux
- </div>
- <div  class="col-xs-3">
- Code
- </div>
- </div>
- <div class="row">
- <div  class="col-xs-3">
- <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
- </div>
- <div  class="col-xs-3">
- {{selectedtax}}
+     <div  class="col-xs-3">
+     <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+     </div>
+
+     <div  class="col-xs-3">
+     <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+     </div>
  </div>
 
+ <div class="row">
+     <div  class="col-xs-3">
+     {{rate}}
+     </div>
+     <div  class="col-xs-3">
+     {{code}}
+     </div>
+ </div>
+ <div class="row">
+    <div class="col-xs-12">
+        <h1>Autocomplete map with object</h1>
+    </div>
+ </div>
+ <div class="row">
+    <div class="col-xs-12">
+        <span class="text" >
+        You can map object directly inside autocomplete
+        </span>
+     </div>
+ </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     Taux
+     </div>
+     <div  class="col-xs-3">
+     Code
+     </div>
+ </div>
+ <div class="row">
+     <div  class="col-xs-3">
+     <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
+     </div>
+     <div  class="col-xs-3">
+     {{selectedtax}}
+    </div>
  </div>
  </div>
  </file>
@@ -306,16 +325,14 @@
             }
 
             $scope.taxConverter={
-                getObjectFromId : function(id,items){
-                    items.forEach(function(item){
-                        if(item.id == id){
-                            return item;
-                        }
-                    })
+                getObject : function(item){
+                    var resultItem = item;
+                    resultItem.content = undefined;
+                    return resultItem;
                 },
                 getIdFromObject: function(object){
                     if(angular.isDefined(object)){
-                    return object.id;
+                        return object.id;
                     }else{
                         $log.error("unable to get id of null object");
                     }
@@ -527,7 +544,7 @@ IteSoft
                         selectedItem: {},
                         searchMode: $scope.searchMode,
                         placeholder: $scope.placeholder,
-                        debug: true,
+                        debug: false,
                         converter: $scope.converter,
                         event: {
                             refresh: {
@@ -768,10 +785,6 @@ IteSoft
                         if (self.fields.debug) {
                             $log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
                         }
-                        //if an oldValue is set
-                        if (angular.isDefined(oldValue)) {
-                            _unselectItemWithId(oldValue);
-                        }
 
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != _getIdFromObject(self.fields.selectedItem)) {
                             _selectItemWithId(newValue);
@@ -830,24 +843,6 @@ IteSoft
                     }
 
                     /**
-                     * Unselect Item with it id
-                     * @param id
-                     * @private
-                     */
-                    function _unselectItemWithId(id) {
-                        if (angular.isDefined(id)) {
-                            if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: unselect with id " + id);
-                            }
-                            angular.forEach(self.fields.items, function (item) {
-                                if (_getIdFromObject(item) == id) {
-                                    unselect(item);
-                                }
-                            });
-                        }
-                    }
-
-                    /**
                      * init + copy of externalItems
                      */
                     function initItems() {
@@ -876,13 +871,8 @@ IteSoft
                             if (angular.isDefined(self.fields.selectedItem)) {
                                 if (self.fields.selectedItem == item) {
                                     select(item)
-                                } else {
-                                    unselect(item);
                                 }
-                            } else {
-                                unselect(item);
                             }
-                            item.position = i;
                             i++;
                         });
                     }
@@ -892,17 +882,14 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
-                        // reset last selectedItem class
-                        if (angular.isDefined(self.fields.selectedItem)) {
-                            unselect(self.fields.selectedItem);
-                        }
                         if (angular.isDefined(selectedItem)) {
 
+                            applySelection(selectedItem);
                             if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
                             }
                             if(self.fields.converter){
-                                $scope.selectedOption = selectedItem;
+                                $scope.selectedOption = _getObject(selectedItem);
                             }else{
                                 $scope.selectedOption = _getIdFromObject(selectedItem);
                             }
@@ -929,16 +916,17 @@ IteSoft
                             if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
                             }
-                            if ($scope.focusIndex != selectedItem.position) {
-                                $scope.focusIndex = selectedItem.position;
+                            var selectedPosition = _getPosition(selectedItem);
+                            if ($scope.focusIndex != selectedPosition) {
+                                $scope.focusIndex = selectedPosition;
                                 updateIndex();
                             }
                             self.fields.inputSearch = _getLabelFromObject(selectedItem);
-                            self.fields.selectedItem = selectedItem;
-                            self.fields.selectedItem.class = self.fields.selectedSelectClass;
+                            self.fields.selectedItem = _getObject(selectedItem);
+                            //self.fields.selectedItem.class = self.fields.selectedSelectClass;
 
                             var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
-                            scrollTo(selectedDiv);
+                            scrollTo(selectedDiv,selectedItem);
                         } else {
                             self.fields.selectedItem = undefined;
                             $scope.focusIndex = -1;
@@ -946,19 +934,12 @@ IteSoft
                         }
                     }
 
-                    /**
-                     * Unselect item
-                     * @param item
-                     */
-                    function unselect(item) {
-                        item.class = self.fields.defaultSelectClass;
-                    }
 
                     /**
                      * Scroll on selectedItem when user use keyboard to select an item
                      * @param divId
                      */
-                    function scrollTo(targetDiv) {
+                    function scrollTo(targetDiv,item) {
 
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId + "");
 
@@ -967,17 +948,21 @@ IteSoft
                         }
                         if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
                             && angular.isDefined(containerDiv) && containerDiv != null) {
-                            var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
+                            /*var targetPosition = targetDiv.getBoundingClientRect().top +
+                             targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
                             var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
                             var pos = targetPosition - containerPosition;
-                            containerDiv.scrollTop = pos;
+                             containerDiv.scrollTop = pos;*/
+
+                            containerDiv.scrollTop = (_getPosition(item)+1)*20 - containerDiv.getBoundingClientRect().height ;
+                            $log.info($scope.name + " itAutocomplete: scrollTo "+containerDiv.scrollTop+" "+self.fields.selectedItems);
                             if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: scrollTo parent " + containerDiv.parentElement.getBoundingClientRect().top);
                                 $log.debug($scope.name + " itAutocomplete: scrollTo container " + containerDiv.getBoundingClientRect().top);
                                 $log.debug($scope.name + " itAutocomplete: scrollTo targetDiv " + targetDiv.getBoundingClientRect().top);
                             }
                         } else {
-                            $log.error($scope.name + " itAutocomplete: scrollTo unable to scroll target div");
+                            $log.info($scope.name + " itAutocomplete: scrollTo unable to scroll target div: "+targetDiv);
                         }
                     }
 
@@ -1060,13 +1045,14 @@ IteSoft
                         } else {
                             var i = 0;
                             angular.forEach(self.fields.initialItems, function (item) {
+                                //item.class = self.fields.defaultSelectClass;
                                 /**
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
                                     if (_getLower(_getLabelFromObject(item)).startsWith(_getLower(self.fields.inputSearch))) {
                                         self.fields.items.push(item);
-                                        self.fields.items[i].position = i;
+                                        //self.fields.items[i].position = i;
                                         i++;
                                     }
                                     /**
@@ -1077,16 +1063,16 @@ IteSoft
                                         $log.error($scope.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
                                     } else if (self.fn.searchPredicate(self.fields.inputSearch, item)) {
                                         self.fields.items.push(item);
-                                        self.fields.items[i].position = i;
+                                        //self.fields.items[i].position = i;
                                         i++;
                                     }
                                     /**
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(_getLabelFromObject(item.value)).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
-                                        self.fields.items[i].position = i;
+                                        //self.fields.items[i].position = i;
                                         i++;
                                     }
                                 }
@@ -1208,15 +1194,46 @@ IteSoft
                      */
                     function _getIdFromObject(objectToTransform) {
                         var id = "";
-                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getObjectFromId) {
+                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getIdFromObject) {
                             id = self.fields.converter.getIdFromObject(objectToTransform);
-                        } else if (typeof objectToTransform === "object") {
+                        } else if (objectToTransform && angular.isDefined(objectToTransform) && typeof objectToTransform === "object") {
                             id = objectToTransform.id;
                         } else {
                             return objectToTransform;
                         }
                         return id;
                     }
+
+                    /**
+                     *  Return object that is selected
+                     * @param id
+                     * @returns {*}
+                     * @private
+                     */
+                    function _getObject(item){
+                        var result = {};
+                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getObject) {
+                            //var resultItem = item;
+                            //resultItem.class = undefined;
+                            //resultItem.position = undefined;
+                            result = self.fields.converter.getObject(item);
+                        } else  {
+                            result =  item;
+                        }
+                        return result;
+                    }
+
+
+                    /**
+                     * Return position inside list of item
+                     * @param item
+                     * @returns {number}
+                     * @private
+                     */
+                    function _getPosition(item){
+                        return self.fields.items.indexOf(item);
+                    }
+
 
                 }
             ],
@@ -1226,7 +1243,7 @@ IteSoft
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
-            '          <div ng-class="item.class" ' +
+            '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
             '               id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
             '               ng-mousedown="itAutocompleteCtrl.fn.select(item)">' +
             '               {{itAutocompleteCtrl.fn.getLabelFromObject(item)}}' +
