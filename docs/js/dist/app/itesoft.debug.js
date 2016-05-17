@@ -36,6 +36,54 @@ var IteSoft = angular.module('itesoft', [
     'it-tiff-viewer'
 ]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -91,194 +139,11 @@ IteSoft.directive('itCircularBtn',
         }]
 );
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 'use strict';
 /**
  * Service that provide RSQL query
  */
-IteSoft.factory('itAmountCleanerService', [function () {
+IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
 
         var supportedLocales = ['en_US',
             'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
@@ -1145,6 +1010,141 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 "use strict";
 
 /**
@@ -2558,6 +2558,234 @@ IteSoft
         }
 
     });
+'use strict';
+/**
+ * TODO itInclude desc
+ */
+IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *     <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" >
+     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js'
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    scope.template = 'No template found for extension : '  + ext;
+                    break;
+            }
+        };
+
+        var _setValue = function(value) {
+            if(value){
+                if(typeof value === typeof ""){
+                    scope.ext = _splitLast(value, '.').toLowerCase();
+                    _setTemplate(scope.ext, value);
+                }else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type, value);
+                    }else{
+                        scope.template = 'must specify type when using stream';
+                    }
+                }
+            }else {
+                scope.template = null;
+            }
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
+    };
+
+    return {
+        scope: {
+            src : '=',
+            file: '=',
+            type: '@',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
 'use strict';
 
 /**
@@ -4316,234 +4544,6 @@ IteSoft
             }
         }
 }]);
-'use strict';
-/**
- * TODO itInclude desc
- */
-IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
-    var linker = function (scope, element, attrs) {
-        var currentScope;
-        scope.$watch(attrs.itInclude, function (template) {
-            $timeout(function () {
-                if(currentScope){
-                    currentScope.$destroy();
-                }
-                currentScope = scope.$new();
-                element.html( template || '');
-                $compile(element.contents())(currentScope);
-            }, 50);
-        });
-    };
-    return {
-        restrict: 'AE',
-        link: linker
-    };
-}]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMediaViewer
- * @module itesoft
- * @since 1.2
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *     <it-media-viewer></it-media-viewer>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl" >
-     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
-
-    var _splitLast = function (word, character) {
-        if(word != undefined){
-            var words = word.split(character);
-            return words[words.length - 1];
-        }
-        return word;
-    };
-
-    var linker = function (scope, element, attrs) {
-        var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
-            switch (ext) {
-                case 'pdf':
-                    scope.pdfSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/pdf.js'
-                    ]).then(function() {
-                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                    });
-                    break;
-                case 'png':
-                case 'jpeg':
-                    scope.imageSrc = value;
-                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                    break;
-                case 'tif':
-                case 'tiff':
-                    scope.tiffSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/tiff.min.js'
-                    ]).then(function() {
-                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                    });
-                    break;
-                default :
-                    scope.template = 'No template found for extension : '  + ext;
-                    break;
-            }
-        };
-
-        var _setValue = function(value) {
-            if(value){
-                if(typeof value === typeof ""){
-                    scope.ext = _splitLast(value, '.').toLowerCase();
-                    _setTemplate(scope.ext, value);
-                }else {
-                    if(attrs.type) {
-                        _setTemplate(attrs.type, value);
-                    }else{
-                        scope.template = 'must specify type when using stream';
-                    }
-                }
-            }else {
-                scope.template = null;
-            }
-        };
-
-        scope.$watch("src", _setValue);
-        scope.$watch("file", _setValue);
-    };
-
-    return {
-        scope: {
-            src : '=',
-            file: '=',
-            type: '@',
-            options : '=',
-        },
-        restrict: 'E',
-        template :  '<div it-include="template"></div>',
-        link: linker
-    };
-}]);
-
-
-'use strict';
-/**
- * TODO ScriptService desc
- */
-IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
-    var _scipts = {};
-    var _css = {};
-    var defaultScriptPromise = $q.defer();
-    var defaultScriptsPromise = $q.defer();
-
-    //JS
-    var _loadScripJs = function (js) {
-        if(js){
-            if(_scipts[js] != undefined){
-                return _scipts[js];
-            }else {
-                var deferred = $q.defer();
-                var script = document.createElement('script');
-                _scipts[js] = deferred.promise;
-                script.src = js;
-                script.type = 'text/javascript';
-                script.onload = function () {
-                    deferred.resolve(script);
-                };
-                document.head.appendChild(script);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsJs = function (scriptJs) {
-        if(typeof scriptJs == typeof ""){
-            return _loadScripJs(scriptJs);
-        }else if(typeof scriptJs == typeof []){
-            var promises = [];
-            angular.forEach(scriptJs, function(js){
-                promises.push(_loadScripJs(js));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //CSS
-    var _loadScriptCss = function (css) {
-        if(css){
-            if(_css[css] != undefined){
-                return _css[css];
-            }else {
-                var deferred = $q.defer();
-                var link = document.createElement('link');
-                _css[css] = deferred.promise;
-                link.href = css;
-                link.rel ='stylesheet';
-                link.type = 'text/css';
-                link.onload = function () {
-                    deferred.resolve(link);
-                };
-                document.head.appendChild(link);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsCss = function (scriptCss) {
-        if(typeof scriptCss == typeof ""){
-            return _loadScriptCss(scriptCss);
-        }else if(typeof scriptCss == typeof []){
-            var promises = [];
-            angular.forEach(scriptCss, function(css){
-                promises.push(_loadScriptCss(css));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //Scripts
-    var _loadScripts = function (js, css) {
-        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
-    };
-
-    return {
-        LoadScripts : _loadScripts
-    };
-}]);
-
 "use strict";
 /**
  * You do not talk about FIGHT CLUB!!
@@ -7099,6 +7099,55 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 IteSoft
@@ -7212,55 +7261,6 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 
 'use strict';
