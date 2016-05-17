@@ -2,7 +2,7 @@
 /**
  * Service that provide RSQL query
  */
-IteSoft.factory('itAmountCleanerService', [function () {
+IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
 
         var supportedLocales = ['en_US',
             'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
