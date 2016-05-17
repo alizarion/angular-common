@@ -81,6 +81,20 @@
 </code></pre><p> </tr>
  <tr>
      <td>
+          converter
+     </td>
+     <td>
+         Converter to transform object to id or label
+          implements:
+          {
+          getIdFromObject,
+          getLabelFromObject,
+          getObject
+          }
+     </td>
+ </tr>
+ <tr>
+     <td>
          selected-option
      </td>
      <td>
@@ -155,10 +169,10 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-autocomplete"&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itautocomplete-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-3" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-5" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-3" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
-<script type="text/ng-template" id="index.html-3">
+<pre class="prettyprint linenums" ng-set-text="index.html-5" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-5">
 <style>
 .width300{width:300px};
 </style>
@@ -200,61 +214,66 @@ You can use a custom filter method by adding search-mode="'custom'" parameter
 </div>
 <h3 id="example_linked-autocomplete">Linked autocomplete</h3>
 <div class="row">
-<div class="col-xs-12">
-<span class="text" >
-You can link autocomplete together by adding event-select and event-refresh params
-</span>
-</div>
-</div>
-<div class="row">
-<div  class="col-xs-3">
-Taux
-</div>
-<div  class="col-xs-3">
-Code
-</div>
-</div>
-<div class="row">
-<div  class="col-xs-3">
-<it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+    <div class="col-xs-12">
+    <span class="text" >
+    You can link autocomplete together by adding event-select and event-refresh params
+    </span>
+    </div>
 </div>
 
-<div  class="col-xs-3">
-<it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
-</div>
+<div class="row">
+    <div  class="col-xs-3">
+    Taux
+    </div>
+    <div  class="col-xs-3">
+    Code
+    </div>
 </div>
 <div class="row">
-<div  class="col-xs-3">
-{{rate}}
-</div>
-<div  class="col-xs-3">
-{{code}}
-</div>
-</div>
-<h3 id="example_autocomplete-map-with-object">Autocomplete map with object</h3>
-<div class="row">
-<div class="col-xs-12">
-<span class="text" >
-You can map object directly inside autocomplete
-</span>
-</div>
-</div>
-<div class="row">
-<div  class="col-xs-3">
-Taux
-</div>
-<div  class="col-xs-3">
-Code
-</div>
-</div>
-<div class="row">
-<div  class="col-xs-3">
-<it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
-</div>
-<div  class="col-xs-3">
-{{selectedtax}}
+    <div  class="col-xs-3">
+    <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
+    </div>
+
+    <div  class="col-xs-3">
+    <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+    </div>
 </div>
 
+<div class="row">
+    <div  class="col-xs-3">
+    {{rate}}
+    </div>
+    <div  class="col-xs-3">
+    {{code}}
+    </div>
+</div>
+<div class="row">
+   <div class="col-xs-12">
+       <h3 id="example_autocomplete-map-with-object">Autocomplete map with object</h3>
+   </div>
+</div>
+<div class="row">
+   <div class="col-xs-12">
+       <span class="text" >
+       You can map object directly inside autocomplete
+       </span>
+    </div>
+</div>
+<div class="row">
+    <div  class="col-xs-3">
+    Taux
+    </div>
+    <div  class="col-xs-3">
+    Code
+    </div>
+</div>
+<div class="row">
+    <div  class="col-xs-3">
+    <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
+    </div>
+    <div  class="col-xs-3">
+    {{selectedtax}}
+   </div>
 </div>
 </div>
 </script>
@@ -312,16 +331,14 @@ angular.module('itesoft-showcase').controller('HomeCtrl',
            }
 
            $scope.taxConverter={
-               getObjectFromId : function(id,items){
-                   items.forEach(function(item){
-                       if(item.id == id){
-                           return item;
-                       }
-                   })
+               getObject : function(item){
+                   var resultItem = item;
+                   resultItem.content = undefined;
+                   return resultItem;
                },
                getIdFromObject: function(object){
                    if(angular.isDefined(object)){
-                   return object.id;
+                       return object.id;
                    }else{
                        $log.error("unable to get id of null object");
                    }
@@ -434,6 +451,6 @@ angular.module('itesoft-showcase').controller('HomeCtrl',
 </script>
 </div>
 </div><h4 id="example_autocomplete-map-with-object_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-3" ng-eval-javascript="Module.js controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-5" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>
