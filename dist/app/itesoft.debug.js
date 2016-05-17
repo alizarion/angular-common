@@ -36,55 +36,6 @@ var IteSoft = angular.module('itesoft', [
     'it-tiff-viewer'
 ]);
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 
 /**
@@ -2675,20 +2626,6 @@ IteSoft
  *  </tr>
  *  <tr>
  *      <td>
- *           converter
- *      </td>
- *      <td>
- *          Converter to transform object to id or label
- *           implements:
- *           {
- *           getIdFromObject,
- *           getLabelFromObject,
- *           getObjectFromId
- *           }
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *          selected-option
  *      </td>
  *      <td>
@@ -2799,66 +2736,61 @@ IteSoft
  </div>
  <h1>Linked autocomplete</h1>
  <div class="row">
-     <div class="col-xs-12">
-     <span class="text" >
-     You can link autocomplete together by adding event-select and event-refresh params
-     </span>
-     </div>
+ <div class="col-xs-12">
+ <span class="text" >
+ You can link autocomplete together by adding event-select and event-refresh params
+ </span>
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ Taux
+ </div>
+ <div  class="col-xs-3">
+ Code
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
  </div>
 
- <div class="row">
-     <div  class="col-xs-3">
-     Taux
-     </div>
-     <div  class="col-xs-3">
-     Code
-     </div>
+ <div  class="col-xs-3">
+ <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+ </div>
  </div>
  <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
-     </div>
+ <div  class="col-xs-3">
+ {{rate}}
+ </div>
+ <div  class="col-xs-3">
+ {{code}}
+ </div>
+ </div>
+ <h1>Autocomplete map with object</h1>
+ <div class="row">
+ <div class="col-xs-12">
+ <span class="text" >
+ You can map object directly inside autocomplete
+ </span>
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ Taux
+ </div>
+ <div  class="col-xs-3">
+ Code
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
+ </div>
+ <div  class="col-xs-3">
+ {{selectedtax}}
+ </div>
 
-     <div  class="col-xs-3">
-     <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
-     </div>
- </div>
-
- <div class="row">
-     <div  class="col-xs-3">
-     {{rate}}
-     </div>
-     <div  class="col-xs-3">
-     {{code}}
-     </div>
- </div>
- <div class="row">
-    <div class="col-xs-12">
-        <h1>Autocomplete map with object</h1>
-    </div>
- </div>
- <div class="row">
-    <div class="col-xs-12">
-        <span class="text" >
-        You can map object directly inside autocomplete
-        </span>
-     </div>
- </div>
- <div class="row">
-     <div  class="col-xs-3">
-     Taux
-     </div>
-     <div  class="col-xs-3">
-     Code
-     </div>
- </div>
- <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
-     </div>
-     <div  class="col-xs-3">
-     {{selectedtax}}
-    </div>
  </div>
  </div>
  </file>
@@ -3664,7 +3596,6 @@ IteSoft
                         } else {
                             var i = 0;
                             angular.forEach(self.fields.initialItems, function (item) {
-                                item.class = self.fields.defaultSelectClass;
                                 /**
                                  * StartsWith
                                  */
@@ -3689,7 +3620,7 @@ IteSoft
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (_getLower(_getLabelFromObject(item.value)).search(_getLower(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
                                         self.fields.items[i].position = i;
                                         i++;
@@ -7240,6 +7171,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 
 'use strict';
