@@ -95,12 +95,13 @@ IteSoft.factory('itAmountCleanerService', [function () {
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
                 if(angular.isDefined(currency)){
-
-                    if(currency === 'TND'){
+                    //met en Uppercase la devise
+                    currency=$filter('uppercase')(currency);
+                    if(angular.equals(currency ,'TND')){
                         // 3 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
 
-                    }else if(currency === 'YEN'){
+                    }else if(angular.equals(currency ,'JPY')){
                         // 0 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
 
