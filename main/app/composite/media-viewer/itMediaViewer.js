@@ -17,8 +17,8 @@
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-     <div ng-controller="HomeCtrl" >
-     <it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer>
+     <div ng-controller="HomeCtrl" class="row">
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer></div></div>
      </div>
  </file>
  <file name="Module.js">
