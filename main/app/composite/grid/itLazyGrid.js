@@ -144,7 +144,7 @@ IteSoft.directive('itLazyGrid',
                 '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
                 '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
                 '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
                 '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
                 '<div class="ui-grid-filter-container"> ' +
                 '<span class="{{col.headerCellClass}}"> ' +
@@ -163,24 +163,47 @@ IteSoft.directive('itLazyGrid',
                 '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
                 '<div role="navigation" class="ui-grid-pager-container"> ' +
                 '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
+                'ng-disabled="cantPageBackward()">' +
                 '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
-                '<div class="first-triangle prev-triangle"></div> </button> ' +
+                '<input type="button" title="" ' +
+                'ng-click="pageFirstPageClick()" > </input>'+
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'ng-disabled="cantPageBackward()">' +
+                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pagePreviousPageClick()"/>' +
+                '</label>' +
                 '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
                 '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
                 '{{ paginationApi.getTotalPages() }} ' +
-                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
-                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
-                '<div class="last-triangle next-triangle">' +
-                '</div> ' +
-                '</button> ' +
-                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
-                '<div class="last-triangle"> ' +
-                '<div class="last-bar"> ' +
-                '</div> </div> ' +
-                '</button> </div> ' +
+                '</span> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
+                'ng-disabled="cantPageForward()">' +
+                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageNextPageClick()"/>' +
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
+                'ng-disabled="cantPageToLast()">' +
+                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageLastPageClick()"/>' +
+                '</label>' +
+                ' </div> ' +
                 '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
                 '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
                 '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
