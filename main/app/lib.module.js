@@ -26,6 +26,7 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid.resizeColumns',
     'ui.grid.moveColumns',
     'ui.grid.grouping',
+    'ui.bootstrap.dropdown',
     'LocalStorageModule',
     'ngToast',
     'mgcrea.ngStrap.datepicker',

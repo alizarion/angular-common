@@ -39,6 +39,14 @@ IteSoft
                 var button = angular.element(element[0]
                     .querySelector('.it-material-design-hamburger__icon'));
 
+                var menuContent = angular.element(document
+                    .querySelector('it-side-menu-content'));
+
+
+                if(menuContent){
+                    menuContent.css('padding-top','60px');
+                }
+
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
                 if(attrs.itAnimate === "true") {
                     scope.$watch('showmenu', function (newValue, oldValue) {
