@@ -21,7 +21,7 @@ IteSoft
             restrict : 'ECA',
             require : '^itSideMenus',
             transclude : true,
-            scope : true,
+            scope : false,
             link : function(scope){
                 var sideMenuHeader = angular.element(document
                     .querySelector('it-side-menu-header'));
@@ -30,7 +30,7 @@ IteSoft
                 }
             },
             template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
                 '</div>'
         }
