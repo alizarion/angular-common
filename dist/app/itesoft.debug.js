@@ -26,6 +26,7 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid.resizeColumns',
     'ui.grid.moveColumns',
     'ui.grid.grouping',
+    'ui.bootstrap.dropdown',
     'LocalStorageModule',
     'ngToast',
     'mgcrea.ngStrap.datepicker',
@@ -37,113 +38,10 @@ var IteSoft = angular.module('itesoft', [
 ]);
 
 'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCircularBtn
- * @module itesoft
- * @since 1.1
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *   <it-circular-btn></it-circular-btn>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl">
-     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope',
-     function($scope) {
-
-                        }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itCircularBtn',
-    [
-        function () {
-            return {
-                restrict: 'ACE',
-                scope: false,
-                transclude: true,
-                template:'<span class="it-circular-button-container ">' +
-                '<button class="btn  pull-right" > ' +
-                '<div class="it-animated-circular-button">' +
-                '<ng-transclude></ng-transclude>' +
-                '</div>' +
-                '</button> '+
-                '</span>'
-
-            }
-        }]
-);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-'use strict';
 /**
  * Service that provide RSQL query
  */
-IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
+IteSoft.factory('itAmountCleanerService', [function () {
 
         var supportedLocales = ['en_US',
             'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
@@ -236,13 +134,12 @@ IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
                 }
                 //Formattage des montants avec la locale avec 2 décimales après la virgule
                 if(angular.isDefined(currency)){
-                    //met en Uppercase la devise
-                    currency=$filter('uppercase')(currency);
-                    if(angular.equals(currency ,'TND')){
+
+                    if(currency === 'TND'){
                         // 3 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
 
-                    }else if(angular.equals(currency ,'JPY')){
+                    }else if(currency === 'YEN'){
                         // 0 décimales
                         result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
 
@@ -410,7 +307,7 @@ IteSoft.directive('itLazyGrid',
                 '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
                 '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
                 '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
                 '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
                 '<div class="ui-grid-filter-container"> ' +
                 '<span class="{{col.headerCellClass}}"> ' +
@@ -429,47 +326,24 @@ IteSoft.directive('itLazyGrid',
                 '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
                 '<div role="navigation" class="ui-grid-pager-container"> ' +
                 '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
-                'ng-disabled="cantPageBackward()">' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-first it-sp-grid-pager-first" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageFirstPageClick()" ng-disabled="cantPageBackward()"> ' +
                 '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '<input type="button" title="" ' +
-                'ng-click="pageFirstPageClick()" > </input>'+
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'ng-disabled="cantPageBackward()">' +
-                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pagePreviousPageClick()"/>' +
-                '</label>' +
+                '</button> <button type="button" role="menuitem" class="ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'bs-tooltip title="{{ \'HELP.PREVPAGE\' | translate }}" ng-click="pagePreviousPageClick()" ng-disabled="cantPageBackward()"> ' +
+                '<div class="first-triangle prev-triangle"></div> </button> ' +
                 '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
                 '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
                 '{{ paginationApi.getTotalPages() }} ' +
-                '</span> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
-                'ng-disabled="cantPageForward()">' +
-                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageNextPageClick()"/>' +
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
-                'ng-disabled="cantPageToLast()">' +
-                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageLastPageClick()"/>' +
-                '</label>' +
-                ' </div> ' +
+                '</span> <button type="button" role="menuitem" class="ui-grid-pager-next it-sp-grid-pager-next "' +
+                ' bs-tooltip title="{{ \'HELP.NEXTPAGE\' | translate }}" ng-click="pageNextPageClick()" ng-disabled="cantPageForward()"> ' +
+                '<div class="last-triangle next-triangle">' +
+                '</div> ' +
+                '</button> ' +
+                '<button type="button" role="menuitem" class="ui-grid-pager-last it-sp-grid-pager-last" bs-tooltip title="{{ \'HELP.FIRSTPAGE\' | translate }}" ng-click="pageLastPageClick()" ng-disabled="cantPageToLast()"> ' +
+                '<div class="last-triangle"> ' +
+                '<div class="last-bar"> ' +
+                '</div> </div> ' +
+                '</button> </div> ' +
                 '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
                 '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
                 '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
@@ -1012,375 +886,52 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
 );
 /**
  * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
+ * @name itesoft.directive:itCompile
  * @module itesoft
  * @restrict EA
  * @since 1.0
  * @description
- * print the encapsuled content into full screen modal popup. 42
+ * This directive can evaluate and transclude an expression in a scope context.
  *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
  * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
              </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
 
- </example>
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
  */
 IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
                     }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
+                );
+            };
         }]);
-
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
     }]);
-"use strict";
 
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
 "use strict";
 /**
  * @ngdoc directive
@@ -2650,20 +2201,6 @@ IteSoft
  *  </tr>
  *  <tr>
  *      <td>
- *           converter
- *      </td>
- *      <td>
- *          Converter to transform object to id or label
- *           implements:
- *           {
- *           getIdFromObject,
- *           getLabelFromObject,
- *           getObject
- *           }
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *          selected-option
  *      </td>
  *      <td>
@@ -2774,66 +2311,61 @@ IteSoft
  </div>
  <h1>Linked autocomplete</h1>
  <div class="row">
-     <div class="col-xs-12">
-     <span class="text" >
-     You can link autocomplete together by adding event-select and event-refresh params
-     </span>
-     </div>
+ <div class="col-xs-12">
+ <span class="text" >
+ You can link autocomplete together by adding event-select and event-refresh params
+ </span>
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ Taux
+ </div>
+ <div  class="col-xs-3">
+ Code
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
  </div>
 
- <div class="row">
-     <div  class="col-xs-3">
-     Taux
-     </div>
-     <div  class="col-xs-3">
-     Code
-     </div>
+ <div  class="col-xs-3">
+ <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
+ </div>
  </div>
  <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items-getter="getRate(code)" name="'firstRate'" selected-option="rate"  event-select="'firstEvent'" selected-option="firstRate" event-refresh="'secondEvent'" options="options" ></it-autocomplete>
-     </div>
+ <div  class="col-xs-3">
+ {{rate}}
+ </div>
+ <div  class="col-xs-3">
+ {{code}}
+ </div>
+ </div>
+ <h1>Autocomplete map with object</h1>
+ <div class="row">
+ <div class="col-xs-12">
+ <span class="text" >
+ You can map object directly inside autocomplete
+ </span>
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ Taux
+ </div>
+ <div  class="col-xs-3">
+ Code
+ </div>
+ </div>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
+ </div>
+ <div  class="col-xs-3">
+ {{selectedtax}}
+ </div>
 
-     <div  class="col-xs-3">
-     <it-autocomplete   items-getter="getCode(rate)"  name="'firstCode'" selected-option="code"    event-select="'secondEvent'" selected-option="firstCode" event-refresh="'firstEvent'" options="options" ></it-autocomplete>
-     </div>
- </div>
-
- <div class="row">
-     <div  class="col-xs-3">
-     {{rate}}
-     </div>
-     <div  class="col-xs-3">
-     {{code}}
-     </div>
- </div>
- <div class="row">
-    <div class="col-xs-12">
-        <h1>Autocomplete map with object</h1>
-    </div>
- </div>
- <div class="row">
-    <div class="col-xs-12">
-        <span class="text" >
-        You can map object directly inside autocomplete
-        </span>
-     </div>
- </div>
- <div class="row">
-     <div  class="col-xs-3">
-     Taux
-     </div>
-     <div  class="col-xs-3">
-     Code
-     </div>
- </div>
- <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items="availablesTax" name="'objectAutoComplete'" converter="taxConverter"  selected-option="selectedtax" ></it-autocomplete>
-     </div>
-     <div  class="col-xs-3">
-     {{selectedtax}}
-    </div>
  </div>
  </div>
  </file>
@@ -2885,14 +2417,16 @@ IteSoft
             }
 
             $scope.taxConverter={
-                getObject : function(item){
-                    var resultItem = item;
-                    resultItem.content = undefined;
-                    return resultItem;
+                getObjectFromId : function(id,items){
+                    items.forEach(function(item){
+                        if(item.id == id){
+                            return item;
+                        }
+                    })
                 },
                 getIdFromObject: function(object){
                     if(angular.isDefined(object)){
-                        return object.id;
+                    return object.id;
                     }else{
                         $log.error("unable to get id of null object");
                     }
@@ -3104,7 +2638,7 @@ IteSoft
                         selectedItem: {},
                         searchMode: $scope.searchMode,
                         placeholder: $scope.placeholder,
-                        debug: false,
+                        debug: true,
                         converter: $scope.converter,
                         event: {
                             refresh: {
@@ -3345,6 +2879,10 @@ IteSoft
                         if (self.fields.debug) {
                             $log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
                         }
+                        //if an oldValue is set
+                        if (angular.isDefined(oldValue)) {
+                            _unselectItemWithId(oldValue);
+                        }
 
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != _getIdFromObject(self.fields.selectedItem)) {
                             _selectItemWithId(newValue);
@@ -3403,6 +2941,24 @@ IteSoft
                     }
 
                     /**
+                     * Unselect Item with it id
+                     * @param id
+                     * @private
+                     */
+                    function _unselectItemWithId(id) {
+                        if (angular.isDefined(id)) {
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: unselect with id " + id);
+                            }
+                            angular.forEach(self.fields.items, function (item) {
+                                if (_getIdFromObject(item) == id) {
+                                    unselect(item);
+                                }
+                            });
+                        }
+                    }
+
+                    /**
                      * init + copy of externalItems
                      */
                     function initItems() {
@@ -3431,8 +2987,13 @@ IteSoft
                             if (angular.isDefined(self.fields.selectedItem)) {
                                 if (self.fields.selectedItem == item) {
                                     select(item)
+                                } else {
+                                    unselect(item);
                                 }
+                            } else {
+                                unselect(item);
                             }
+                            item.position = i;
                             i++;
                         });
                     }
@@ -3442,14 +3003,17 @@ IteSoft
                      * @param id
                      */
                     function select(selectedItem) {
+                        // reset last selectedItem class
+                        if (angular.isDefined(self.fields.selectedItem)) {
+                            unselect(self.fields.selectedItem);
+                        }
                         if (angular.isDefined(selectedItem)) {
 
-                            applySelection(selectedItem);
                             if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
                             }
                             if(self.fields.converter){
-                                $scope.selectedOption = _getObject(selectedItem);
+                                $scope.selectedOption = selectedItem;
                             }else{
                                 $scope.selectedOption = _getIdFromObject(selectedItem);
                             }
@@ -3476,17 +3040,16 @@ IteSoft
                             if (self.fields.debug) {
                                 $log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
                             }
-                            var selectedPosition = _getPosition(selectedItem);
-                            if ($scope.focusIndex != selectedPosition) {
-                                $scope.focusIndex = selectedPosition;
+                            if ($scope.focusIndex != selectedItem.position) {
+                                $scope.focusIndex = selectedItem.position;
                                 updateIndex();
                             }
                             self.fields.inputSearch = _getLabelFromObject(selectedItem);
-                            self.fields.selectedItem = _getObject(selectedItem);
-                            //self.fields.selectedItem.class = self.fields.selectedSelectClass;
+                            self.fields.selectedItem = selectedItem;
+                            self.fields.selectedItem.class = self.fields.selectedSelectClass;
 
                             var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
-                            scrollTo(selectedDiv,selectedItem);
+                            scrollTo(selectedDiv);
                         } else {
                             self.fields.selectedItem = undefined;
                             $scope.focusIndex = -1;
@@ -3494,23 +3057,39 @@ IteSoft
                         }
                     }
 
+                    /**
+                     * Unselect item
+                     * @param item
+                     */
+                    function unselect(item) {
+                        item.class = self.fields.defaultSelectClass;
+                    }
 
                     /**
                      * Scroll on selectedItem when user use keyboard to select an item
                      * @param divId
                      */
-                    function scrollTo(targetDiv,item) {
+                    function scrollTo(targetDiv) {
 
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId + "");
 
                         if (self.fields.debug) {
                             $log.debug($scope.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
                         }
-
-                        if (angular.isDefined(containerDiv) && containerDiv != null){
-                            containerDiv.scrollTop = (_getPosition(item)+1)*20 - containerDiv.getBoundingClientRect().height ;
+                        if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
+                            && angular.isDefined(containerDiv) && containerDiv != null) {
+                            var targetPosition = targetDiv.getBoundingClientRect().top + targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
+                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
+                            var pos = targetPosition - containerPosition;
+                            containerDiv.scrollTop = pos;
+                            if (self.fields.debug) {
+                                $log.debug($scope.name + " itAutocomplete: scrollTo parent " + containerDiv.parentElement.getBoundingClientRect().top);
+                                $log.debug($scope.name + " itAutocomplete: scrollTo container " + containerDiv.getBoundingClientRect().top);
+                                $log.debug($scope.name + " itAutocomplete: scrollTo targetDiv " + targetDiv.getBoundingClientRect().top);
+                            }
+                        } else {
+                            $log.error($scope.name + " itAutocomplete: scrollTo unable to scroll target div");
                         }
-                        
                     }
 
                     /**
@@ -3592,14 +3171,13 @@ IteSoft
                         } else {
                             var i = 0;
                             angular.forEach(self.fields.initialItems, function (item) {
-                                //item.class = self.fields.defaultSelectClass;
                                 /**
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
                                     if (_getLower(_getLabelFromObject(item)).startsWith(_getLower(self.fields.inputSearch))) {
                                         self.fields.items.push(item);
-                                        //self.fields.items[i].position = i;
+                                        self.fields.items[i].position = i;
                                         i++;
                                     }
                                     /**
@@ -3610,16 +3188,16 @@ IteSoft
                                         $log.error($scope.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
                                     } else if (self.fn.searchPredicate(self.fields.inputSearch, item)) {
                                         self.fields.items.push(item);
-                                        //self.fields.items[i].position = i;
+                                        self.fields.items[i].position = i;
                                         i++;
                                     }
                                     /**
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (_getLower(_getLabelFromObject(item.value)).search(_getLower(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
-                                        //self.fields.items[i].position = i;
+                                        self.fields.items[i].position = i;
                                         i++;
                                     }
                                 }
@@ -3741,46 +3319,15 @@ IteSoft
                      */
                     function _getIdFromObject(objectToTransform) {
                         var id = "";
-                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getIdFromObject) {
+                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getObjectFromId) {
                             id = self.fields.converter.getIdFromObject(objectToTransform);
-                        } else if (objectToTransform && angular.isDefined(objectToTransform) && typeof objectToTransform === "object") {
+                        } else if (typeof objectToTransform === "object") {
                             id = objectToTransform.id;
                         } else {
                             return objectToTransform;
                         }
                         return id;
                     }
-
-                    /**
-                     *  Return object that is selected
-                     * @param id
-                     * @returns {*}
-                     * @private
-                     */
-                    function _getObject(item){
-                        var result = {};
-                        if (angular.isDefined(self.fields.converter) && self.fields.converter.getObject) {
-                            //var resultItem = item;
-                            //resultItem.class = undefined;
-                            //resultItem.position = undefined;
-                            result = self.fields.converter.getObject(item);
-                        } else  {
-                            result =  item;
-                        }
-                        return result;
-                    }
-
-
-                    /**
-                     * Return position inside list of item
-                     * @param item
-                     * @returns {number}
-                     * @private
-                     */
-                    function _getPosition(item){
-                        return self.fields.items.indexOf(item);
-                    }
-
 
                 }
             ],
@@ -3790,7 +3337,7 @@ IteSoft
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
-            '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
+            '          <div ng-class="item.class" ' +
             '               id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
             '               ng-mousedown="itAutocompleteCtrl.fn.select(item)">' +
             '               {{itAutocompleteCtrl.fn.getLabelFromObject(item)}}' +
@@ -4303,45 +3850,6 @@ IteSoft
             }
         }
 }]);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4570,255 +4078,432 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
-"use strict";
+'use strict';
+
 /**
  * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
+ * @name itesoft.directive:itCircularBtn
+ * @module itesoft
+ * @since 1.1
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *   <it-circular-btn></it-circular-btn>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl">
+     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope',
+     function($scope) {
 
+                        }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itCircularBtn',
+    [
+        function () {
+            return {
+                restrict: 'ACE',
+                scope: false,
+                transclude: true,
+                template:'<span class="it-circular-button-container ">' +
+                '<button class="btn  pull-right" > ' +
+                '<div class="it-animated-circular-button">' +
+                '<ng-transclude></ng-transclude>' +
+                '</div>' +
+                '</button> '+
+                '</span>'
+
+            }
+        }]
+);
+
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
  * @module itesoft
  * @restrict EA
- * @parent itesoft
  * @since 1.0
  * @description
- * A container for display source code in browser with syntax highlighting.
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
  *
  * @usage
- * <it-prettyprint>
- * </it-prettyprint>
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
  *
  * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
 
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
                 };
+                data.push(dataItem);
             }
-
+            return data;
         };
-    }]);
-'use strict';
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
 
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
         }
 
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
 
-    };
+ </example>
+ *
+ **/
 
-}]);
-'use strict';
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:pixelWidth
+ * @name itesoft.directive:itLoader
  * @module itesoft
- * @restrict A
- * @since 1.1
+ * @restrict EA
+ * @since 1.0
  * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
+ * Simple loading spinner that handle http request pending.
  *
  *
  * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
 
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 /**
  * @ngdoc directive
- * @name itesoft.directive:rowHeight
+ * @name itesoft.directive:itModalFullScreen
  * @module itesoft
- * @restrict A
- * @since 1.1
+ * @restrict EA
+ * @since 1.0
  * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ * print the encapsuled content into full screen modal popup. 42
  *
- *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
  * @example
  <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
  </example>
  */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 'use strict';
 /**
  * @ngdoc directive
@@ -4965,8 +4650,17 @@ IteSoft
             require : '^itSideMenus',
             transclude : true,
             scope:true,
+            link:function(scope, element, attrs ){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                   scope.$noMenuHeader = true;
+                }
+
+
+            },
             template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
                    '<div class="it-sidebar-inner">'+
                         '<div class="nav navbar navbar-inverse">'+
                         '<nav class="" ng-transclude ></nav>' +
@@ -5001,6 +4695,13 @@ IteSoft
             require : '^itSideMenus',
             transclude : true,
             scope : true,
+            link : function(scope){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                    scope.showmenu = true;
+                }
+            },
             template :
                 '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
@@ -5078,6 +4779,14 @@ IteSoft
                     .querySelector('.it-material-design-hamburger__layer'));
                 var button = angular.element(element[0]
                     .querySelector('.it-material-design-hamburger__icon'));
+
+                var menuContent = angular.element(document
+                    .querySelector('it-side-menu-content'));
+
+
+                if(menuContent){
+                    menuContent.css('padding-top','60px');
+                }
 
                 scope.toggleMenu = sideMenuCtrl.toggleMenu;
                 if(attrs.itAnimate === "true") {
@@ -5165,33 +4874,77 @@ IteSoft
          <it-side-menus>
              <it-side-menu-header it-animate="true"  it-button-menu="true">
 
-
+                 <!-- Header Menu-->
+                 <div class="collapse navbar-collapse">
+                 <div uib-dropdown class="nav navbar-nav navbar-right ">
+                 <button class="btn loginButton" type="button" uib-dropdown-toggle>
+                 <i class="glyphicon glyphicon-user ">&nbsp;John Doe&nbsp;</i><span class="caret"></span>
+                 </button>
+                 <ul class="dropdown-menu" role="menu">
+                 <li>
+                 <a ng-cloak>
+                 français
+                 <i class="pull-right">
+                 </i>
+                 </a>
+                 </li>
+                 <li>
+                 <a ng-cloak>
+                 anglais
+                 <i class="pull-right glyphicon glyphicon-ok">
+                 </i>
+                 </a>
+                 </li>
+                 <li>
+                 <a ng-cloak>
+                 dothraki
+                 <i class="pull-right">
+                 </i>
+                 </a>
+                 </li>
+                 <li class="divider"></li>
+                 <li>
+                 <a ng-cloak>
+                 logout
+                 </a>
+                 </li>
+                 </ul>
+                 </div>
+                 </div>
              </it-side-menu-header>
 
-             <it-side-menu>
-                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+         <it-side-menu>
+             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+             <li it-collapsed-item>
+             <a href=""><h5><i class="fa fa-music"></i>&nbsp; Menu 1</h5></a>
+             <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+             <li >
+             <a href="#/menu1/sub1" translate>SubMenu 1</a>
+             </li>
+             <li >
+             <a href="#/menu2/sub2" translate>SubMenu 2</a>
+             </li>
+             </ul>
+             </li>
+             <li>
+             <a href="#/menu2"><h5><i class="fa fa-list"></i>&nbsp; Menu 2</h5></a>
+             </li>
+             <li>
+             <a href="#/menu3"><h5><i class="fa fa-pied-piper-alt"></i>&nbsp; Menu 3</h5></a>
+             </li>
+             </ul>
+         </it-side-menu>
 
 
-                     <li it-collapsed-item=""   >
-                     <a href=""><h5>Menu</h5></a>
-                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                     <li >
-                     <a href="#/widget/itloader">SubMenu1</a>
-                     </li>
-                     <li >
-                     <a href="#/widget/itBottomGlue">SubMenu2</a>
-                     </li>
-                     </ul>
-                     </li>
-                     </ul>
-              </it-side-menu>
+         <it-side-menu-content>
+
+             <div class="container-fluid">
+                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi, veritatis, earum ullam accusantium consectetur consequuntur totam enim nemo impedit atque blanditiis ratione eum provident libero illum laboriosam qui amet eius.</p>
+
+             </div>
 
 
-             <it-side-menu-content>
-
-                 <h1>See on Plunker !</h1>
-
-             </it-side-menu-content>
+            </it-side-menu-content>
          </it-side-menus>
 
     </file>
@@ -6009,6 +5762,457 @@ IteSoft
                 '<div class="it-side-panel-header text-center" ng-transclude></div>'
         };
     });
+
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
 
 
 /**
@@ -7086,169 +7290,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 
 'use strict';
 /**
@@ -8193,6 +8234,743 @@ IteSoft
             }, opts || {}));
         }
         return itPopup;
+    }]);
+
+'use strict';
+/**
+ * TODO itProgressbarViewer desc
+ */
+itMultiPagesViewer.directive('itProgressbarViewer', [function(){
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="loader" >' +
+        '<div class="progress-bar">' +
+        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
+        '</div>' +
+        '</div>'
+    };
+}]);
+'use strict';
+/**
+ * TODO itToolbarViewer desc
+ */
+itMultiPagesViewer.directive('itToolbarViewer', [function(){
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("api.getZoomLevel()", function (value) {
+            scope.scale = value;
+        });
+
+        scope.$watch("api.getCurrentPage()", function (value) {
+            scope.currentPage = value;
+        });
+
+        scope.onZoomLevelChanged = function() {
+            scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onPageChanged = function() {
+            scope.api.goToPage(scope.currentPage);
+        };
+
+        scope.zoomIn = function() {
+            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+
+        scope.zoomOut = function() {
+            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+    };
+
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="toolbar">' +
+        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+        '<button ng-click="zoomOut()">-</button> ' +
+        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
+        '</select> ' +
+        '<button ng-click="zoomIn()">+</button> ' +
+        '</div>' +
+
+        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+        '<span>Page : </span>' +
+        '<button ng-click="api.goToPrevPage()"><</button> ' +
+        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+        '<button ng-click="api.goToNextPage()">></button> ' +
+        '<span> of {{api.getNumPages()}}</span>' +
+        '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesConstants desc
+ */
+itMultiPagesViewer.constant("MultiPagesConstants", {
+    PAGE_RENDER_FAILED : -1,
+    PAGE_RENDER_CANCELLED : 0,
+    PAGE_RENDERED : 1,
+    PAGE_ALREADY_RENDERED : 2,
+    ZOOM_LEVELS_LUT : [
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
+        2.0, 2.2, 2.4, 2.6, 2.8,
+        3.0, 3.3, 3.6, 3.9,
+        4.0, 4.5,
+        5.0],
+    ZOOM_FIT_WIDTH : "fit_width",
+    ZOOM_FIT_PAGE : "fit_page",
+    ZOOM_FIT_HEIGHT : "fit_height"
+})
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+
+    function MultiPagesPage(pageIndex, view) {
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page'></div>");
+        this.container.attr("id", "page_" + pageIndex);
+
+        this.canvasRendered = false;
+        this.rendered = false;
+
+        //transform
+        this.view = view;
+
+    }
+
+    MultiPagesPage.prototype = {
+        clear: function () {
+            this.rendered = false;
+            this.container.empty();
+        },
+        getViewport: function (scale) {
+            return new PageViewport(this.view, scale, 0, 0, 0);
+        },
+        resize: function (scale) {
+            this.viewport = this.getViewport(scale);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
+
+            this.container.css("width", this.viewport.width + "px");
+            this.container.css("height", this.viewport.height + "px");
+        },
+        isVisible: function () {
+            var pageContainer = this.container[0];
+            var parentContainer = this.container.parent()[0];
+
+            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+            var pageBottom = pageTop + pageContainer.offsetHeight;
+
+            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+        },
+        render: function (callback) {
+            throw "NotImplementedError - render";
+        }
+    };
+
+    return (MultiPagesPage);
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesViewer desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+    function getElementInnerSize(element, margin) {
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
+
+        element.append(tallTempElement);
+
+        var w = tallTempElement[0].offsetWidth;
+
+        tallTempElement.remove();
+
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
+
+        w -= 2 * margin;
+        h -= 2 * margin;
+
+        return {
+            width: w,
+            height: h
+        };
+    }
+
+    function MultiPagesViewer(api, element) {
+        this.pages = [];
+        this.scaleItem = null;
+        this.fitWidthScale = 1.0;
+        this.fitHeightScale = 1.0;
+        this.fitPageScale = 1.0;
+        this.element = element;
+        this.pageMargin = 0;
+        this.currentPage = 0;
+        this.lastScrollDir = 0;
+
+        this.api = api;
+
+        // Hooks for the client...
+        this.onPageRendered = null;
+        this.onDataDownloaded = null;
+        this.onCurrentPageChanged = null;
+    }
+
+    MultiPagesViewer.prototype = {
+        getAPI: function () {
+            return this.api;
+        },
+        setContainerSize: function (initialScale) {
+            if(this.pages.length > 0){
+                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                this.api.zoomLevels = [];
+                var lastScale = 0.1;
+                do {
+                    var curScale = this.api.getNextZoomInScale(lastScale);
+                    if(curScale.value=== lastScale) {
+                        break;
+                    }
+
+                    if(curScale.value === 100){
+                        this.defaultScale = curScale;
+                    }
+
+                    if(this.scaleItem == undefined && curScale.id === initialScale){
+                        this.scaleItem = curScale;
+                    }
+
+                    this.api.zoomLevels.push(curScale);
+
+                    lastScale = curScale.value;
+                } while(true);
+
+                this.setScale(this.scaleItem);
+            }
+        },
+        setScale: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.scaleItem = scaleItem;
+            }
+            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+
+            var numPages = this.pages.length;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                // Clear the page's contents...
+                this.pages[iPage].clear();
+
+                // Resize to current scaleItem...
+                this.pages[iPage].resize(si.value);
+            }
+
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        calcScale: function (desiredScale) {
+            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                // Find the widest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxWidth = this.pages[0].getViewport(1.0).width;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                }
+
+                return this.containerSize.width / maxWidth;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                // Find the highest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxHeight = this.pages[0].getViewport(1.0).height;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                }
+
+                return this.containerSize.height / maxHeight;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                // Find the smaller dimension of the container and fit the 1st page to it.
+                var page0Viewport = this.pages[0].getViewport(1.0);
+
+                if(this.containerSize.height < this.containerSize.width) {
+                    return this.containerSize.height / page0Viewport.height;
+                }
+
+                return this.containerSize.width / page0Viewport.width;
+            }
+
+            var scale = parseFloat(desiredScale);
+            if(isNaN(scale)) {
+                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                return 1.0;
+            }
+
+            return scale;
+        },
+        removeDistantPages: function (curPageID, distance) {
+            var numPages = this.pages.length;
+
+            var firstActivePageID = Math.max(curPageID - distance, 0);
+            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+
+            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                this.pages[iPage].clear();
+            }
+
+            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                this.pages[iPage].clear();
+            }
+        },
+        renderAllVisiblePages: function (scrollDir) {
+            if(scrollDir != undefined){
+                this.lastScrollDir = scrollDir;
+            }
+
+            var self = this;
+            var numPages = this.pages.length;
+            var currentPageID = 0;
+            var atLeastOnePageInViewport = false;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+
+                if(page.isVisible()) {
+                    var parentContainer = page.container.parent()[0];
+                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
+                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                        currentPageID = iPage;
+                    }
+
+                    atLeastOnePageInViewport = true;
+                    page.render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                } else {
+                    if(atLeastOnePageInViewport) {
+                        break;
+                    }
+                }
+            }
+
+            if(this.lastScrollDir !== 0) {
+                var nextPageID = currentPageID + this.lastScrollDir;
+                if(nextPageID >= 0 && nextPageID < numPages) {
+                    this.pages[nextPageID].render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                }
+            }
+
+            this.removeDistantPages(currentPageID, 2);
+
+            this.currentPage = currentPageID + 1;
+            if(this.onCurrentPageChanged){
+                this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        hookScope: function(scope, initialScale) {
+            var self = this;
+            var lastScrollY = 0;
+            var watcher = new SizeWatcher(self.element[0], 200);
+            scope.$watchGroup(watcher.group, function(values) {
+                self.setContainerSize(initialScale);
+            });
+
+            var onProgress = function(operation, state, value, total, message) {
+                if (operation === "render" && value === 1) {
+                    if (state === "success") {
+                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                    }
+                    else {
+                        $log.debug("Failed to render 1st page!\n\n" + message);
+                    }
+                }
+                else if (operation === "download" && state === "loading") {
+                    self.api.downloadProgress = (value / total) * 100.0;
+                }
+                else {
+                    if (state === "failed") {
+                        $log.debug("Something went really bad!\n\n" + message);
+                    }
+                }
+            };
+
+            scope.onPageRendered = function(status, pageID, numPages, message) {
+                onProgress("render", status, pageID, numPages, message);
+            };
+
+            scope.onDataDownloaded = function(status, loaded, total, message) {
+                onProgress("download", status, loaded, total, message);
+            };
+
+            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+            scope.$on('$destroy', function() {
+                if(self.onDestroy != null){
+                    try	{
+
+                    }catch (ex)
+                    {
+                        $log.log(ex);
+                    }
+                    self.onDestroy();
+                }
+                watcher.cancel();
+                self.element.empty();
+                $log.debug("viewer destroyed");
+            });
+
+            self.element.bind("scroll", function(event) {
+                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
+                scope.scrollTimeout = $timeout(function() {
+                    var scrollTop = self.element[0].scrollTop;
+
+                    var scrollDir = scrollTop - lastScrollY;
+                    lastScrollY = scrollTop;
+
+                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                }, 350);
+            });
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        }
+    };
+
+    return (MultiPagesViewer);
+}]);
+'use strict';
+/**
+ * TODO MultiPagesViewerAPI desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+
+        function MultiPagesViewerAPI(viewer) {
+            this.viewer = viewer;
+            this.scaleItems = {};
+            this.zoomLevels = [];
+        };
+
+        MultiPagesViewerAPI.prototype = {
+            getNextZoomInScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                }else {
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            getNextZoomOutScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = numZoomLevels - 1; i >= 0;--i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                } else{
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            zoomTo: function (scaleItem) {
+                if(scaleItem != undefined){
+                    this.viewer.setScale(scaleItem);
+                }
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            goToPage: function (pageIndex) {
+                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                    return;
+                }
+
+                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            },
+            goToNextPage: function () {
+                this.goToPage(this.viewer.currentPage + 1);
+            },
+            goToPrevPage: function () {
+                this.goToPage(this.viewer.currentPage - 1);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            }
+        };
+
+        return (MultiPagesViewerAPI);
+    }]);
+
+'use strict';
+/**
+ * TODO PageViewport desc
+ */
+itMultiPagesViewer.factory('PageViewport', [function() {
+
+        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+            this.viewBox = viewBox;
+            this.scale = scale;
+            this.rotation = rotation;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+
+            // creating transform to convert pdf coordinate system to the normal
+            // canvas like coordinates taking in account scale and rotation
+            var centerX = (viewBox[2] + viewBox[0]) / 2;
+            var centerY = (viewBox[3] + viewBox[1]) / 2;
+            var rotateA, rotateB, rotateC, rotateD;
+            rotation = rotation % 360;
+            rotation = rotation < 0 ? rotation + 360 : rotation;
+            switch (rotation) {
+                case 180:
+                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                    break;
+                case 90:
+                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                    break;
+                case 270:
+                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                    break;
+                //case 0:
+                default:
+                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                    break;
+            }
+
+            if (dontFlip) {
+                rotateC = -rotateC; rotateD = -rotateD;
+            }
+
+            var offsetCanvasX, offsetCanvasY;
+            var width, height;
+            if (rotateA === 0) {
+                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            } else {
+                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            }
+            // creating transform for the following operations:
+            // translate(-centerX, -centerY), rotate and flip vertically,
+            // scale, and translate(offsetCanvasX, offsetCanvasY)
+            this.transform = [
+                rotateA * scale,
+                rotateB * scale,
+                rotateC * scale,
+                rotateD * scale,
+                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+            ];
+
+            this.width = width;
+            this.height = height;
+            this.fontScale = scale;
+        }
+        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+            /**
+             * Clones viewport with additional properties.
+             * @param args {Object} (optional) If specified, may contain the 'scale' or
+             * 'rotation' properties to override the corresponding properties in
+             * the cloned viewport.
+             * @returns {PDFJS.PageViewport} Cloned viewport.
+             */
+            clone: function PageViewPort_clone(args) {
+                args = args || {};
+                var scale = 'scale' in args ? args.scale : this.scale;
+                var rotation = 'rotation' in args ? args.rotation : this.rotation;
+                return new PageViewport(this.viewBox.slice(), scale, rotation,
+                    this.offsetX, this.offsetY, args.dontFlip);
+            },
+            /**
+             * Converts PDF point to the viewport coordinates. For examples, useful for
+             * converting PDF location into canvas pixel coordinates.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the viewport coordinate space.
+             * @see {@link convertToPdfPoint}
+             * @see {@link convertToViewportRectangle}
+             */
+            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+                return Util.applyTransform([x, y], this.transform);
+            },
+            /**
+             * Converts PDF rectangle to the viewport coordinates.
+             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+             * @returns {Array} Contains corresponding coordinates of the rectangle
+             * in the viewport coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToViewportRectangle:
+                function PageViewport_convertToViewportRectangle(rect) {
+                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                    return [tl[0], tl[1], br[0], br[1]];
+                },
+            /**
+             * Converts viewport coordinates to the PDF location. For examples, useful
+             * for converting canvas pixel location into PDF one.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the PDF coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+                return Util.applyInverseTransform([x, y], this.transform);
+            }
+        };
+
+        return (PageViewport);
+    }]);
+
+'use strict';
+/**
+ * TODO SizeWatcher desc
+ */
+itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
+        return function (element, rate) {
+            var self = this;
+            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
+            self.monitor = $interval(self.update, rate);
+            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
+            self.cancel = function() { $interval.cancel(self.monitor); };
+        };
     }]);
 
 'use strict';
@@ -9186,743 +9964,6 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
         };
 
         return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itProgressbarViewer desc
- */
-itMultiPagesViewer.directive('itProgressbarViewer', [function(){
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="loader" >' +
-        '<div class="progress-bar">' +
-        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
-        '</div>' +
-        '</div>'
-    };
-}]);
-'use strict';
-/**
- * TODO itToolbarViewer desc
- */
-itMultiPagesViewer.directive('itToolbarViewer', [function(){
-    var linker = function (scope, element, attrs) {
-
-        scope.$watch("api.getZoomLevel()", function (value) {
-            scope.scale = value;
-        });
-
-        scope.$watch("api.getCurrentPage()", function (value) {
-            scope.currentPage = value;
-        });
-
-        scope.onZoomLevelChanged = function() {
-            scope.api.zoomTo(scope.scale);
-        };
-
-        scope.onPageChanged = function() {
-            scope.api.goToPage(scope.currentPage);
-        };
-
-        scope.zoomIn = function() {
-            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-
-        scope.zoomOut = function() {
-            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-    };
-
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
-        '</select> ' +
-        '<button ng-click="zoomIn()">+</button> ' +
-        '</div>' +
-
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span>' +
-        '</div>' +
-        '</div>',
-        link: linker
-    };
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesConstants desc
- */
-itMultiPagesViewer.constant("MultiPagesConstants", {
-    PAGE_RENDER_FAILED : -1,
-    PAGE_RENDER_CANCELLED : 0,
-    PAGE_RENDERED : 1,
-    PAGE_ALREADY_RENDERED : 2,
-    ZOOM_LEVELS_LUT : [
-        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
-        2.0, 2.2, 2.4, 2.6, 2.8,
-        3.0, 3.3, 3.6, 3.9,
-        4.0, 4.5,
-        5.0],
-    ZOOM_FIT_WIDTH : "fit_width",
-    ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
-})
-
-'use strict';
-/**
- * TODO MultiPagesPage desc
- */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
-
-    function MultiPagesPage(pageIndex, view) {
-        this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page'></div>");
-        this.container.attr("id", "page_" + pageIndex);
-
-        this.canvasRendered = false;
-        this.rendered = false;
-
-        //transform
-        this.view = view;
-
-    }
-
-    MultiPagesPage.prototype = {
-        clear: function () {
-            this.rendered = false;
-            this.container.empty();
-        },
-        getViewport: function (scale) {
-            return new PageViewport(this.view, scale, 0, 0, 0);
-        },
-        resize: function (scale) {
-            this.viewport = this.getViewport(scale);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
-
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
-        },
-        isVisible: function () {
-            var pageContainer = this.container[0];
-            var parentContainer = this.container.parent()[0];
-
-            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-            var pageBottom = pageTop + pageContainer.offsetHeight;
-
-            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
-        },
-        render: function (callback) {
-            throw "NotImplementedError - render";
-        }
-    };
-
-    return (MultiPagesPage);
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesViewer desc
- */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
-    function getElementInnerSize(element, margin) {
-        var tallTempElement = angular.element("<div></div>");
-        tallTempElement.css("height", "10000px");
-
-        element.append(tallTempElement);
-
-        var w = tallTempElement[0].offsetWidth;
-
-        tallTempElement.remove();
-
-        var h = element[0].offsetHeight;
-        if(h === 0) {
-            // TODO: Should we get the parent height?
-            h = 2 * margin;
-        }
-
-        w -= 2 * margin;
-        h -= 2 * margin;
-
-        return {
-            width: w,
-            height: h
-        };
-    }
-
-    function MultiPagesViewer(api, element) {
-        this.pages = [];
-        this.scaleItem = null;
-        this.fitWidthScale = 1.0;
-        this.fitHeightScale = 1.0;
-        this.fitPageScale = 1.0;
-        this.element = element;
-        this.pageMargin = 0;
-        this.currentPage = 0;
-        this.lastScrollDir = 0;
-
-        this.api = api;
-
-        // Hooks for the client...
-        this.onPageRendered = null;
-        this.onDataDownloaded = null;
-        this.onCurrentPageChanged = null;
-    }
-
-    MultiPagesViewer.prototype = {
-        getAPI: function () {
-            return this.api;
-        },
-        setContainerSize: function (initialScale) {
-            if(this.pages.length > 0){
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.api.zoomLevels = [];
-                var lastScale = 0.1;
-                do {
-                    var curScale = this.api.getNextZoomInScale(lastScale);
-                    if(curScale.value=== lastScale) {
-                        break;
-                    }
-
-                    if(curScale.value === 100){
-                        this.defaultScale = curScale;
-                    }
-
-                    if(this.scaleItem == undefined && curScale.id === initialScale){
-                        this.scaleItem = curScale;
-                    }
-
-                    this.api.zoomLevels.push(curScale);
-
-                    lastScale = curScale.value;
-                } while(true);
-
-                this.setScale(this.scaleItem);
-            }
-        },
-        setScale: function (scaleItem) {
-            if(scaleItem != undefined) {
-                this.scaleItem = scaleItem;
-            }
-            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
-
-            var numPages = this.pages.length;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                // Clear the page's contents...
-                this.pages[iPage].clear();
-
-                // Resize to current scaleItem...
-                this.pages[iPage].resize(si.value);
-            }
-
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
-        },
-        calcScale: function (desiredScale) {
-            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
-                // Find the widest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxWidth = this.pages[0].getViewport(1.0).width;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
-                }
-
-                return this.containerSize.width / maxWidth;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
-                // Find the highest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxHeight = this.pages[0].getViewport(1.0).height;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
-                }
-
-                return this.containerSize.height / maxHeight;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
-                // Find the smaller dimension of the container and fit the 1st page to it.
-                var page0Viewport = this.pages[0].getViewport(1.0);
-
-                if(this.containerSize.height < this.containerSize.width) {
-                    return this.containerSize.height / page0Viewport.height;
-                }
-
-                return this.containerSize.width / page0Viewport.width;
-            }
-
-            var scale = parseFloat(desiredScale);
-            if(isNaN(scale)) {
-                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
-                return 1.0;
-            }
-
-            return scale;
-        },
-        removeDistantPages: function (curPageID, distance) {
-            var numPages = this.pages.length;
-
-            var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
-
-            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
-                this.pages[iPage].clear();
-            }
-
-            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
-                this.pages[iPage].clear();
-            }
-        },
-        renderAllVisiblePages: function (scrollDir) {
-            if(scrollDir != undefined){
-                this.lastScrollDir = scrollDir;
-            }
-
-            var self = this;
-            var numPages = this.pages.length;
-            var currentPageID = 0;
-            var atLeastOnePageInViewport = false;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-
-                if(page.isVisible()) {
-                    var parentContainer = page.container.parent()[0];
-                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
-                    if(pageTop <= parentContainer.offsetHeight / 2) {
-                        currentPageID = iPage;
-                    }
-
-                    atLeastOnePageInViewport = true;
-                    page.render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                } else {
-                    if(atLeastOnePageInViewport) {
-                        break;
-                    }
-                }
-            }
-
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = currentPageID + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
-            }
-
-            this.removeDistantPages(currentPageID, 2);
-
-            this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
-                this.onCurrentPageChanged( currentPageID + 1);
-            }
-        },
-        hookScope: function(scope, initialScale) {
-            var self = this;
-            var lastScrollY = 0;
-            var watcher = new SizeWatcher(self.element[0], 200);
-            scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(initialScale);
-            });
-
-            var onProgress = function(operation, state, value, total, message) {
-                if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
-                    }
-                    else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
-                    }
-                }
-                else if (operation === "download" && state === "loading") {
-                    self.api.downloadProgress = (value / total) * 100.0;
-                }
-                else {
-                    if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
-                    }
-                }
-            };
-
-            scope.onPageRendered = function(status, pageID, numPages, message) {
-                onProgress("render", status, pageID, numPages, message);
-            };
-
-            scope.onDataDownloaded = function(status, loaded, total, message) {
-                onProgress("download", status, loaded, total, message);
-            };
-
-            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
-            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
-
-            scope.$on('$destroy', function() {
-                if(self.onDestroy != null){
-                    try	{
-
-                    }catch (ex)
-                    {
-                        $log.log(ex);
-                    }
-                    self.onDestroy();
-                }
-                watcher.cancel();
-                self.element.empty();
-                $log.debug("viewer destroyed");
-            });
-
-            self.element.bind("scroll", function(event) {
-                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
-                scope.scrollTimeout = $timeout(function() {
-                    var scrollTop = self.element[0].scrollTop;
-
-                    var scrollDir = scrollTop - lastScrollY;
-                    lastScrollY = scrollTop;
-
-                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
-                    self.renderAllVisiblePages(normalizedScrollDir);
-                }, 350);
-            });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
-        }
-    };
-
-    return (MultiPagesViewer);
-}]);
-'use strict';
-/**
- * TODO MultiPagesViewerAPI desc
- */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-
-        function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
-
-        MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
-            }
-        };
-
-        return (MultiPagesViewerAPI);
-    }]);
-
-'use strict';
-/**
- * TODO PageViewport desc
- */
-itMultiPagesViewer.factory('PageViewport', [function() {
-
-        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
-            this.viewBox = viewBox;
-            this.scale = scale;
-            this.rotation = rotation;
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-
-            // creating transform to convert pdf coordinate system to the normal
-            // canvas like coordinates taking in account scale and rotation
-            var centerX = (viewBox[2] + viewBox[0]) / 2;
-            var centerY = (viewBox[3] + viewBox[1]) / 2;
-            var rotateA, rotateB, rotateC, rotateD;
-            rotation = rotation % 360;
-            rotation = rotation < 0 ? rotation + 360 : rotation;
-            switch (rotation) {
-                case 180:
-                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
-                    break;
-                case 90:
-                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
-                    break;
-                case 270:
-                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
-                    break;
-                //case 0:
-                default:
-                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
-                    break;
-            }
-
-            if (dontFlip) {
-                rotateC = -rotateC; rotateD = -rotateD;
-            }
-
-            var offsetCanvasX, offsetCanvasY;
-            var width, height;
-            if (rotateA === 0) {
-                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
-                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
-                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
-            } else {
-                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
-                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
-                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
-            }
-            // creating transform for the following operations:
-            // translate(-centerX, -centerY), rotate and flip vertically,
-            // scale, and translate(offsetCanvasX, offsetCanvasY)
-            this.transform = [
-                rotateA * scale,
-                rotateB * scale,
-                rotateC * scale,
-                rotateD * scale,
-                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
-                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
-            ];
-
-            this.width = width;
-            this.height = height;
-            this.fontScale = scale;
-        }
-        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
-            /**
-             * Clones viewport with additional properties.
-             * @param args {Object} (optional) If specified, may contain the 'scale' or
-             * 'rotation' properties to override the corresponding properties in
-             * the cloned viewport.
-             * @returns {PDFJS.PageViewport} Cloned viewport.
-             */
-            clone: function PageViewPort_clone(args) {
-                args = args || {};
-                var scale = 'scale' in args ? args.scale : this.scale;
-                var rotation = 'rotation' in args ? args.rotation : this.rotation;
-                return new PageViewport(this.viewBox.slice(), scale, rotation,
-                    this.offsetX, this.offsetY, args.dontFlip);
-            },
-            /**
-             * Converts PDF point to the viewport coordinates. For examples, useful for
-             * converting PDF location into canvas pixel coordinates.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the viewport coordinate space.
-             * @see {@link convertToPdfPoint}
-             * @see {@link convertToViewportRectangle}
-             */
-            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
-                return Util.applyTransform([x, y], this.transform);
-            },
-            /**
-             * Converts PDF rectangle to the viewport coordinates.
-             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
-             * @returns {Array} Contains corresponding coordinates of the rectangle
-             * in the viewport coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToViewportRectangle:
-                function PageViewport_convertToViewportRectangle(rect) {
-                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
-                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
-                    return [tl[0], tl[1], br[0], br[1]];
-                },
-            /**
-             * Converts viewport coordinates to the PDF location. For examples, useful
-             * for converting canvas pixel location into PDF one.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the PDF coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
-                return Util.applyInverseTransform([x, y], this.transform);
-            }
-        };
-
-        return (PageViewport);
-    }]);
-
-'use strict';
-/**
- * TODO SizeWatcher desc
- */
-itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
-        return function (element, rate) {
-            var self = this;
-            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
-            self.monitor = $interval(self.update, rate);
-            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
-            self.cancel = function() { $interval.cancel(self.monitor); };
-        };
     }]);
 
 'use strict';

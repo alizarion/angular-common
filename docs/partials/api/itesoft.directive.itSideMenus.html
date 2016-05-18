@@ -41,46 +41,90 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-side-menus"&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itsidemenus-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js" source-edit-html="index.html-18" source-edit-css="" source-edit-js="" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft" source-edit-deps="angular.js" source-edit-html="index.html-13" source-edit-css="" source-edit-js="" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-18" ng-html-wrap-loaded="itesoft angular.js"></pre>
-<script type="text/ng-template" id="index.html-18">
+<pre class="prettyprint linenums" ng-set-text="index.html-13" ng-html-wrap-loaded="itesoft angular.js"></pre>
+<script type="text/ng-template" id="index.html-13">
 
      <it-side-menus>
          <it-side-menu-header it-animate="true"  it-button-menu="true">
 
-
+             <!-- Header Menu-->
+             <div class="collapse navbar-collapse">
+             <div uib-dropdown class="nav navbar-nav navbar-right ">
+             <button class="btn loginButton" type="button" uib-dropdown-toggle>
+             <i class="glyphicon glyphicon-user ">&nbsp;John Doe&nbsp;</i><span class="caret"></span>
+             </button>
+             <ul class="dropdown-menu" role="menu">
+             <li>
+             <a ng-cloak>
+             français
+             <i class="pull-right">
+             </i>
+             </a>
+             </li>
+             <li>
+             <a ng-cloak>
+             anglais
+             <i class="pull-right glyphicon glyphicon-ok">
+             </i>
+             </a>
+             </li>
+             <li>
+             <a ng-cloak>
+             dothraki
+             <i class="pull-right">
+             </i>
+             </a>
+             </li>
+             <li class="divider"></li>
+             <li>
+             <a ng-cloak>
+             logout
+             </a>
+             </li>
+             </ul>
+             </div>
+             </div>
          </it-side-menu-header>
 
-         <it-side-menu>
-                 <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+     <it-side-menu>
+         <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+         <li it-collapsed-item>
+         <a href=""><h7 id="example_source_&nbsp;-menu-1"><i class="fa fa-music"></i>&nbsp; Menu 1</h7></a>
+         <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+         <li >
+         <a href="#/menu1/sub1" translate>SubMenu 1</a>
+         </li>
+         <li >
+         <a href="#/menu2/sub2" translate>SubMenu 2</a>
+         </li>
+         </ul>
+         </li>
+         <li>
+         <a href="#/menu2"><h7 id="example_source_&nbsp;-menu-2"><i class="fa fa-list"></i>&nbsp; Menu 2</h7></a>
+         </li>
+         <li>
+         <a href="#/menu3"><h7 id="example_source_&nbsp;-menu-3"><i class="fa fa-pied-piper-alt"></i>&nbsp; Menu 3</h7></a>
+         </li>
+         </ul>
+     </it-side-menu>
 
 
-                 <li it-collapsed-item=""   >
-                 <a href=""><h7 id="example_source_menu">Menu</h7></a>
-                 <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-                 <li >
-                 <a href="#/widget/itloader">SubMenu1</a>
-                 </li>
-                 <li >
-                 <a href="#/widget/itBottomGlue">SubMenu2</a>
-                 </li>
-                 </ul>
-                 </li>
-                 </ul>
-          </it-side-menu>
+     <it-side-menu-content>
+
+         <div class="container-fluid">
+             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi, veritatis, earum ullam accusantium consectetur consequuntur totam enim nemo impedit atque blanditiis ratione eum provident libero illum laboriosam qui amet eius.</p>
+
+         </div>
 
 
-         <it-side-menu-content>
-
-             <h3 id="example_see-on-plunker">See on Plunker !</h3>
-
-         </it-side-menu-content>
+        </it-side-menu-content>
      </it-side-menus>
 
 </script>
 </div>
-</div><h4 id="example_see-on-plunker_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-18" ng-eval-javascript=""></div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-13" ng-eval-javascript=""></div>
 </div></div>
 </div>
