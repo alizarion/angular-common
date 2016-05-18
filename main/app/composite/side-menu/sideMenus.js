@@ -13,7 +13,24 @@
  * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
  * and `<it-side-menu>` directives
  *
-
+ * <table class="table">
+ *  <tr>
+ *  <td><code>it-width="400"  attribute on it-side-menu directive </code></td>
+ *   <td>Width of the side menu, in pixels, max value 800.</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-animate="true"  on it-side-menu-header  </code></td>
+ *   <td>to animate de side menu open and close button</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-hide-button-menu="true"  on it-side-menu-header  </code></td>
+ *   <td>to hide header menu Close/open button</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-side-menu-header </code></td>
+ *   <td>headers are optionnal</td>
+ *  </tr>
+ *  </table>
  *
  * ```html
  * <it-side-menus>
@@ -80,7 +97,7 @@
                  </div>
              </it-side-menu-header>
 
-         <it-side-menu>
+         <it-side-menu it-width="200">
              <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
              <li it-collapsed-item>
              <a href=""><h5><i class="fa fa-music"></i>&nbsp; Menu 1</h5></a>

@@ -2,7 +2,7 @@
 
 $menu-animation-speed:            300ms !default;
 $menu-bg:                        $background !default;
-$menu-width:                      260px !default;
+$menu-max-width:                      800px !default;
 $menu-header:                      50px !default;
 $menu-text-color:                   white !important;
 
@@ -13,6 +13,7 @@ $menu-text-color:                   white !important;
 
 .it-side-menu .navbar{
   min-height : 100%;
+  margin-bottom : 0px;
 }
 .it-side-menu .nav .navbar-nav{
   margin: 0;
@@ -48,14 +49,9 @@ $menu-text-color:                   white !important;
   text-decoration: none;
 }
 
-.it-side-menu .it-sidebar-inner  .navbar {
-  width: $menu-width;
-}
-
 .it-side-menu .it-sidebar-inner {
   height: 100%;
   overflow-y: auto;
-  width: $menu-width + 50px;
 }
 .it-side-menu .navbar li {
   float: none;
@@ -142,12 +138,6 @@ it-side-menu-content{
   margin-right: auto;
 }
 
-.it-menu-content.it-side-menu-overlay {
-  padding-left:$menu-width;
-}
-
-
-
 .it-side-menu-header.navbar {
   padding:0 15px;
 }
@@ -188,7 +178,6 @@ it-side-menu-header .nav .btn {
 
 .it-side-menu{
   top:$menu-header;
-  width:$menu-width;
   position: fixed;
   bottom: 0;
   z-index: 1000;
@@ -202,23 +191,13 @@ it-side-menu-header .nav .btn {
 }
 
 .it-side-menu-left{
-  left:-$menu-width;
+  left:-$menu-max-width;
 }
 
 .it-side-menu-left.it-side-menu-slide{
   left:0;
   overflow-y: auto;
 }
-
-.it-side-menu-right{
-  right:-$menu-width;
-}
-
-.it-side-menu-right.it-side-menu-slide{
-  right:$menu-width;
-
-}
-
 
 .it-material-design-hamburger__icon--to-arrow {
   -webkit-animation-name: it-material-design-hamburger__icon--slide;
