@@ -946,24 +946,11 @@ IteSoft
                         if (self.fields.debug) {
                             $log.debug($scope.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
                         }
-                        if (angular.isDefined(targetDiv) && targetDiv != null && angular.isDefined(targetDiv.getBoundingClientRect())
-                            && angular.isDefined(containerDiv) && containerDiv != null) {
-                            /*var targetPosition = targetDiv.getBoundingClientRect().top +
-                             targetDiv.getBoundingClientRect().height + containerDiv.scrollTop;
-                            var containerPosition = containerDiv.getBoundingClientRect().top + containerDiv.getBoundingClientRect().height;
-                            var pos = targetPosition - containerPosition;
-                             containerDiv.scrollTop = pos;*/
 
+                        if (angular.isDefined(containerDiv) && containerDiv != null){
                             containerDiv.scrollTop = (_getPosition(item)+1)*20 - containerDiv.getBoundingClientRect().height ;
-                            $log.info($scope.name + " itAutocomplete: scrollTo "+containerDiv.scrollTop+" "+self.fields.selectedItems);
-                            if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: scrollTo parent " + containerDiv.parentElement.getBoundingClientRect().top);
-                                $log.debug($scope.name + " itAutocomplete: scrollTo container " + containerDiv.getBoundingClientRect().top);
-                                $log.debug($scope.name + " itAutocomplete: scrollTo targetDiv " + targetDiv.getBoundingClientRect().top);
-                            }
-                        } else {
-                            $log.info($scope.name + " itAutocomplete: scrollTo unable to scroll target div: "+targetDiv);
                         }
+                        
                     }
 
                     /**
