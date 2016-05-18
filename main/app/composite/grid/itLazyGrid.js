@@ -144,7 +144,7 @@ IteSoft.directive('itLazyGrid',
                 '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
                 '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
                 '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
                 '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
                 '<div class="ui-grid-filter-container"> ' +
                 '<span class="{{col.headerCellClass}}"> ' +
