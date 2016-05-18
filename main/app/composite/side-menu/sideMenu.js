@@ -21,8 +21,17 @@ IteSoft
             require : '^itSideMenus',
             transclude : true,
             scope:true,
+            link:function(scope, element, attrs ){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                   scope.$noMenuHeader = true;
+                }
+
+
+            },
             template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
                    '<div class="it-sidebar-inner">'+
                         '<div class="nav navbar navbar-inverse">'+
                         '<nav class="" ng-transclude ></nav>' +

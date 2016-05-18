@@ -22,6 +22,13 @@ IteSoft
             require : '^itSideMenus',
             transclude : true,
             scope : true,
+            link : function(scope){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                    scope.showmenu = true;
+                }
+            },
             template :
                 '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
                     '<div class="it-container it-fill" ng-transclude></div>'+
