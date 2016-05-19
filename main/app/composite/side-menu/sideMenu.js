@@ -22,8 +22,12 @@ IteSoft
             transclude : true,
             scope:false,
             link:function(scope, element, attrs ){
-
                 scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+
+
+                scope.$watch(function(){
+                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                });
 
                 var sideMenuHeader = angular.element(document
                     .querySelector('it-side-menu-header'));
