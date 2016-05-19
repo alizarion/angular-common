@@ -56,6 +56,7 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
                     break;
                 case 'png':
                 case 'jpeg':
+                case 'jpg':
                     scope.imageSrc = value;
                     scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
                     break;
@@ -79,15 +80,16 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
                 if(typeof value === typeof ""){
                     scope.ext = _splitLast(value, '.').toLowerCase();
                     _setTemplate(scope.ext, value);
-                }else {
+                } else {
                     if(attrs.type) {
                         _setTemplate(attrs.type, value);
-                    }else{
+                    }else if(value.name != undefined) {
+                        scope.ext = _splitLast(value.name, '.').toLowerCase();
+                        _setTemplate(scope.ext, value);
+                    } else {
                         scope.template = 'must specify type when using stream';
                     }
                 }
-            }else {
-                scope.template = null;
             }
         };
 

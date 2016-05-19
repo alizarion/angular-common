@@ -159,28 +159,32 @@ itPdfViewer
         PDFViewer.prototype = new MultiPagesViewer;
 
         PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            this.initialScale = initialScale;
+            this.hasTextLayer = renderTextLayer;
             var isFile = typeof obj != typeof "";
+
             if(this.getDocumentTask != undefined){
                 var self = this;
                 this.getDocumentTask.destroy().then(function (){
                     if(isFile){
-                        self.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                        self.setFile(obj);
                     }else {
-                        self.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                        self.setUrl(obj);
                     }
+
                 });
-            }else {
+            } else {
                 if(isFile){
-                    this.setFile(obj, initialScale, renderTextLayer, pageMargin);
+                    this.setFile(obj);
                 }else {
-                    this.setUrl(obj, initialScale, renderTextLayer, pageMargin);
+                    this.setUrl(obj);
                 }
             }
         };
-        PDFViewer.prototype.setUrl = function (url, initialScale, renderTextLayer, pageMargin) {
-            this.pages = [];
-            this.hasTextLayer = renderTextLayer;
-            this.pageMargin = pageMargin;
+        PDFViewer.prototype.setUrl = function (url) {
             if (url !== undefined && url !== null && url !== '') {
                 var self = this;
                 this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
@@ -196,74 +200,72 @@ itPdfViewer
                             self.element.append(pageList[iPage].container);
                         }
 
-                        self.setContainerSize(initialScale);
+                        self.setContainerSize(self.initialScale);
                     });
                 }, function (message) {
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
             }
         };
-        PDFViewer.prototype.setFile = function (file, initialScale, renderTextLayer, pageMargin) {
-            this.pages = [];
-            this.hasTextLayer = renderTextLayer;
-            this.pageMargin = pageMargin;
+        PDFViewer.prototype.setFile = function (file) {
+            if (file !== undefined && file !== null) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var arrayBuffer = e.target.result;
+                    var uint8Array = new Uint8Array(arrayBuffer);
+                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                    getDocumentTask.then(function (pdf) {
+                        self.pdf = pdf;
 
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
-                    self.pdf = pdf;
+                        self.getAllPages(function (pageList, pagesRefMap) {
+                            self.pages = pageList;
+                            self.pagesRefMap = pagesRefMap;
 
-                    self.getAllPages(function (pageList, pagesRefMap) {
-                        self.pages = pageList;
-                        self.pagesRefMap = pagesRefMap;
+                            // Append all page containers to the $element...
+                            for(var iPage = 0;iPage < pageList.length; ++iPage) {
+                                self.element.append(pageList[iPage].container);
+                            }
 
-                        // Append all page containers to the $element...
-                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                            self.element.append(pageList[iPage].container);
+                            self.setContainerSize(self.initialScale);
+                        });
+                    }, function (message) {
+                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                    });
+                };
+
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
                         }
 
-                        self.setContainerSize(initialScale);
-                    });
-                }, function (message) {
-                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                });
-            };
-
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
-
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
+                        self.onDataDownloaded("failed", 0, 0, message);
                     }
+                };
 
-                    self.onDataDownloaded("failed", 0, 0, message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
+                reader.readAsArrayBuffer(file);
+            }
         };
         PDFViewer.prototype.getAllPages = function (callback) {
             var pageList = [],
@@ -366,16 +368,14 @@ itPdfViewer
                 };
 
                 $scope.onSrcChanged = function () {
-                    $element.empty();
                     viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
                 };
 
-                $scope.onPDFFileChanged = function () {
-                    $element.empty();
+                $scope.onFileChanged = function () {
                     viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
                 };
 
-                viewer.hookScope($scope, $scope.initialScale);
+                viewer.hookScope($scope);
             }],
             link: function (scope, element, attrs) {
                 attrs.$observe('src', function (src) {
@@ -383,9 +383,7 @@ itPdfViewer
                 });
 
                 scope.$watch("file", function (file) {
-                    if(scope.file !== undefined && scope.file !== null) {
-                        scope.onPDFFileChanged();
-                    }
+                    scope.onFileChanged();
                 });
             }
         };

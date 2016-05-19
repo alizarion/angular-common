@@ -49,17 +49,73 @@ itImageViewer
 
         IMAGEViewer.prototype = new MultiPagesViewer;
 
-        IMAGEViewer.prototype.open = function(url, initialScale, pageMargin) {
+        IMAGEViewer.prototype.open = function(obj, initialScale, pageMargin) {
+            this.element.empty();
             this.pages = [];
             this.pageMargin = pageMargin;
-            var self = this;
+            this.initialScale = initialScale;
+            var isFile = typeof obj != typeof "";
 
+            if(isFile){
+                this.setFile(obj);
+            }else {
+                this.setUrl(obj);
+            }
+        };
+        IMAGEViewer.prototype.setUrl = function(url) {
             if (url !== undefined && url !== null && url !== '') {
+                var self = this;
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
 
-                    self.setContainerSize(initialScale);
+                    self.setContainerSize(self.initialScale);
                 });
+            }
+        };
+        IMAGEViewer.prototype.setFile = function(file) {
+            if (file !== undefined && file !== null) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var url = e.target.result;
+                    self.getAllPages(url, function(pageList) {
+                        self.pages = pageList;
+
+                        self.setContainerSize(self.initialScale);
+                    });
+                };
+
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
+                        }
+
+                        self.onDataDownloaded("failed", 0, 0, message);
+                    }
+                };
+
+                reader.readAsDataURL(file);
             }
         };
         IMAGEViewer.prototype.getAllPages = function(url, callback) {
@@ -70,7 +126,7 @@ itImageViewer
 
             var img = new Image;
             img.onprogress = angular.bind(this, self.downloadProgress);
-            img.onload = function(){
+            img.onload = function() {
                 var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
 
@@ -101,15 +157,22 @@ itImageViewer
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function () {
-                    $element.empty();
                     viewer.open(this.src, this.initialScale, pageMargin);
                 };
 
-                viewer.hookScope($scope, $scope.initialScale);
+                $scope.onFileChanged = function () {
+                    viewer.open(this.file, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope);
             }],
             link: function (scope, element, attrs) {
                 attrs.$observe('src', function (src) {
                     scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    scope.onFileChanged();
                 });
             }
         };

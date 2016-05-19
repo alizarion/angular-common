@@ -47,7 +47,7 @@ itTiffViewer
     }])
 
     .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
-        //Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
 
         function TIFFViewer(element) {
             this.base = MultiPagesViewer;
@@ -58,40 +58,96 @@ itTiffViewer
 
         TIFFViewer.prototype = new MultiPagesViewer;
 
-        TIFFViewer.prototype.open = function(url, initialScale, pageMargin) {
+        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
+            this.element.empty();
             this.pages = [];
             this.pageMargin = pageMargin;
-            if (url !== undefined && url !== null && url !== '') {
+            this.initialScale = initialScale;
+            var isFile = typeof obj != typeof "";
 
+            if(isFile){
+                this.setFile(obj);
+            }else {
+                this.setUrl(obj);
+            }
+        };
+        TIFFViewer.prototype.setUrl = function(url) {
+            if (url !== undefined && url !== null && url !== '') {
                 var self = this;
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url);
                 xhr.responseType = 'arraybuffer';
                 xhr.onprogress =  angular.bind(this, self.downloadProgress);
                 xhr.onload = function (e) {
-                    var buffer = xhr.response;
-                    self.onDestroy();
-                    Tiff.initialize({TOTAL_MEMORY:16777216*5});
-                    self.tiff = new Tiff({buffer: buffer});
-                    self.getAllPages(function(pageList) {
-                        self.pages = pageList;
-
-                        self.setContainerSize(initialScale);
-                    });
+                    self.loadTiff(xhr.response);
                 };
                 xhr.send();
             }
+        };
+        TIFFViewer.prototype.setFile = function(file) {
+            if (file !== undefined && file !== null) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    self.loadTiff(e.target.result);
+                };
+
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
+                        }
+
+                        self.onDataDownloaded("failed", 0, 0, message);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+        };
+        TIFFViewer.prototype.loadTiff = function(arrayBuffer){
+            var self = this;
+            self.onDestroy();
+            self.tiff = new Tiff({buffer: arrayBuffer});
+            self.getAllPages(function(pageList) {
+                self.pages = pageList;
+
+                self.setContainerSize(self.initialScale);
+            });
         };
         TIFFViewer.prototype.getAllPages = function(callback) {
             var pageList = [],
                 numPages = this.tiff.countDirectory(),
                 remainingPages = numPages;
-
+            var self = this;
+            function _getUrl(index) {
+                self.tiff.setDirectory(index);
+                return self.tiff.toDataURL();
+            };
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
                 this.tiff.setDirectory(iPage);
-                var src = this.tiff.toDataURL();
-                var page =  new TIFFPage(iPage, src, [0,0,this.tiff.width(),this.tiff.height()]);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
                 pageList[iPage] = page;
 
                 this.element.append(page.container);
@@ -132,15 +188,22 @@ itTiffViewer
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function() {
-                    $element.empty();
                     viewer.open(this.src, this.initialScale, pageMargin);
                 };
 
-                viewer.hookScope($scope, $scope.initialScale);
+                $scope.onFileChanged = function () {
+                    viewer.open(this.file, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope);
             }],
             link: function(scope, element, attrs) {
                 attrs.$observe('src', function(src) {
                     scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    scope.onFileChanged();
                 });
             }
         };
