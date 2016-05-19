@@ -20,11 +20,25 @@ IteSoft
             restrict: 'E',
             require : '^itSideMenus',
             transclude : true,
-            scope:true,
+            scope:false,
+            link:function(scope, element, attrs ){
+                scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+
+
+                scope.$watch(function(){
+                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                });
+
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                   scope.$noMenuHeader = true;
+                }
+            },
             template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
+                '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div style="width:{{($itSideMenuWidth * 1 ) + (50 * 1)}}px;"  class="it-sidebar-inner">'+
+                        '<div style="width:{{$itSideMenuWidth}}px;" class="nav navbar navbar-inverse">'+
                         '<nav class="" ng-transclude ></nav>' +
                         '</div>'+
                     '</div>'+

@@ -2,9 +2,9 @@
 
 $menu-animation-speed:            300ms !default;
 $menu-bg:                        $background !default;
-$menu-width:                      260px !default;
+$menu-max-width:                      800px !default;
 $menu-header:                      50px !default;
-
+$menu-text-color:                   white !important;
 
 .it-side-menu  .navbar .navbar-nav>.active>a, .navbar .navbar-nav>.active>a:focus, .navbar .navbar-nav>.active>a:hover{
   border-left: $primary 4px solid;
@@ -13,6 +13,7 @@ $menu-header:                      50px !default;
 
 .it-side-menu .navbar{
   min-height : 100%;
+  margin-bottom : 0px;
 }
 .it-side-menu .nav .navbar-nav{
   margin: 0;
@@ -32,7 +33,7 @@ $menu-header:                      50px !default;
   font-size: 15px;
   margin: 2px 2px 2px 20px;
   text-transform: uppercase;
-  color: rgba(255,255,255,.843137);
+  color: $menu-text-color;
   border-top: solid 1px;
   border-top-style: dashed;
   padding-top: 15px;
@@ -48,14 +49,9 @@ $menu-header:                      50px !default;
   text-decoration: none;
 }
 
-.it-side-menu .it-sidebar-inner  .navbar {
-  width: $menu-width;
-}
-
 .it-side-menu .it-sidebar-inner {
   height: 100%;
   overflow-y: auto;
-  width: $menu-width + 50px;
 }
 .it-side-menu .navbar li {
   float: none;
@@ -142,16 +138,14 @@ it-side-menu-content{
   margin-right: auto;
 }
 
-.it-menu-content.it-side-menu-overlay {
-  padding-left:$menu-width;
-}
-
-
-
 .it-side-menu-header.navbar {
   padding:0 15px;
 }
 
+
+it-side-menu-header .nav .btn {
+  color :  $menu-text-color;
+}
 
 
 .it-material-design-hamburger button {
@@ -184,7 +178,6 @@ it-side-menu-content{
 
 .it-side-menu{
   top:$menu-header;
-  width:$menu-width;
   position: fixed;
   bottom: 0;
   z-index: 1000;
@@ -198,22 +191,13 @@ it-side-menu-content{
 }
 
 .it-side-menu-left{
-  left:-$menu-width;
+  left:-$menu-max-width;
 }
 
 .it-side-menu-left.it-side-menu-slide{
   left:0;
   overflow-y: auto;
 }
-
-.it-side-menu-right{
-  right:-$menu-width;
-}
-
-.it-side-menu-right.it-side-menu-slide{
-  right:$menu-width;
-}
-
 
 .it-material-design-hamburger__icon--to-arrow {
   -webkit-animation-name: it-material-design-hamburger__icon--slide;
@@ -407,7 +391,7 @@ it-side-menu-content{
   width: 20px;
   height: 2px;
   border-radius: 1px;
-  background: #ffffff;
+  background: $menu-text-color;
   position: relative;
   -webkit-animation-duration: $menu-animation-speed;
   animation-duration: $menu-animation-speed;
