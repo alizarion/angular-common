@@ -26,7 +26,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.grid.resizeColumns',
     'ui.grid.moveColumns',
     'ui.grid.grouping',
-    'ui.bootstrap.dropdown',
     'LocalStorageModule',
     'ngToast',
     'mgcrea.ngStrap.datepicker',
@@ -37,6 +36,1385 @@ var IteSoft = angular.module('itesoft', [
     'it-tiff-viewer'
 ]);
 
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCircularBtn
+ * @module itesoft
+ * @since 1.1
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *   <it-circular-btn></it-circular-btn>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl">
+     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope',
+     function($scope) {
+
+                        }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itCircularBtn',
+    [
+        function () {
+            return {
+                restrict: 'ACE',
+                scope: false,
+                transclude: true,
+                template:'<span class="it-circular-button-container ">' +
+                '<button class="btn  pull-right" > ' +
+                '<div class="it-animated-circular-button">' +
+                '<ng-transclude></ng-transclude>' +
+                '</div>' +
+                '</button> '+
+                '</span>'
+
+            }
+        }]
+);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
+'use strict';
+/**
+ * TODO itInclude desc
+ */
+IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *     <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" class="row">
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer></div></div>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js'
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                case 'jpg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    scope.template = 'No template found for extension : '  + ext;
+                    break;
+            }
+        };
+
+        var _setValue = function(value) {
+            if(value){
+                if(typeof value === typeof ""){
+                    scope.ext = _splitLast(value, '.').toLowerCase();
+                    _setTemplate(scope.ext, value);
+                } else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type, value);
+                    }else if(value.name != undefined) {
+                        scope.ext = _splitLast(value.name, '.').toLowerCase();
+                        _setTemplate(scope.ext, value);
+                    } else {
+                        scope.template = 'must specify type when using stream';
+                    }
+                }
+            }
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
+    };
+
+    return {
+        scope: {
+            src : '=',
+            file: '=',
+            type: '@',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
+IteSoft
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
+                    }
+                }
+
+                setActive();
+
+                scope.$on('$locationChangeSuccess', setActive);
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:true,
+            template :
+                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                   '<div class="it-sidebar-inner">'+
+                        '<div class="nav navbar navbar-inverse">'+
+                        '<nav class="" ng-transclude ></nav>' +
+                        '</div>'+
+                    '</div>'+
+                '</div>'
+
+
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+ * @since 1.0
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : true,
+            template :
+                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
+                    '<div class="it-container it-fill" ng-transclude></div>'+
+                '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
+IteSoft
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
+
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+
+             </it-side-menu-header>
+
+             <it-side-menu>
+                     <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+
+
+                     <li it-collapsed-item=""   >
+                     <a href=""><h5>Menu</h5></a>
+                     <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+                     <li >
+                     <a href="#/widget/itloader">SubMenu1</a>
+                     </li>
+                     <li >
+                     <a href="#/widget/itBottomGlue">SubMenu2</a>
+                     </li>
+                     </ul>
+                     </li>
+                     </ul>
+              </it-side-menu>
+
+
+             <it-side-menu-content>
+
+                 <h1>See on Plunker !</h1>
+
+             </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
+IteSoft
+    .directive('itSideMenus',function(){
+        return {
+            restrict: 'ECA',
+            transclude : true,
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
+        }
+});
 'use strict';
 /**
  * Service that provide RSQL query
@@ -909,241 +2287,2878 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     ]
 );
 /**
+ * Created by sza on 22/04/2016.
+ */
+'use strict';
+IteSoft
+    .factory('BlockService', ['$resource', 'CONFIG',
+        function ($resource, CONFIG) {
+            return {
+                custom: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                all: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/all/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                original: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/:name'),
+                customByOriginal: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/original/'+CONFIG.CURRENT_PACKAGE+'/:name/custom'),
+                restore: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                build: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
+                preview: $resource(
+                    CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
+                'new': function (name, ref, position, content, roleAllowed, version) {
+                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
+                },
+            }
+        }]);
+'use strict';
+/**
  * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
+ * @name itesoft.directive:itBlock
  * @module itesoft
- * @restrict EA
+ * @restrict E
+ *
+ * @description
+ * The Block widgets provides  way to customize UI.
+ *
+ * <h1>Enable</h1>
+ * Enable editMode with
+ *
+ * ```js
+ * $rootScope.editSite
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * REST_TEMPLATE_API_URL = url of template rest api
+ * TEMPLATE_EDITOR_URL = template web editor url
+ * TEMPLATE_USER_AUTO_LOGIN = login and password to use for autologin {login: "admin", password: "admin"}
+ * SKIP_LOGIN = true if you want to skip login
+ * CURRENT_PACKAGE = package used to saved modification (ex 10-PS)
+ * CURRENT_ROLE = user usrole used to managed block (PS, RD ...)
+ * ```
+ *
+ * ```html
+ *   <it-block name="login_input" role="RD"></it-block>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+    <div ng-controller="HomeCtrl">
+         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+         <it-block-control-panel></it-block-control-panel>
+         <it-block name="zone-coding-lines-actions3" style="margin:10px">
+         <it-block name="login_input" role="RD">
+         <div class="form-group">
+         <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+         </div>
+         </it-block>
+         <it-block name="coding-lines-add3" removed="true">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
+         ng-click="codingController.addNewLine()">
+         <span class="fa fa-plus fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-remove3">
+         <button class="btn btn-danger col-xs-2"
+         title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
+         ng-click="codingController.removeNewLine()">
+         <span class="fa fa-trash fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-duplicate3">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
+         ng-click="codingController.duplicateLine()">
+         <span class="fa fa-copy fa-lg"/>
+         </button>
+         </it-block>
+         <it-block name="coding-lines-memorize3" removed="true">
+         <button class="btn btn-primary col-xs-2"
+         title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
+         ng-click=""
+         disabled>
+         <span class="fa fa-folder fa-lg"/>
+         </button>
+         </it-block>
+         </it-block>
+         <br/>
+         <br/>
+         <br/>
+         <br/>
+         <it-block name="zone-grid-example">
+            <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+         </it-block>
+    </div>
+ </file>
+ <file name="Module.js">
+     angular.module('itesoft-showcase',['itesoft','ngResource'])
+     .constant("CONFIG", {
+                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
+                "ENABLE_TEMPLATE_EDITOR": true,
+                "SKIP_LOGIN" : true,
+                "CURRENT_PACKAGE" : "10-PS",
+                "CURRENT_ROLE" : "PS",
+                "VERSION": "v1",
+                });
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope','$rootScope','$http','uiGridGroupingConstants',
+     function($scope,$rootScope,$http,uiGridGroupingConstants) {
+                       $rootScope.editSite = true;
+                       $scope.myData = [];
+            // sample values
+            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
+            angular.copy($scope.myDataInit,$scope.myData);
+            $scope.gridOptions = {
+                data:$scope.myData,
+                useExternalFiltering: true,
+                enableFiltering: true,
+                onRegisterApi: function(gridApi){
+                  $scope.gridApi = gridApi;
+                  //quick an dirty example of filter that use it-autocomplete
+                  $scope.gridApi.core.on.filterChanged($scope, function(){
+                            $scope.myData = [];
+                            var filterUse = false;
+                              angular.forEach($scope.myDataInit,function(item){
+                                    var added = false;
+                                    var key = '';
+                                    var value = '';
+                                    $scope.gridOptions.data = $scope.myData;
+                                    $scope.gridOptions.totalItems = $scope.myData.length;
+                              })
+                            });
+                        },
+                        columnDefs:[{
+                            name: 'firstName',
+                            cellClass: 'firstName',
+                            cellTemplate:' <div class="ui-grid-cell-contents"> <it-block name="zone-firstName">test</it-block> </div>'
+                            },{
+                            name: 'lastName',
+                            cellClass: 'lastName'
+                           }
+                        ]
+                    };
+                    $scope.selectedOption = "Lorraine";
+                    }]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlock',
+    [
+        function () {
+            return {
+                restrict: 'E',
+                scope: true,
+                transclude: true,
+                template:
+                '<ng-transclude  ' +
+                'class="{{itBlockController.hilightClass}}" ' +
+                'ng-mouseover="itBlockController.over()" ' +
+                'ng-mouseleave="itBlockController.leave()" ' +
+                'ng-if="!removed || $root.editSite"> ' +
+                '</ng-transclude>',
+                controllerAs: 'itBlockController',
+                link: function ($scope, element, attrs, ctrl, transclude) {
+                    transclude($scope, function (content) {
+                        var myContent = "";
+                        angular.forEach(content, function (contentLine) {
+                            if (contentLine.outerHTML) {
+                                myContent += contentLine.outerHTML;
+                            }
+                        });
+                        $scope.content = myContent;
+                    });
+                    /**
+                     * Get attributes values
+                     */
+                    $scope.ref = attrs["ref"];
+                    $scope.role = attrs["role"];
+                    $scope.position = attrs["position"];
+                    $scope.name = attrs["name"];
+                    $scope.removed = false;
+                    $scope.element = element;
+                    $scope.version = attrs["version"];
+                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
+                        $scope.removed = attrs["removed"];
+                    }
+                    this.fields = {};
+                    /**
+                     * Call when attributes are read
+                     */
+                    ctrl.onRegisterApi();
+
+                },
+                controller: ['$scope','$rootScope', '$location', '$log', '$interval', '$timeout','$document', 'itPopup', 'BlockService', 'PilotSiteSideService',
+                    function ($scope,$rootScope, $location, $log, $interval,$timeout, $document, itPopup, BlockService, PilotSiteSideService) {
+
+                        var self = this;
+                        self.focusable = false;
+
+                        /**
+                         * Call when block is selected by control panel
+                         */
+                        $rootScope.$on("hilightBlock",function(event,block){
+                            if(angular.isDefined(block) && block.name == self.block.name) {
+                                self.hilightClass="block-hilight";
+                            }else{
+                                if($scope.removed){
+                                    self.hilightClass = "block-removed";
+                                }else {
+                                    self.hilightClass = "";
+                                }
+                            }
+                        });
+
+                        /**
+                         * Call when attributes are read
+                         */
+                        self.onRegisterApi = function(){
+                            self.block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role, $scope.version);
+                            self.block.removed= $scope.removed;
+                        };
+
+                        /**
+                         * Call when mouse leave block
+                         */
+                        self.leave = function () {
+                            $rootScope.$emit("unSelectBlock",self.block);
+                        };
+
+                        /**
+                         * Call when mouse is over block
+                         */
+                        self.over = function () {
+                            $rootScope.$emit("selectBlock",self.block);
+                        };
+
+                        /**
+                         * Call when edit site mode changed
+                         */
+                        $rootScope.$watch('editSite',function()
+                        {
+                            if ($rootScope.editSite) {
+                                /**
+                                 * Need to change transclude content if block is removed or disabled
+                                 */
+                                $timeout(function () {
+                                    if ($scope.removed) {
+                                        self.hilightClass = "block-removed";
+                                    }
+                                }, 500);
+                                $timeout(function () {
+                                    if (angular.isDefined($scope.element.find("ng-transclude")[0])) {
+                                        $scope.element.find("ng-transclude")[0].children[0].disabled = false;
+                                    }
+                                }, 500);
+                            }
+                        });
+                    }
+                ]
+            }
+        }]
+)
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBlockControlPanel
+ * @module itesoft
+ * @restrict E
+ *
+ * @description
+ * The Control Panel Block widgets provides a way to activate it-block edition
+ *
+ * <h1>Translate</h1>
+ * ```config
+ * GLOBAL.TEMPLATE.BLOCK.EDIT
+ * GLOBAL.TEMPLATE.BLOCK.READONLY
+ * GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE
+ * GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM
+ * ```
+ *
+ * <h1>Config</h1>
+ * ```config
+ * REST_TEMPLATE_API_URL = template API URL
+ * REST_EDITOR_API_URL = editor pilot API URL
+ * TEMPLATE_EDITOR_URL = template web editor url
+ * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
+ * ```
+ *
+ * ```html
+ *   <it-block-control-panel ></it-block-control-panel>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div>
+ <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+ <it-block-control-panel></it-block-control-panel>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft'])
+ .constant("CONFIG", {
+                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
+                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
+                "ENABLE_TEMPLATE_EDITOR": false,
+                "SKIP_LOGIN" : true,
+                "CURRENT_PACKAGE" : "10-PS",
+                "VERSION": "v1",
+            })
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope',
+ function($scope,$rootScope) {$rootScope.editSite=true;}]);
+ </file>
+ </example>
+ */
+IteSoft.directive('itBlockControlPanel',
+    [
+        function () {
+            return {
+                restrict: 'EA',
+                scope: true,
+                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                '<div ng-if="itBlockControlPanelController.editorIsOpen" class="col-xs-12"/> ' +
+                '<div class="block-control-panel-action-container col-xs-12">' +
+                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true" ><i class="fa fa-pencil"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false" ><i class="fa fa-eye"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i class="fa fa-stop"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i class="fa fa-play"></i></it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><i class="fa fa-floppy-o"></i></a></it-circular-btn>' +
+                '<span ng-if="!itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Press Ctrl and move your mouse over a block)</span>' +
+                '<span ng-if="itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Release Ctrl over an element to select it)</span>' +
+                '</div>' +
+                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
+                '<span class="fa fa-exclamation" aria-hidden="true"></span>' +
+                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
+                '</div>' +
+                '<div class="block-lists"  ng-if="$root.editSite">' +
+                '<div ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
+                ' class="{{itBlockControlPanelController.getClass(block)}}">' +
+                '<div class="block-lists-name">{{block.name}}</div>' +
+                '<div class="block-lists-action">' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i  class="fa fa-pencil"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i  class="fa fa-eye"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i  class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>',
+
+                controllerAs: 'itBlockControlPanelController',
+                controller: ['$scope', '$rootScope', '$location', '$log', '$document', '$filter',
+                    'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
+                    function ($scope, $rootScope, $location, $log, $document, $filter,
+                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup, itNotifier) {
+                        var self = this;
+                        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+                            self.editorIsOpen = false;
+                            self.CONFIG = CONFIG;
+                            self.blocks = [];
+                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/export/' + CONFIG.CURRENT_PACKAGE;
+                            this.refresh = function () {
+                                BlockService.build.get(function () {
+                                    location.reload();
+                                }, function (error) {
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    }, error.data.body);
+                                });
+                            };
+                            self.interval = 0;
+                            _options();
+                            PilotSiteSideService.on.pong = function (res) {
+                                $log.debug("pong");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
+
+                            PilotSiteSideService.on.editorConnect = function (res) {
+                                $log.debug("editorConnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = true;
+                                    _options();
+                                })
+                            };
+
+                            PilotSiteSideService.on.editorDisconnect = function (res) {
+                                $log.debug("editorDisconnect");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+
+                            PilotSiteSideService.on.close = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.error = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+                            PilotSiteSideService.on.transportFailure = function () {
+                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
+                                $scope.$applyAsync(function () {
+                                    self.editorIsOpen = false;
+                                })
+                            };
+
+                            PilotSiteSideService.on.reload = this.refresh;
+
+                            /**
+                             *
+                             */
+                            self.editJS = function () {
+                                $log.debug("edit JS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "js.blocks.js",
+                                    fileType: "js",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.editCSS = function () {
+                                $log.debug("edit CSS");
+                                PilotSiteSideService.fn.editPage({
+                                    fileName: "css.blocks.css",
+                                    fileType: "css",
+                                    filePackage: CONFIG.CURRENT_PACKAGE
+                                })
+                            };
+                            /**
+                             *
+                             */
+                            self.addFile = function () {
+                                $log.debug("add File");
+                                PilotSiteSideService.fn.createPage()
+                            };
+
+                            /*
+                             We enable edit mode by default
+                             */
+                            $rootScope.editSite = true;
+                            $rootScope.autoRefreshTemplate = true;
+
+                            /*
+                             Capture du CTRL
+                             */
+                            $document.bind("keydown", function (event) {
+                                if (event.keyCode == 17 && !self.focusable) {
+                                    $document.find("*").addClass("crosshair");
+
+                                    $log.log("keydown");
+                                    self.focusable = true;
+                                    self.blocks = [];
+                                    self.hilightedBlock = undefined;
+                                    self.hilightBlock(undefined);
+                                }
+                            });
+
+                            /**
+                             *
+                             */
+                            $document.bind("keyup", function (event) {
+                                if (event.keyCode == 17 && self.focusable) {
+                                    $log.log("keyup");
+                                    $document.find("*").removeClass("crosshair");
+                                    self.focusable = false;
+                                }
+                            });
+
+                            /*
+                             Catch event send when over block
+                             */
+                            $rootScope.$on("selectBlock", function (event, block) {
+                                if (self.focusable && self.blocks.indexOf(block) == -1) {
+                                    self.blocks.push(block)
+                                }
+                            });
+
+                            /**
+                             Catch event send when leave block
+                             */
+                            $rootScope.$on("unSelectBlock", function (event, block) {
+                                if (self.focusable && self.blocks.indexOf(block) != -1) {
+                                    self.blocks.splice(self.blocks.indexOf(block), 1);
+                                }
+                            });
+                        }
+
+                        /*
+                         Do block edit action
+                         */
+                        self.editBlock = function (block) {
+                            $log.debug("edit block");
+                            if (angular.isDefined(block.ref) && block.ref != '') {
+                                PilotSiteSideService.fn.editBlock(block, $location.path());
+
+                            } else {
+                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
+                                PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
+                            }
+                        };
+
+                        /**
+                         * Do add block action
+                         * @param block
+                         */
+                        self.addBlock = function (block) {
+                            if (angular.isDefined(block.name) && block.name != '') {
+                                $log.debug("add block");
+                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
+                                PilotSiteSideService.fn.createBlock(addBlock, $location.path());
+                            }
+                        };
+
+                        /**
+                         * Do restore block action
+                         * @param block
+                         */
+                        self.restoreBlock = function (block) {
+                            $log.debug("restore block");
+                            BlockService.restore.get({'name': block.name}, function () {
+                                BlockService.build.get(function () {
+                                    BlockService.build.get(function () {
+                                        if ($rootScope.autoRefreshTemplate) {
+                                            location.reload();
+                                        }
+                                    }, function (error) {
+                                        itNotifier.notifyError({
+                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                            dismissOnTimeout: false
+                                        }, error.data.body);
+                                    })
+                                }, function (error) {
+
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    }, error.data.body);
+                                    $log.error("Unable to restore block " + JSON.stringify(block));
+                                })
+                            })
+                        };
+
+                        /**
+                         * Do delete block action
+                         * @param block
+                         */
+                        self.deleteBlock = function (block) {
+                            $log.debug("delete block");
+                            var confirmPopup = itPopup.confirm({
+                                title: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE' | translate}}",
+                                text: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM' | translate}}",
+                                buttons: [
+
+                                    {
+                                        text: 'Cancel',
+                                        type: '',
+                                        onTap: function () {
+                                            return false;
+                                        }
+                                    },
+                                    {
+                                        text: 'ok',
+                                        type: '',
+                                        onTap: function () {
+                                            return true;
+                                        }
+                                    }
+                                ]
+                            });
+
+                            confirmPopup.then(function () {
+                                BlockService.all.delete({name: block.name}, function () {
+                                    BlockService.build.get(function () {
+                                        if ($rootScope.autoRefreshTemplate) {
+                                            location.reload();
+                                        }
+                                    }, function (error) {
+                                        itNotifier.notifyError({
+                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                            dismissOnTimeout: false
+                                        }, error.data.body);
+                                    })
+                                }, function (error) {
+                                    itNotifier.notifyError({
+                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
+                                        dismissOnTimeout: false
+                                    }, error.data.body);
+                                });
+                            }, function () {
+                                itNotifier.notifyError({
+                                    content: "{{'GLOBAL.TEMPLACE.WS.BLOCK_DELETED_KO' | translate}}"
+                                });
+                            });
+                        };
+
+                        /**
+                         * Do hilight block action (means that user click on block name inside control panel)
+                         * @param block
+                         */
+                        self.hilightBlock = function (block) {
+                            self.hilightedBlock = block;
+                            $rootScope.$emit("hilightBlock", block);
+                        };
+
+                        /**
+                         * Return class to use to display block name
+                         * @param block
+                         * @returns {*}
+                         */
+                        self.getClass = function (block) {
+                            if (self.hilightedBlock && self.hilightedBlock.name == block.name) {
+                                return "block-lists-element-hilight";
+                            } else {
+                                return "";
+                            }
+                        };
+
+
+                        /**
+                         * senf option to editor
+                         * @private
+                         */
+                        function _options() {
+                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
+                        }
+
+                    }
+                ]
+            }
+        }
+    ]
+);
+
+/**
+ * Created by stephen on 03/04/2016.
+ * Service that pilot editor or web site web socket communication
+ */
+
+'use strict';
+
+
+IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
+    function ($resource, $log, CONFIG) {
+
+        var self = this;
+
+        self.ACTION_EDIT_BLOCK = "editBlock";
+        self.ACTION_REMOVE_BLOCK = "removeBlock";
+        self.ACTION_CREATE_BLOCK = "createBlock";
+        self.ACTION_EDIT_PAGE = "editPage";
+        self.ACTION_REMOVE_PAGE = "removePage";
+        self.ACTION_CREATE_PAGE = "createPage";
+        self.ACTION_PING = "ping";
+        self.ACTION_PONG = "pong";
+        self.ACTION_DISCONNECT = "disconnect";
+        self.ACTION_TIMEOUT = "timeout";
+        self.ACTION_CONNECT = "connect";
+        self.ACTION_RELOAD = "reload";
+        self.ACTION_OPTIONS = "options";
+        self.DEST_EDITOR = "editor";
+        self.DEST_SITE = "site";
+        self.DEST_ALL = "all";
+
+        self.fields = {
+            socket: {},
+            request: {
+                url: CONFIG.REST_EDITOR_API_URL,
+                contentType: 'application/json',
+                logLevel: 'debug',
+                transport: 'websocket',
+                trackMessageLength: true,
+                reconnectInterval: 5000,
+                enableXDR: true,
+                timeout: 60000},
+            model: {},
+            dest: ""
+        };
+
+        self.fn = {
+            ping: _ping,
+            pong: _pong
+        };
+        self.on = {
+            message:{},
+            open:undefined,
+            close:undefined,
+            reopen:undefined,
+            transportFailure:undefined,
+            error:undefined
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onOpen = function (response) {
+            self.fields.model.transport = response.transport;
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.open)){
+                self.on.open();
+            }
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onClientTimeout = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
+            setTimeout(function () {
+                self.fields.socket = atmosphere.subscribe(self.fields.request);
+            }, self.fields.request.reconnectInterval);
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onReopen = function (response) {
+            self.fields.model.connected = true;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
+            if(angular.isDefined(self.on.reopen)){
+                self.on.reopen();
+            }
+        };
+
+        /**
+         * Long polling Failure mode
+         * @param errorMsg
+         * @param request
+         */
+        self.fields.request.onTransportFailure = function (errorMsg, request) {
+            atmosphere.util.info(errorMsg);
+            request.fallbackTransport = 'long-polling';
+            if(angular.isDefined(self.on.transportFailure)){
+                self.on.transportFailure();
+            }
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onMessage = function (response) {
+            self.on.message(response);
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onClose = function (response) {
+            self.fields.model.connected = false;
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
+            if(angular.isDefined(self.on.close)){
+                self.on.close();
+            }
+        };
+
+        /**
+         *
+         * @param response
+         */
+        self.fields.request.onError = function (response) {
+            self.fields.model.logged = false;
+            if(angular.isDefined(self.on.error)){
+                self.on.error();
+            }
+        };
+
+        /**
+         *
+         * @param request
+         * @param response
+         */
+        self.fields.request.onReconnect = function (request, response) {
+            self.fields.model.connected = false;
+        };
+
+        /**
+         * Used to test connection between editor and website
+         * @param dest
+         * @private
+         */
+        function _ping(dest) {
+            $log.log("ping "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
+        }
+
+        /**
+         * Reply to ping
+         * @param dest
+         * @private
+         */
+        function _pong(dest) {
+            $log.log("pong "+dest);
+            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
+        }
+
+
+        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+            self.fields.socket = atmosphere.subscribe(self.fields.request);
+        }
+        return self;
+    }
+]
+)
+;
+
+/**
+ * Created by stephen on 03/04/2016.
+ * Service that pilot web site to editor communication
+ */
+
+'use strict';
+
+IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
+    function ($resource, $log, CONFIG, PilotService) {
+
+        var self = this;
+
+        self.fields = {};
+
+        self.fn = {
+            editBlock: _editBlock,
+            removeBlock: _removeBlock,
+            createBlock: _createBlock,
+            editPage: _editPage,
+            removePage: _removePage,
+            createPage: _createPage,
+            options: _options,
+            ping: PilotService.fn.ping
+        };
+
+        self.on = {
+            reload: undefined,
+            pong: undefined,
+            editorConnect: undefined,
+            editorDisconnect: undefined,
+            close: undefined,
+            reopen: undefined,
+            transportFailure: undefined,
+            error: undefined
+        };
+
+
+        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+            PilotService.fields.dest = PilotService.DEST_EDITOR;
+
+            // test connection with editor when websocket is open
+            PilotService.on.open = function (response) {
+                $log.log("WebSocket connection is opened");
+                self.fn.ping(PilotService.DEST_EDITOR);
+            };
+
+            PilotService.on.reopen = function (response) {
+                $log.log("WebSocket connection is reopened");
+                self.fn.ping(PilotService.DEST_EDITOR);
+            };
+
+            PilotService.on.close = function () {
+                if (angular.isDefined(self.on.close)) {
+                    self.on.close();
+                }
+            };
+            PilotService.on.error = function () {
+                if (angular.isDefined(self.on.error)) {
+                    self.on.error();
+                }
+            };
+            PilotService.on.transportFailure = function () {
+                if (angular.isDefined(self.on.transportFailure)) {
+                    self.on.transportFailure();
+                }
+            };
+
+            /**
+             * Call when message on websocket
+             * @param response
+             */
+            PilotService.on.message = function (response) {
+                var responseText = response.responseBody;
+                try {
+                    var message = atmosphere.util.parseJSON(responseText);
+
+                    if (message.dest == PilotService.DEST_ALL) {
+                        switch (message.action) {
+                            case PilotService.ACTION_CONNECT:
+                                $log.log(PilotService.ACTION_CONNECT);
+                                if (angular.isDefined(self.on.editorConnect)) {
+                                    self.on.editorConnect();
+                                }
+                                break;
+                            case PilotService.ACTION_DISCONNECT:
+                                $log.log(PilotService.ACTION_DISCONNECT);
+                                if (angular.isDefined(self.on.editorDisconnect)) {
+                                    self.on.editorDisconnect();
+                                }
+                                break;
+                        }
+                    }
+                    if (message.dest == PilotService.DEST_SITE) {
+                        switch (message.action) {
+                            case PilotService.ACTION_RELOAD:
+                                $log.log(PilotService.ACTION_RELOAD);
+                                if (angular.isDefined(self.on.reload)) {
+                                    self.on.reload();
+                                }
+                                break;
+                            case PilotService.ACTION_PING:
+                                $log.log(PilotService.ACTION_PING);
+                                PilotService.pong(PilotService.DEST_EDITOR);
+                                break;
+                            case PilotService.ACTION_PONG:
+                                $log.log(PilotService.ACTION_PONG);
+                                if (angular.isDefined(self.on.pong)) {
+                                    self.on.pong();
+                                }
+                                break;
+                            case PilotService.ACTION_PONG:
+                                $log.log(PilotService.ACTION_PONG);
+                                if (angular.isDefined(self.on.pong)) {
+                                    self.on.pong();
+                                }
+                                break;
+                            case PilotService.ACTION_DISCONNECT:
+                                $log.log(PilotService.ACTION_DISCONNECT);
+                                if (angular.isDefined(self.on.editorDisconnect)) {
+                                    self.on.editorDisconnect();
+                                }
+                                break;
+                            case PilotService.ACTION_CONNECT:
+                                $log.log(PilotService.ACTION_CONNECT);
+                                if (angular.isDefined(self.on.editorConnect)) {
+                                    self.on.editorConnect();
+                                }
+                                break;
+                        }
+                    }
+                } catch (e) {
+                    $log.error("Error parsing JSON: ", responseText);
+                    throw e;
+                }
+            };
+        }
+
+        /**
+         * Call when click on edit block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _editBlock(block, path) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_BLOCK,
+                params: [{'block': block, 'path': path}]
+            }));
+        }
+
+        /**
+         * Call when click on remove block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _removeBlock(block, path) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_BLOCK,
+                params: [{'block': block, 'path': path}]
+            }));
+        }
+
+        /**
+         * Call when click on create block
+         * @param block
+         * @param path
+         * @private
+         */
+        function _createBlock(block, path) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_BLOCK,
+                params: [{'block': block, 'path': path}]
+            }));
+        }
+
+        /**
+         * Call when click on edit page
+         * @param page
+         * @private
+         */
+        function _editPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_EDIT_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        /**
+         * Call when click on remove page
+         * @param page
+         * @private
+         */
+        function _removePage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_REMOVE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        /**
+         * Call when click on create page
+         * @param page
+         * @private
+         */
+        function _createPage(page) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_CREATE_PAGE,
+                params: [{'page': page}]
+            }));
+        }
+
+        function _options(options) {
+            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
+                dest: PilotService.DEST_EDITOR,
+                action: PilotService.ACTION_OPTIONS,
+                params: [{'options': options}]
+            }));
+        }
+
+        return self;
+    }
+]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanel
+ * @module itesoft
+ * @restrict E
  * @since 1.0
  * @description
- * print the encapsuled content into full screen modal popup. 42
+ * A container element for side panel and its Header, Content and Footer
  *
  * <table class="table">
+ *   <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-col="3">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
+ *  </tr>
  *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *      <td>
+ *          <pre>
+ *          <it-side-panel it-z-index="700">
+ *          </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
  *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-icon-class="fa-star-o">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
  *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-height-mode="auto | window | full">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set "Height Mode" of the Side Panel.
+ *          <ul>
+ *              <li><b>auto</b> :
+ *                  <ul>
+ *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
+ *                      <li>Else the height of Side Panel is equal to its content</li>
+ *                  </ul>
+ *                </li>
+ *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
+ *              <li><b>full</b>
+*                   <ul>
+ *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
+ *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
+ *                  </ul>
+ *              </li>
+ *          </ul>
+ *      </td>
  *  </tr>
- *  </table>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-top-position="XX | none">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set css top position of the Side Panel. Default value is "none" mode
+ *          <ul>
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-side-panel>
+ *      <it-side-panel-header>
+ *          <!--Header of Side Panel -->
+ *      </it-side-panel-header>
+ *      <it-side-panel-content>
+ *          <!--Content Side Panel-->
+ *      </it-side-panel-content>
+ *      <it-side-panel-footer>
+ *          <!--Footer Side Panel-->
+ *      </it-side-panel-footer>
+ * </it-side-panel>
+ * ```
  * @example
  <example module="itesoft">
-     <file name="index.html">
+ <file name="custom.css">
 
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
+     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+       background-color: blue;
+     }
 
+     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+       background-color: green;
+     }
+
+     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+       background-color: gray;
+     }
+
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+        text-align: center;
+        display: table;
+        width: 100%;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+        display: table-cell;
+        vertical-align:middle;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+        margin:0px;
+     }
+
+ </file>
+ <file name="index.html">
+
+ <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
+ <it-side-panel-header>
+ <div><h1>Favorites</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Favorite 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Favorite 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 4</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 5</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 6</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 7</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 8</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 9</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 10</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 11</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 12</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 13</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 14</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 15</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 16</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+ <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
+ <it-side-panel-header>
+ <div><h1>Silicon Valley</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Paragraph 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Paragraph 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Paragraph 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+
+ <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
+ <it-side-panel-header>
+ <div><h1>Search</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Search 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Search 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Search 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+ </file>
  </example>
  */
 IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
+    .directive('itSidePanel', ['$window', function ($window) {
 
-            function _findHighestZIndex()
-            {
+
+        function _link(scope, element, attrs) {
+
+            scope.itSidePanelElement = element;
+
+            scope.setIconClass(scope, attrs);
+
+            scope.setZIndexes(element, attrs);
+
+            scope.setColMd(attrs);
+
+            scope.setHeightMode(attrs);
+
+            scope.setTopPosition(attrs);
+
+        }
+
+        return {
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            controller: '$sidePanelCtrl',
+            scope : true,
+            template:
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+                    '<span class="fa {{itIconClass}}"></span>' +
+                '</div>'+
+                '<div class="it-side-panel" ng-transclude></div>'+
+            '</div>'
+
+        };
+    }]);
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelContent
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel content, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-content>
+ * </it-side-panel-content>
+ */
+IteSoft
+    .directive('itSidePanelContent', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require: '^itSidePanel',
+            template:
+                '<div class="it-side-panel-content" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .controller("$sidePanelCtrl", [
+        '$scope',
+        '$window',
+        '$document',
+        '$timeout',
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
+
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
+
+            var Z_INDEX_CSS_KEY = 'z-index';
+
+            var IT_HEIGHT_MODE_WINDOW = 'window';
+            var IT_HEIGHT_MODE_FULL = 'full';
+            var IT_HEIGHT_MODE_AUTO = 'auto';
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+
+            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
+            var DEFAULT_COL_MD = 4;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
+            var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
+
+            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
+            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
+            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
+            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
+            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
+            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
+
+            var _self = this;
+            _self.scope = $scope;
+            _self.scope.showPanel = false;
+
+            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+            //Set default col-md(s) to the scope
+            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
+
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
+
+
+            var w = angular.element($window);
+
+
+            /**
+             * Get window Dimensions
+             * @returns {{height: Number, width: Number}}
+             */
+            _self.scope.getWindowDimensions = function () {
+                return {
+                    'height': $window.innerHeight,
+                    'width': $window.innerWidth
+                };
+            };
+
+            /**
+             * Watch the resizing of window Dimensions
+             */
+            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
+
+                _self.scope.windowHeight = newValue.height;
+                _self.scope.windowWidth = newValue.width;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+
+                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
+
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if(Math.abs(top) < _self.scope.windowHeight){
+
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if(_self.scope.isNoneTopPosition()){
+                            itTopPosition = 0;
+                        }
+
+                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+
+                        var heightHeader = (newHeight*0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height',heightHeader+'px');
+
+                        var heightFooter = (newHeight*0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height',heightFooter+'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+
+                    }
+                }
+
+
+                if(_self.scope.showPanel){
+                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                //if its the firt time initialise all components width an right
+                }else {
+                    _self.scope.modifySidePanelCssProperties();
+                }
+
+            }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function (){
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
+
+            w.bind('resize', function () {
+                _self.scope.$apply();
+            });
+
+            /**
+             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
+             */
+            _self.scope.toggleSidePanel = function () {
+                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if(_self.scope.showPanel){
+
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function(){
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    },50);
+
+
+                } else {
+
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                }
+            };
+
+            _self.scope.setItSidePanelElement = function(element){
+                _self.scope.itSidePanelElement = element;
+            };
+
+
+            /**
+             * Set the Side Panel Height Mode from "it-height-mode" attributes
+             * @param attrs directive attributes object
+             */
+            _self.scope.setHeightMode = function (attrs){
+                _self.scope.itHeightMode = attrs.itHeightMode;
+
+                //If attribute is not defined set the default height Mode
+                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
+                    //Get the provided mode
+                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
+                } else{
+
+                    //If height mode is defined but unknown set to the default  height mode
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
+                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                }
+
+                //Set height of header, content and footer
+                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                sidePanelHeader.css('height','10%');
+
+                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                sidePanelFooter.css('height','10%');
+
+                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                sidePanelContent.css('height', '80%');
+
+
+
+                //Configure height of Side Panel elements depending on the provided height mode
+                switch(_self.scope.itHeightMode) {
+                    case IT_HEIGHT_MODE_FULL:
+
+                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
+
+                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                            sidePanelContainer.css('height', '100%');
+                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                            sidePanel.css('height', '100%');
+                        }
+                        break;
+                    case IT_HEIGHT_MODE_AUTO:
+                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
+                        break;
+                    case IT_HEIGHT_MODE_WINDOW:
+
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', '100%');
+
+                        //set overflow : auto to the Side Panel Content
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('overflow', 'auto');
+                        break;
+                    default:
+                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                }
+            };
+
+            /**
+             * Retrieve provided iconClass and put the value it in scope
+             * @param scope the scope
+             * @param attrs the attributes provided by directive
+             * @private
+             */
+            _self.scope.setIconClass = function (scope, attrs) {
+                var defaultIconClass = DEFAULT_ICON_CLASS;
+                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
+                    _self.scope.itIconClass = defaultIconClass;
+                } else {
+                    _self.scope.itIconClass = attrs.itIconClass;
+                }
+            };
+
+            /**
+             * Handle col-md of directive.
+             * If itCol is provided to the directive apply its col-md-X
+             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setColMd = function (attrs) {
+                var colMd = DEFAULT_COL_MD;
+                if (!isNaN(parseInt(attrs.itCol))) {
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                }
+            };
+
+            /**
+             * Handle z indexes of directive.
+             * If itZIndex is provided to the directive apply its z-index
+             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setZIndexes = function (element, attrs) {
+
+                var zindex = null;
+                if (!isNaN(parseInt(attrs.itZIndex))) {
+                    zindex = parseInt(attrs.itZIndex);
+                }
+
+                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (zindex !== null) {
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
+                } else {
+
+                    var highestZIndex = _self.scope.findHighestZIndex();
+                    var newHighestZIndex = highestZIndex + 100;
+
+                    //set the zindex to side panel element
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
+
+                    //set the zindex to the icon button of the side panel element
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
+
+                }
+            };
+
+            /**
+             * Get Dom element from its class
+             * @param element dom element in which the class search will be performed
+             * @param className className. Using 'querySelector' selector convention
+             * @private
+             */
+            _self.scope.getElementFromClass = function (element, className) {
+                var content = angular.element(element[0].querySelector(className));
+                var sidePanel = angular.element(content[0]);
+                return sidePanel;
+            };
+
+            /**
+             * Find the highest z-index of the DOM
+             * @returns {number} the highest z-index value
+             * @private
+             */
+            _self.scope.findHighestZIndex = function () {
                 var elements = document.getElementsByTagName("*");
                 var highest_index = 0;
 
                 for (var i = 0; i < elements.length - 1; i++) {
                     var computedStyles = $window.getComputedStyle(elements[i]);
                     var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
                         highest_index = zindex;
                     }
                 }
                 return highest_index;
-            }
+            };
 
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
 
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
 
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
                 }
-            }
-        }]);
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
+            };
+        }
+    ]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelFooter
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel footer, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-footer>
+ * </it-side-panel-footer>
+ */
+IteSoft
+    .directive('itSidePanelFooter', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-footer" ng-transclude></div>'
+        };
+    });
 
 
 'use strict';
-
 /**
  * @ngdoc directive
- * @name itesoft.directive:itCircularBtn
+ * @name itesoft.directive:itSidePanelHeader
  * @module itesoft
- * @since 1.1
- * @restrict AEC
- *
+ * @restrict E
+ * @since 1.0
  * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *   <it-circular-btn></it-circular-btn>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl">
-     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope',
-     function($scope) {
-
-                        }]);
- </file>
- </example>
+ * A container for a Side Panel header, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-header>
+ * </it-side-panel-header>
  */
+IteSoft
+    .directive('itSidePanelHeader', function () {
+        function _link(scope) {
 
-IteSoft.directive('itCircularBtn',
-    [
-        function () {
-            return {
-                restrict: 'ACE',
-                scope: false,
-                transclude: true,
-                template:'<span class="it-circular-button-container ">' +
-                '<button class="btn  pull-right" > ' +
-                '<div class="it-animated-circular-button">' +
-                '<ng-transclude></ng-transclude>' +
-                '</div>' +
-                '</button> '+
-                '</span>'
+        }
 
-            }
-        }]
-);
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-header text-center" ng-transclude></div>'
+        };
+    });
+
 
 /**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
  * @module itesoft
  * @restrict EA
  * @since 1.0
  * @description
- * This directive can evaluate and transclude an expression in a scope context.
+ * Simple filter that escape string to unicode.
+ *
  *
  * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
              </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
 
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
+         </file>
+    </example>
  */
 IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
                     }
-                );
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itLanguageChangeHandler
+ * @module itesoft
+ * @since 1.1
+ * @requires localStorageService
+ * @requires itPopup
+ *
+ * @description
+ * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
+ * <br/>1) Asks confirmation (optional) before changing the language;
+ * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
+ * <br/>3) Allows the consuming service to receive returned results by a callback method.
+ * <br/>
+ * <table class="table">
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
+ *   <td>Method to change the current language.
+ *    <br/>lang (required). The new language culture, e.g. "en_GB".
+ *    <br/>scope (optional). The current scope.
+ *    <br/>callback (optional). The callback function.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
+ *   <td>Method to get the current configuration options.
+ *   <br />storage: local (default value) for localStorage or query for url query parameter
+ *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
+ *   <br />onChangePopup:
+ *   <br />title: title of popup confirmation
+ *   <br />text: text of popup confirmation
+ *   <br />buttonCancelLabel: label text for the cancel button
+ *   <br />buttonOkLabel: label text for the ok button
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
+ *   <td>Method to get the current language.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
+ *   <td>Method to get the default locale from an optional language code.
+ *    <br/>lang (optional). The language code, e.g. "en".
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
+ *   <td>Method to get the language code from an optional locale.
+ *    <br/>locale (optional). The locale, e.g. "en_GB".
+ *   </td>
+ *  </tr>
+ * </table>
+ *
+ * @example
+ <example module="itesoft">
+
+ <file name="Controller.js">
+    angular.module('itesoft')
+        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
+                    // example for storage option configuration value
+                    itLanguageChangeHandlerProvider.options.storage = "local";
+                     
+                    localStorageServiceProvider.setPrefix('itesoft');
+
+                }])
+        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
+            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
+
+            // new language setting returned by a callback function.
+            var languageChanged = function(data){
+              $scope.currentLanguage = data.currentLanguage;
             };
+        
+            $scope.changeLanguage = function(){
+              if($scope.locale) {
+                
+                // new language setting returned by a promise.
+                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
+              }
+            }
         }]);
+ </file>
+ <file name="index.html">
+ <div ng-controller="MainController">
+    <br /> Set language: <input type="text" ng-model="locale" /> 
+    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
+
+    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
+    <br /> Initial language: {{initialLanguage}}
+    <br /> Updated current language: {{currentLanguage}}
+</div>
+ </file>
+ </example>
+ */
+IteSoft.provider('itLanguageChangeHandler', function () {
+    var self = this;
+    this.options = {
+        storage: 'local', //local for localStorage or query for url query parameter
+        displayConfirm: true,// true | false
+        onChangePopup: {
+            title: "Confirm language change",
+            text: "By modifying the language any recent changes may be lost. Continue?",
+            buttonCancelLabel: 'NO',
+            buttonOkLabel: 'YES'
+        }
+    };
+
+    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
+        return {
+            translate: $translate,
+            getConfig: function () {
+                return self.options;
+            },
+            changeLanguage: function (lang, scope, callback) {
+                var data = {
+                    currentLanguage:
+                        this.getCurrentLanguage()
+                };
+                if (self.options.displayConfirm) {
+                    $translate.use(lang);
+                    var confirmPopup = itPopup.confirm({
+                        title: self.options.onChangePopup.title,
+                        text: self.options.onChangePopup.text,
+                        cancelText: self.options.onChangePopup.buttonCancelLabel,
+                        okText: self.options.onChangePopup.buttonOkLabel
+                    });
+                    (function (data) {
+                        var locale = data;
+                        confirmPopup.then(function (res) {
+                            //Traduction
+                            $translate.use(lang);
+
+                            if (self.options.storage === 'query') {
+
+                                try {
+                                    $location.search('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+                            else {
+                                // Save to local storage
+                                try {
+                                    localStorageService.set('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+
+                            // Change language to chosen language.
+                            if (scope) {
+                                scope.currentLanguage = lang;
+                                if (scope.user) {
+                                    scope.user.language = $translate.use();
+                                }
+                            }
+
+                            data = {
+                                currentLanguage: lang,
+                            };
+
+                            if (callback) {
+                                callback(data);
+                            }
+
+                            //Reload de la page
+                            $rootScope.$applyAsync(function () {
+                                location.reload();
+                            });
+
+                        }, function () {
+                            $translate.use(locale.currentLanguage);
+                        });
+                    })(data);
+                }
+                return;
+            },
+            getCurrentLanguage: function () {
+                if (self.options.storage === 'query') {
+                    if ($location.search().Locale) {
+                        return $location.search().Locale.replace(/-/g, '_');
+                    } 
+                    else {
+                        return this.getDefaultLocale(this.translate.use());
+                    }
+                }
+                else {
+                    // load from local storage
+                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
+                }
+            },
+            getDefaultLocale: function (lang) {
+                if (!lang) {
+                    lang = $translate.preferredLanguage();
+                }
+
+                switch (lang) {
+                    case "en":
+                        return "en_GB";
+                    case "de":
+                        return "de_DE";
+                    default:
+                    case "fr":
+                        return "fr_FR";
+                }
+            },
+            getLanguageCode: function (locale) {
+                switch (locale) {
+                    case "en_GB":
+                    case "en-GB":
+                    case "en_US":
+                    case "en-US":
+                        return "en";
+                    case "de_DE":
+                    case "de-DE":
+                        return "de";
+                    default:
+                    case "fr_FR":
+                    case "fr-FR":
+                    case "fr_CA":
+                    case "fr-CA":
+                        return "fr";
+                }
+            }
+        }
+    }];
+});
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itNotifier
+ * @module itesoft
+ * @since 1.1
+ * @requires ngToast
+ * @requires $rootScope
+ * @requires $log
+ *
+ * @description
+ * Simple notifier service, that display toasters.
+ *
+ * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>additionalClasses</code></td>
+ *     <td>''</td>
+ *     <td>Allows to add some classes to the current ngToast</td>
+ * </tr>
+ * <tr>
+ *     <td><code>animation</code></td>
+ *     <td>'fade'</td>
+ *     <td>Adds an openning/ending animation, for example 'fade'</td>
+ * </tr>
+ * <tr>
+ *     <td><code>className</code></td>
+ *     <td>"success"</td>
+ *     <td>The className of the toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>content</code></td>
+ *     <td>''</td>
+ *     <td>Content of the toast message as String (HTML compliant)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>combineDuplications</code></td>
+ *     <td>false</td>
+ *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
+ * </tr>
+ * <tr>
+ *     <td><code>compileContent</code></td>
+ *     <td>false</td>
+ *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnTimeout</code></td>
+ *     <td>true</td>
+ *     <td>Automatically remove toast message after specific time</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButton:</code></td>
+ *     <td>true</td>
+ *     <td>Adds close button on toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButtonHtml</code></td>
+ *     <td>"&#38;times;"</td>
+ *     <td>Html of close button</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnClick</code></td>
+ *     <td>false</td>
+ *     <td>Allows to remove toast message with a click</td>
+ * </tr>
+ * <tr>
+ *     <td><code>horizontalPosition</code></td>
+ *     <td>"right"</td>
+ *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
+ * </tr>
+ * <tr>
+ *     <td><code>maxNumber</code></td>
+ *     <td>0</td>
+ *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>timeout</code></td>
+ *     <td>4000</td>
+ *     <td>Timer for remove toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>verticalPosition</code></td>
+ *     <td>"bottom"</td>
+ *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
+ * </tr>
+ * </table>
+ * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
+ *
+ * Overload of defaults options value for each type of toasts are :
+ * <ul>
+ * <li>success:{dismissOnClick: true}</li>
+ * <li>info:{dismissOnClick: true}</li>
+ * <li>error:{dismissOnTimeout: false}</li>
+ * <li>warning:{dismissOnTimeout: false}</li>
+ * </ul>
+ * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
+ * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
+ *
+ *
+ * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Possible value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td>CODE</td>
+ *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
+ *     <td>The code bounds to the status of the action</td>
+ * </tr>
+ * <tr>
+ *     <td>TYPE</td>
+ *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
+ *     <td>The type message received</td>
+ * </tr>
+ * <tr>
+ *     <td>MESSAGE</td>
+ *     <td></td>
+ *     <td>The message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DETAIL</td>
+ *     <td></td>
+ *     <td>The detail of the message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DONE</td>
+ *     <td>TRUE("1"), FALSE("0");</td>
+ *     <td>A boolean that decribes the final result of the request</td>
+ * </tr>
+ * </table>
+ * <br/>
+ *
+ * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
+ *
+ * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
+ * @example
+     <example module="itesoft">
+
+         <file name="Controller.js">
+
+            angular.module('itesoft')
+                .config(['itNotifierProvider', function (itNotifierProvider) {
+                    //configuration of default values
+                    itNotifierProvider.defaultOptions = {
+                        dismissOnTimeout: true,
+                        timeout: 4000,
+                        dismissButton: true,
+                        animation: 'fade',
+                        horizontalPosition: 'right',
+                        verticalPosition: 'bottom',
+                        compileContent: true,
+                        dismissOnClick: false,
+                        success:{dismissOnClick: true},//optional overload behavior toast success
+                        info:{dismissOnClick: true},//optional overload behavior toast info
+                        error:{dismissOnTimeout: false},//optional overload behavior toast error
+                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+                    };
+
+                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
+                    $scope.showSuccess = function(){
+                        itNotifier.notifySuccess({
+                        content: "Success popup"
+                        });
+                    };
+                    $scope.showSuccessEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                            type: "SUCCESS",
+                            options: {
+                                content : "Success event popup"
+                            }}
+                         );
+                    };
+                    $scope.showError = function(){
+                        itNotifier.notifyError({
+                            content: "Error popup",
+                            dismissOnTimeout: false
+                        },
+                        {
+                            CODE:500,
+                            TYPE:'error',
+                            MESSAGE:'Something bad happened',
+                            DETAIL:'You don\'t wanna know',
+                            DONE:1
+                        });
+                    };
+                    $scope.showErrorOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "ERROR",
+                        options: {
+                                content : "error event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:500,
+                                TYPE:'error',
+                                MESSAGE:'Something bad happened',
+                                DETAIL:'You don\'t wanna know',
+                                DONE:1
+                            }
+                        });
+                    }
+                    $scope.showInfo = function(){
+                        itNotifier.notifyInfo({
+                        content: "Information popup"
+                        });
+                    };
+                    $scope.showWarningOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "WARNING",
+                        options: {
+                                content : "Warning event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:1000,
+                                TYPE:'warning',
+                                MESSAGE:'The request is empty',
+                                DETAIL:'Nothing',
+                                DONE:1
+                            }
+                        });
+                    };
+                    $scope.dismiss = function(){
+                        itNotifier.notifyDismiss();
+                        $scope.$emit('itNotifierEvent',{
+                            type:"DISMISS"
+                        });
+                    };
+                    $scope.dismissOnEvent = function(){
+                        $scope.$emit("$locationChangeSuccess");
+
+                    };
+                }]);
+         </file>
+         <file name="index.html">
+             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+             <div ng-controller="NotifierCtrl">
+                 <button class="btn btn-success" ng-click="showSuccess()">
+                    Success
+                 </button>
+                 <button class="btn btn-success" ng-click="showSuccessEvent()">
+                    Success on event
+                 </button>
+                 <button class="btn btn-danger" ng-click="showError()">
+                    Error
+                 </button>
+                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
+                    Error on event
+                 </button>
+                 <button class="btn btn-info" ng-click="showInfo()">
+                    Info
+                 </button>
+                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
+                    Warning
+                 </button>
+                 <button class="btn btn-success" ng-click="dismiss()">
+                    Dismiss all popups
+                 </button>
+                 <button class="btn btn-success" ng-click="dismissOnEvent()">
+                    Dismiss on Change location event
+                 </button>
+             </div>
+         </file>
+     </example>
+ **/
+IteSoft.provider('itNotifier', [ function () {
+
+    var self = this;
+
+    //default behaviors
+    self.defaultOptions = {
+        dismissOnTimeout: true,
+        timeout: 4000,
+        dismissButton: true,
+        animation: 'fade',
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom',
+        compileContent: true,
+        dismissOnClick: false,
+        success:{dismissOnClick: true},//optional overload behavior toast success
+        info:{dismissOnClick: true},//optional overload behavior toast info
+        error:{dismissOnTimeout: false},//optional overload behavior toast error
+        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+    };
+
+    //provide get method to build provider
+    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
+
+        // service declaration
+        var itNotifier = {};
+
+        //configuration of the ngToast
+        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
+
+        /**
+         * Private method that format error details message
+         * @param errorDetails
+         * @returns {string}
+         * @private
+         */
+        function _formatErrorDetails(errorDetails){
+            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
+        }
+
+        /** method declaration**/
+        /**
+         * Display a toast configure as success element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifySuccess= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
+            ngToast.success(localOptions);
+            if(errorDetails != undefined) {
+                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as error element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyError= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
+
+            ngToast.danger(localOptions);
+            if(errorDetails != undefined) {
+                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as info element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyInfo= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
+
+            ngToast.info(localOptions);
+            if(errorDetails != undefined) {
+                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as warning element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyWarning= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
+
+            ngToast.warning(localOptions);
+            if(errorDetails != undefined) {
+                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Dismiss all toaster
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyDismiss= function (options,errorDetails) {
+            ngToast.dismiss();
+        };
+        /**
+         * Log an error because this type is unknown
+         * @param options
+         */
+        itNotifier.notify= function (options) {
+            $log.error('Unknown type for itNotifier: '+options )
+        }
+
+        /** events declaration **/
+
+        /**
+         * Listen an event and dismiss all toaster
+         */
+        $rootScope.$on("$locationChangeSuccess", function () {
+            // Remove all currently display toaster messages.
+            itNotifier.notifyDismiss();
+        });
+
+        /**
+         * Listen an event and display associated toast depending on his type
+         */
+        $rootScope.$on("itNotifierEvent",function(event, args){
+            //Handle event and calls appropriate method depending on the type of request
+            if (args) {
+                switch (args.type) {
+                    case "SUCCESS":
+                        itNotifier.notifySuccess(args.options,args.errorDetails);
+                        break;
+                    case "ERROR":
+                        itNotifier.notifyError(args.options,args.errorDetails);
+                        break;
+                    case "INFO":
+                        itNotifier.notifyInfo(args.options,args.errorDetails);
+                        break;
+                    case "WARNING":
+                        itNotifier.notifyWarning(args.options,args.errorDetails);
+                        break;
+                    case "DISMISS":
+                        itNotifier.notifyDismiss(args.options,args.errorDetails);
+                        break;
+                    default:
+                        itNotifier.notify(args.type);
+                        break;
+                }
+            }
+            else{
+                $log.error('Bad usage of itNotifier. Check manual for details');
+            }
+        });
+        return itNotifier;
+    }];
+}]);
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
     }]);
 
 "use strict";
@@ -2323,6 +6338,120 @@ IteSoft
         }
 
     });
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
 'use strict';
 
 /**
@@ -4070,4226 +8199,6 @@ IteSoft
 }]);
 'use strict';
 /**
- * TODO itInclude desc
- */
-IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
-    var linker = function (scope, element, attrs) {
-        var currentScope;
-        scope.$watch(attrs.itInclude, function (template) {
-            $timeout(function () {
-                if(currentScope){
-                    currentScope.$destroy();
-                }
-                currentScope = scope.$new();
-                element.html( template || '');
-                $compile(element.contents())(currentScope);
-            }, 50);
-        });
-    };
-    return {
-        restrict: 'AE',
-        link: linker
-    };
-}]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMediaViewer
- * @module itesoft
- * @since 1.2
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *     <it-media-viewer></it-media-viewer>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer></div></div>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
-
-    var _splitLast = function (word, character) {
-        if(word != undefined){
-            var words = word.split(character);
-            return words[words.length - 1];
-        }
-        return word;
-    };
-
-    var linker = function (scope, element, attrs) {
-        var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
-            switch (ext) {
-                case 'pdf':
-                    scope.pdfSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/pdf.js'
-                    ]).then(function() {
-                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                    });
-                    break;
-                case 'png':
-                case 'jpeg':
-                case 'jpg':
-                    scope.imageSrc = value;
-                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                    break;
-                case 'tif':
-                case 'tiff':
-                    scope.tiffSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/tiff.min.js'
-                    ]).then(function() {
-                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                    });
-                    break;
-                default :
-                    scope.template = 'No template found for extension : '  + ext;
-                    break;
-            }
-        };
-
-        var _setValue = function(value) {
-            if(value){
-                if(typeof value === typeof ""){
-                    scope.ext = _splitLast(value, '.').toLowerCase();
-                    _setTemplate(scope.ext, value);
-                } else {
-                    if(attrs.type) {
-                        _setTemplate(attrs.type, value);
-                    }else if(value.name != undefined) {
-                        scope.ext = _splitLast(value.name, '.').toLowerCase();
-                        _setTemplate(scope.ext, value);
-                    } else {
-                        scope.template = 'must specify type when using stream';
-                    }
-                }
-            }
-        };
-
-        scope.$watch("src", _setValue);
-        scope.$watch("file", _setValue);
-    };
-
-    return {
-        scope: {
-            src : '=',
-            file: '=',
-            type: '@',
-            options : '=',
-        },
-        restrict: 'E',
-        template :  '<div it-include="template"></div>',
-        link: linker
-    };
-}]);
-
-
-'use strict';
-/**
- * TODO ScriptService desc
- */
-IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
-    var _scipts = {};
-    var _css = {};
-    var defaultScriptPromise = $q.defer();
-    var defaultScriptsPromise = $q.defer();
-
-    //JS
-    var _loadScripJs = function (js) {
-        if(js){
-            if(_scipts[js] != undefined){
-                return _scipts[js];
-            }else {
-                var deferred = $q.defer();
-                var script = document.createElement('script');
-                _scipts[js] = deferred.promise;
-                script.src = js;
-                script.type = 'text/javascript';
-                script.onload = function () {
-                    deferred.resolve(script);
-                };
-                document.head.appendChild(script);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsJs = function (scriptJs) {
-        if(typeof scriptJs == typeof ""){
-            return _loadScripJs(scriptJs);
-        }else if(typeof scriptJs == typeof []){
-            var promises = [];
-            angular.forEach(scriptJs, function(js){
-                promises.push(_loadScripJs(js));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //CSS
-    var _loadScriptCss = function (css) {
-        if(css){
-            if(_css[css] != undefined){
-                return _css[css];
-            }else {
-                var deferred = $q.defer();
-                var link = document.createElement('link');
-                _css[css] = deferred.promise;
-                link.href = css;
-                link.rel ='stylesheet';
-                link.type = 'text/css';
-                link.onload = function () {
-                    deferred.resolve(link);
-                };
-                document.head.appendChild(link);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsCss = function (scriptCss) {
-        if(typeof scriptCss == typeof ""){
-            return _loadScriptCss(scriptCss);
-        }else if(typeof scriptCss == typeof []){
-            var promises = [];
-            angular.forEach(scriptCss, function(css){
-                promises.push(_loadScriptCss(css));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //Scripts
-    var _loadScripts = function (js, css) {
-        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
-    };
-
-    return {
-        LoadScripts : _loadScripts
-    };
-}]);
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- * @since 1.0
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:false,
-            link:function(scope, element, attrs ){
-                scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
-
-
-                scope.$watch(function(){
-                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
-                });
-
-                var sideMenuHeader = angular.element(document
-                    .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                   scope.$noMenuHeader = true;
-                }
-            },
-            template :
-                '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div style="width:{{($itSideMenuWidth * 1 ) + (50 * 1)}}px;"  class="it-sidebar-inner">'+
-                        '<div style="width:{{$itSideMenuWidth}}px;" class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
-                    '</div>'+
-                '</div>'
-
-
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
- * @since 1.0
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : false,
-            link : function(scope){
-                var sideMenuHeader = angular.element(document
-                    .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                    scope.showmenu = true;
-                }
-            },
-            template :
-                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                var menuContent = angular.element(document
-                    .querySelector('it-side-menu-content'));
-
-
-                if(menuContent){
-                    menuContent.css('padding-top','60px');
-                }
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
- * <table class="table">
- *  <tr>
- *  <td><code>it-width="400"  attribute on it-side-menu directive </code></td>
- *   <td>Width of the side menu, in pixels, max value 800.</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-animate="true"  on it-side-menu-header  </code></td>
- *   <td>to animate de side menu open and close button</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-hide-button-menu="true"  on it-side-menu-header  </code></td>
- *   <td>to hide header menu Close/open button</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-side-menu-header </code></td>
- *   <td>headers are optionnal</td>
- *  </tr>
- *  </table>
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-                 <!-- Header Menu-->
-                 <div class="collapse navbar-collapse">
-                 <div uib-dropdown class="nav navbar-nav navbar-right ">
-                 <button class="btn loginButton" type="button" uib-dropdown-toggle>
-                 <i class="glyphicon glyphicon-user ">&nbsp;John Doe&nbsp;</i><span class="caret"></span>
-                 </button>
-                 <ul class="dropdown-menu" role="menu">
-                 <li>
-                 <a ng-cloak>
-                 français
-                 <i class="pull-right">
-                 </i>
-                 </a>
-                 </li>
-                 <li>
-                 <a ng-cloak>
-                 anglais
-                 <i class="pull-right glyphicon glyphicon-ok">
-                 </i>
-                 </a>
-                 </li>
-                 <li>
-                 <a ng-cloak>
-                 dothraki
-                 <i class="pull-right">
-                 </i>
-                 </a>
-                 </li>
-                 <li class="divider"></li>
-                 <li>
-                 <a ng-cloak>
-                 logout
-                 </a>
-                 </li>
-                 </ul>
-                 </div>
-                 </div>
-             </it-side-menu-header>
-
-         <it-side-menu it-width="200">
-             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-             <li it-collapsed-item>
-             <a href=""><h5><i class="fa fa-music"></i>&nbsp; Menu 1</h5></a>
-             <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-             <li >
-             <a href="#/menu1/sub1" translate>SubMenu 1</a>
-             </li>
-             <li >
-             <a href="#/menu2/sub2" translate>SubMenu 2</a>
-             </li>
-             </ul>
-             </li>
-             <li>
-             <a href="#/menu2"><h5><i class="fa fa-list"></i>&nbsp; Menu 2</h5></a>
-             </li>
-             <li>
-             <a href="#/menu3"><h5><i class="fa fa-pied-piper-alt"></i>&nbsp; Menu 3</h5></a>
-             </li>
-             </ul>
-         </it-side-menu>
-
-
-         <it-side-menu-content>
-
-             <div class="container-fluid">
-                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi, veritatis, earum ullam accusantium consectetur consequuntur totam enim nemo impedit atque blanditiis ratione eum provident libero illum laboriosam qui amet eius.</p>
-
-             </div>
-
-
-            </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanel
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container element for side panel and its Header, Content and Footer
- *
- * <table class="table">
- *   <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-col="3">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *          <it-side-panel it-z-index="700">
- *          </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-icon-class="fa-star-o">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-height-mode="auto | window | full">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set "Height Mode" of the Side Panel.
- *          <ul>
- *              <li><b>auto</b> :
- *                  <ul>
- *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
- *                      <li>Else the height of Side Panel is equal to its content</li>
- *                  </ul>
- *                </li>
- *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
- *              <li><b>full</b>
-*                   <ul>
- *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
- *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
- *                  </ul>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-top-position="XX | none">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set css top position of the Side Panel. Default value is "none" mode
- *          <ul>
- *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
- *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-side-panel>
- *      <it-side-panel-header>
- *          <!--Header of Side Panel -->
- *      </it-side-panel-header>
- *      <it-side-panel-content>
- *          <!--Content Side Panel-->
- *      </it-side-panel-content>
- *      <it-side-panel-footer>
- *          <!--Footer Side Panel-->
- *      </it-side-panel-footer>
- * </it-side-panel>
- * ```
- * @example
- <example module="itesoft">
- <file name="custom.css">
-
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
-       background-color: blue;
-     }
-
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
-       background-color: green;
-     }
-
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
-       background-color: gray;
-     }
-
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
-        text-align: center;
-        display: table;
-        width: 100%;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
-        display: table-cell;
-        vertical-align:middle;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
-        margin:0px;
-     }
-
- </file>
- <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
-
- <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
- <it-side-panel-header>
- <div><h1>Search</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Search 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Search 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Search 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
- </file>
- </example>
- */
-IteSoft
-    .directive('itSidePanel', ['$window', function ($window) {
-
-
-        function _link(scope, element, attrs) {
-
-            scope.itSidePanelElement = element;
-
-            scope.setIconClass(scope, attrs);
-
-            scope.setZIndexes(element, attrs);
-
-            scope.setColMd(attrs);
-
-            scope.setHeightMode(attrs);
-
-            scope.setTopPosition(attrs);
-
-        }
-
-        return {
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
-            '</div>'
-
-        };
-    }]);
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelContent
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel content, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-content>
- * </it-side-panel-content>
- */
-IteSoft
-    .directive('itSidePanelContent', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require: '^itSidePanel',
-            template:
-                '<div class="it-side-panel-content" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .controller("$sidePanelCtrl", [
-        '$scope',
-        '$window',
-        '$document',
-        '$timeout',
-        '$log',
-        function ($scope, $window, $document, $timeout, $log) {
-
-
-            var COL_MD_NAME = 'it-col';
-            var HEIGHT_MODE_NAME = 'it-height-mode';
-            var TOP_POSITION_NAME = 'it-top-position';
-
-            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
-
-            var Z_INDEX_CSS_KEY = 'z-index';
-
-            var IT_HEIGHT_MODE_WINDOW = 'window';
-            var IT_HEIGHT_MODE_FULL = 'full';
-            var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
-
-            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
-
-
-            var DEFAULT_COL_MD = 4;
-            var MAX_COL_MD = 12;
-            var MIN_COL_MD = 1;
-
-            var DEFAULT_ICON_CLASS = 'fa-search';
-
-
-            var DEFAULT_TOP_POSITION = 'none';
-            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
-
-            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
-            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
-            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
-            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
-            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
-            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
-            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
-
-            var _self = this;
-            _self.scope = $scope;
-            _self.scope.showPanel = false;
-
-            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-            //Set default col-md(s) to the scope
-            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-
-            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
-
-            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
-
-            _self.scope.sidePanelContainerWidth = null;
-            _self.scope.sidePanelContainerRight = null;
-            _self.scope.sidePanelButtonRight = null;
-
-
-            var w = angular.element($window);
-
-
-            /**
-             * Get window Dimensions
-             * @returns {{height: Number, width: Number}}
-             */
-            _self.scope.getWindowDimensions = function () {
-                return {
-                    'height': $window.innerHeight,
-                    'width': $window.innerWidth
-                };
-            };
-
-            /**
-             * Watch the resizing of window Dimensions
-             */
-            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
-
-                _self.scope.windowHeight = newValue.height;
-                _self.scope.windowWidth = newValue.width;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-
-                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-
-                    var top = sidePanelContainer[0].getBoundingClientRect().top;
-
-                    //Do not update side panel height property when
-                    // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if(Math.abs(top) < _self.scope.windowHeight){
-
-                        var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if(_self.scope.isNoneTopPosition()){
-                            itTopPosition = 0;
-                        }
-
-                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
-
-                        var heightHeader = (newHeight*0.10);
-                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height',heightHeader+'px');
-
-                        var heightFooter = (newHeight*0.10);
-                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height',heightFooter+'px');
-
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight*0.8)+'px');
-
-                    }
-                }
-
-
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
-                    _self.scope.sidePanelContainerWidth = newWidth;
-                    sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
-                    _self.scope.modifySidePanelCssProperties();
-                }
-
-            }, true);
-
-            /**
-             * Update Side panel Css properties (right and width)
-             */
-            _self.scope.modifySidePanelCssProperties = function (){
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
-                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
-
-                _self.scope.sidePanelContainerWidth = newWidth;
-                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
-                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                //update side panel container right and width properties
-                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
-                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-
-                //update side panel button right right property
-                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
-            };
-
-            w.bind('resize', function () {
-                _self.scope.$apply();
-            });
-
-            /**
-             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
-             */
-            _self.scope.toggleSidePanel = function () {
-                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if(_self.scope.showPanel){
-
-                    //Reset the right property of Side panel button
-                    iconButtonElement.css('right', "");
-
-                    //Do the transition in order to the side panel be visible
-                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
-                        _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
-
-
-                } else {
-
-                    var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
-                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
-                }
-            };
-
-            _self.scope.setItSidePanelElement = function(element){
-                _self.scope.itSidePanelElement = element;
-            };
-
-
-            /**
-             * Set the Side Panel Height Mode from "it-height-mode" attributes
-             * @param attrs directive attributes object
-             */
-            _self.scope.setHeightMode = function (attrs){
-                _self.scope.itHeightMode = attrs.itHeightMode;
-
-                //If attribute is not defined set the default height Mode
-                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
-                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
-                    //Get the provided mode
-                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
-
-                    //If height mode is defined but unknown set to the default  height mode
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
-                }
-
-                //Set height of header, content and footer
-                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
-
-                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
-
-                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css('height', '80%');
-
-
-
-                //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
-                    case IT_HEIGHT_MODE_FULL:
-
-                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css('height');
-
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
-                            sidePanelContainer.css('height', '100%');
-                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css('height', '100%');
-                        }
-                        break;
-                    case IT_HEIGHT_MODE_AUTO:
-                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
-                        break;
-                    case IT_HEIGHT_MODE_WINDOW:
-
-                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css('height', '100%');
-
-                        //set overflow : auto to the Side Panel Content
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('overflow', 'auto');
-                        break;
-                    default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
-                }
-            };
-
-            /**
-             * Retrieve provided iconClass and put the value it in scope
-             * @param scope the scope
-             * @param attrs the attributes provided by directive
-             * @private
-             */
-            _self.scope.setIconClass = function (scope, attrs) {
-                var defaultIconClass = DEFAULT_ICON_CLASS;
-                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
-                    _self.scope.itIconClass = defaultIconClass;
-                } else {
-                    _self.scope.itIconClass = attrs.itIconClass;
-                }
-            };
-
-            /**
-             * Handle col-md of directive.
-             * If itCol is provided to the directive apply its col-md-X
-             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setColMd = function (attrs) {
-                var colMd = DEFAULT_COL_MD;
-                if (!isNaN(parseInt(attrs.itCol))) {
-
-                    if (attrs.itCol > MAX_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
-                            '(' + MAX_COL_MD + '). The maximum value is taken.');
-                    } else if (attrs.itCol < MIN_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
-                            '(' + MIN_COL_MD + '). The minimum value is taken.');
-                    } else {
-                        _self.scope.itSidePanelcolMd = attrs.itCol;
-                    }
-                } else {
-                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
-                }
-            };
-
-            /**
-             * Handle z indexes of directive.
-             * If itZIndex is provided to the directive apply its z-index
-             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setZIndexes = function (element, attrs) {
-
-                var zindex = null;
-                if (!isNaN(parseInt(attrs.itZIndex))) {
-                    zindex = parseInt(attrs.itZIndex);
-                }
-
-                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (zindex !== null) {
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
-                } else {
-
-                    var highestZIndex = _self.scope.findHighestZIndex();
-                    var newHighestZIndex = highestZIndex + 100;
-
-                    //set the zindex to side panel element
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
-
-                    //set the zindex to the icon button of the side panel element
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
-
-                }
-            };
-
-            /**
-             * Get Dom element from its class
-             * @param element dom element in which the class search will be performed
-             * @param className className. Using 'querySelector' selector convention
-             * @private
-             */
-            _self.scope.getElementFromClass = function (element, className) {
-                var content = angular.element(element[0].querySelector(className));
-                var sidePanel = angular.element(content[0]);
-                return sidePanel;
-            };
-
-            /**
-             * Find the highest z-index of the DOM
-             * @returns {number} the highest z-index value
-             * @private
-             */
-            _self.scope.findHighestZIndex = function () {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            };
-
-            _self.scope.setTopPosition = function (attrs) {
-                var topPosition = attrs.itTopPosition;
-                if (!isNaN(parseInt(topPosition))) {
-                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
-                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
-
-                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
-
-                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
-                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
-                }
-            };
-
-            /**
-             *
-             * @returns {boolean}
-             */
-            _self.scope.isNoneTopPosition = function () {
-                return _self.scope.itSidePanelTopPosition === 'none';
-            };
-        }
-    ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelFooter
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel footer, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-footer>
- * </it-side-panel-footer>
- */
-IteSoft
-    .directive('itSidePanelFooter', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-footer" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelHeader
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel header, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-header>
- * </it-side-panel-header>
- */
-IteSoft
-    .directive('itSidePanelHeader', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-header text-center" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
-/**
- * Created by sza on 22/04/2016.
- */
-'use strict';
-IteSoft
-    .factory('BlockService', ['$resource', 'CONFIG',
-        function ($resource, CONFIG) {
-            return {
-                custom: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/'+CONFIG.CURRENT_PACKAGE+'/:name'),
-                all: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/all/'+CONFIG.CURRENT_PACKAGE+'/:name'),
-                original: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/:name'),
-                customByOriginal: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/original/'+CONFIG.CURRENT_PACKAGE+'/:name/custom'),
-                restore: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/'+CONFIG.CURRENT_PACKAGE+'/:name'),
-                build: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
-                preview: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
-                'new': function (name, ref, position, content, roleAllowed, version) {
-                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
-                },
-            }
-        }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBlock
- * @module itesoft
- * @restrict E
- *
- * @description
- * The Block widgets provides  way to customize UI.
- *
- * <h1>Enable</h1>
- * Enable editMode with
- *
- * ```js
- * $rootScope.editSite
- * ```
- *
- * <h1>Config</h1>
- * ```config
- * REST_TEMPLATE_API_URL = url of template rest api
- * TEMPLATE_EDITOR_URL = template web editor url
- * TEMPLATE_USER_AUTO_LOGIN = login and password to use for autologin {login: "admin", password: "admin"}
- * SKIP_LOGIN = true if you want to skip login
- * CURRENT_PACKAGE = package used to saved modification (ex 10-PS)
- * CURRENT_ROLE = user usrole used to managed block (PS, RD ...)
- * ```
- *
- * ```html
- *   <it-block name="login_input" role="RD"></it-block>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-    <div ng-controller="HomeCtrl">
-         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-         <it-block-control-panel></it-block-control-panel>
-         <it-block name="zone-coding-lines-actions3" style="margin:10px">
-         <it-block name="login_input" role="RD">
-         <div class="form-group">
-         <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
-         </div>
-         </it-block>
-         <it-block name="coding-lines-add3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
-         ng-click="codingController.addNewLine()">
-         <span class="fa fa-plus fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-remove3">
-         <button class="btn btn-danger col-xs-2"
-         title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
-         ng-click="codingController.removeNewLine()">
-         <span class="fa fa-trash fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-duplicate3">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
-         ng-click="codingController.duplicateLine()">
-         <span class="fa fa-copy fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-memorize3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
-         ng-click=""
-         disabled>
-         <span class="fa fa-folder fa-lg"/>
-         </button>
-         </it-block>
-         </it-block>
-         <br/>
-         <br/>
-         <br/>
-         <br/>
-         <it-block name="zone-grid-example">
-            <div id="grid1" ui-grid="gridOptions" class="grid"></div>
-         </it-block>
-    </div>
- </file>
- <file name="Module.js">
-     angular.module('itesoft-showcase',['itesoft','ngResource'])
-     .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
-                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": true,
-                "SKIP_LOGIN" : true,
-                "CURRENT_PACKAGE" : "10-PS",
-                "CURRENT_ROLE" : "PS",
-                "VERSION": "v1",
-                });
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope','$rootScope','$http','uiGridGroupingConstants',
-     function($scope,$rootScope,$http,uiGridGroupingConstants) {
-                       $rootScope.editSite = true;
-                       $scope.myData = [];
-            // sample values
-            $scope.myDataInit = [ { "firstName": "Cox", "lastName": "Carney", "company": "Enormo", "employed": true }, { "firstName": "Lorraine", "lastName": "Wise", "company": "Comveyer", "employed": false }, { "firstName": "Nancy", "lastName": "Waters", "company": "Fuelton", "employed": false }];
-            angular.copy($scope.myDataInit,$scope.myData);
-            $scope.gridOptions = {
-                data:$scope.myData,
-                useExternalFiltering: true,
-                enableFiltering: true,
-                onRegisterApi: function(gridApi){
-                  $scope.gridApi = gridApi;
-                  //quick an dirty example of filter that use it-autocomplete
-                  $scope.gridApi.core.on.filterChanged($scope, function(){
-                            $scope.myData = [];
-                            var filterUse = false;
-                              angular.forEach($scope.myDataInit,function(item){
-                                    var added = false;
-                                    var key = '';
-                                    var value = '';
-                                    $scope.gridOptions.data = $scope.myData;
-                                    $scope.gridOptions.totalItems = $scope.myData.length;
-                              })
-                            });
-                        },
-                        columnDefs:[{
-                            name: 'firstName',
-                            cellClass: 'firstName',
-                            cellTemplate:' <div class="ui-grid-cell-contents"> <it-block name="zone-firstName">test</it-block> </div>'
-                            },{
-                            name: 'lastName',
-                            cellClass: 'lastName'
-                           }
-                        ]
-                    };
-                    $scope.selectedOption = "Lorraine";
-                    }]);
- </file>
- </example>
- */
-IteSoft.directive('itBlock',
-    [
-        function () {
-            return {
-                restrict: 'E',
-                scope: true,
-                transclude: true,
-                template:
-                '<ng-transclude  ' +
-                'class="{{itBlockController.hilightClass}}" ' +
-                'ng-mouseover="itBlockController.over()" ' +
-                'ng-mouseleave="itBlockController.leave()" ' +
-                'ng-if="!removed || $root.editSite"> ' +
-                '</ng-transclude>',
-                controllerAs: 'itBlockController',
-                link: function ($scope, element, attrs, ctrl, transclude) {
-                    transclude($scope, function (content) {
-                        var myContent = "";
-                        angular.forEach(content, function (contentLine) {
-                            if (contentLine.outerHTML) {
-                                myContent += contentLine.outerHTML;
-                            }
-                        });
-                        $scope.content = myContent;
-                    });
-                    /**
-                     * Get attributes values
-                     */
-                    $scope.ref = attrs["ref"];
-                    $scope.role = attrs["role"];
-                    $scope.position = attrs["position"];
-                    $scope.name = attrs["name"];
-                    $scope.removed = false;
-                    $scope.element = element;
-                    $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
-                        $scope.removed = attrs["removed"];
-                    }
-                    this.fields = {};
-                    /**
-                     * Call when attributes are read
-                     */
-                    ctrl.onRegisterApi();
-
-                },
-                controller: ['$scope','$rootScope', '$location', '$log', '$interval', '$timeout','$document', 'itPopup', 'BlockService', 'PilotSiteSideService',
-                    function ($scope,$rootScope, $location, $log, $interval,$timeout, $document, itPopup, BlockService, PilotSiteSideService) {
-
-                        var self = this;
-                        self.focusable = false;
-
-                        /**
-                         * Call when block is selected by control panel
-                         */
-                        $rootScope.$on("hilightBlock",function(event,block){
-                            if(angular.isDefined(block) && block.name == self.block.name) {
-                                self.hilightClass="block-hilight";
-                            }else{
-                                if($scope.removed){
-                                    self.hilightClass = "block-removed";
-                                }else {
-                                    self.hilightClass = "";
-                                }
-                            }
-                        });
-
-                        /**
-                         * Call when attributes are read
-                         */
-                        self.onRegisterApi = function(){
-                            self.block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role, $scope.version);
-                            self.block.removed= $scope.removed;
-                        };
-
-                        /**
-                         * Call when mouse leave block
-                         */
-                        self.leave = function () {
-                            $rootScope.$emit("unSelectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when mouse is over block
-                         */
-                        self.over = function () {
-                            $rootScope.$emit("selectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when edit site mode changed
-                         */
-                        $rootScope.$watch('editSite',function()
-                        {
-                            if ($rootScope.editSite) {
-                                /**
-                                 * Need to change transclude content if block is removed or disabled
-                                 */
-                                $timeout(function () {
-                                    if ($scope.removed) {
-                                        self.hilightClass = "block-removed";
-                                    }
-                                }, 500);
-                                $timeout(function () {
-                                    if (angular.isDefined($scope.element.find("ng-transclude")[0])) {
-                                        $scope.element.find("ng-transclude")[0].children[0].disabled = false;
-                                    }
-                                }, 500);
-                            }
-                        });
-                    }
-                ]
-            }
-        }]
-)
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBlockControlPanel
- * @module itesoft
- * @restrict E
- *
- * @description
- * The Control Panel Block widgets provides a way to activate it-block edition
- *
- * <h1>Translate</h1>
- * ```config
- * GLOBAL.TEMPLATE.BLOCK.EDIT
- * GLOBAL.TEMPLATE.BLOCK.READONLY
- * GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE
- * GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM
- * ```
- *
- * <h1>Config</h1>
- * ```config
- * REST_TEMPLATE_API_URL = template API URL
- * REST_EDITOR_API_URL = editor pilot API URL
- * TEMPLATE_EDITOR_URL = template web editor url
- * ENABLE_TEMPLATE_EDITOR = true if you need to customize your web app
- * ```
- *
- * ```html
- *   <it-block-control-panel ></it-block-control-panel>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div>
- <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
- <it-block-control-panel></it-block-control-panel>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft'])
- .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
-                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": false,
-                "SKIP_LOGIN" : true,
-                "CURRENT_PACKAGE" : "10-PS",
-                "VERSION": "v1",
-            })
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
- ['$scope','$rootScope',
- function($scope,$rootScope) {$rootScope.editSite=true;}]);
- </file>
- </example>
- */
-IteSoft.directive('itBlockControlPanel',
-    [
-        function () {
-            return {
-                restrict: 'EA',
-                scope: true,
-                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="itBlockControlPanelController.editorIsOpen" class="col-xs-12"/> ' +
-                '<div class="block-control-panel-action-container col-xs-12">' +
-                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true" ><i class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false" ><i class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i class="fa fa-stop"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i class="fa fa-play"></i></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><i class="fa fa-floppy-o"></i></a></it-circular-btn>' +
-                '<span ng-if="!itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Press Ctrl and move your mouse over a block)</span>' +
-                '<span ng-if="itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Release Ctrl over an element to select it)</span>' +
-                '</div>' +
-                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
-                '<span class="fa fa-exclamation" aria-hidden="true"></span>' +
-                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
-                '</div>' +
-                '<div class="block-lists"  ng-if="$root.editSite">' +
-                '<div ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
-                ' class="{{itBlockControlPanelController.getClass(block)}}">' +
-                '<div class="block-lists-name">{{block.name}}</div>' +
-                '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i  class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i  class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i  class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>',
-
-                controllerAs: 'itBlockControlPanelController',
-                controller: ['$scope', '$rootScope', '$location', '$log', '$document', '$filter',
-                    'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
-                    function ($scope, $rootScope, $location, $log, $document, $filter,
-                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup, itNotifier) {
-                        var self = this;
-                        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
-                            self.editorIsOpen = false;
-                            self.CONFIG = CONFIG;
-                            self.blocks = [];
-                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/export/' + CONFIG.CURRENT_PACKAGE;
-                            this.refresh = function () {
-                                BlockService.build.get(function () {
-                                    location.reload();
-                                }, function (error) {
-                                    itNotifier.notifyError({
-                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                        dismissOnTimeout: false
-                                    }, error.data.body);
-                                });
-                            };
-                            self.interval = 0;
-                            _options();
-                            PilotSiteSideService.on.pong = function (res) {
-                                $log.debug("pong");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = true;
-                                    _options();
-                                })
-                            };
-
-                            PilotSiteSideService.on.editorConnect = function (res) {
-                                $log.debug("editorConnect");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = true;
-                                    _options();
-                                })
-                            };
-
-                            PilotSiteSideService.on.editorDisconnect = function (res) {
-                                $log.debug("editorDisconnect");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = false;
-                                })
-                            };
-
-                            PilotSiteSideService.on.close = function () {
-                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = false;
-                                })
-                            };
-                            PilotSiteSideService.on.error = function () {
-                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = false;
-                                })
-                            };
-                            PilotSiteSideService.on.transportFailure = function () {
-                                $log.error("websocket api is deconnected, please restart APIs to enable connection");
-                                $scope.$applyAsync(function () {
-                                    self.editorIsOpen = false;
-                                })
-                            };
-
-                            PilotSiteSideService.on.reload = this.refresh;
-
-                            /**
-                             *
-                             */
-                            self.editJS = function () {
-                                $log.debug("edit JS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "js.blocks.js",
-                                    fileType: "js",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.editCSS = function () {
-                                $log.debug("edit CSS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "css.blocks.css",
-                                    fileType: "css",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.addFile = function () {
-                                $log.debug("add File");
-                                PilotSiteSideService.fn.createPage()
-                            };
-
-                            /*
-                             We enable edit mode by default
-                             */
-                            $rootScope.editSite = true;
-                            $rootScope.autoRefreshTemplate = true;
-
-                            /*
-                             Capture du CTRL
-                             */
-                            $document.bind("keydown", function (event) {
-                                if (event.keyCode == 17 && !self.focusable) {
-                                    $document.find("*").addClass("crosshair");
-
-                                    $log.log("keydown");
-                                    self.focusable = true;
-                                    self.blocks = [];
-                                    self.hilightedBlock = undefined;
-                                    self.hilightBlock(undefined);
-                                }
-                            });
-
-                            /**
-                             *
-                             */
-                            $document.bind("keyup", function (event) {
-                                if (event.keyCode == 17 && self.focusable) {
-                                    $log.log("keyup");
-                                    $document.find("*").removeClass("crosshair");
-                                    self.focusable = false;
-                                }
-                            });
-
-                            /*
-                             Catch event send when over block
-                             */
-                            $rootScope.$on("selectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) == -1) {
-                                    self.blocks.push(block)
-                                }
-                            });
-
-                            /**
-                             Catch event send when leave block
-                             */
-                            $rootScope.$on("unSelectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) != -1) {
-                                    self.blocks.splice(self.blocks.indexOf(block), 1);
-                                }
-                            });
-                        }
-
-                        /*
-                         Do block edit action
-                         */
-                        self.editBlock = function (block) {
-                            $log.debug("edit block");
-                            if (angular.isDefined(block.ref) && block.ref != '') {
-                                PilotSiteSideService.fn.editBlock(block, $location.path());
-
-                            } else {
-                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
-                                PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
-                            }
-                        };
-
-                        /**
-                         * Do add block action
-                         * @param block
-                         */
-                        self.addBlock = function (block) {
-                            if (angular.isDefined(block.name) && block.name != '') {
-                                $log.debug("add block");
-                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
-                                PilotSiteSideService.fn.createBlock(addBlock, $location.path());
-                            }
-                        };
-
-                        /**
-                         * Do restore block action
-                         * @param block
-                         */
-                        self.restoreBlock = function (block) {
-                            $log.debug("restore block");
-                            BlockService.restore.get({'name': block.name}, function () {
-                                BlockService.build.get(function () {
-                                    BlockService.build.get(function () {
-                                        if ($rootScope.autoRefreshTemplate) {
-                                            location.reload();
-                                        }
-                                    }, function (error) {
-                                        itNotifier.notifyError({
-                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                            dismissOnTimeout: false
-                                        }, error.data.body);
-                                    })
-                                }, function (error) {
-
-                                    itNotifier.notifyError({
-                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                        dismissOnTimeout: false
-                                    }, error.data.body);
-                                    $log.error("Unable to restore block " + JSON.stringify(block));
-                                })
-                            })
-                        };
-
-                        /**
-                         * Do delete block action
-                         * @param block
-                         */
-                        self.deleteBlock = function (block) {
-                            $log.debug("delete block");
-                            var confirmPopup = itPopup.confirm({
-                                title: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.TITLE' | translate}}",
-                                text: "{{'GLOBAL.TEMPLATE.BLOCK.DELETE.CONFIRM' | translate}}",
-                                buttons: [
-
-                                    {
-                                        text: 'Cancel',
-                                        type: '',
-                                        onTap: function () {
-                                            return false;
-                                        }
-                                    },
-                                    {
-                                        text: 'ok',
-                                        type: '',
-                                        onTap: function () {
-                                            return true;
-                                        }
-                                    }
-                                ]
-                            });
-
-                            confirmPopup.then(function () {
-                                BlockService.all.delete({name: block.name}, function () {
-                                    BlockService.build.get(function () {
-                                        if ($rootScope.autoRefreshTemplate) {
-                                            location.reload();
-                                        }
-                                    }, function (error) {
-                                        itNotifier.notifyError({
-                                            content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                            dismissOnTimeout: false
-                                        }, error.data.body);
-                                    })
-                                }, function (error) {
-                                    itNotifier.notifyError({
-                                        content: $filter('translate')('GLOBAL.TEMPLATE.WS.ERROR'),
-                                        dismissOnTimeout: false
-                                    }, error.data.body);
-                                });
-                            }, function () {
-                                itNotifier.notifyError({
-                                    content: "{{'GLOBAL.TEMPLACE.WS.BLOCK_DELETED_KO' | translate}}"
-                                });
-                            });
-                        };
-
-                        /**
-                         * Do hilight block action (means that user click on block name inside control panel)
-                         * @param block
-                         */
-                        self.hilightBlock = function (block) {
-                            self.hilightedBlock = block;
-                            $rootScope.$emit("hilightBlock", block);
-                        };
-
-                        /**
-                         * Return class to use to display block name
-                         * @param block
-                         * @returns {*}
-                         */
-                        self.getClass = function (block) {
-                            if (self.hilightedBlock && self.hilightedBlock.name == block.name) {
-                                return "block-lists-element-hilight";
-                            } else {
-                                return "";
-                            }
-                        };
-
-
-                        /**
-                         * senf option to editor
-                         * @private
-                         */
-                        function _options() {
-                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
-                        }
-
-                    }
-                ]
-            }
-        }
-    ]
-);
-
-/**
- * Created by stephen on 03/04/2016.
- * Service that pilot editor or web site web socket communication
- */
-
-'use strict';
-
-
-IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
-    function ($resource, $log, CONFIG) {
-
-        var self = this;
-
-        self.ACTION_EDIT_BLOCK = "editBlock";
-        self.ACTION_REMOVE_BLOCK = "removeBlock";
-        self.ACTION_CREATE_BLOCK = "createBlock";
-        self.ACTION_EDIT_PAGE = "editPage";
-        self.ACTION_REMOVE_PAGE = "removePage";
-        self.ACTION_CREATE_PAGE = "createPage";
-        self.ACTION_PING = "ping";
-        self.ACTION_PONG = "pong";
-        self.ACTION_DISCONNECT = "disconnect";
-        self.ACTION_TIMEOUT = "timeout";
-        self.ACTION_CONNECT = "connect";
-        self.ACTION_RELOAD = "reload";
-        self.ACTION_OPTIONS = "options";
-        self.DEST_EDITOR = "editor";
-        self.DEST_SITE = "site";
-        self.DEST_ALL = "all";
-
-        self.fields = {
-            socket: {},
-            request: {
-                url: CONFIG.REST_EDITOR_API_URL,
-                contentType: 'application/json',
-                logLevel: 'debug',
-                transport: 'websocket',
-                trackMessageLength: true,
-                reconnectInterval: 5000,
-                enableXDR: true,
-                timeout: 60000},
-            model: {},
-            dest: ""
-        };
-
-        self.fn = {
-            ping: _ping,
-            pong: _pong
-        };
-        self.on = {
-            message:{},
-            open:undefined,
-            close:undefined,
-            reopen:undefined,
-            transportFailure:undefined,
-            error:undefined
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onOpen = function (response) {
-            self.fields.model.transport = response.transport;
-            self.fields.model.connected = true;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
-            if(angular.isDefined(self.on.open)){
-                self.on.open();
-            }
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onClientTimeout = function (response) {
-            self.fields.model.connected = false;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_TIMEOUT, params: []}));
-            setTimeout(function () {
-                self.fields.socket = atmosphere.subscribe(self.fields.request);
-            }, self.fields.request.reconnectInterval);
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onReopen = function (response) {
-            self.fields.model.connected = true;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest, action: self.ACTION_CONNECT, params: []}));
-            if(angular.isDefined(self.on.reopen)){
-                self.on.reopen();
-            }
-        };
-
-        /**
-         * Long polling Failure mode
-         * @param errorMsg
-         * @param request
-         */
-        self.fields.request.onTransportFailure = function (errorMsg, request) {
-            atmosphere.util.info(errorMsg);
-            request.fallbackTransport = 'long-polling';
-            if(angular.isDefined(self.on.transportFailure)){
-                self.on.transportFailure();
-            }
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onMessage = function (response) {
-            self.on.message(response);
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onClose = function (response) {
-            self.fields.model.connected = false;
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': self.fields.dest,action: self.ACTION_DISCONNECT, params: []}));
-            if(angular.isDefined(self.on.close)){
-                self.on.close();
-            }
-        };
-
-        /**
-         *
-         * @param response
-         */
-        self.fields.request.onError = function (response) {
-            self.fields.model.logged = false;
-            if(angular.isDefined(self.on.error)){
-                self.on.error();
-            }
-        };
-
-        /**
-         *
-         * @param request
-         * @param response
-         */
-        self.fields.request.onReconnect = function (request, response) {
-            self.fields.model.connected = false;
-        };
-
-        /**
-         * Used to test connection between editor and website
-         * @param dest
-         * @private
-         */
-        function _ping(dest) {
-            $log.log("ping "+dest);
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PING, params: []}));
-        }
-
-        /**
-         * Reply to ping
-         * @param dest
-         * @private
-         */
-        function _pong(dest) {
-            $log.log("pong "+dest);
-            self.fields.socket.push(atmosphere.util.stringifyJSON({'dest': dest, action: self.ACTION_PONG, params: []}));
-        }
-
-
-        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
-            self.fields.socket = atmosphere.subscribe(self.fields.request);
-        }
-        return self;
-    }
-]
-)
-;
-
-/**
- * Created by stephen on 03/04/2016.
- * Service that pilot web site to editor communication
- */
-
-'use strict';
-
-IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
-    function ($resource, $log, CONFIG, PilotService) {
-
-        var self = this;
-
-        self.fields = {};
-
-        self.fn = {
-            editBlock: _editBlock,
-            removeBlock: _removeBlock,
-            createBlock: _createBlock,
-            editPage: _editPage,
-            removePage: _removePage,
-            createPage: _createPage,
-            options: _options,
-            ping: PilotService.fn.ping
-        };
-
-        self.on = {
-            reload: undefined,
-            pong: undefined,
-            editorConnect: undefined,
-            editorDisconnect: undefined,
-            close: undefined,
-            reopen: undefined,
-            transportFailure: undefined,
-            error: undefined
-        };
-
-
-        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
-            PilotService.fields.dest = PilotService.DEST_EDITOR;
-
-            // test connection with editor when websocket is open
-            PilotService.on.open = function (response) {
-                $log.log("WebSocket connection is opened");
-                self.fn.ping(PilotService.DEST_EDITOR);
-            };
-
-            PilotService.on.reopen = function (response) {
-                $log.log("WebSocket connection is reopened");
-                self.fn.ping(PilotService.DEST_EDITOR);
-            };
-
-            PilotService.on.close = function () {
-                if (angular.isDefined(self.on.close)) {
-                    self.on.close();
-                }
-            };
-            PilotService.on.error = function () {
-                if (angular.isDefined(self.on.error)) {
-                    self.on.error();
-                }
-            };
-            PilotService.on.transportFailure = function () {
-                if (angular.isDefined(self.on.transportFailure)) {
-                    self.on.transportFailure();
-                }
-            };
-
-            /**
-             * Call when message on websocket
-             * @param response
-             */
-            PilotService.on.message = function (response) {
-                var responseText = response.responseBody;
-                try {
-                    var message = atmosphere.util.parseJSON(responseText);
-
-                    if (message.dest == PilotService.DEST_ALL) {
-                        switch (message.action) {
-                            case PilotService.ACTION_CONNECT:
-                                $log.log(PilotService.ACTION_CONNECT);
-                                if (angular.isDefined(self.on.editorConnect)) {
-                                    self.on.editorConnect();
-                                }
-                                break;
-                            case PilotService.ACTION_DISCONNECT:
-                                $log.log(PilotService.ACTION_DISCONNECT);
-                                if (angular.isDefined(self.on.editorDisconnect)) {
-                                    self.on.editorDisconnect();
-                                }
-                                break;
-                        }
-                    }
-                    if (message.dest == PilotService.DEST_SITE) {
-                        switch (message.action) {
-                            case PilotService.ACTION_RELOAD:
-                                $log.log(PilotService.ACTION_RELOAD);
-                                if (angular.isDefined(self.on.reload)) {
-                                    self.on.reload();
-                                }
-                                break;
-                            case PilotService.ACTION_PING:
-                                $log.log(PilotService.ACTION_PING);
-                                PilotService.pong(PilotService.DEST_EDITOR);
-                                break;
-                            case PilotService.ACTION_PONG:
-                                $log.log(PilotService.ACTION_PONG);
-                                if (angular.isDefined(self.on.pong)) {
-                                    self.on.pong();
-                                }
-                                break;
-                            case PilotService.ACTION_PONG:
-                                $log.log(PilotService.ACTION_PONG);
-                                if (angular.isDefined(self.on.pong)) {
-                                    self.on.pong();
-                                }
-                                break;
-                            case PilotService.ACTION_DISCONNECT:
-                                $log.log(PilotService.ACTION_DISCONNECT);
-                                if (angular.isDefined(self.on.editorDisconnect)) {
-                                    self.on.editorDisconnect();
-                                }
-                                break;
-                            case PilotService.ACTION_CONNECT:
-                                $log.log(PilotService.ACTION_CONNECT);
-                                if (angular.isDefined(self.on.editorConnect)) {
-                                    self.on.editorConnect();
-                                }
-                                break;
-                        }
-                    }
-                } catch (e) {
-                    $log.error("Error parsing JSON: ", responseText);
-                    throw e;
-                }
-            };
-        }
-
-        /**
-         * Call when click on edit block
-         * @param block
-         * @param path
-         * @private
-         */
-        function _editBlock(block, path) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_EDIT_BLOCK,
-                params: [{'block': block, 'path': path}]
-            }));
-        }
-
-        /**
-         * Call when click on remove block
-         * @param block
-         * @param path
-         * @private
-         */
-        function _removeBlock(block, path) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_REMOVE_BLOCK,
-                params: [{'block': block, 'path': path}]
-            }));
-        }
-
-        /**
-         * Call when click on create block
-         * @param block
-         * @param path
-         * @private
-         */
-        function _createBlock(block, path) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_CREATE_BLOCK,
-                params: [{'block': block, 'path': path}]
-            }));
-        }
-
-        /**
-         * Call when click on edit page
-         * @param page
-         * @private
-         */
-        function _editPage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_EDIT_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        /**
-         * Call when click on remove page
-         * @param page
-         * @private
-         */
-        function _removePage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_REMOVE_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        /**
-         * Call when click on create page
-         * @param page
-         * @private
-         */
-        function _createPage(page) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_CREATE_PAGE,
-                params: [{'page': page}]
-            }));
-        }
-
-        function _options(options) {
-            PilotService.fields.socket.push(atmosphere.util.stringifyJSON({
-                dest: PilotService.DEST_EDITOR,
-                action: PilotService.ACTION_OPTIONS,
-                params: [{'options': options}]
-            }));
-        }
-
-        return self;
-    }
-]);
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itLanguageChangeHandler
- * @module itesoft
- * @since 1.1
- * @requires localStorageService
- * @requires itPopup
- *
- * @description
- * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
- * <br/>1) Asks confirmation (optional) before changing the language;
- * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
- * <br/>3) Allows the consuming service to receive returned results by a callback method.
- * <br/>
- * <table class="table">
- *  <tr>
- *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
- *   <td>Method to change the current language.
- *    <br/>lang (required). The new language culture, e.g. "en_GB".
- *    <br/>scope (optional). The current scope.
- *    <br/>callback (optional). The callback function.
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
- *   <td>Method to get the current configuration options.
- *   <br />storage: local (default value) for localStorage or query for url query parameter
- *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
- *   <br />onChangePopup:
- *   <br />title: title of popup confirmation
- *   <br />text: text of popup confirmation
- *   <br />buttonCancelLabel: label text for the cancel button
- *   <br />buttonOkLabel: label text for the ok button
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
- *   <td>Method to get the current language.</td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
- *   <td>Method to get the default locale from an optional language code.
- *    <br/>lang (optional). The language code, e.g. "en".
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
- *   <td>Method to get the language code from an optional locale.
- *    <br/>locale (optional). The locale, e.g. "en_GB".
- *   </td>
- *  </tr>
- * </table>
- *
- * @example
- <example module="itesoft">
-
- <file name="Controller.js">
-    angular.module('itesoft')
-        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
-                    // example for storage option configuration value
-                    itLanguageChangeHandlerProvider.options.storage = "local";
-                     
-                    localStorageServiceProvider.setPrefix('itesoft');
-
-                }])
-        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
-            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
-
-            // new language setting returned by a callback function.
-            var languageChanged = function(data){
-              $scope.currentLanguage = data.currentLanguage;
-            };
-        
-            $scope.changeLanguage = function(){
-              if($scope.locale) {
-                
-                // new language setting returned by a promise.
-                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
-              }
-            }
-        }]);
- </file>
- <file name="index.html">
- <div ng-controller="MainController">
-    <br /> Set language: <input type="text" ng-model="locale" /> 
-    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
-
-    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
-    <br /> Initial language: {{initialLanguage}}
-    <br /> Updated current language: {{currentLanguage}}
-</div>
- </file>
- </example>
- */
-IteSoft.provider('itLanguageChangeHandler', function () {
-    var self = this;
-    this.options = {
-        storage: 'local', //local for localStorage or query for url query parameter
-        displayConfirm: true,// true | false
-        onChangePopup: {
-            title: "Confirm language change",
-            text: "By modifying the language any recent changes may be lost. Continue?",
-            buttonCancelLabel: 'NO',
-            buttonOkLabel: 'YES'
-        }
-    };
-
-    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
-        return {
-            translate: $translate,
-            getConfig: function () {
-                return self.options;
-            },
-            changeLanguage: function (lang, scope, callback) {
-                var data = {
-                    currentLanguage:
-                        this.getCurrentLanguage()
-                };
-                if (self.options.displayConfirm) {
-                    $translate.use(lang);
-                    var confirmPopup = itPopup.confirm({
-                        title: self.options.onChangePopup.title,
-                        text: self.options.onChangePopup.text,
-                        cancelText: self.options.onChangePopup.buttonCancelLabel,
-                        okText: self.options.onChangePopup.buttonOkLabel
-                    });
-                    (function (data) {
-                        var locale = data;
-                        confirmPopup.then(function (res) {
-                            //Traduction
-                            $translate.use(lang);
-
-                            if (self.options.storage === 'query') {
-
-                                try {
-                                    $location.search('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-                            else {
-                                // Save to local storage
-                                try {
-                                    localStorageService.set('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-
-                            // Change language to chosen language.
-                            if (scope) {
-                                scope.currentLanguage = lang;
-                                if (scope.user) {
-                                    scope.user.language = $translate.use();
-                                }
-                            }
-
-                            data = {
-                                currentLanguage: lang,
-                            };
-
-                            if (callback) {
-                                callback(data);
-                            }
-
-                            //Reload de la page
-                            $rootScope.$applyAsync(function () {
-                                location.reload();
-                            });
-
-                        }, function () {
-                            $translate.use(locale.currentLanguage);
-                        });
-                    })(data);
-                }
-                return;
-            },
-            getCurrentLanguage: function () {
-                if (self.options.storage === 'query') {
-                    if ($location.search().Locale) {
-                        return $location.search().Locale.replace(/-/g, '_');
-                    } 
-                    else {
-                        return this.getDefaultLocale(this.translate.use());
-                    }
-                }
-                else {
-                    // load from local storage
-                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
-                }
-            },
-            getDefaultLocale: function (lang) {
-                if (!lang) {
-                    lang = $translate.preferredLanguage();
-                }
-
-                switch (lang) {
-                    case "en":
-                        return "en_GB";
-                    case "de":
-                        return "de_DE";
-                    default:
-                    case "fr":
-                        return "fr_FR";
-                }
-            },
-            getLanguageCode: function (locale) {
-                switch (locale) {
-                    case "en_GB":
-                    case "en-GB":
-                    case "en_US":
-                    case "en-US":
-                        return "en";
-                    case "de_DE":
-                    case "de-DE":
-                        return "de";
-                    default:
-                    case "fr_FR":
-                    case "fr-FR":
-                    case "fr_CA":
-                    case "fr-CA":
-                        return "fr";
-                }
-            }
-        }
-    }];
-});
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itNotifier
- * @module itesoft
- * @since 1.1
- * @requires ngToast
- * @requires $rootScope
- * @requires $log
- *
- * @description
- * Simple notifier service, that display toasters.
- *
- * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>additionalClasses</code></td>
- *     <td>''</td>
- *     <td>Allows to add some classes to the current ngToast</td>
- * </tr>
- * <tr>
- *     <td><code>animation</code></td>
- *     <td>'fade'</td>
- *     <td>Adds an openning/ending animation, for example 'fade'</td>
- * </tr>
- * <tr>
- *     <td><code>className</code></td>
- *     <td>"success"</td>
- *     <td>The className of the toast message</td>
- * </tr>
- * <tr>
- *     <td><code>content</code></td>
- *     <td>''</td>
- *     <td>Content of the toast message as String (HTML compliant)</td>
- * </tr>
- * <tr>
- *     <td><code>combineDuplications</code></td>
- *     <td>false</td>
- *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
- * </tr>
- * <tr>
- *     <td><code>compileContent</code></td>
- *     <td>false</td>
- *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnTimeout</code></td>
- *     <td>true</td>
- *     <td>Automatically remove toast message after specific time</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButton:</code></td>
- *     <td>true</td>
- *     <td>Adds close button on toast message</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButtonHtml</code></td>
- *     <td>"&#38;times;"</td>
- *     <td>Html of close button</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnClick</code></td>
- *     <td>false</td>
- *     <td>Allows to remove toast message with a click</td>
- * </tr>
- * <tr>
- *     <td><code>horizontalPosition</code></td>
- *     <td>"right"</td>
- *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
- * </tr>
- * <tr>
- *     <td><code>maxNumber</code></td>
- *     <td>0</td>
- *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
- * </tr>
- * <tr>
- *     <td><code>timeout</code></td>
- *     <td>4000</td>
- *     <td>Timer for remove toast message</td>
- * </tr>
- * <tr>
- *     <td><code>verticalPosition</code></td>
- *     <td>"bottom"</td>
- *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
- * </tr>
- * </table>
- * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
- *
- * Overload of defaults options value for each type of toasts are :
- * <ul>
- * <li>success:{dismissOnClick: true}</li>
- * <li>info:{dismissOnClick: true}</li>
- * <li>error:{dismissOnTimeout: false}</li>
- * <li>warning:{dismissOnTimeout: false}</li>
- * </ul>
- * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
- * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
- *
- *
- * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Possible value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td>CODE</td>
- *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
- *     <td>The code bounds to the status of the action</td>
- * </tr>
- * <tr>
- *     <td>TYPE</td>
- *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
- *     <td>The type message received</td>
- * </tr>
- * <tr>
- *     <td>MESSAGE</td>
- *     <td></td>
- *     <td>The message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DETAIL</td>
- *     <td></td>
- *     <td>The detail of the message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DONE</td>
- *     <td>TRUE("1"), FALSE("0");</td>
- *     <td>A boolean that decribes the final result of the request</td>
- * </tr>
- * </table>
- * <br/>
- *
- * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
- *
- * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
- * @example
-     <example module="itesoft">
-
-         <file name="Controller.js">
-
-            angular.module('itesoft')
-                .config(['itNotifierProvider', function (itNotifierProvider) {
-                    //configuration of default values
-                    itNotifierProvider.defaultOptions = {
-                        dismissOnTimeout: true,
-                        timeout: 4000,
-                        dismissButton: true,
-                        animation: 'fade',
-                        horizontalPosition: 'right',
-                        verticalPosition: 'bottom',
-                        compileContent: true,
-                        dismissOnClick: false,
-                        success:{dismissOnClick: true},//optional overload behavior toast success
-                        info:{dismissOnClick: true},//optional overload behavior toast info
-                        error:{dismissOnTimeout: false},//optional overload behavior toast error
-                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-                    };
-
-                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
-                    $scope.showSuccess = function(){
-                        itNotifier.notifySuccess({
-                        content: "Success popup"
-                        });
-                    };
-                    $scope.showSuccessEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                            type: "SUCCESS",
-                            options: {
-                                content : "Success event popup"
-                            }}
-                         );
-                    };
-                    $scope.showError = function(){
-                        itNotifier.notifyError({
-                            content: "Error popup",
-                            dismissOnTimeout: false
-                        },
-                        {
-                            CODE:500,
-                            TYPE:'error',
-                            MESSAGE:'Something bad happened',
-                            DETAIL:'You don\'t wanna know',
-                            DONE:1
-                        });
-                    };
-                    $scope.showErrorOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "ERROR",
-                        options: {
-                                content : "error event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:500,
-                                TYPE:'error',
-                                MESSAGE:'Something bad happened',
-                                DETAIL:'You don\'t wanna know',
-                                DONE:1
-                            }
-                        });
-                    }
-                    $scope.showInfo = function(){
-                        itNotifier.notifyInfo({
-                        content: "Information popup"
-                        });
-                    };
-                    $scope.showWarningOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "WARNING",
-                        options: {
-                                content : "Warning event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:1000,
-                                TYPE:'warning',
-                                MESSAGE:'The request is empty',
-                                DETAIL:'Nothing',
-                                DONE:1
-                            }
-                        });
-                    };
-                    $scope.dismiss = function(){
-                        itNotifier.notifyDismiss();
-                        $scope.$emit('itNotifierEvent',{
-                            type:"DISMISS"
-                        });
-                    };
-                    $scope.dismissOnEvent = function(){
-                        $scope.$emit("$locationChangeSuccess");
-
-                    };
-                }]);
-         </file>
-         <file name="index.html">
-             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-             <div ng-controller="NotifierCtrl">
-                 <button class="btn btn-success" ng-click="showSuccess()">
-                    Success
-                 </button>
-                 <button class="btn btn-success" ng-click="showSuccessEvent()">
-                    Success on event
-                 </button>
-                 <button class="btn btn-danger" ng-click="showError()">
-                    Error
-                 </button>
-                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
-                    Error on event
-                 </button>
-                 <button class="btn btn-info" ng-click="showInfo()">
-                    Info
-                 </button>
-                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
-                    Warning
-                 </button>
-                 <button class="btn btn-success" ng-click="dismiss()">
-                    Dismiss all popups
-                 </button>
-                 <button class="btn btn-success" ng-click="dismissOnEvent()">
-                    Dismiss on Change location event
-                 </button>
-             </div>
-         </file>
-     </example>
- **/
-IteSoft.provider('itNotifier', [ function () {
-
-    var self = this;
-
-    //default behaviors
-    self.defaultOptions = {
-        dismissOnTimeout: true,
-        timeout: 4000,
-        dismissButton: true,
-        animation: 'fade',
-        horizontalPosition: 'right',
-        verticalPosition: 'bottom',
-        compileContent: true,
-        dismissOnClick: false,
-        success:{dismissOnClick: true},//optional overload behavior toast success
-        info:{dismissOnClick: true},//optional overload behavior toast info
-        error:{dismissOnTimeout: false},//optional overload behavior toast error
-        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-    };
-
-    //provide get method to build provider
-    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
-
-        // service declaration
-        var itNotifier = {};
-
-        //configuration of the ngToast
-        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
-
-        /**
-         * Private method that format error details message
-         * @param errorDetails
-         * @returns {string}
-         * @private
-         */
-        function _formatErrorDetails(errorDetails){
-            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
-        }
-
-        /** method declaration**/
-        /**
-         * Display a toast configure as success element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifySuccess= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
-            ngToast.success(localOptions);
-            if(errorDetails != undefined) {
-                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as error element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyError= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
-
-            ngToast.danger(localOptions);
-            if(errorDetails != undefined) {
-                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as info element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyInfo= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
-
-            ngToast.info(localOptions);
-            if(errorDetails != undefined) {
-                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as warning element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyWarning= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
-
-            ngToast.warning(localOptions);
-            if(errorDetails != undefined) {
-                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Dismiss all toaster
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyDismiss= function (options,errorDetails) {
-            ngToast.dismiss();
-        };
-        /**
-         * Log an error because this type is unknown
-         * @param options
-         */
-        itNotifier.notify= function (options) {
-            $log.error('Unknown type for itNotifier: '+options )
-        }
-
-        /** events declaration **/
-
-        /**
-         * Listen an event and dismiss all toaster
-         */
-        $rootScope.$on("$locationChangeSuccess", function () {
-            // Remove all currently display toaster messages.
-            itNotifier.notifyDismiss();
-        });
-
-        /**
-         * Listen an event and display associated toast depending on his type
-         */
-        $rootScope.$on("itNotifierEvent",function(event, args){
-            //Handle event and calls appropriate method depending on the type of request
-            if (args) {
-                switch (args.type) {
-                    case "SUCCESS":
-                        itNotifier.notifySuccess(args.options,args.errorDetails);
-                        break;
-                    case "ERROR":
-                        itNotifier.notifyError(args.options,args.errorDetails);
-                        break;
-                    case "INFO":
-                        itNotifier.notifyInfo(args.options,args.errorDetails);
-                        break;
-                    case "WARNING":
-                        itNotifier.notifyWarning(args.options,args.errorDetails);
-                        break;
-                    case "DISMISS":
-                        itNotifier.notifyDismiss(args.options,args.errorDetails);
-                        break;
-                    default:
-                        itNotifier.notify(args.type);
-                        break;
-                }
-            }
-            else{
-                $log.error('Bad usage of itNotifier. Check manual for details');
-            }
-        });
-        return itNotifier;
-    }];
-}]);
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
-
-'use strict';
-/**
  * TODO Image implementation desc
  */
 itImageViewer
@@ -8492,743 +8401,6 @@ itImageViewer.directive('itImageViewer', ['$sce', function($sce){
         link: linker
     };
 }]);
-
-'use strict';
-/**
- * TODO itProgressbarViewer desc
- */
-itMultiPagesViewer.directive('itProgressbarViewer', [function(){
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="loader" >' +
-        '<div class="progress-bar">' +
-        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
-        '</div>' +
-        '</div>'
-    };
-}]);
-'use strict';
-/**
- * TODO itToolbarViewer desc
- */
-itMultiPagesViewer.directive('itToolbarViewer', [function(){
-    var linker = function (scope, element, attrs) {
-
-        scope.$watch("api.getZoomLevel()", function (value) {
-            scope.scale = value;
-        });
-
-        scope.$watch("api.getCurrentPage()", function (value) {
-            scope.currentPage = value;
-        });
-
-        scope.onZoomLevelChanged = function() {
-            scope.api.zoomTo(scope.scale);
-        };
-
-        scope.onPageChanged = function() {
-            scope.api.goToPage(scope.currentPage);
-        };
-
-        scope.zoomIn = function() {
-            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-
-        scope.zoomOut = function() {
-            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-    };
-
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
-        '</select> ' +
-        '<button ng-click="zoomIn()">+</button> ' +
-        '</div>' +
-
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span>' +
-        '</div>' +
-        '</div>',
-        link: linker
-    };
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesConstants desc
- */
-itMultiPagesViewer.constant("MultiPagesConstants", {
-    PAGE_RENDER_FAILED : -1,
-    PAGE_RENDER_CANCELLED : 0,
-    PAGE_RENDERED : 1,
-    PAGE_ALREADY_RENDERED : 2,
-    ZOOM_LEVELS_LUT : [
-        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
-        2.0, 2.2, 2.4, 2.6, 2.8,
-        3.0, 3.3, 3.6, 3.9,
-        4.0, 4.5,
-        5.0],
-    ZOOM_FIT_WIDTH : "fit_width",
-    ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
-})
-
-'use strict';
-/**
- * TODO MultiPagesPage desc
- */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
-
-    function MultiPagesPage(pageIndex, view) {
-        this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page'></div>");
-        this.container.attr("id", "page_" + pageIndex);
-
-        this.canvasRendered = false;
-        this.rendered = false;
-
-        //transform
-        this.view = view;
-
-    }
-
-    MultiPagesPage.prototype = {
-        clear: function () {
-            this.rendered = false;
-            this.container.empty();
-        },
-        getViewport: function (scale) {
-            return new PageViewport(this.view, scale, 0, 0, 0);
-        },
-        resize: function (scale) {
-            this.viewport = this.getViewport(scale);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
-
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
-        },
-        isVisible: function () {
-            var pageContainer = this.container[0];
-            var parentContainer = this.container.parent()[0];
-
-            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-            var pageBottom = pageTop + pageContainer.offsetHeight;
-
-            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
-        },
-        render: function (callback) {
-            throw "NotImplementedError - render";
-        }
-    };
-
-    return (MultiPagesPage);
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesViewer desc
- */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
-    function getElementInnerSize(element, margin) {
-        var tallTempElement = angular.element("<div></div>");
-        tallTempElement.css("height", "10000px");
-
-        element.append(tallTempElement);
-
-        var w = tallTempElement[0].offsetWidth;
-
-        tallTempElement.remove();
-
-        var h = element[0].offsetHeight;
-        if(h === 0) {
-            // TODO: Should we get the parent height?
-            h = 2 * margin;
-        }
-
-        w -= 2 * margin;
-        h -= 2 * margin;
-
-        return {
-            width: w,
-            height: h
-        };
-    }
-
-    function MultiPagesViewer(api, element) {
-        this.pages = [];
-        this.scaleItem = null;
-        this.fitWidthScale = 1.0;
-        this.fitHeightScale = 1.0;
-        this.fitPageScale = 1.0;
-        this.element = element;
-        this.pageMargin = 0;
-        this.currentPage = 0;
-        this.lastScrollDir = 0;
-
-        this.api = api;
-
-        // Hooks for the client...
-        this.onPageRendered = null;
-        this.onDataDownloaded = null;
-        this.onCurrentPageChanged = null;
-    }
-
-    MultiPagesViewer.prototype = {
-        getAPI: function () {
-            return this.api;
-        },
-        setContainerSize: function (initialScale) {
-            if(this.pages.length > 0){
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.api.zoomLevels = [];
-                var lastScale = 0.1;
-                do {
-                    var curScale = this.api.getNextZoomInScale(lastScale);
-                    if(curScale.value=== lastScale) {
-                        break;
-                    }
-
-                    if(curScale.value === 100){
-                        this.defaultScale = curScale;
-                    }
-
-                    if(this.scaleItem == undefined && curScale.id === initialScale){
-                        this.scaleItem = curScale;
-                    }
-
-                    this.api.zoomLevels.push(curScale);
-
-                    lastScale = curScale.value;
-                } while(true);
-
-                this.setScale(this.scaleItem);
-            }
-        },
-        setScale: function (scaleItem) {
-            if(scaleItem != undefined) {
-                this.scaleItem = scaleItem;
-            }
-            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
-
-            var numPages = this.pages.length;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                // Clear the page's contents...
-                this.pages[iPage].clear();
-
-                // Resize to current scaleItem...
-                this.pages[iPage].resize(si.value);
-            }
-
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
-        },
-        calcScale: function (desiredScale) {
-            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
-                // Find the widest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxWidth = this.pages[0].getViewport(1.0).width;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
-                }
-
-                return this.containerSize.width / maxWidth;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
-                // Find the highest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var maxHeight = this.pages[0].getViewport(1.0).height;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
-                }
-
-                return this.containerSize.height / maxHeight;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
-                // Find the smaller dimension of the container and fit the 1st page to it.
-                var page0Viewport = this.pages[0].getViewport(1.0);
-
-                if(this.containerSize.height < this.containerSize.width) {
-                    return this.containerSize.height / page0Viewport.height;
-                }
-
-                return this.containerSize.width / page0Viewport.width;
-            }
-
-            var scale = parseFloat(desiredScale);
-            if(isNaN(scale)) {
-                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
-                return 1.0;
-            }
-
-            return scale;
-        },
-        removeDistantPages: function (curPageID, distance) {
-            var numPages = this.pages.length;
-
-            var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
-
-            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
-                this.pages[iPage].clear();
-            }
-
-            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
-                this.pages[iPage].clear();
-            }
-        },
-        renderAllVisiblePages: function (scrollDir) {
-            if(scrollDir != undefined){
-                this.lastScrollDir = scrollDir;
-            }
-
-            var self = this;
-            var numPages = this.pages.length;
-            var currentPageID = 0;
-            var atLeastOnePageInViewport = false;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-
-                if(page.isVisible()) {
-                    var parentContainer = page.container.parent()[0];
-                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
-                    if(pageTop <= parentContainer.offsetHeight / 2) {
-                        currentPageID = iPage;
-                    }
-
-                    atLeastOnePageInViewport = true;
-                    page.render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                } else {
-                    if(atLeastOnePageInViewport) {
-                        break;
-                    }
-                }
-            }
-
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = currentPageID + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
-            }
-
-            this.removeDistantPages(currentPageID, 2);
-
-            this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
-                this.onCurrentPageChanged( currentPageID + 1);
-            }
-        },
-        hookScope: function(scope, initialScale) {
-            var self = this;
-            var lastScrollY = 0;
-            var watcher = new SizeWatcher(self.element[0], 200);
-            scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(initialScale);
-            });
-
-            var onProgress = function(operation, state, value, total, message) {
-                if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
-                    }
-                    else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
-                    }
-                }
-                else if (operation === "download" && state === "loading") {
-                    self.api.downloadProgress = (value / total) * 100.0;
-                }
-                else {
-                    if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
-                    }
-                }
-            };
-
-            scope.onPageRendered = function(status, pageID, numPages, message) {
-                onProgress("render", status, pageID, numPages, message);
-            };
-
-            scope.onDataDownloaded = function(status, loaded, total, message) {
-                onProgress("download", status, loaded, total, message);
-            };
-
-            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
-            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
-
-            scope.$on('$destroy', function() {
-                if(self.onDestroy != null){
-                    try	{
-
-                    }catch (ex)
-                    {
-                        $log.log(ex);
-                    }
-                    self.onDestroy();
-                }
-                watcher.cancel();
-                self.element.empty();
-                $log.debug("viewer destroyed");
-            });
-
-            self.element.bind("scroll", function(event) {
-                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
-                scope.scrollTimeout = $timeout(function() {
-                    var scrollTop = self.element[0].scrollTop;
-
-                    var scrollDir = scrollTop - lastScrollY;
-                    lastScrollY = scrollTop;
-
-                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
-                    self.renderAllVisiblePages(normalizedScrollDir);
-                }, 350);
-            });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
-        }
-    };
-
-    return (MultiPagesViewer);
-}]);
-'use strict';
-/**
- * TODO MultiPagesViewerAPI desc
- */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-
-        function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
-
-        MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
-            }
-        };
-
-        return (MultiPagesViewerAPI);
-    }]);
-
-'use strict';
-/**
- * TODO PageViewport desc
- */
-itMultiPagesViewer.factory('PageViewport', [function() {
-
-        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
-            this.viewBox = viewBox;
-            this.scale = scale;
-            this.rotation = rotation;
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-
-            // creating transform to convert pdf coordinate system to the normal
-            // canvas like coordinates taking in account scale and rotation
-            var centerX = (viewBox[2] + viewBox[0]) / 2;
-            var centerY = (viewBox[3] + viewBox[1]) / 2;
-            var rotateA, rotateB, rotateC, rotateD;
-            rotation = rotation % 360;
-            rotation = rotation < 0 ? rotation + 360 : rotation;
-            switch (rotation) {
-                case 180:
-                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
-                    break;
-                case 90:
-                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
-                    break;
-                case 270:
-                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
-                    break;
-                //case 0:
-                default:
-                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
-                    break;
-            }
-
-            if (dontFlip) {
-                rotateC = -rotateC; rotateD = -rotateD;
-            }
-
-            var offsetCanvasX, offsetCanvasY;
-            var width, height;
-            if (rotateA === 0) {
-                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
-                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
-                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
-            } else {
-                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
-                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
-                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
-            }
-            // creating transform for the following operations:
-            // translate(-centerX, -centerY), rotate and flip vertically,
-            // scale, and translate(offsetCanvasX, offsetCanvasY)
-            this.transform = [
-                rotateA * scale,
-                rotateB * scale,
-                rotateC * scale,
-                rotateD * scale,
-                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
-                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
-            ];
-
-            this.width = width;
-            this.height = height;
-            this.fontScale = scale;
-        }
-        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
-            /**
-             * Clones viewport with additional properties.
-             * @param args {Object} (optional) If specified, may contain the 'scale' or
-             * 'rotation' properties to override the corresponding properties in
-             * the cloned viewport.
-             * @returns {PDFJS.PageViewport} Cloned viewport.
-             */
-            clone: function PageViewPort_clone(args) {
-                args = args || {};
-                var scale = 'scale' in args ? args.scale : this.scale;
-                var rotation = 'rotation' in args ? args.rotation : this.rotation;
-                return new PageViewport(this.viewBox.slice(), scale, rotation,
-                    this.offsetX, this.offsetY, args.dontFlip);
-            },
-            /**
-             * Converts PDF point to the viewport coordinates. For examples, useful for
-             * converting PDF location into canvas pixel coordinates.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the viewport coordinate space.
-             * @see {@link convertToPdfPoint}
-             * @see {@link convertToViewportRectangle}
-             */
-            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
-                return Util.applyTransform([x, y], this.transform);
-            },
-            /**
-             * Converts PDF rectangle to the viewport coordinates.
-             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
-             * @returns {Array} Contains corresponding coordinates of the rectangle
-             * in the viewport coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToViewportRectangle:
-                function PageViewport_convertToViewportRectangle(rect) {
-                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
-                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
-                    return [tl[0], tl[1], br[0], br[1]];
-                },
-            /**
-             * Converts viewport coordinates to the PDF location. For examples, useful
-             * for converting canvas pixel location into PDF one.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the PDF coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
-                return Util.applyInverseTransform([x, y], this.transform);
-            }
-        };
-
-        return (PageViewport);
-    }]);
-
-'use strict';
-/**
- * TODO SizeWatcher desc
- */
-itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
-        return function (element, rate) {
-            var self = this;
-            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
-            self.monitor = $interval(self.update, rate);
-            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
-            self.cancel = function() { $interval.cancel(self.monitor); };
-        };
-    }]);
 
 'use strict';
 /**
@@ -10312,5 +9484,742 @@ itTiffViewer
                     scope.onFileChanged();
                 });
             }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO itProgressbarViewer desc
+ */
+itMultiPagesViewer.directive('itProgressbarViewer', [function(){
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="loader" >' +
+        '<div class="progress-bar">' +
+        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
+        '</div>' +
+        '</div>'
+    };
+}]);
+'use strict';
+/**
+ * TODO itToolbarViewer desc
+ */
+itMultiPagesViewer.directive('itToolbarViewer', [function(){
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("api.getZoomLevel()", function (value) {
+            scope.scale = value;
+        });
+
+        scope.$watch("api.getCurrentPage()", function (value) {
+            scope.currentPage = value;
+        });
+
+        scope.onZoomLevelChanged = function() {
+            scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onPageChanged = function() {
+            scope.api.goToPage(scope.currentPage);
+        };
+
+        scope.zoomIn = function() {
+            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+
+        scope.zoomOut = function() {
+            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
+            scope.api.zoomTo(nextScale);
+            scope.scale = nextScale;
+        };
+    };
+
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="toolbar">' +
+        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+        '<button ng-click="zoomOut()">-</button> ' +
+        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
+        '</select> ' +
+        '<button ng-click="zoomIn()">+</button> ' +
+        '</div>' +
+
+        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+        '<span>Page : </span>' +
+        '<button ng-click="api.goToPrevPage()"><</button> ' +
+        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+        '<button ng-click="api.goToNextPage()">></button> ' +
+        '<span> of {{api.getNumPages()}}</span>' +
+        '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesConstants desc
+ */
+itMultiPagesViewer.constant("MultiPagesConstants", {
+    PAGE_RENDER_FAILED : -1,
+    PAGE_RENDER_CANCELLED : 0,
+    PAGE_RENDERED : 1,
+    PAGE_ALREADY_RENDERED : 2,
+    ZOOM_LEVELS_LUT : [
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
+        2.0, 2.2, 2.4, 2.6, 2.8,
+        3.0, 3.3, 3.6, 3.9,
+        4.0, 4.5,
+        5.0],
+    ZOOM_FIT_WIDTH : "fit_width",
+    ZOOM_FIT_PAGE : "fit_page",
+    ZOOM_FIT_HEIGHT : "fit_height"
+})
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+
+    function MultiPagesPage(pageIndex, view) {
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page'></div>");
+        this.container.attr("id", "page_" + pageIndex);
+
+        this.canvasRendered = false;
+        this.rendered = false;
+
+        //transform
+        this.view = view;
+
+    }
+
+    MultiPagesPage.prototype = {
+        clear: function () {
+            this.rendered = false;
+            this.container.empty();
+        },
+        getViewport: function (scale) {
+            return new PageViewport(this.view, scale, 0, 0, 0);
+        },
+        resize: function (scale) {
+            this.viewport = this.getViewport(scale);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
+
+            this.container.css("width", this.viewport.width + "px");
+            this.container.css("height", this.viewport.height + "px");
+        },
+        isVisible: function () {
+            var pageContainer = this.container[0];
+            var parentContainer = this.container.parent()[0];
+
+            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+            var pageBottom = pageTop + pageContainer.offsetHeight;
+
+            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+        },
+        render: function (callback) {
+            throw "NotImplementedError - render";
+        }
+    };
+
+    return (MultiPagesPage);
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesViewer desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+    function getElementInnerSize(element, margin) {
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
+
+        element.append(tallTempElement);
+
+        var w = tallTempElement[0].offsetWidth;
+
+        tallTempElement.remove();
+
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
+
+        w -= 2 * margin;
+        h -= 2 * margin;
+
+        return {
+            width: w,
+            height: h
+        };
+    }
+
+    function MultiPagesViewer(api, element) {
+        this.pages = [];
+        this.scaleItem = null;
+        this.fitWidthScale = 1.0;
+        this.fitHeightScale = 1.0;
+        this.fitPageScale = 1.0;
+        this.element = element;
+        this.pageMargin = 0;
+        this.currentPage = 0;
+        this.lastScrollDir = 0;
+
+        this.api = api;
+
+        // Hooks for the client...
+        this.onPageRendered = null;
+        this.onDataDownloaded = null;
+        this.onCurrentPageChanged = null;
+    }
+
+    MultiPagesViewer.prototype = {
+        getAPI: function () {
+            return this.api;
+        },
+        setContainerSize: function (initialScale) {
+            if(this.pages.length > 0){
+                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                this.api.zoomLevels = [];
+                var lastScale = 0.1;
+                do {
+                    var curScale = this.api.getNextZoomInScale(lastScale);
+                    if(curScale.value=== lastScale) {
+                        break;
+                    }
+
+                    if(curScale.value === 100){
+                        this.defaultScale = curScale;
+                    }
+
+                    if(this.scaleItem == undefined && curScale.id === initialScale){
+                        this.scaleItem = curScale;
+                    }
+
+                    this.api.zoomLevels.push(curScale);
+
+                    lastScale = curScale.value;
+                } while(true);
+
+                this.setScale(this.scaleItem);
+            }
+        },
+        setScale: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.scaleItem = scaleItem;
+            }
+            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+
+            var numPages = this.pages.length;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                // Clear the page's contents...
+                this.pages[iPage].clear();
+
+                // Resize to current scaleItem...
+                this.pages[iPage].resize(si.value);
+            }
+
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        calcScale: function (desiredScale) {
+            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                // Find the widest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxWidth = this.pages[0].getViewport(1.0).width;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                }
+
+                return this.containerSize.width / maxWidth;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                // Find the highest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var maxHeight = this.pages[0].getViewport(1.0).height;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                }
+
+                return this.containerSize.height / maxHeight;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                // Find the smaller dimension of the container and fit the 1st page to it.
+                var page0Viewport = this.pages[0].getViewport(1.0);
+
+                if(this.containerSize.height < this.containerSize.width) {
+                    return this.containerSize.height / page0Viewport.height;
+                }
+
+                return this.containerSize.width / page0Viewport.width;
+            }
+
+            var scale = parseFloat(desiredScale);
+            if(isNaN(scale)) {
+                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                return 1.0;
+            }
+
+            return scale;
+        },
+        removeDistantPages: function (curPageID, distance) {
+            var numPages = this.pages.length;
+
+            var firstActivePageID = Math.max(curPageID - distance, 0);
+            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+
+            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                this.pages[iPage].clear();
+            }
+
+            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                this.pages[iPage].clear();
+            }
+        },
+        renderAllVisiblePages: function (scrollDir) {
+            if(scrollDir != undefined){
+                this.lastScrollDir = scrollDir;
+            }
+
+            var self = this;
+            var numPages = this.pages.length;
+            var currentPageID = 0;
+            var atLeastOnePageInViewport = false;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+
+                if(page.isVisible()) {
+                    var parentContainer = page.container.parent()[0];
+                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
+                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                        currentPageID = iPage;
+                    }
+
+                    atLeastOnePageInViewport = true;
+                    page.render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                } else {
+                    if(atLeastOnePageInViewport) {
+                        break;
+                    }
+                }
+            }
+
+            if(this.lastScrollDir !== 0) {
+                var nextPageID = currentPageID + this.lastScrollDir;
+                if(nextPageID >= 0 && nextPageID < numPages) {
+                    this.pages[nextPageID].render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                }
+            }
+
+            this.removeDistantPages(currentPageID, 2);
+
+            this.currentPage = currentPageID + 1;
+            if(this.onCurrentPageChanged){
+                this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        hookScope: function(scope, initialScale) {
+            var self = this;
+            var lastScrollY = 0;
+            var watcher = new SizeWatcher(self.element[0], 200);
+            scope.$watchGroup(watcher.group, function(values) {
+                self.setContainerSize(initialScale);
+            });
+
+            var onProgress = function(operation, state, value, total, message) {
+                if (operation === "render" && value === 1) {
+                    if (state === "success") {
+                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                    }
+                    else {
+                        $log.debug("Failed to render 1st page!\n\n" + message);
+                    }
+                }
+                else if (operation === "download" && state === "loading") {
+                    self.api.downloadProgress = (value / total) * 100.0;
+                }
+                else {
+                    if (state === "failed") {
+                        $log.debug("Something went really bad!\n\n" + message);
+                    }
+                }
+            };
+
+            scope.onPageRendered = function(status, pageID, numPages, message) {
+                onProgress("render", status, pageID, numPages, message);
+            };
+
+            scope.onDataDownloaded = function(status, loaded, total, message) {
+                onProgress("download", status, loaded, total, message);
+            };
+
+            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+            scope.$on('$destroy', function() {
+                if(self.onDestroy != null){
+                    try	{
+
+                    }catch (ex)
+                    {
+                        $log.log(ex);
+                    }
+                    self.onDestroy();
+                }
+                watcher.cancel();
+                self.element.empty();
+                $log.debug("viewer destroyed");
+            });
+
+            self.element.bind("scroll", function(event) {
+                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
+                scope.scrollTimeout = $timeout(function() {
+                    var scrollTop = self.element[0].scrollTop;
+
+                    var scrollDir = scrollTop - lastScrollY;
+                    lastScrollY = scrollTop;
+
+                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                }, 350);
+            });
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        }
+    };
+
+    return (MultiPagesViewer);
+}]);
+'use strict';
+/**
+ * TODO MultiPagesViewerAPI desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+
+        function MultiPagesViewerAPI(viewer) {
+            this.viewer = viewer;
+            this.scaleItems = {};
+            this.zoomLevels = [];
+        };
+
+        MultiPagesViewerAPI.prototype = {
+            getNextZoomInScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                }else {
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            getNextZoomOutScale: function (scale) {
+                var newScale = scale;
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
+                var scaleItem = null;
+                for(var i = numZoomLevels - 1; i >= 0;--i) {
+                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
+                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        break;
+                    }
+                }
+
+                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                        value : this.viewer.fitWidthScale,
+                        label: "Fit width"
+                    };
+                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                        value : this.viewer.fitHeightScale,
+                        label: "Fit height"
+                    };
+                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
+                    scaleItem = {
+                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                        value : this.viewer.fitPageScale,
+                        label: "Fit page"
+                    };
+                } else{
+                    scaleItem = {
+                        id: newScale,
+                        value : newScale,
+                        label: (newScale * 100.0).toFixed(0) + "%"
+                    };
+                }
+
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
+                return result;
+            },
+            zoomTo: function (scaleItem) {
+                if(scaleItem != undefined){
+                    this.viewer.setScale(scaleItem);
+                }
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            goToPage: function (pageIndex) {
+                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                    return;
+                }
+
+                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            },
+            goToNextPage: function () {
+                this.goToPage(this.viewer.currentPage + 1);
+            },
+            goToPrevPage: function () {
+                this.goToPage(this.viewer.currentPage - 1);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            }
+        };
+
+        return (MultiPagesViewerAPI);
+    }]);
+
+'use strict';
+/**
+ * TODO PageViewport desc
+ */
+itMultiPagesViewer.factory('PageViewport', [function() {
+
+        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+            this.viewBox = viewBox;
+            this.scale = scale;
+            this.rotation = rotation;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+
+            // creating transform to convert pdf coordinate system to the normal
+            // canvas like coordinates taking in account scale and rotation
+            var centerX = (viewBox[2] + viewBox[0]) / 2;
+            var centerY = (viewBox[3] + viewBox[1]) / 2;
+            var rotateA, rotateB, rotateC, rotateD;
+            rotation = rotation % 360;
+            rotation = rotation < 0 ? rotation + 360 : rotation;
+            switch (rotation) {
+                case 180:
+                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                    break;
+                case 90:
+                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                    break;
+                case 270:
+                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                    break;
+                //case 0:
+                default:
+                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                    break;
+            }
+
+            if (dontFlip) {
+                rotateC = -rotateC; rotateD = -rotateD;
+            }
+
+            var offsetCanvasX, offsetCanvasY;
+            var width, height;
+            if (rotateA === 0) {
+                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            } else {
+                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            }
+            // creating transform for the following operations:
+            // translate(-centerX, -centerY), rotate and flip vertically,
+            // scale, and translate(offsetCanvasX, offsetCanvasY)
+            this.transform = [
+                rotateA * scale,
+                rotateB * scale,
+                rotateC * scale,
+                rotateD * scale,
+                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+            ];
+
+            this.width = width;
+            this.height = height;
+            this.fontScale = scale;
+        }
+        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+            /**
+             * Clones viewport with additional properties.
+             * @param args {Object} (optional) If specified, may contain the 'scale' or
+             * 'rotation' properties to override the corresponding properties in
+             * the cloned viewport.
+             * @returns {PDFJS.PageViewport} Cloned viewport.
+             */
+            clone: function PageViewPort_clone(args) {
+                args = args || {};
+                var scale = 'scale' in args ? args.scale : this.scale;
+                var rotation = 'rotation' in args ? args.rotation : this.rotation;
+                return new PageViewport(this.viewBox.slice(), scale, rotation,
+                    this.offsetX, this.offsetY, args.dontFlip);
+            },
+            /**
+             * Converts PDF point to the viewport coordinates. For examples, useful for
+             * converting PDF location into canvas pixel coordinates.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the viewport coordinate space.
+             * @see {@link convertToPdfPoint}
+             * @see {@link convertToViewportRectangle}
+             */
+            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+                return Util.applyTransform([x, y], this.transform);
+            },
+            /**
+             * Converts PDF rectangle to the viewport coordinates.
+             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+             * @returns {Array} Contains corresponding coordinates of the rectangle
+             * in the viewport coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToViewportRectangle:
+                function PageViewport_convertToViewportRectangle(rect) {
+                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                    return [tl[0], tl[1], br[0], br[1]];
+                },
+            /**
+             * Converts viewport coordinates to the PDF location. For examples, useful
+             * for converting canvas pixel location into PDF one.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the PDF coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+                return Util.applyInverseTransform([x, y], this.transform);
+            }
+        };
+
+        return (PageViewport);
+    }]);
+
+'use strict';
+/**
+ * TODO SizeWatcher desc
+ */
+itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
+        return function (element, rate) {
+            var self = this;
+            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
+            self.monitor = $interval(self.update, rate);
+            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
+            self.cancel = function() { $interval.cancel(self.monitor); };
         };
     }]);

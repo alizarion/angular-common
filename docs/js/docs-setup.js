@@ -316,7 +316,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "A container element for side menu(s) and the main content. Allows the left and/or right side menu",
-      "keywords": "accusantium active add adipisicing allows amet anglais animate api area atque attribute blanditiis btn button caret center child class close collapse consectetur consequuntur container container-fluid content de directive directives divider doe dolor dothraki dragging dropdown-menu earum eca eius element elements elit encompass enim eum fa fa-list fa-music fa-pied-piper-alt fran glyphicon glyphicon-ok glyphicon-user header hide href html illum impedit ipsum it-animate it-button-menu it-collapsed-item it-hide-button-menu it-menu-animated it-nav-active it-side-menu it-side-menu-header it-width itesoft laboriosam left libero list-group loginbutton logout main max menu menu-- menus modi module nav nav-pills nav-stacked navbar-collapse navbar-nav navbar-right nemo ng-cloak open optionnal parent pixels provident pull-right qui ratione role side sit table toggled totam translate true type uib-dropdown uib-dropdown-toggle ullam veritatis"
+      "keywords": "active add allows api area center child class container content directive directives dragging eca element elements encompass href html it-animate it-button-menu it-collapsed-item it-hide-button-menu it-menu-animated it-nav-active itesoft left list-group main menu menus module nav nav-pills nav-stacked navbar-nav parent plunker side toggled true"
     },
     {
       "section": "api",
