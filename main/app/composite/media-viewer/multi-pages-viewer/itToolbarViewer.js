@@ -20,18 +20,6 @@ itMultiPagesViewer.directive('itToolbarViewer', [function(){
         scope.onPageChanged = function() {
             scope.api.goToPage(scope.currentPage);
         };
-
-        scope.zoomIn = function() {
-            var nextScale = scope.api.getNextZoomInScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
-
-        scope.zoomOut = function() {
-            var nextScale = scope.api.getNextZoomOutScale(scope.scale.value);
-            scope.api.zoomTo(nextScale);
-            scope.scale = nextScale;
-        };
     };
 
     return {
@@ -41,10 +29,10 @@ itMultiPagesViewer.directive('itToolbarViewer', [function(){
         restrict: 'E',
         template :  '<div class="toolbar">' +
         '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="zoomOut()">-</button> ' +
+        '<button ng-click="api.zoomOut()">-</button> ' +
         '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
         '</select> ' +
-        '<button ng-click="zoomIn()">+</button> ' +
+        '<button ng-click="api.zoomIn()">+</button> ' +
         '</div>' +
 
         '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +

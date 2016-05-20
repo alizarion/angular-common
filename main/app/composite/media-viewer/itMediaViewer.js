@@ -8,7 +8,93 @@
  * @restrict AEC
  *
  * @description
- * Provide a circular button like for the full screen button
+ * <table class="table">
+ *  <tr>
+ *   <td><code>src</code></td>
+ *   <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>file</code></td>
+ *   <td>stream passed to the media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>type</code></td>
+ *   <td>to force type of document if the media viewer can't guess the type.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options = {}</code></td>
+ *   <td>Object passed to the media viewer to apply options.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showProgressbar = true | false</code></td>
+ *   <td>Hide | Show progress bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showToolbar  = true | false</code></td>
+ *   <td>Hide | Show tool bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
+ *   <td>Set initial scale of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.renderTextLayer = true | false</code></td>
+ *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api</code></td>
+ *   <td>Api of media viewer.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>options.api.getNextZoomInScale(scale)</code></td>
+ *   <td>Method to get the next zoom level of scale parameter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>options.api.getNextZoomOutScale(scale)</code></td>
+ *   <td>Method to get the prev zoom level of scale parameter.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getZoomLevel()</code></td>
+ *   <td>Method to get the current zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomIn()</code></td>
+ *   <td>Method to zoom to the next zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomOut()</code></td>
+ *   <td>Method to zoom to the prev zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomLevels</code></td>
+ *   <td>List of zoom level items.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getCurrentPage()</code></td>
+ *   <td>Method to get the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPage(pageIndex)</code></td>
+ *   <td>Method to go to the page index if possible.</td>
+ *  </tr>
+ *   <tr>
+ *   <td><code>options.api.goToNextPage()</code></td>
+ *   <td>Method to go to the next page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPrevPage()</code></td>
+ *   <td>Method to go to the prev page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getNumPages()</code></td>
+ *   <td>Method to get the number of pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.downloadProgress</code></td>
+ *   <td>% of progress.</td>
+ *  </tr>
+ * </table>
  *
  * ```html
  *     <it-media-viewer></it-media-viewer>

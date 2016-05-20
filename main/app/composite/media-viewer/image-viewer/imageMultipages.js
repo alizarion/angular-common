@@ -5,41 +5,41 @@
 itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
-    function IMAGEPage(pageIndex, img, view) {
-        this.base = MultiPagesPage;
-        this.base(pageIndex, view);
-        this.img = img;
-    }
+        function IMAGEPage(pageIndex, img, view) {
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
+            this.img = img;
+        }
 
-    IMAGEPage.prototype = new MultiPagesPage;
+        IMAGEPage.prototype = new MultiPagesPage;
 
-    IMAGEPage.prototype.render = function (callback) {
-        var self = this;
-        if(this.rendered) {
-            if(callback) {
-                callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+        IMAGEPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+            }else {
+                self.container.append(self.canvas);
+
+                var ctx = self.canvas[0].getContext('2d');
+                ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+
+                if(callback) {
+                    callback(self, MultiPagesConstants.PAGE_RENDERED);
+                }
             }
-            return;
         };
 
-        this.rendered = true;
-
-        if(this.canvasRendered){
-            self.container.append(self.canvas);
-        }else {
-            self.container.append(self.canvas);
-
-            var ctx = self.canvas[0].getContext('2d');
-            ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
-
-            if(callback) {
-                callback(self, MultiPagesConstants.PAGE_RENDERED);
-            }
-        }
-    };
-
-    return (IMAGEPage);
-}])
+        return (IMAGEPage);
+    }])
 
     .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
         function IMAGEViewer(element) {

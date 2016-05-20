@@ -41,10 +41,11 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                         label: "Fit page"
                     };
                 }else {
+                    var label = (newScale * 100.0).toFixed(0) + "%";
                     scaleItem = {
-                        id: newScale,
+                        id: label,
                         value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
+                        label: label
                     };
                 }
 
@@ -110,6 +111,14 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
             },
             getZoomLevel: function () {
                 return this.viewer.scaleItem;
+            },
+            zoomIn: function() {
+                var nextScale = this.getNextZoomInScale(this.getZoomLevel().value);
+                this.zoomTo(nextScale);
+            },
+            zoomOut: function() {
+                var nextScale = this.getNextZoomOutScale(this.getZoomLevel().value);
+                this.zoomTo(nextScale);
             },
             getCurrentPage: function () {
                 return this.viewer.currentPage;
