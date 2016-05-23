@@ -243,8 +243,8 @@ NG_DOCS={
       "shortName": "itMediaViewer",
       "type": "directive",
       "moduleName": "itesoft",
-      "shortDescription": "Provide a circular button like for the full screen button",
-      "keywords": "$scope aec angular api button circular class col-md-12 controller directive fit_height full function github height homectrl html http initialscale io itesoft itesoft-showcase js module ng-controller options pdf provide rendertextlayer row screen showtoolbar src style tracemonkey-pldi-09 true"
+      "shortDescription": "",
+      "keywords": "$scope aec allow angular api apply bar case class col-md-12 controller cross current directive disable document domain downloadprogress enable false fit_height fit_page fit_width force function getcurrentpage getnextzoominscale getnextzoomoutscale getnumpages getzoomlevel github gotonextpage gotopage gotoprevpage guess height homectrl html http implement initial initialscale io items itesoft itesoft-showcase js layer level libpath media module ng-controller number options origin parameter passed pdf prev progress render rendertextlayer row scale server showprogressbar showtoolbar src style table text tool tracemonkey-pldi-09 true type url viewer zoom zoomin zoomlevels zoomout"
     },
     {
       "section": "api",

@@ -5,8 +5,95 @@
 </div>
 </h1>
 <div><h2 id="description">Description</h2>
-<div class="description"><div class="itesoft-directive-page itesoft-directive-itmediaviewer-page"><p>Provide a circular button like for the full screen button</p>
-<pre><code class="lang-html">    &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itmediaviewer-page"><table class="table">
+<tr>
+ <td><code>src</code></td>
+ <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
+</tr>
+<tr>
+ <td><code>file</code></td>
+ <td>stream passed to the media viewer.</td>
+</tr>
+<tr>
+ <td><code>type</code></td>
+ <td>to force type of document if the media viewer can&#39;t guess the type.</td>
+</tr>
+<tr>
+ <td><code>options = {}</code></td>
+ <td>Object passed to the media viewer to apply options.</td>
+</tr>
+<tr>
+ <td><code>options.showProgressbar = true | false</code></td>
+ <td>Hide | Show progress bar.</td>
+</tr>
+<tr>
+ <td><code>options.showToolbar  = true | false</code></td>
+ <td>Hide | Show tool bar.</td>
+</tr>
+<tr>
+ <td><code>options.initialScale  = &#39;20 - 500%&#39; | &#39;fit_height&#39; | &#39;fit_page&#39; | &#39;fit_width&#39;</code></td>
+ <td>Set initial scale of media viewer.</td>
+</tr>
+<tr>
+ <td><code>options.renderTextLayer = true | false</code></td>
+ <td>only used for pdf, Enable | Disable render of html text layer.</td>
+</tr>
+<tr>
+ <td><code>options.api</code></td>
+ <td>Api of media viewer.</td>
+</tr>
+<tr>
+ <td><code>options.api.getNextZoomInScale(scale)</code></td>
+ <td>Method to get the next zoom level of scale parameter.</td>
+</tr>
+<tr>
+<tr>
+ <td><code>options.api.getNextZoomOutScale(scale)</code></td>
+ <td>Method to get the prev zoom level of scale parameter.</td>
+</tr>
+<tr>
+ <td><code>options.api.getZoomLevel()</code></td>
+ <td>Method to get the current zoom level.</td>
+</tr>
+<tr>
+ <td><code>options.api.zoomIn()</code></td>
+ <td>Method to zoom to the next zoom level.</td>
+</tr>
+<tr>
+ <td><code>options.api.zoomOut()</code></td>
+ <td>Method to zoom to the prev zoom level.</td>
+</tr>
+<tr>
+ <td><code>options.api.zoomLevels</code></td>
+ <td>List of zoom level items.</td>
+</tr>
+<tr>
+ <td><code>options.api.getCurrentPage()</code></td>
+ <td>Method to get the current page.</td>
+</tr>
+<tr>
+ <td><code>options.api.goToPage(pageIndex)</code></td>
+ <td>Method to go to the page index if possible.</td>
+</tr>
+ <tr>
+ <td><code>options.api.goToNextPage()</code></td>
+ <td>Method to go to the next page if possible.</td>
+</tr>
+<tr>
+ <td><code>options.api.goToPrevPage()</code></td>
+ <td>Method to go to the prev page if possible.</td>
+</tr>
+<tr>
+ <td><code>options.api.getNumPages()</code></td>
+ <td>Method to get the number of pages.</td>
+</tr>
+<tr>
+ <td><code>options.api.downloadProgress</code></td>
+ <td>% of progress.</td>
+</tr>
+</table>
+
+<pre><code class="lang-html">   &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
 </code></pre>
 </div></div>
 <h2 id="usage">Usage</h2>
@@ -26,7 +113,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-media-viewer"&gt;
 <pre class="prettyprint linenums" ng-set-text="index.html-12" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
 <script type="text/ng-template" id="index.html-12">
     <div ng-controller="HomeCtrl" class="row">
-       <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true }"></it-media-viewer></div></div>
+       <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib' }"></it-media-viewer></div></div>
     </div>
 </script>
 </div>
