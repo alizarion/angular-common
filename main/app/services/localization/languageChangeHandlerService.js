@@ -4,7 +4,7 @@
  * @ngdoc service
  * @name itesoft.service:itLanguageChangeHandler
  * @module itesoft
- * @since 1.1
+ * @since 1.2
  * @requires localStorageService
  * @requires itPopup
  *
