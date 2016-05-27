@@ -275,6 +275,18 @@
      {{selectedtax}}
     </div>
  </div>
+ <h1>Disabled</h1>
+ <div class="row">
+     <div  class="col-xs-3">
+     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" disabled="'true'" search-mode="'custom'"      selected-option="firstRate"  options="options" ></it-autocomplete>
+     </div>
+ </div>
+ <h1>ReadOnly</h1>
+ <div class="row">
+     <div  class="col-xs-3">
+     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"        selected-option="firstRate"  options="options" ></it-autocomplete>
+     </div>
+     </div>
  </div>
  </file>
  <file name="Module.js">
@@ -513,7 +525,15 @@ IteSoft
                 /**
                  * name
                  */
-                name: "="
+                name: "=",
+                /**
+                 * disabled input
+                 */
+                disabled: "=",
+                /**
+                 * readonly
+                 */
+                readonly: "="
 
             },
             controllerAs: 'itAutocompleteCtrl',
@@ -546,6 +566,8 @@ IteSoft
                         placeholder: $scope.placeholder,
                         debug: false,
                         converter: $scope.converter,
+                        disabled: false,
+                        readonly: false,
                         event: {
                             refresh: {
                                 name: $scope.eventRefresh,
@@ -568,7 +590,12 @@ IteSoft
                     if (angular.isUndefined(self.fields.placeholder)) {
                         self.fields.placeholder = '';
                     }
-
+                    if(angular.isDefined($scope.disabled)){
+                        self.fields.disabled = true;
+                    }
+                    if(angular.isDefined($scope.readonly)){
+                        self.fields.readonly = true;
+                    }
 
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
@@ -1221,11 +1248,10 @@ IteSoft
                         return self.fields.items.indexOf(item);
                     }
 
-
                 }
             ],
             template: '<div class="col-xs-12 it-autocomplete-div">' +
-            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
+            '<input ng-disabled="itAutocompleteCtrl.fields.disabled"  ng-readonly="itAutocompleteCtrl.fields.readonly" placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
             'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
