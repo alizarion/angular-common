@@ -61,87 +61,87 @@ itPdfViewer
             MultiPagesPage.prototype.clear.call(this);
             this.renderTask = null;
         };
-        PDFPage.prototype.getViewport = function (scale) {
-            return this.pdfPage.getViewport(scale);
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation, 0, 0);
         };
-        PDFPage.prototype.resize = function (scale) {
-            MultiPagesPage.prototype.resize.call(this, scale);
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
 
             this.textLayer = angular.element("<div class='text-layer'></div>");
             this.textLayer.css("width", this.viewport.width + "px");
             this.textLayer.css("height", this.viewport.height + "px");
         };
         PDFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(this.renderTask === null) {
-                    if(callback) {
-                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                    }
-                } else {
-                    this.renderTask.then(function () {
+                var self = this;
+                if(this.rendered) {
+                    if(this.renderTask === null) {
                         if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                        }
-                    }, function (reason) {
-                        $log.debug('stopped ' + reason);
-                    });
-                }
-
-                return;
-            }
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-                self.container.append(self.textLayer);
-            }else{
-                this.renderTask = this.pdfPage.render({
-                    canvasContext: this.canvas[0].getContext('2d'),
-                    viewport: this.viewport
-                });
-
-                self.container.append(self.canvas);
-
-                this.renderTask.then(function () {
-                    self.rendered = true;
-                    self.renderTask = null;
-                    self.canvasRendered = true;
-                    //self.container.append(self.canvas);
-
-                    if(self.textContent) {
-                        // Render the text layer...
-                        var textLayerBuilder = new TextLayerBuilder({
-                            textLayerDiv: self.textLayer[0],
-                            pageIndex: self.id,
-                            viewport: self.viewport
-                        });
-
-                        textLayerBuilder.setTextContent(self.textContent);
-                        textLayerBuilder.renderLayer();
-                        self.container.append(self.textLayer);
-                    }
-
-                    if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                }, function (message) {
-                    self.rendered = false;
-                    self.renderTask = null;
-
-                    if(message === "cancelled") {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                            callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                         }
                     } else {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
-                        }
+                        this.renderTask.then(function () {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                            }
+                        }, function (reason) {
+                            $log.debug('stopped ' + reason);
+                        });
                     }
-                });
-            }
-        };
+
+                    return;
+                }
+
+                this.rendered = true;
+
+                if(this.canvasRendered){
+                    self.container.append(self.canvas);
+                    self.container.append(self.textLayer);
+                }else{
+                    this.renderTask = this.pdfPage.render({
+                        canvasContext: this.canvas[0].getContext('2d'),
+                        viewport: this.viewport
+                    });
+
+                    self.container.append(self.canvas);
+
+                    this.renderTask.then(function () {
+                        self.rendered = true;
+                        self.renderTask = null;
+                        self.canvasRendered = true;
+                        //self.container.append(self.canvas);
+
+                        if(self.textContent) {
+                            // Render the text layer...
+                            var textLayerBuilder = new TextLayerBuilder({
+                                textLayerDiv: self.textLayer[0],
+                                pageIndex: self.id,
+                                viewport: self.viewport
+                            });
+
+                            textLayerBuilder.setTextContent(self.textContent);
+                            textLayerBuilder.renderLayer();
+                            self.container.append(self.textLayer);
+                        }
+
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDERED);
+                        }
+                    }, function (message) {
+                        self.rendered = false;
+                        self.renderTask = null;
+
+                        if(message === "cancelled") {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                            }
+                        } else {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
+                            }
+                        }
+                    });
+                }
+            };
 
         return (PDFPage);
     }])
