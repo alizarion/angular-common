@@ -5,107 +5,16 @@
 itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
 
         function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
+        			this.viewer = viewer;
+        			this.rotation = 0;
+        		};
 
         MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    var label = (newScale * 100.0).toFixed(0) + "%";
-                    scaleItem = {
-                        id: label,
-                        value : newScale,
-                        label: label
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
+            getZoomLevels: function () {
+                return this.viewer.zoomLevels;
             },
             zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
+                if(scaleItem != undefined) {
                     this.viewer.setScale(scaleItem);
                 }
             },
@@ -113,12 +22,16 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                 return this.viewer.scaleItem;
             },
             zoomIn: function() {
-                var nextScale = this.getNextZoomInScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index < this.viewer.zoomLevels.length) {
+                    this.zoomTo(this.viewer.zoomLevels[index + 1]);
+                }
             },
             zoomOut: function() {
-                var nextScale = this.getNextZoomOutScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index > 0) {
+                    this.zoomTo(this.viewer.zoomLevels[index - 1]);
+                }
             },
             getCurrentPage: function () {
                 return this.viewer.currentPage;
@@ -129,7 +42,11 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                 }
 
                 //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+                var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+                if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                this.viewer.element[0].scrollTop = offsetTop;
             },
             goToNextPage: function () {
                 this.goToPage(this.viewer.currentPage + 1);
@@ -139,6 +56,38 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
             },
             getNumPages: function () {
                 return this.viewer.pages.length;
+            },
+            rotatePagesRight: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation + 90;
+                if(rotation === 360 || rotation === -360) {
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePagesLeft: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation - 90;
+                if(rotation === 360 || rotation === -360){
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePageRight: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: 90 });
+            },
+            rotatePageLeft: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: -90 });
             }
         };
 

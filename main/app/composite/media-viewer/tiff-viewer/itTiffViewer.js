@@ -8,6 +8,13 @@ itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
 		scope.trustSrc = function(src) {
 			return $sce.trustAsResourceUrl(src);
 		};
+
+		//notify callback when api set in options for SCPAS team
+        scope.$watch("options.api", function (value) {
+             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
+                scope.options.onApiLoaded(scope.options.api);
+             }
+        });
 	};
 
 	return {

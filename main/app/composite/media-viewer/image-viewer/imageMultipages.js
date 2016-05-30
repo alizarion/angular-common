@@ -6,10 +6,10 @@ itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
         function IMAGEPage(pageIndex, img, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
-            this.img = img;
-        }
+                    this.base = MultiPagesPage;
+                    this.base(pageIndex, view);
+                    this.img = img;
+                }
 
         IMAGEPage.prototype = new MultiPagesPage;
 
@@ -30,7 +30,9 @@ itImageViewer
                 self.container.append(self.canvas);
 
                 var ctx = self.canvas[0].getContext('2d');
-                ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+                ctx.transform.apply(ctx, self.viewport.transform);
+                ctx.drawImage(this.img , 0, 0); // Or at whatever offset you like
+
 
                 if(callback) {
                     callback(self, MultiPagesConstants.PAGE_RENDERED);

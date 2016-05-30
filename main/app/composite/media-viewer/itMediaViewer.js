@@ -26,6 +26,10 @@
  *   <td>Object passed to the media viewer to apply options.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.onApiLoaded = function(api) { }</code></td>
+ *   <td>Callback to be notify when the property api is available.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
  *   <td>Hide | Show progress bar.</td>
  *  </tr>
@@ -45,15 +49,6 @@
  *   <td><code>options.api</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
- * <tr>
- *   <td><code>options.api.getNextZoomInScale(scale)</code></td>
- *   <td>Method to get the next zoom level of scale parameter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>options.api.getNextZoomOutScale(scale)</code></td>
- *   <td>Method to get the prev zoom level of scale parameter.</td>
- *  </tr>
  *  <tr>
  *   <td><code>options.api.getZoomLevel()</code></td>
  *   <td>Method to get the current zoom level.</td>
@@ -71,8 +66,8 @@
  *   <td>Method to zoom to the prev zoom level.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api.zoomLevels</code></td>
- *   <td>List of zoom level items.</td>
+ *   <td><code>options.api.getZoomLevels()</code></td>
+ *   <td>Method to get the list of zoom level items.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.api.getCurrentPage()</code></td>
@@ -95,6 +90,22 @@
  *   <td>Method to get the number of pages.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.rotatePagesRight()</code></td>
+ *   <td>Method to rotate to the right (90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesLeft</code></td>
+ *   <td>Method to rotate to the left (-90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageRight()</code></td>
+ *   <td>Method to rotate to the right (per 90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageLeft()</code></td>
+ *   <td>Method to rotate to the left (per -90°) the current page.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
  *  </tr>
@@ -108,14 +119,14 @@
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib' }"></it-media-viewer></div></div>
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
      </div>
  </file>
  <file name="Module.js">
     angular.module('itesoft-showcase',['itesoft'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { console.log(api); } }; }]);
  </file>
  </example>
  */

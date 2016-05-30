@@ -5,12 +5,12 @@
 itTiffViewer
     .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
 
-        function TIFFPage(pageIndex, src, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
+        function TIFFPage(pageIndex, getSrc, view) {
+        			this.base = MultiPagesPage;
+        			this.base(pageIndex, view);
 
-            this.src = src;
-        }
+        			this.getSrc = getSrc;
+        		}
 
         TIFFPage.prototype = new MultiPagesPage;
 
@@ -31,15 +31,24 @@ itTiffViewer
                 self.container.append(self.canvas);
 
                 var ctx = self.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, self.viewport.transform);
                 var img = new Image;
                 img.onload = function(){
-                    ctx.drawImage(img,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
-
+                    ctx.drawImage(img,0,0); // Or at whatever offset you like
+                    self.canvasRendered = true;
                     if(callback) {
                         callback(self, MultiPagesConstants.PAGE_RENDERED);
                     }
                 };
-                img.src = this.src;
+
+                $timeout(function () {
+                    if(self.src == undefined){
+                        self.src =  self.getSrc(self.id - 1);
+                    }
+
+                    img.src = self.src;
+                }, 50);
+
             }
         };
 
