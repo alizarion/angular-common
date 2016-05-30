@@ -4431,6 +4431,10 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Object passed to the media viewer to apply options.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.onApiLoaded = function(api) { }</code></td>
+ *   <td>Callback to be notify when the property api is available.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
  *   <td>Hide | Show progress bar.</td>
  *  </tr>
@@ -4450,15 +4454,6 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td><code>options.api</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
- * <tr>
- *   <td><code>options.api.getNextZoomInScale(scale)</code></td>
- *   <td>Method to get the next zoom level of scale parameter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>options.api.getNextZoomOutScale(scale)</code></td>
- *   <td>Method to get the prev zoom level of scale parameter.</td>
- *  </tr>
  *  <tr>
  *   <td><code>options.api.getZoomLevel()</code></td>
  *   <td>Method to get the current zoom level.</td>
@@ -4476,8 +4471,8 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to zoom to the prev zoom level.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api.zoomLevels</code></td>
- *   <td>List of zoom level items.</td>
+ *   <td><code>options.api.getZoomLevels()</code></td>
+ *   <td>Method to get the list of zoom level items.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.api.getCurrentPage()</code></td>
@@ -4500,6 +4495,22 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to get the number of pages.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.rotatePagesRight()</code></td>
+ *   <td>Method to rotate to the right (90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesLeft</code></td>
+ *   <td>Method to rotate to the left (-90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageRight()</code></td>
+ *   <td>Method to rotate to the right (per 90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageLeft()</code></td>
+ *   <td>Method to rotate to the left (per -90°) the current page.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
  *  </tr>
@@ -4513,14 +4524,14 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib' }"></it-media-viewer></div></div>
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
      </div>
  </file>
  <file name="Module.js">
     angular.module('itesoft-showcase',['itesoft'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { console.log(api); } }; }]);
  </file>
  </example>
  */
@@ -7691,296 +7702,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
 'use strict';
 /**
  * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-
-IteSoft
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
-
-'use strict';
-/**
- * @ngdoc service
  * @name itesoft.service:itNotifier
  * @module itesoft
  * @since 1.1
@@ -8406,16 +8127,306 @@ IteSoft.provider('itNotifier', [ function () {
 }]);
 'use strict';
 /**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+
+IteSoft
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
+
+'use strict';
+/**
  * TODO Image implementation desc
  */
 itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
         function IMAGEPage(pageIndex, img, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
-            this.img = img;
-        }
+                    this.base = MultiPagesPage;
+                    this.base(pageIndex, view);
+                    this.img = img;
+                }
 
         IMAGEPage.prototype = new MultiPagesPage;
 
@@ -8436,7 +8447,9 @@ itImageViewer
                 self.container.append(self.canvas);
 
                 var ctx = self.canvas[0].getContext('2d');
-                ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+                ctx.transform.apply(ctx, self.viewport.transform);
+                ctx.drawImage(this.img , 0, 0); // Or at whatever offset you like
+
 
                 if(callback) {
                     callback(self, MultiPagesConstants.PAGE_RENDERED);
@@ -8594,6 +8607,13 @@ itImageViewer.directive('itImageViewer', ['$sce', function($sce){
         scope.trustSrc = function(src) {
             return $sce.trustAsResourceUrl(src);
         };
+
+        //notify callback when api set in options for SCPAS team
+        scope.$watch("options.api", function (value) {
+             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
+                scope.options.onApiLoaded(scope.options.api);
+             }
+        });
     };
 
     return {
@@ -8630,7 +8650,7 @@ itMultiPagesViewer.directive('itProgressbarViewer', [function(){
 /**
  * TODO itToolbarViewer desc
  */
-itMultiPagesViewer.directive('itToolbarViewer', [function(){
+itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
     var linker = function (scope, element, attrs) {
 
         scope.$watch("api.getZoomLevel()", function (value) {
@@ -8656,24 +8676,29 @@ itMultiPagesViewer.directive('itToolbarViewer', [function(){
         },
         restrict: 'E',
         template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="api.zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
-        '</select> ' +
-        '<button ng-click="api.zoomIn()">+</button> ' +
-        '</div>' +
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                            '<button ng-click="api.zoomOut()">-</button> ' +
+                            '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
+                            '</select> ' +
+                            '<button ng-click="api.zoomIn()">+</button> ' +
+                        '</div>' +
 
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span>' +
-        '</div>' +
-        '</div>',
+                        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+                            '<span>Page : </span>' +
+                            '<button ng-click="api.goToPrevPage()"><</button> ' +
+                            '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+                            '<button ng-click="api.goToNextPage()">></button> ' +
+                            '<span> of {{api.getNumPages()}}</span> ' +
+                        '</div>' +
+
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                          '</div>' +
+                    '</div>',
         link: linker
     };
-}]);
+}])
 
 'use strict';
 /**
@@ -8703,36 +8728,71 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
 itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
 
     function MultiPagesPage(pageIndex, view) {
-        this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page'></div>");
-        this.container.attr("id", "page_" + pageIndex);
+    			this.id = pageIndex + 1;
+    			this.container = angular.element("<div class='page'></div>");
+    			this.container.attr("id", "page_" + pageIndex);
 
-        this.canvasRendered = false;
-        this.rendered = false;
+    			this.canvasRendered = false;
+    			this.rendered = false;
 
-        //transform
-        this.view = view;
+    			//transform
+                this.rotation = 0;
+                this.scale = 1.0;
+    			this.view = view;
 
-    }
+    		}
 
     MultiPagesPage.prototype = {
         clear: function () {
             this.rendered = false;
             this.container.empty();
         },
-        getViewport: function (scale) {
-            return new PageViewport(this.view, scale, 0, 0, 0);
+        getViewport: function (scale, rotation) {
+            return new PageViewport(this.view, scale, rotation, 0, 0, true);
         },
-        resize: function (scale) {
-            this.viewport = this.getViewport(scale);
+        transform : function() {
+            this.clear();
+            this.viewport = this.getViewport(this.scale, this.rotation);
             this.canvasRendered = false;
             this.canvas = angular.element("<canvas></canvas>");
-
             this.canvas.attr("width", this.viewport.width);
             this.canvas.attr("height", this.viewport.height);
 
             this.container.css("width", this.viewport.width + "px");
             this.container.css("height", this.viewport.height + "px");
+        },
+        resize: function (scale) {
+            this.scale = scale;
+            this.transform();
+        },
+        rotate: function (rotation) {
+            this.rotation = rotation;
+            this.transform();
+            /*// The canvas may have been originally rotated, rotate relative to that.
+            //var relativeRotation = rotation - this.canvas._viewport.rotation;
+            var relativeRotation = rotation;
+            var absRotation = Math.abs(relativeRotation);
+            var scaleX = 1, scaleY = 1;
+
+            if (absRotation === 90 || absRotation === 270) {
+                // Scale x and y because of the rotation.
+                *//*scaleX = this.viewport.height / this.viewport.width;
+                scaleY = this.viewport.width / this.viewport.height;*//*
+
+
+               if(this.viewport.width > this.viewport.height) {
+                    var margin = (this.viewport.width - this.viewport.height);
+                    this.container.css("margin", margin + "px auto");
+                }
+
+            }else {
+                this.container.css("margin", null);
+            }
+
+            this.viewport.rotation = relativeRotation;
+            var cssTransform = 'rotate(' + relativeRotation + 'deg) ' +
+                'scale(' + scaleX + ',' + scaleY + ')';
+            this.container.css('transform', cssTransform);*/
         },
         isVisible: function () {
             var pageContainer = this.container[0];
@@ -8757,29 +8817,29 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
  */
 itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
     function getElementInnerSize(element, margin) {
-        var tallTempElement = angular.element("<div></div>");
-        tallTempElement.css("height", "10000px");
+    			var tallTempElement = angular.element("<div></div>");
+    			tallTempElement.css("height", "10000px");
 
-        element.append(tallTempElement);
+    			element.append(tallTempElement);
 
-        var w = tallTempElement[0].offsetWidth;
+    			var w = tallTempElement[0].offsetWidth;
 
-        tallTempElement.remove();
+    			tallTempElement.remove();
 
-        var h = element[0].offsetHeight;
-        if(h === 0) {
-            // TODO: Should we get the parent height?
-            h = 2 * margin;
-        }
+    			var h = element[0].offsetHeight;
+    			if(h === 0) {
+    				// TODO: Should we get the parent height?
+    				h = 2 * margin;
+    			}
 
-        w -= 2 * margin;
-        h -= 2 * margin;
+    			w -= 2 * margin;
+    			h -= 2 * margin;
 
-        return {
-            width: w,
-            height: h
-        };
-    }
+    			return {
+    				width: w,
+    				height: h
+    			};
+    		}
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
@@ -8791,7 +8851,8 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         this.pageMargin = 0;
         this.currentPage = 0;
         this.lastScrollDir = 0;
-
+        this.scaleItems = {};
+        this.zoomLevels = [];
         this.api = api;
 
         // Hooks for the client...
@@ -8804,52 +8865,97 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         getAPI: function () {
             return this.api;
         },
+        updateScaleItem : function(scaleItem) {
+            var result = this.scaleItems[scaleItem.id];
+            if(result == undefined){
+                this.scaleItems[scaleItem.id] = scaleItem;
+                result = scaleItem;
+            }else{
+                result.value = scaleItem.value;
+            }
+
+            this.zoomLevels.push(result);
+
+            return result;
+        },
         setContainerSize: function (initialScale) {
-            if(this.pages.length > 0){
+            if(this.pages.length > 0) {
                 this.containerSize = getElementInnerSize(this.element, this.pageMargin);
 
                 this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
                 this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
                 this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
 
-                this.api.zoomLevels = [];
-                var lastScale = 0.1;
-                do {
-                    var curScale = this.api.getNextZoomInScale(lastScale);
-                    if(curScale.value=== lastScale) {
-                        break;
+                this.zoomLevels = [];
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    var scaleItem = null;
+                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                           value : this.fitWidthScale,
+                           label: "Fit width"
+                       });
+                   }
+
+                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                           value : this.fitHeightScale,
+                           label: "Fit height"
+                       });
+                   }
+
+                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                           value : this.fitPageScale,
+                           label: "Fit page"
+                       });
+                   }
+
+                   var label = (newScale * 100.0).toFixed(0) + "%";
+                   scaleItem = this.updateScaleItem({
+                       id: label,
+                       value : newScale,
+                       label: label
+                   });
+                }
+
+                if (this.scaleItem == undefined && this.scaleItems[initialScale] != undefined) {
+                    this.scaleItem = this.scaleItems[initialScale];
+                }
+
+                this.setScale(this.scaleItem || this.scaleItems[1]);
+            }
+        },
+        rotate : function (args) {
+            if(args != undefined) {
+                var page = this.pages[args.pageIndex | (this.currentPage -1)];
+                if(page != undefined) {
+                    var rotation = page.viewport.rotation + args.rotation;
+                    if(rotation === 360 || rotation === -360){
+                        rotation = 0;
                     }
-
-                    if(curScale.value === 100){
-                        this.defaultScale = curScale;
-                    }
-
-                    if(this.scaleItem == undefined && curScale.id === initialScale){
-                        this.scaleItem = curScale;
-                    }
-
-                    this.api.zoomLevels.push(curScale);
-
-                    lastScale = curScale.value;
-                } while(true);
-
-                this.setScale(this.scaleItem);
+                    page.viewport.rotation = rotation;
+                    page.rotate(rotation);
+                    this.setContainerSize(this.initialScale);
+                }
             }
         },
         setScale: function (scaleItem) {
-            if(scaleItem != undefined) {
+            if(scaleItem != undefined){
                 this.scaleItem = scaleItem;
             }
-            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+            var sci = scaleItem  || this.zoomLevels[0];
 
             var numPages = this.pages.length;
 
             for(var iPage = 0;iPage < numPages;++iPage) {
-                // Clear the page's contents...
-                this.pages[iPage].clear();
-
                 // Resize to current scaleItem...
-                this.pages[iPage].resize(si.value);
+                this.pages[iPage].resize(sci.value);
             }
 
             if(this.currentPage != 0 && this.currentPage != 1) {
@@ -8862,24 +8968,29 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
                 // Find the widest page in the document and fit it to the container.
                 var numPages = this.pages.length;
-                var maxWidth = this.pages[0].getViewport(1.0).width;
+                var page = this.pages[0];
+                var maxWidth = page.getViewport(1.0, page.rotation).width;
                 for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                    page = this.pages[iPage];
+                    maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
                 }
 
                 return this.containerSize.width / maxWidth;
             } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
                 // Find the highest page in the document and fit it to the container.
                 var numPages = this.pages.length;
-                var maxHeight = this.pages[0].getViewport(1.0).height;
+                var page = this.pages[0];
+                var maxHeight = page.getViewport(1.0, page.rotation).height;
                 for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                    page = this.pages[iPage];
+                    maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
                 }
 
                 return this.containerSize.height / maxHeight;
             } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
                 // Find the smaller dimension of the container and fit the 1st page to it.
-                var page0Viewport = this.pages[0].getViewport(1.0);
+                var page = this.pages[0];
+                var page0Viewport = page.getViewport(1.0, page.rotation);
 
                 if(this.containerSize.height < this.containerSize.width) {
                     return this.containerSize.height / page0Viewport.height;
@@ -8896,11 +9007,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
 
             return scale;
         },
-        removeDistantPages: function (curPageID, distance) {
+        removeDistantPages: function (curPageID, lastPageID, distance) {
             var numPages = this.pages.length;
 
             var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+            var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
 
             for(var iPage = 0;iPage < firstActivePageID;++iPage) {
                 this.pages[iPage].clear();
@@ -8917,19 +9028,23 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
 
             var self = this;
             var numPages = this.pages.length;
-            var currentPageID = 0;
+            var currentPageID = -1;
+            var lastPageID = 0;
             var atLeastOnePageInViewport = false;
             for(var iPage = 0;iPage < numPages;++iPage) {
                 var page = this.pages[iPage];
 
                 if(page.isVisible()) {
                     var parentContainer = page.container.parent()[0];
-                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
-                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                    var pageContainer = page.container[0];
+                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                    var pageCenter = pageContainer.offsetHeight / 2;
+                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
                         currentPageID = iPage;
                     }
 
                     atLeastOnePageInViewport = true;
+                    lastPageID = iPage;
                     page.render(function (page, status) {
                         if(status === MultiPagesConstants.PAGE_RENDERED) {
                             self.onPageRendered("success", page.id, self.pages.length, "");
@@ -8945,7 +9060,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             }
 
             if(this.lastScrollDir !== 0) {
-                var nextPageID = currentPageID + this.lastScrollDir;
+                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
                 if(nextPageID >= 0 && nextPageID < numPages) {
                     this.pages[nextPageID].render(function (page, status) {
                         if(status === MultiPagesConstants.PAGE_RENDERED) {
@@ -8957,19 +9072,19 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 }
             }
 
-            this.removeDistantPages(currentPageID, 2);
+            this.removeDistantPages(currentPageID, lastPageID, 1);
 
             this.currentPage = currentPageID + 1;
             if(this.onCurrentPageChanged){
                 this.onCurrentPageChanged( currentPageID + 1);
             }
         },
-        hookScope: function(scope, initialScale) {
+        hookScope: function(scope) {
             var self = this;
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(initialScale);
+                self.setContainerSize(self.initialScale);
             });
 
             var onProgress = function(operation, state, value, total, message) {
@@ -9062,107 +9177,16 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
 itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
 
         function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
+        			this.viewer = viewer;
+        			this.rotation = 0;
+        		};
 
         MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    var label = (newScale * 100.0).toFixed(0) + "%";
-                    scaleItem = {
-                        id: label,
-                        value : newScale,
-                        label: label
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
+            getZoomLevels: function () {
+                return this.viewer.zoomLevels;
             },
             zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
+                if(scaleItem != undefined) {
                     this.viewer.setScale(scaleItem);
                 }
             },
@@ -9170,12 +9194,16 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                 return this.viewer.scaleItem;
             },
             zoomIn: function() {
-                var nextScale = this.getNextZoomInScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index < this.viewer.zoomLevels.length) {
+                    this.zoomTo(this.viewer.zoomLevels[index + 1]);
+                }
             },
             zoomOut: function() {
-                var nextScale = this.getNextZoomOutScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index > 0) {
+                    this.zoomTo(this.viewer.zoomLevels[index - 1]);
+                }
             },
             getCurrentPage: function () {
                 return this.viewer.currentPage;
@@ -9186,7 +9214,11 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                 }
 
                 //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+                var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+                if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                this.viewer.element[0].scrollTop = offsetTop;
             },
             goToNextPage: function () {
                 this.goToPage(this.viewer.currentPage + 1);
@@ -9196,6 +9228,38 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
             },
             getNumPages: function () {
                 return this.viewer.pages.length;
+            },
+            rotatePagesRight: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation + 90;
+                if(rotation === 360 || rotation === -360) {
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePagesLeft: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation - 90;
+                if(rotation === 360 || rotation === -360){
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePageRight: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: 90 });
+            },
+            rotatePageLeft: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: -90 });
             }
         };
 
@@ -9345,6 +9409,258 @@ itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
 
 'use strict';
 /**
+ * TODO itTiffViewer desc
+ */
+itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
+	var linker = function(scope, element, attrs) {
+
+		scope.trustSrc = function(src) {
+			return $sce.trustAsResourceUrl(src);
+		};
+
+		//notify callback when api set in options for SCPAS team
+        scope.$watch("options.api", function (value) {
+             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
+                scope.options.onApiLoaded(scope.options.api);
+             }
+        });
+	};
+
+	return {
+		scope: {
+			src: "=",
+			options: "="
+		},
+		restrict: 'E',
+		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+					'<tiff-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
+		link: linker
+
+	};
+}]);
+'use strict';
+/**
+ * TODO Tiff implementation desc
+ */
+itTiffViewer
+    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
+
+        function TIFFPage(pageIndex, getSrc, view) {
+        			this.base = MultiPagesPage;
+        			this.base(pageIndex, view);
+
+        			this.getSrc = getSrc;
+        		}
+
+        TIFFPage.prototype = new MultiPagesPage;
+
+        TIFFPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+            }else {
+                self.container.append(self.canvas);
+
+                var ctx = self.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, self.viewport.transform);
+                var img = new Image;
+                img.onload = function(){
+                    ctx.drawImage(img,0,0); // Or at whatever offset you like
+                    self.canvasRendered = true;
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                };
+
+                $timeout(function () {
+                    if(self.src == undefined){
+                        self.src =  self.getSrc(self.id - 1);
+                    }
+
+                    img.src = self.src;
+                }, 50);
+
+            }
+        };
+
+        return (TIFFPage);
+    }])
+
+    .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
+        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+
+        function TIFFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new MultiPagesViewerAPI(this), element);
+
+            this.tiff = null;
+        }
+
+        TIFFViewer.prototype = new MultiPagesViewer;
+
+        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            this.initialScale = initialScale;
+            var isFile = typeof obj != typeof "";
+
+            if(isFile){
+                this.setFile(obj);
+            }else {
+                this.setUrl(obj);
+            }
+        };
+        TIFFViewer.prototype.setUrl = function(url) {
+            if (url !== undefined && url !== null && url !== '') {
+                var self = this;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.responseType = 'arraybuffer';
+                xhr.onprogress =  angular.bind(this, self.downloadProgress);
+                xhr.onload = function (e) {
+                    self.loadTiff(xhr.response);
+                };
+                xhr.send();
+            }
+        };
+        TIFFViewer.prototype.setFile = function(file) {
+            if (file !== undefined && file !== null) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    self.loadTiff(e.target.result);
+                };
+
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
+                        }
+
+                        self.onDataDownloaded("failed", 0, 0, message);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+        };
+        TIFFViewer.prototype.loadTiff = function(arrayBuffer){
+            var self = this;
+            self.onDestroy();
+            self.tiff = new Tiff({buffer: arrayBuffer});
+            self.getAllPages(function(pageList) {
+                self.pages = pageList;
+
+                self.setContainerSize(self.initialScale);
+            });
+        };
+        TIFFViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.tiff.countDirectory(),
+                remainingPages = numPages;
+            var self = this;
+            function _getUrl(index) {
+                self.tiff.setDirectory(index);
+                return self.tiff.toDataURL();
+            };
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                this.tiff.setDirectory(iPage);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
+                pageList[iPage] = page;
+
+                this.element.append(page.container);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        TIFFViewer.prototype.onDestroy = function () {
+            if(self.tiff != null){
+                self.tiff.close();
+                self.tiff = null;
+            }
+        };
+
+        return (TIFFViewer);
+    }])
+
+    .directive("tiffViewer", ['$log' , 'TIFFViewer', function($log, TIFFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope:
+            {
+                src: "@",
+                file: "=",
+                api: "=",
+                initialScale: "@"
+
+            },
+            controller: ['$scope', '$element', function($scope, $element) {
+
+                var viewer = new TIFFViewer($element);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.onSrcChanged = function() {
+                    viewer.open(this.src, this.initialScale, pageMargin);
+                };
+
+                $scope.onFileChanged = function () {
+                    viewer.open(this.file, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope);
+            }],
+            link: function(scope, element, attrs) {
+                attrs.$observe('src', function(src) {
+                    scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    scope.onFileChanged();
+                });
+            }
+        };
+    }]);
+
+'use strict';
+/**
  * TODO CustomStyle desc
  */
 itPdfViewer.factory('CustomStyle', [function () {
@@ -9417,6 +9733,13 @@ itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
 		scope.trustSrc = function(src) {
 			return $sce.trustAsResourceUrl(src);
 		};
+
+        //notify callback when api set in options for SCPAS team
+        scope.$watch("options.api", function (value) {
+             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
+                scope.options.onApiLoaded(scope.options.api);
+             }
+        });
 	};
 
 	return {
@@ -9494,87 +9817,87 @@ itPdfViewer
             MultiPagesPage.prototype.clear.call(this);
             this.renderTask = null;
         };
-        PDFPage.prototype.getViewport = function (scale) {
-            return this.pdfPage.getViewport(scale);
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation, 0, 0);
         };
-        PDFPage.prototype.resize = function (scale) {
-            MultiPagesPage.prototype.resize.call(this, scale);
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
 
             this.textLayer = angular.element("<div class='text-layer'></div>");
             this.textLayer.css("width", this.viewport.width + "px");
             this.textLayer.css("height", this.viewport.height + "px");
         };
         PDFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(this.renderTask === null) {
-                    if(callback) {
-                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                    }
-                } else {
-                    this.renderTask.then(function () {
+                var self = this;
+                if(this.rendered) {
+                    if(this.renderTask === null) {
                         if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                        }
-                    }, function (reason) {
-                        $log.debug('stopped ' + reason);
-                    });
-                }
-
-                return;
-            }
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-                self.container.append(self.textLayer);
-            }else{
-                this.renderTask = this.pdfPage.render({
-                    canvasContext: this.canvas[0].getContext('2d'),
-                    viewport: this.viewport
-                });
-
-                self.container.append(self.canvas);
-
-                this.renderTask.then(function () {
-                    self.rendered = true;
-                    self.renderTask = null;
-                    self.canvasRendered = true;
-                    //self.container.append(self.canvas);
-
-                    if(self.textContent) {
-                        // Render the text layer...
-                        var textLayerBuilder = new TextLayerBuilder({
-                            textLayerDiv: self.textLayer[0],
-                            pageIndex: self.id,
-                            viewport: self.viewport
-                        });
-
-                        textLayerBuilder.setTextContent(self.textContent);
-                        textLayerBuilder.renderLayer();
-                        self.container.append(self.textLayer);
-                    }
-
-                    if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                }, function (message) {
-                    self.rendered = false;
-                    self.renderTask = null;
-
-                    if(message === "cancelled") {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                            callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                         }
                     } else {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
-                        }
+                        this.renderTask.then(function () {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                            }
+                        }, function (reason) {
+                            $log.debug('stopped ' + reason);
+                        });
                     }
-                });
-            }
-        };
+
+                    return;
+                }
+
+                this.rendered = true;
+
+                if(this.canvasRendered){
+                    self.container.append(self.canvas);
+                    self.container.append(self.textLayer);
+                }else{
+                    this.renderTask = this.pdfPage.render({
+                        canvasContext: this.canvas[0].getContext('2d'),
+                        viewport: this.viewport
+                    });
+
+                    self.container.append(self.canvas);
+
+                    this.renderTask.then(function () {
+                        self.rendered = true;
+                        self.renderTask = null;
+                        self.canvasRendered = true;
+                        //self.container.append(self.canvas);
+
+                        if(self.textContent) {
+                            // Render the text layer...
+                            var textLayerBuilder = new TextLayerBuilder({
+                                textLayerDiv: self.textLayer[0],
+                                pageIndex: self.id,
+                                viewport: self.viewport
+                            });
+
+                            textLayerBuilder.setTextContent(self.textContent);
+                            textLayerBuilder.renderLayer();
+                            self.container.append(self.textLayer);
+                        }
+
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDERED);
+                        }
+                    }, function (message) {
+                        self.rendered = false;
+                        self.renderTask = null;
+
+                        if(message === "cancelled") {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                            }
+                        } else {
+                            if(callback) {
+                                callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
+                            }
+                        }
+                    });
+                }
+            };
 
         return (PDFPage);
     }])
@@ -10190,240 +10513,4 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
         };
 
         return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itTiffViewer desc
- */
-itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
-	var linker = function(scope, element, attrs) {
-
-		scope.trustSrc = function(src) {
-			return $sce.trustAsResourceUrl(src);
-		};
-	};
-
-	return {
-		scope: {
-			src: "=",
-			options: "="
-		},
-		restrict: 'E',
-		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<tiff-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
-		link: linker
-
-	};
-}]);
-'use strict';
-/**
- * TODO Tiff implementation desc
- */
-itTiffViewer
-    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
-
-        function TIFFPage(pageIndex, src, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
-
-            this.src = src;
-        }
-
-        TIFFPage.prototype = new MultiPagesPage;
-
-        TIFFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-            }else {
-                self.container.append(self.canvas);
-
-                var ctx = self.canvas[0].getContext('2d');
-                var img = new Image;
-                img.onload = function(){
-                    ctx.drawImage(img,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
-
-                    if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                };
-                img.src = this.src;
-            }
-        };
-
-        return (TIFFPage);
-    }])
-
-    .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
-        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
-
-        function TIFFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new MultiPagesViewerAPI(this), element);
-
-            this.tiff = null;
-        }
-
-        TIFFViewer.prototype = new MultiPagesViewer;
-
-        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            this.pageMargin = pageMargin;
-            this.initialScale = initialScale;
-            var isFile = typeof obj != typeof "";
-
-            if(isFile){
-                this.setFile(obj);
-            }else {
-                this.setUrl(obj);
-            }
-        };
-        TIFFViewer.prototype.setUrl = function(url) {
-            if (url !== undefined && url !== null && url !== '') {
-                var self = this;
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', url);
-                xhr.responseType = 'arraybuffer';
-                xhr.onprogress =  angular.bind(this, self.downloadProgress);
-                xhr.onload = function (e) {
-                    self.loadTiff(xhr.response);
-                };
-                xhr.send();
-            }
-        };
-        TIFFViewer.prototype.setFile = function(file) {
-            if (file !== undefined && file !== null) {
-                var self = this;
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    self.loadTiff(e.target.result);
-                };
-
-                reader.onprogress = function (e) {
-                    self.downloadProgress(e);
-                };
-
-                reader.onloadend = function (e) {
-                    var error = e.target.error;
-                    if(error !== null) {
-                        var message = "File API error: ";
-                        switch(e.code) {
-                            case error.ENCODING_ERR:
-                                message += "Encoding error.";
-                                break;
-                            case error.NOT_FOUND_ERR:
-                                message += "File not found.";
-                                break;
-                            case error.NOT_READABLE_ERR:
-                                message += "File could not be read.";
-                                break;
-                            case error.SECURITY_ERR:
-                                message += "Security issue with file.";
-                                break;
-                            default:
-                                message += "Unknown error.";
-                                break;
-                        }
-
-                        self.onDataDownloaded("failed", 0, 0, message);
-                    }
-                };
-
-                reader.readAsArrayBuffer(file);
-            }
-        };
-        TIFFViewer.prototype.loadTiff = function(arrayBuffer){
-            var self = this;
-            self.onDestroy();
-            self.tiff = new Tiff({buffer: arrayBuffer});
-            self.getAllPages(function(pageList) {
-                self.pages = pageList;
-
-                self.setContainerSize(self.initialScale);
-            });
-        };
-        TIFFViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.tiff.countDirectory(),
-                remainingPages = numPages;
-            var self = this;
-            function _getUrl(index) {
-                self.tiff.setDirectory(index);
-                return self.tiff.toDataURL();
-            };
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                this.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
-                pageList[iPage] = page;
-
-                this.element.append(page.container);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        TIFFViewer.prototype.onDestroy = function () {
-            if(self.tiff != null){
-                self.tiff.close();
-                self.tiff = null;
-            }
-        };
-
-        return (TIFFViewer);
-    }])
-
-    .directive("tiffViewer", ['$log' , 'TIFFViewer', function($log, TIFFViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope:
-            {
-                src: "@",
-                file: "=",
-                api: "=",
-                initialScale: "@"
-
-            },
-            controller: ['$scope', '$element', function($scope, $element) {
-
-                var viewer = new TIFFViewer($element);
-
-                $scope.api = viewer.getAPI();
-
-                $scope.onSrcChanged = function() {
-                    viewer.open(this.src, this.initialScale, pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
-                };
-
-                viewer.hookScope($scope);
-            }],
-            link: function(scope, element, attrs) {
-                attrs.$observe('src', function(src) {
-                    scope.onSrcChanged();
-                });
-
-                scope.$watch("file", function (file) {
-                    scope.onFileChanged();
-                });
-            }
-        };
     }]);
