@@ -159,6 +159,30 @@
  *  </tr>
  *  <tr>
  *      <td>
+ *          it-autocomplete-div-visible
+ *      </td>
+ *      <td>
+ *          always visible part of autocomplete (input)
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-input
+ *      </td>
+ *      <td>
+ *          input text of autocomplete
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          it-autocomplete-btn
+ *      </td>
+ *      <td>
+ *          ... btn at the end of autocomplete fields
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
  *          search-mode
  *      </td>
  *      <td>
@@ -585,7 +609,7 @@ IteSoft
                         self.fields.optionContainerClass = '';
                     }
                     if (angular.isUndefined(self.fields.inputClass)) {
-                        self.fields.inputClass = 'it-autocomplete-input-class';
+                        self.fields.inputClass = 'it-autocomplete-input-class it-autocomplete-input';
                     }
                     if (angular.isUndefined(self.fields.placeholder)) {
                         self.fields.placeholder = '';
@@ -708,8 +732,10 @@ IteSoft
                     /**
                      * Create a random name to have an autogenerate id for log
                      */
-                    if (angular.isUndefined($scope.name)) {
-                        $scope.name = self.fields.optionContainerId;
+                    if (angular.isUndefined(self.fields.name)) {
+                        self.fields.name = self.fields.optionContainerId;
+                    }else{
+                        self.fields.name = self.fields.name;
                     }
                     /**
                      * public function
@@ -736,11 +762,11 @@ IteSoft
 
 
                     if (angular.isDefined($scope.items) && angular.isDefined($scope.itemsGetter)) {
-                        $log.error($scope.name + " Autocomplete must use items or items-getter, you are not allowed to use both")
+                        $log.error(self.fields.name + " Autocomplete must use items or items-getter, you are not allowed to use both")
                     }
 
                     if (angular.isUndefined($scope.items) && angular.isUndefined($scope.itemsGetter)) {
-                        $log.error($scope.name + " Autocomplete must use items or items-getter, you need to add one parameter")
+                        $log.error(self.fields.name + " Autocomplete must use items or items-getter, you need to add one parameter")
                     }
                     /**
                      * Call register function to give ref of current autocomplete to the controller
@@ -770,7 +796,7 @@ IteSoft
                         $rootScope.$on(self.fields.event.refresh.name, function (event, value) {
 
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: refresh event emit, calling refresh items ");
+                                $log.debug(self.fields.name + " itAutocomplete: refresh event emit, calling refresh items ");
                             }
                             self.fields.event.refresh.value = value;
                             initItems();
@@ -784,13 +810,13 @@ IteSoft
                          */
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: refresh event is not defined, add watch to items");
+                            $log.debug(self.fields.name + " itAutocomplete: refresh event is not defined, add watch to items");
                         }
                         $scope.$watch('items', function (newValue, oldValue) {
                             if (newValue != self.fields.item) {
 
                                 if (self.fields.debug) {
-                                    $log.debug($scope.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);
+                                    $log.debug(self.fields.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);
                                 }
                                 initItems();
                                 initSelect();
@@ -810,7 +836,7 @@ IteSoft
                         }
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
+                            $log.debug(self.fields.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
                         }
 
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != _getIdFromObject(self.fields.selectedItem)) {
@@ -824,7 +850,7 @@ IteSoft
                     function updateIndex() {
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);
+                            $log.debug(self.fields.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);
                         }
                         if ($scope.focusIndex < 0) {
                             $scope.focusIndex = -1;
@@ -855,7 +881,7 @@ IteSoft
                         self.fields.selectedItem = {};
                         if (angular.isDefined(id)) {
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: select with  id " + id);
+                                $log.debug(self.fields.name + " itAutocomplete: select with  id " + id);
                             }
                             angular.forEach(self.fields.items, function (item) {
                                 if (_getIdFromObject(item) == id) {
@@ -881,7 +907,7 @@ IteSoft
                         self.fields.initialItems = angular.copy(self.fields.items);
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: copy option items " + self.fields.initialItems);
+                            $log.debug(self.fields.name + " itAutocomplete: copy option items " + self.fields.initialItems);
                         }
                     }
 
@@ -891,7 +917,7 @@ IteSoft
                     function initSelect() {
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: init select ");
+                            $log.debug(self.fields.name + " itAutocomplete: init select ");
                         }
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
@@ -913,7 +939,7 @@ IteSoft
 
                             applySelection(selectedItem);
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
+                                $log.debug(self.fields.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
                             }
                             if(self.fields.converter){
                                 $scope.selectedOption = _getObject(selectedItem);
@@ -923,14 +949,14 @@ IteSoft
                         } else {
 
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: select empty");
+                                $log.debug(self.fields.name + " itAutocomplete: select empty");
                             }
                             $scope.selectedOption = undefined;
                         }
                         if (self.fields.event.select) {
 
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: emit select event " + $scope.selectedOption);
+                                $log.debug(self.fields.name + " itAutocomplete: emit select event " + $scope.selectedOption);
                             }
                             $rootScope.$emit(self.fields.event.select, $scope.selectedOption);
                         }
@@ -941,7 +967,7 @@ IteSoft
                         if (angular.isDefined(selectedItem)) {
 
                             if (self.fields.debug) {
-                                $log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
+                                $log.debug(self.fields.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
                             }
                             var selectedPosition = _getPosition(selectedItem);
                             if ($scope.focusIndex != selectedPosition) {
@@ -971,7 +997,7 @@ IteSoft
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId + "");
 
                         if (self.fields.debug) {
-                            $log.debug($scope.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
+                            $log.debug(self.fields.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
                         }
 
                         if (angular.isDefined(containerDiv) && containerDiv != null){
@@ -984,7 +1010,7 @@ IteSoft
                      * Hide option items
                      */
                     function hideItems($event) {
-                        $log.debug($scope.name + " itAutocomplete: hide "+self.fields.selectedItem);
+                        $log.debug(self.fields.name + " itAutocomplete: hide "+self.fields.selectedItem);
                         // Si appelé lors du click sur la touche entrée
                         if (angular.isUndefined($event)) {
                             self.fields.showItems = false;
@@ -993,7 +1019,7 @@ IteSoft
 
                             }
                             // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
-                        } else if (!document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
+                        } else if (!document.activeElement.classList.contains('it-autocomplete-container')) {
                             self.fields.showItems = false;
                             if (angular.isDefined(self.fields.selectedItem)) {
                                 self.fields.inputSearch = _getLabelFromObject(self.fields.selectedItem);
@@ -1050,7 +1076,7 @@ IteSoft
                      * Call when search input content change
                      */
                     function change(event) {
-                        $log.debug($scope.name + " itAutocomplete: input search change value " + event + "->" + self.fields.inputSearch)
+                        $log.debug(self.fields.name + " itAutocomplete: input search change value " + event + "->" + self.fields.inputSearch)
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
                             select(undefined);
@@ -1074,7 +1100,7 @@ IteSoft
                                      */
                                 } else if (self.fields.searchMode == "custom") {
                                     if (angular.isUndefined(self.fn.searchPredicate)) {
-                                        $log.error($scope.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
+                                        $log.error(self.fields.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
                                     } else if (self.fn.searchPredicate(self.fields.inputSearch, item)) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
@@ -1109,6 +1135,7 @@ IteSoft
                     const KEY_UP = 40;
                     const KEY_BACK = 8;
                     const KEY_DELETE = 8;
+                    const KEY_ESCAPE = 27;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
@@ -1124,6 +1151,14 @@ IteSoft
                         }
                     });
                     $scope.keys.push({
+                        code: KEY_BACK, action: function () {
+                            self.fields.inputSearch = "";
+                            $scope.focusIndex = -1;
+                            updateIndex();
+                            change();
+                        }
+                    });
+                    $scope.keys.push({
                         code: KEY_DOWN, action: function () {
                             showItems();
                             $scope.focusIndex--;
@@ -1135,6 +1170,13 @@ IteSoft
                             showItems();
                             $scope.focusIndex++;
                             updateIndex();
+                        }
+                    });
+                    $scope.keys.push({
+                        code: KEY_ESCAPE, action: function () {
+                            if (self.fields.showItems) {
+                                hideItems();
+                            }
                         }
                     });
 
@@ -1237,7 +1279,6 @@ IteSoft
                         return result;
                     }
 
-
                     /**
                      * Return position inside list of item
                      * @param item
@@ -1251,9 +1292,13 @@ IteSoft
                 }
             ],
             template: '<div class="col-xs-12 it-autocomplete-div">' +
-            '<input ng-disabled="itAutocompleteCtrl.fields.disabled"  ng-readonly="itAutocompleteCtrl.fields.readonly" placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
-            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
+            '<div class="it-autocomplete-div-visible" > '+
+            '   <input ng-disabled="itAutocompleteCtrl.fields.disabled"  ng-readonly="itAutocompleteCtrl.fields.readonly" placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
+            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control it-autocomplete-input" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
+            '   <div class="it-autocomplete-btn"  ng-disabled="itAutocompleteCtrl.fields.disabled" ng-click="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" > ' +
+            '&#9679;&#9679;&#9679;</div>'+
+            '</div>'+
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
             '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
