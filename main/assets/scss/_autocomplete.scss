@@ -43,6 +43,18 @@
   z-index: 9999;
 }
 
+.it-autocomplete-btn{
+  width: 30px;
+  position: absolute;
+  top:0;
+  right:15px;
+  pointer-events: none;
+  display: inline-block;
+}
+
+.it-autocomplete-div-visible:hover .it-autocomplete-btn {
+  color: #03a9f4;
+}
 .it-autocomplete-container {
   max-height: 200px;
   min-height: 50px;
@@ -52,4 +64,12 @@
   overflow-x: hidden;
   z-index: 2000;
   @include box-shadow(1px 1px 1px #666);
+}
+
+.it-autocomplete-div-visible{
+}
+
+.it-autocomplete-input{
+  display: inline-block;
+  padding-right: 30px !important;
 }
