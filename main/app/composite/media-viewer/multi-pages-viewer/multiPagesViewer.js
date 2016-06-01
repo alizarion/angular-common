@@ -2,31 +2,31 @@
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
     function getElementInnerSize(element, margin) {
-    			var tallTempElement = angular.element("<div></div>");
-    			tallTempElement.css("height", "10000px");
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
 
-    			element.append(tallTempElement);
+        element.append(tallTempElement);
 
-    			var w = tallTempElement[0].offsetWidth;
+        var w = tallTempElement[0].offsetWidth;
 
-    			tallTempElement.remove();
+        tallTempElement.remove();
 
-    			var h = element[0].offsetHeight;
-    			if(h === 0) {
-    				// TODO: Should we get the parent height?
-    				h = 2 * margin;
-    			}
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
 
-    			w -= 2 * margin;
-    			h -= 2 * margin;
+        w -= 2 * margin;
+        h -= 2 * margin;
 
-    			return {
-    				width: w,
-    				height: h
-    			};
-    		}
+        return {
+            width: w,
+            height: h
+        };
+    }
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
@@ -68,6 +68,8 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         setContainerSize: function (initialScale) {
             if(this.pages.length > 0) {
                 this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
 
                 this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
                 this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
@@ -111,25 +113,24 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                    });
                 }
 
-                if (this.scaleItem == undefined && this.scaleItems[initialScale] != undefined) {
-                    this.scaleItem = this.scaleItems[initialScale];
+                if (this.scaleItem == undefined && initialScale) {
+                    if(this.scaleItems[initialScale] != undefined) {
+                        this.scaleItem = this.scaleItems[initialScale];
+                    }else{
+                        $log.debug("InitialScale not found : " + initialScale);
+                    }
                 }
 
-                this.setScale(this.scaleItem || this.scaleItems[1]);
-            }
-        },
-        rotate : function (args) {
-            if(args != undefined) {
-                var page = this.pages[args.pageIndex | (this.currentPage -1)];
-                if(page != undefined) {
-                    var rotation = page.viewport.rotation + args.rotation;
-                    if(rotation === 360 || rotation === -360){
-                        rotation = 0;
-                    }
-                    page.viewport.rotation = rotation;
-                    page.rotate(rotation);
-                    this.setContainerSize(this.initialScale);
+                if(this.api.onZoomLevelsChanged ) {
+                    this.api.onZoomLevelsChanged (this.zoomLevels);
                 }
+
+                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue) {
+                    this.render();
+                    return;
+                }
+
+                this.setScale(this.scaleItem || this.scaleItems["100%"]);
             }
         },
         setScale: function (scaleItem) {
@@ -145,11 +146,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 this.pages[iPage].resize(sci.value);
             }
 
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
+            this.render();
         },
         calcScale: function (desiredScale) {
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
@@ -266,6 +263,51 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 this.onCurrentPageChanged( currentPageID + 1);
             }
         },
+        render: function () {
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        rotate : function (args) {
+            if(args != undefined) {
+                var page = this.pages[args.pageIndex];
+                if(page != undefined) {
+                    var rotation = page.viewport.rotation + args.rotation;
+                    if(rotation === 360 || rotation === -360){
+                        rotation = 0;
+                    }
+                    page.viewport.rotation = rotation;
+                    page.rotate(rotation);
+                    if(this.api.onPageRotation) {
+                        this.api.onPageRotation(args);
+                    }
+                    this.setContainerSize(this.initialScale);
+                }
+            }
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        },
         hookScope: function(scope) {
             var self = this;
             var lastScrollY = 0;
@@ -277,6 +319,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             var onProgress = function(operation, state, value, total, message) {
                 if (operation === "render" && value === 1) {
                     if (state === "success") {
+                         $compile(self.element.contents())(scope);
                         $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
                     }
                     else {
@@ -331,27 +374,6 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                     self.renderAllVisiblePages(normalizedScrollDir);
                 }, 350);
             });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
         }
     };
 

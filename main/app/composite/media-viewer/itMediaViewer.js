@@ -70,6 +70,10 @@
  *   <td>Method to get the list of zoom level items.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
+ *   <td>Callback to be notify when the property zoom levels change.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.api.getCurrentPage()</code></td>
  *   <td>Method to get the current page.</td>
  *  </tr>
@@ -94,7 +98,7 @@
  *   <td>Method to rotate to the right (90°) all pages.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api.rotatePagesLeft</code></td>
+ *   <td><code>options.api.rotatePagesLeft()</code></td>
  *   <td>Method to rotate to the left (-90°) all pages.</td>
  *  </tr>
  *  <tr>
@@ -106,6 +110,10 @@
  *   <td>Method to rotate to the left (per -90°) the current page.</td>
  *  </tr>
  *  <tr>
+ *  <tr>
+ *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
+ *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
  *  </tr>
@@ -126,7 +134,7 @@
     angular.module('itesoft-showcase',['itesoft'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { console.log(api); } }; }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */

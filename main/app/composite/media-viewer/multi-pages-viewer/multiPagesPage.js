@@ -2,22 +2,22 @@
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport', function ($log, MultiPagesConstants, PageViewport) {
 
     function MultiPagesPage(pageIndex, view) {
-    			this.id = pageIndex + 1;
-    			this.container = angular.element("<div class='page'></div>");
-    			this.container.attr("id", "page_" + pageIndex);
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page' ng-click='api.onPageClicked(" + this.id + ")'></div>");
+        this.container.attr("id", "page_" + pageIndex);
 
-    			this.canvasRendered = false;
-    			this.rendered = false;
+        this.canvasRendered = false;
+        this.rendered = false;
 
-    			//transform
-                this.rotation = 0;
-                this.scale = 1.0;
-    			this.view = view;
+        //transform
+          this.rotation = 0;
+          this.scale = 1.0;
+        this.view = view;
 
-    		}
+    }
 
     MultiPagesPage.prototype = {
         clear: function () {
@@ -29,22 +29,22 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
         },
         transform : function() {
             this.clear();
-            this.viewport = this.getViewport(this.scale, this.rotation);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
+              this.viewport = this.getViewport(this.scale, this.rotation);
+              this.canvasRendered = false;
+              this.canvas = angular.element("<canvas></canvas>");
+              this.canvas.attr("width", this.viewport.width);
+              this.canvas.attr("height", this.viewport.height);
 
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
+              this.container.css("width", this.viewport.width + "px");
+              this.container.css("height", this.viewport.height + "px");
         },
         resize: function (scale) {
             this.scale = scale;
             this.transform();
         },
         rotate: function (rotation) {
-            this.rotation = rotation;
-            this.transform();
+              this.rotation = rotation;
+              this.transform();
             /*// The canvas may have been originally rotated, rotate relative to that.
             //var relativeRotation = rotation - this.canvas._viewport.rotation;
             var relativeRotation = rotation;
