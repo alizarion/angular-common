@@ -125,7 +125,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                     this.api.onZoomLevelsChanged (this.zoomLevels);
                 }
 
-                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue) {
+                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
                     this.render();
                     return;
                 }

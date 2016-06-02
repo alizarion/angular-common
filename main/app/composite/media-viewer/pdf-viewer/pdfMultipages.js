@@ -43,12 +43,12 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage, textContent) {
+        function PDFPage(pdfPage) {
             this.base = MultiPagesPage;
             this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
-            this.textContent = textContent;
+            this.textContent = null;
             this.renderTask = null;
         }
 
@@ -286,7 +286,7 @@ itPdfViewer
                         var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
                         pagesRefMap[refStr] = page.pageIndex + 1;
 
-                        var pdfPage = new PDFPage(page, null);
+                        var pdfPage = new PDFPage(page);
                         pageList[page.pageIndex] = pdfPage;
 
                         --remainingPages;
@@ -305,7 +305,7 @@ itPdfViewer
 
                     var getPageTask = this.pdf.getPage(iPage + 1);
                     getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page, null);
+                        pageList[page.pageIndex] = new PDFPage(page);
 
                         --remainingPages;
                         if(remainingPages === 0) {
