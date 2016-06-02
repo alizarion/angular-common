@@ -147,6 +147,30 @@ Following is the list of structural style classes:</p>
  </tr>
  <tr>
      <td>
+         it-autocomplete-div-visible
+     </td>
+     <td>
+         always visible part of autocomplete (input)
+     </td>
+ </tr>
+ <tr>
+     <td>
+         it-autocomplete-input
+     </td>
+     <td>
+         input text of autocomplete
+     </td>
+ </tr>
+ <tr>
+     <td>
+         it-autocomplete-btn
+     </td>
+     <td>
+         ... btn at the end of autocomplete fields
+     </td>
+ </tr>
+ <tr>
+     <td>
          search-mode
      </td>
      <td>
@@ -275,6 +299,18 @@ You can use a custom filter method by adding search-mode="'custom'" parameter
     {{selectedtax}}
    </div>
 </div>
+<h3 id="example_disabled">Disabled</h3>
+<div class="row">
+    <div  class="col-xs-3">
+    <it-autocomplete  items="firstNameOptions" name="'customPredicate'" disabled="'true'" search-mode="'custom'"      selected-option="firstRate"  options="options" ></it-autocomplete>
+    </div>
+</div>
+<h3 id="example_readonly">ReadOnly</h3>
+<div class="row">
+    <div  class="col-xs-3">
+    <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"        selected-option="firstRate"  options="options" ></it-autocomplete>
+    </div>
+    </div>
 </div>
 </script>
 </div>
@@ -450,7 +486,7 @@ angular.module('itesoft-showcase').controller('HomeCtrl',
 ]);
 </script>
 </div>
-</div><h4 id="example_autocomplete-map-with-object_demo">Demo</h4>
+</div><h4 id="example_readonly_demo">Demo</h4>
 <div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-6" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>
