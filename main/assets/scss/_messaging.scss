@@ -1,0 +1,43 @@
+.it-messaging-tag {
+  margin : 5px;
+  border-radius : 3px;
+}
+
+.it-messaging-tag a {
+  color :white;
+  text-decoration :none;
+}
+
+.it-messaging-chat {
+  padding: 5px;
+  border-radius: 0px 10px 10px 10px;
+}
+
+.it-messaging-chat.mine{
+  border-radius: 0px 10px 10px 10px;
+  background-color : #DFDAE0;
+}
+
+.it-messaging-chat.others{
+  border-radius: 10px 10px 0px 10px;
+  background-color : #C5B7C9;
+
+}
+
+.it-messaging-message {
+  margin : 10px;
+  font-size:11px;
+}
+
+.it-messaging-message .small {
+  font-size:8px;
+  margin : 5px;
+}
+
+.it-messaging-message .sender {
+  font-weight:bold;
+}
+
+.it-messaging-message .message-text {
+  font-size:11px;
+}
