@@ -118,7 +118,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
-        'main/assets/lib/angular-atmosphere/index.js'
+        'main/assets/lib/angular-atmosphere/index.js',
+        'main/assets/lib/angular-websocket/dist/angular-websocket.min.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -170,7 +171,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/javascript-hint.js',
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
-        'main/assets/lib/angular-atmosphere/index.js'
+        'main/assets/lib/angular-atmosphere/index.js',
+        'main/assets/lib/angular-websocket/dist/angular-websocket.js'
     ],
 
     fileToCopyAndRename:
