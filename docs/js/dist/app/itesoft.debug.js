@@ -275,6 +275,242 @@ IteSoft
         }]);
 
 
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1145,242 +1381,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
-);
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
 );
 "use strict";
 /**
@@ -2720,30 +2720,6 @@ IteSoft
  *  </tr>
  *  <tr>
  *      <td>
- *          it-autocomplete-div-visible
- *      </td>
- *      <td>
- *          always visible part of autocomplete (input)
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-input
- *      </td>
- *      <td>
- *          input text of autocomplete
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          it-autocomplete-btn
- *      </td>
- *      <td>
- *          ... btn at the end of autocomplete fields
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *          search-mode
  *      </td>
  *      <td>
@@ -2860,18 +2836,6 @@ IteSoft
      {{selectedtax}}
     </div>
  </div>
- <h1>Disabled</h1>
- <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" disabled="'true'" search-mode="'custom'"      selected-option="firstRate"  options="options" ></it-autocomplete>
-     </div>
- </div>
- <h1>ReadOnly</h1>
- <div class="row">
-     <div  class="col-xs-3">
-     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"        selected-option="firstRate"  options="options" ></it-autocomplete>
-     </div>
-     </div>
  </div>
  </file>
  <file name="Module.js">
@@ -3110,15 +3074,7 @@ IteSoft
                 /**
                  * name
                  */
-                name: "=",
-                /**
-                 * disabled input
-                 */
-                disabled: "=",
-                /**
-                 * readonly
-                 */
-                readonly: "="
+                name: "="
 
             },
             controllerAs: 'itAutocompleteCtrl',
@@ -3151,8 +3107,6 @@ IteSoft
                         placeholder: $scope.placeholder,
                         debug: false,
                         converter: $scope.converter,
-                        disabled: false,
-                        readonly: false,
                         event: {
                             refresh: {
                                 name: $scope.eventRefresh,
@@ -3170,17 +3124,12 @@ IteSoft
                         self.fields.optionContainerClass = '';
                     }
                     if (angular.isUndefined(self.fields.inputClass)) {
-                        self.fields.inputClass = 'it-autocomplete-input-class it-autocomplete-input';
+                        self.fields.inputClass = 'it-autocomplete-input-class';
                     }
                     if (angular.isUndefined(self.fields.placeholder)) {
                         self.fields.placeholder = '';
                     }
-                    if(angular.isDefined($scope.disabled)){
-                        self.fields.disabled = true;
-                    }
-                    if(angular.isDefined($scope.readonly)){
-                        self.fields.readonly = true;
-                    }
+
 
                     self.fields.optionContainerClass = self.fields.optionContainerClass + " it-autocomplete-container";
                     self.fields.defaultSelectClass = self.fields.optionClass + " it-autocomplete-select";
@@ -3293,10 +3242,8 @@ IteSoft
                     /**
                      * Create a random name to have an autogenerate id for log
                      */
-                    if (angular.isUndefined(self.fields.name)) {
-                        self.fields.name = self.fields.optionContainerId;
-                    }else{
-                        self.fields.name = self.fields.name;
+                    if (angular.isUndefined($scope.name)) {
+                        $scope.name = self.fields.optionContainerId;
                     }
                     /**
                      * public function
@@ -3323,11 +3270,11 @@ IteSoft
 
 
                     if (angular.isDefined($scope.items) && angular.isDefined($scope.itemsGetter)) {
-                        $log.error(self.fields.name + " Autocomplete must use items or items-getter, you are not allowed to use both")
+                        $log.error($scope.name + " Autocomplete must use items or items-getter, you are not allowed to use both")
                     }
 
                     if (angular.isUndefined($scope.items) && angular.isUndefined($scope.itemsGetter)) {
-                        $log.error(self.fields.name + " Autocomplete must use items or items-getter, you need to add one parameter")
+                        $log.error($scope.name + " Autocomplete must use items or items-getter, you need to add one parameter")
                     }
                     /**
                      * Call register function to give ref of current autocomplete to the controller
@@ -3357,7 +3304,7 @@ IteSoft
                         $rootScope.$on(self.fields.event.refresh.name, function (event, value) {
 
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: refresh event emit, calling refresh items ");
+                                $log.debug($scope.name + " itAutocomplete: refresh event emit, calling refresh items ");
                             }
                             self.fields.event.refresh.value = value;
                             initItems();
@@ -3371,13 +3318,13 @@ IteSoft
                          */
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: refresh event is not defined, add watch to items");
+                            $log.debug($scope.name + " itAutocomplete: refresh event is not defined, add watch to items");
                         }
                         $scope.$watch('items', function (newValue, oldValue) {
                             if (newValue != self.fields.item) {
 
                                 if (self.fields.debug) {
-                                    $log.debug(self.fields.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);
+                                    $log.debug($scope.name + " itAutocomplete: items value changed " + newValue + " " + oldValue);
                                 }
                                 initItems();
                                 initSelect();
@@ -3397,7 +3344,7 @@ IteSoft
                         }
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
+                            $log.debug($scope.name + " itAutocomplete: selectedOption value changed " + oldValue + " -> " + newValue);
                         }
 
                         if (angular.isUndefined(self.fields.selectedItem) || newValue != _getIdFromObject(self.fields.selectedItem)) {
@@ -3411,7 +3358,7 @@ IteSoft
                     function updateIndex() {
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);
+                            $log.debug($scope.name + " itAutocomplete: focusIndex value changed  -> " + $scope.focusIndex);
                         }
                         if ($scope.focusIndex < 0) {
                             $scope.focusIndex = -1;
@@ -3442,7 +3389,7 @@ IteSoft
                         self.fields.selectedItem = {};
                         if (angular.isDefined(id)) {
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: select with  id " + id);
+                                $log.debug($scope.name + " itAutocomplete: select with  id " + id);
                             }
                             angular.forEach(self.fields.items, function (item) {
                                 if (_getIdFromObject(item) == id) {
@@ -3468,7 +3415,7 @@ IteSoft
                         self.fields.initialItems = angular.copy(self.fields.items);
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: copy option items " + self.fields.initialItems);
+                            $log.debug($scope.name + " itAutocomplete: copy option items " + self.fields.initialItems);
                         }
                     }
 
@@ -3478,7 +3425,7 @@ IteSoft
                     function initSelect() {
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: init select ");
+                            $log.debug($scope.name + " itAutocomplete: init select ");
                         }
                         var i = 0;
                         angular.forEach(self.fields.items, function (item) {
@@ -3500,7 +3447,7 @@ IteSoft
 
                             applySelection(selectedItem);
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
+                                $log.debug($scope.name + " itAutocomplete: select " + JSON.stringify(selectedItem));
                             }
                             if(self.fields.converter){
                                 $scope.selectedOption = _getObject(selectedItem);
@@ -3510,14 +3457,14 @@ IteSoft
                         } else {
 
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: select empty");
+                                $log.debug($scope.name + " itAutocomplete: select empty");
                             }
                             $scope.selectedOption = undefined;
                         }
                         if (self.fields.event.select) {
 
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: emit select event " + $scope.selectedOption);
+                                $log.debug($scope.name + " itAutocomplete: emit select event " + $scope.selectedOption);
                             }
                             $rootScope.$emit(self.fields.event.select, $scope.selectedOption);
                         }
@@ -3528,7 +3475,7 @@ IteSoft
                         if (angular.isDefined(selectedItem)) {
 
                             if (self.fields.debug) {
-                                $log.debug(self.fields.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
+                                $log.debug($scope.name + " itAutocomplete: applySelection " + JSON.stringify(selectedItem));
                             }
                             var selectedPosition = _getPosition(selectedItem);
                             if ($scope.focusIndex != selectedPosition) {
@@ -3558,7 +3505,7 @@ IteSoft
                         var containerDiv = $document[0].querySelector("#" + self.fields.optionContainerId + "");
 
                         if (self.fields.debug) {
-                            $log.debug(self.fields.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
+                            $log.debug($scope.name + " itAutocomplete: scrollTo " + "#" + self.fields.optionContainerId + " to: " + targetDiv);
                         }
 
                         if (angular.isDefined(containerDiv) && containerDiv != null){
@@ -3571,7 +3518,7 @@ IteSoft
                      * Hide option items
                      */
                     function hideItems($event) {
-                        $log.debug(self.fields.name + " itAutocomplete: hide "+self.fields.selectedItem);
+                        $log.debug($scope.name + " itAutocomplete: hide "+self.fields.selectedItem);
                         // Si appelé lors du click sur la touche entrée
                         if (angular.isUndefined($event)) {
                             self.fields.showItems = false;
@@ -3580,7 +3527,7 @@ IteSoft
 
                             }
                             // si appelé par le on blur, on vérifie que le onblur n'est pas émit par la scrollbar si ie
-                        } else if (!document.activeElement.classList.contains('it-autocomplete-container')) {
+                        } else if (!document.activeElement.parentElement.firstElementChild.classList.contains(self.fields.inputClass)) {
                             self.fields.showItems = false;
                             if (angular.isDefined(self.fields.selectedItem)) {
                                 self.fields.inputSearch = _getLabelFromObject(self.fields.selectedItem);
@@ -3637,7 +3584,7 @@ IteSoft
                      * Call when search input content change
                      */
                     function change(event) {
-                        $log.debug(self.fields.name + " itAutocomplete: input search change value " + event + "->" + self.fields.inputSearch)
+                        $log.debug($scope.name + " itAutocomplete: input search change value " + event + "->" + self.fields.inputSearch)
                         self.fields.items = [];
                         if (self.fields.inputSearch == "") {
                             select(undefined);
@@ -3661,7 +3608,7 @@ IteSoft
                                      */
                                 } else if (self.fields.searchMode == "custom") {
                                     if (angular.isUndefined(self.fn.searchPredicate)) {
-                                        $log.error(self.fields.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
+                                        $log.error($scope.name + " When using searchMode = custom, you need to add a searchPredicate function by adding  self.fn.searchPredicate = function (inputValue,item) ");
                                     } else if (self.fn.searchPredicate(self.fields.inputSearch, item)) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
@@ -3696,7 +3643,6 @@ IteSoft
                     const KEY_UP = 40;
                     const KEY_BACK = 8;
                     const KEY_DELETE = 8;
-                    const KEY_ESCAPE = 27;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
@@ -3712,14 +3658,6 @@ IteSoft
                         }
                     });
                     $scope.keys.push({
-                        code: KEY_BACK, action: function () {
-                            self.fields.inputSearch = "";
-                            $scope.focusIndex = -1;
-                            updateIndex();
-                            change();
-                        }
-                    });
-                    $scope.keys.push({
                         code: KEY_DOWN, action: function () {
                             showItems();
                             $scope.focusIndex--;
@@ -3731,13 +3669,6 @@ IteSoft
                             showItems();
                             $scope.focusIndex++;
                             updateIndex();
-                        }
-                    });
-                    $scope.keys.push({
-                        code: KEY_ESCAPE, action: function () {
-                            if (self.fields.showItems) {
-                                hideItems();
-                            }
                         }
                     });
 
@@ -3840,6 +3771,7 @@ IteSoft
                         return result;
                     }
 
+
                     /**
                      * Return position inside list of item
                      * @param item
@@ -3850,16 +3782,13 @@ IteSoft
                         return self.fields.items.indexOf(item);
                     }
 
+
                 }
             ],
             template: '<div class="col-xs-12 it-autocomplete-div">' +
-            '<div class="it-autocomplete-div-visible" > '+
-            '   <input ng-disabled="itAutocompleteCtrl.fields.disabled"  ng-readonly="itAutocompleteCtrl.fields.readonly" placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
-            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control it-autocomplete-input" ' +
+            '<input placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
+            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
-            '   <div class="it-autocomplete-btn"  ng-disabled="itAutocompleteCtrl.fields.disabled" ng-click="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" > ' +
-            '&#9679;&#9679;&#9679;</div>'+
-            '</div>'+
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
             '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
@@ -4427,6 +4356,10 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Object passed to the media viewer to apply options.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.onApiLoaded = function(api) { }</code></td>
+ *   <td>Callback to be notify when the property api is available.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
  *   <td>Hide | Show progress bar.</td>
  *  </tr>
@@ -4446,15 +4379,6 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td><code>options.api</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
- * <tr>
- *   <td><code>options.api.getNextZoomInScale(scale)</code></td>
- *   <td>Method to get the next zoom level of scale parameter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>options.api.getNextZoomOutScale(scale)</code></td>
- *   <td>Method to get the prev zoom level of scale parameter.</td>
- *  </tr>
  *  <tr>
  *   <td><code>options.api.getZoomLevel()</code></td>
  *   <td>Method to get the current zoom level.</td>
@@ -4472,8 +4396,12 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to zoom to the prev zoom level.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api.zoomLevels</code></td>
- *   <td>List of zoom level items.</td>
+ *   <td><code>options.api.getZoomLevels()</code></td>
+ *   <td>Method to get the list of zoom level items.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
+ *   <td>Callback to be notify when the property zoom levels change.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.api.getCurrentPage()</code></td>
@@ -4496,6 +4424,26 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to get the number of pages.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.rotatePagesRight()</code></td>
+ *   <td>Method to rotate to the right (90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesLeft()</code></td>
+ *   <td>Method to rotate to the left (-90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageRight()</code></td>
+ *   <td>Method to rotate to the right (per 90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageLeft()</code></td>
+ *   <td>Method to rotate to the left (per -90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *  <tr>
+ *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
+ *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
  *  </tr>
@@ -4509,14 +4457,14 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="{showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib' }"></it-media-viewer></div></div>
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
      </div>
  </file>
  <file name="Module.js">
     angular.module('itesoft-showcase',['itesoft'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */
@@ -8457,10 +8405,10 @@ itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
         function IMAGEPage(pageIndex, img, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
-            this.img = img;
-        }
+                    this.base = MultiPagesPage;
+                    this.base(pageIndex, view);
+                    this.img = img;
+                }
 
         IMAGEPage.prototype = new MultiPagesPage;
 
@@ -8481,7 +8429,9 @@ itImageViewer
                 self.container.append(self.canvas);
 
                 var ctx = self.canvas[0].getContext('2d');
-                ctx.drawImage(this.img ,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
+                ctx.transform.apply(ctx, self.viewport.transform);
+                ctx.drawImage(this.img , 0, 0); // Or at whatever offset you like
+
 
                 if(callback) {
                     callback(self, MultiPagesConstants.PAGE_RENDERED);
@@ -8634,25 +8584,23 @@ itImageViewer
 /**
  * TODO itImageViewer desc
  */
-itImageViewer.directive('itImageViewer', ['$sce', function($sce){
-    var linker = function (scope, element, attrs) {
-        scope.trustSrc = function(src) {
-            return $sce.trustAsResourceUrl(src);
-        };
-    };
+itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+     var linker = function(scope, element, attrs) {
+         MultiPagesAddEventWatcher(scope);
+     };
 
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    '<image-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
-        link: linker
-    };
-}]);
+     return {
+         scope: {
+             src: "=",
+             options: "="
+         },
+         restrict: 'E',
+         template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                     '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                     '<image-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}"  api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
+         link: linker
+     };
+ }]);
 
 'use strict';
 /**
@@ -8675,7 +8623,7 @@ itMultiPagesViewer.directive('itProgressbarViewer', [function(){
 /**
  * TODO itToolbarViewer desc
  */
-itMultiPagesViewer.directive('itToolbarViewer', [function(){
+itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
     var linker = function (scope, element, attrs) {
 
         scope.$watch("api.getZoomLevel()", function (value) {
@@ -8701,22 +8649,73 @@ itMultiPagesViewer.directive('itToolbarViewer', [function(){
         },
         restrict: 'E',
         template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button ng-click="api.zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.zoomLevels">' +
-        '</select> ' +
-        '<button ng-click="api.zoomIn()">+</button> ' +
-        '</div>' +
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                            '<button ng-click="api.zoomOut()">-</button> ' +
+                            '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
+                            '</select> ' +
+                            '<button ng-click="api.zoomIn()">+</button> ' +
+                        '</div>' +
 
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span>' +
-        '</div>' +
-        '</div>',
+                        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+                            '<span>Page : </span>' +
+                            '<button ng-click="api.goToPrevPage()"><</button> ' +
+                            '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+                            '<button ng-click="api.goToNextPage()">></button> ' +
+                            '<span> of {{api.getNumPages()}}</span> ' +
+                        '</div>' +
+
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                          '</div>' +
+                    '</div>',
         link: linker
+    };
+}])
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce) {
+    return function (scope) {
+        if(scope){
+            scope.$watch("src", function (src) {
+                if(typeof src === typeof "") {
+                    scope.url = src;
+                }else{
+                    scope.file = src;
+                }
+            });
+
+            scope.$watch("options.thumbnailApi", function (thumbnailApi) {
+                if(thumbnailApi) {
+                    thumbnailApi.onPageClicked = function (pageIndex) {
+                        if(scope.options.api) {
+                            scope.options.api.goToPage(pageIndex);
+                        }
+                    };
+                }
+            });
+
+            scope.$watch("options.api", function (api) {
+                if(api) {
+                    if(scope.options && scope.options.onApiLoaded) {
+                        scope.options.onApiLoaded(api);
+                    }
+
+                    api.onPageRotation = function (args) {
+                        if(scope.options.thumbnailApi) {
+                            scope.options.thumbnailApi.rotatePage(args);
+                        }
+                    };
+                }
+            });
+
+            scope.trustSrc = function(src) {
+                return $sce.trustAsResourceUrl(src)
+            };
+        }
     };
 }]);
 
@@ -8745,17 +8744,19 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport', function ($log, MultiPagesConstants, PageViewport) {
 
     function MultiPagesPage(pageIndex, view) {
         this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page'></div>");
+        this.container = angular.element("<div class='page' ng-click='api.onPageClicked(" + this.id + ")'></div>");
         this.container.attr("id", "page_" + pageIndex);
 
         this.canvasRendered = false;
         this.rendered = false;
 
         //transform
+          this.rotation = 0;
+          this.scale = 1.0;
         this.view = view;
 
     }
@@ -8765,19 +8766,52 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
             this.rendered = false;
             this.container.empty();
         },
-        getViewport: function (scale) {
-            return new PageViewport(this.view, scale, 0, 0, 0);
+        getViewport: function (scale, rotation) {
+            return new PageViewport(this.view, scale, rotation, 0, 0, true);
+        },
+        transform : function() {
+            this.clear();
+              this.viewport = this.getViewport(this.scale, this.rotation);
+              this.canvasRendered = false;
+              this.canvas = angular.element("<canvas></canvas>");
+              this.canvas.attr("width", this.viewport.width);
+              this.canvas.attr("height", this.viewport.height);
+
+              this.container.css("width", this.viewport.width + "px");
+              this.container.css("height", this.viewport.height + "px");
         },
         resize: function (scale) {
-            this.viewport = this.getViewport(scale);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
+            this.scale = scale;
+            this.transform();
+        },
+        rotate: function (rotation) {
+              this.rotation = rotation;
+              this.transform();
+            /*// The canvas may have been originally rotated, rotate relative to that.
+            //var relativeRotation = rotation - this.canvas._viewport.rotation;
+            var relativeRotation = rotation;
+            var absRotation = Math.abs(relativeRotation);
+            var scaleX = 1, scaleY = 1;
 
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
+            if (absRotation === 90 || absRotation === 270) {
+                // Scale x and y because of the rotation.
+                *//*scaleX = this.viewport.height / this.viewport.width;
+                scaleY = this.viewport.width / this.viewport.height;*//*
 
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
+
+               if(this.viewport.width > this.viewport.height) {
+                    var margin = (this.viewport.width - this.viewport.height);
+                    this.container.css("margin", margin + "px auto");
+                }
+
+            }else {
+                this.container.css("margin", null);
+            }
+
+            this.viewport.rotation = relativeRotation;
+            var cssTransform = 'rotate(' + relativeRotation + 'deg) ' +
+                'scale(' + scaleX + ',' + scaleY + ')';
+            this.container.css('transform', cssTransform);*/
         },
         isVisible: function () {
             var pageContainer = this.container[0];
@@ -8800,7 +8834,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
     function getElementInnerSize(element, margin) {
         var tallTempElement = angular.element("<div></div>");
         tallTempElement.css("height", "10000px");
@@ -8836,7 +8870,8 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         this.pageMargin = 0;
         this.currentPage = 0;
         this.lastScrollDir = 0;
-
+        this.scaleItems = {};
+        this.zoomLevels = [];
         this.api = api;
 
         // Hooks for the client...
@@ -8849,82 +8884,129 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         getAPI: function () {
             return this.api;
         },
+        updateScaleItem : function(scaleItem) {
+            var result = this.scaleItems[scaleItem.id];
+            if(result == undefined){
+                this.scaleItems[scaleItem.id] = scaleItem;
+                result = scaleItem;
+            }else{
+                result.value = scaleItem.value;
+            }
+
+            this.zoomLevels.push(result);
+
+            return result;
+        },
         setContainerSize: function (initialScale) {
-            if(this.pages.length > 0){
+            if(this.pages.length > 0) {
                 this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
 
                 this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
                 this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
                 this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
 
-                this.api.zoomLevels = [];
-                var lastScale = 0.1;
-                do {
-                    var curScale = this.api.getNextZoomInScale(lastScale);
-                    if(curScale.value=== lastScale) {
-                        break;
+                this.zoomLevels = [];
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    var scaleItem = null;
+                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                           value : this.fitWidthScale,
+                           label: "Fit width"
+                       });
+                   }
+
+                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                           value : this.fitHeightScale,
+                           label: "Fit height"
+                       });
+                   }
+
+                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                           value : this.fitPageScale,
+                           label: "Fit page"
+                       });
+                   }
+
+                   var label = (newScale * 100.0).toFixed(0) + "%";
+                   scaleItem = this.updateScaleItem({
+                       id: label,
+                       value : newScale,
+                       label: label
+                   });
+                }
+
+                if (this.scaleItem == undefined && initialScale) {
+                    if(this.scaleItems[initialScale] != undefined) {
+                        this.scaleItem = this.scaleItems[initialScale];
+                    }else{
+                        $log.debug("InitialScale not found : " + initialScale);
                     }
+                }
 
-                    if(curScale.value === 100){
-                        this.defaultScale = curScale;
-                    }
+                if(this.api.onZoomLevelsChanged ) {
+                    this.api.onZoomLevelsChanged (this.zoomLevels);
+                }
 
-                    if(this.scaleItem == undefined && curScale.id === initialScale){
-                        this.scaleItem = curScale;
-                    }
+                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue) {
+                    this.render();
+                    return;
+                }
 
-                    this.api.zoomLevels.push(curScale);
-
-                    lastScale = curScale.value;
-                } while(true);
-
-                this.setScale(this.scaleItem);
+                this.setScale(this.scaleItem || this.scaleItems["100%"]);
             }
         },
         setScale: function (scaleItem) {
-            if(scaleItem != undefined) {
+            if(scaleItem != undefined){
                 this.scaleItem = scaleItem;
             }
-            var si = scaleItem  || this.defaultScale || this.api.zoomLevels[0];
+            var sci = scaleItem  || this.zoomLevels[0];
 
             var numPages = this.pages.length;
 
             for(var iPage = 0;iPage < numPages;++iPage) {
-                // Clear the page's contents...
-                this.pages[iPage].clear();
-
                 // Resize to current scaleItem...
-                this.pages[iPage].resize(si.value);
+                this.pages[iPage].resize(sci.value);
             }
 
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
+            this.render();
         },
         calcScale: function (desiredScale) {
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
                 // Find the widest page in the document and fit it to the container.
                 var numPages = this.pages.length;
-                var maxWidth = this.pages[0].getViewport(1.0).width;
+                var page = this.pages[0];
+                var maxWidth = page.getViewport(1.0, page.rotation).width;
                 for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxWidth = Math.max(maxWidth, this.pages[iPage].getViewport(1.0).width);
+                    page = this.pages[iPage];
+                    maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
                 }
 
                 return this.containerSize.width / maxWidth;
             } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
                 // Find the highest page in the document and fit it to the container.
                 var numPages = this.pages.length;
-                var maxHeight = this.pages[0].getViewport(1.0).height;
+                var page = this.pages[0];
+                var maxHeight = page.getViewport(1.0, page.rotation).height;
                 for(var iPage = 1;iPage < numPages;++iPage) {
-                    maxHeight = Math.max(maxHeight, this.pages[iPage].getViewport(1.0).height);
+                    page = this.pages[iPage];
+                    maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
                 }
 
                 return this.containerSize.height / maxHeight;
             } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
                 // Find the smaller dimension of the container and fit the 1st page to it.
-                var page0Viewport = this.pages[0].getViewport(1.0);
+                var page = this.pages[0];
+                var page0Viewport = page.getViewport(1.0, page.rotation);
 
                 if(this.containerSize.height < this.containerSize.width) {
                     return this.containerSize.height / page0Viewport.height;
@@ -8941,11 +9023,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
 
             return scale;
         },
-        removeDistantPages: function (curPageID, distance) {
+        removeDistantPages: function (curPageID, lastPageID, distance) {
             var numPages = this.pages.length;
 
             var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(curPageID + distance, numPages - 1);
+            var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
 
             for(var iPage = 0;iPage < firstActivePageID;++iPage) {
                 this.pages[iPage].clear();
@@ -8962,19 +9044,23 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
 
             var self = this;
             var numPages = this.pages.length;
-            var currentPageID = 0;
+            var currentPageID = -1;
+            var lastPageID = 0;
             var atLeastOnePageInViewport = false;
             for(var iPage = 0;iPage < numPages;++iPage) {
                 var page = this.pages[iPage];
 
                 if(page.isVisible()) {
                     var parentContainer = page.container.parent()[0];
-                    var pageTop = page.container[0].offsetTop - parentContainer.scrollTop;
-                    if(pageTop <= parentContainer.offsetHeight / 2) {
+                    var pageContainer = page.container[0];
+                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                    var pageCenter = pageContainer.offsetHeight / 2;
+                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
                         currentPageID = iPage;
                     }
 
                     atLeastOnePageInViewport = true;
+                    lastPageID = iPage;
                     page.render(function (page, status) {
                         if(status === MultiPagesConstants.PAGE_RENDERED) {
                             self.onPageRendered("success", page.id, self.pages.length, "");
@@ -8990,7 +9076,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             }
 
             if(this.lastScrollDir !== 0) {
-                var nextPageID = currentPageID + this.lastScrollDir;
+                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
                 if(nextPageID >= 0 && nextPageID < numPages) {
                     this.pages[nextPageID].render(function (page, status) {
                         if(status === MultiPagesConstants.PAGE_RENDERED) {
@@ -9002,24 +9088,70 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 }
             }
 
-            this.removeDistantPages(currentPageID, 2);
+            this.removeDistantPages(currentPageID, lastPageID, 1);
 
             this.currentPage = currentPageID + 1;
             if(this.onCurrentPageChanged){
                 this.onCurrentPageChanged( currentPageID + 1);
             }
         },
-        hookScope: function(scope, initialScale) {
+        render: function () {
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        rotate : function (args) {
+            if(args != undefined) {
+                var page = this.pages[args.pageIndex];
+                if(page != undefined) {
+                    var rotation = page.viewport.rotation + args.rotation;
+                    if(rotation === 360 || rotation === -360){
+                        rotation = 0;
+                    }
+                    page.viewport.rotation = rotation;
+                    page.rotate(rotation);
+                    if(this.api.onPageRotation) {
+                        this.api.onPageRotation(args);
+                    }
+                    this.setContainerSize(this.initialScale);
+                }
+            }
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        },
+        hookScope: function(scope) {
             var self = this;
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(initialScale);
+                self.setContainerSize(self.initialScale);
             });
 
             var onProgress = function(operation, state, value, total, message) {
                 if (operation === "render" && value === 1) {
                     if (state === "success") {
+                         $compile(self.element.contents())(scope);
                         $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
                     }
                     else {
@@ -9074,178 +9206,111 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                     self.renderAllVisiblePages(normalizedScrollDir);
                 }, 350);
             });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
         }
     };
 
     return (MultiPagesViewer);
 }]);
+
 'use strict';
 /**
  * TODO MultiPagesViewerAPI desc
  */
 itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
 
-        function MultiPagesViewerAPI(viewer) {
-            this.viewer = viewer;
-            this.scaleItems = {};
-            this.zoomLevels = [];
-        };
+    function MultiPagesViewerAPI(viewer) {
+        this.viewer = viewer;
+        this.rotation = 0;
+    };
 
-        MultiPagesViewerAPI.prototype = {
-            getNextZoomInScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] > scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale < this.viewer.fitWidthScale && newScale > this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale < this.viewer.fitPageScale && newScale > this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                }else {
-                    var label = (newScale * 100.0).toFixed(0) + "%";
-                    scaleItem = {
-                        id: label,
-                        value : newScale,
-                        label: label
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            getNextZoomOutScale: function (scale) {
-                var newScale = scale;
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length;
-                var scaleItem = null;
-                for(var i = numZoomLevels - 1; i >= 0;--i) {
-                    if(MultiPagesConstants.ZOOM_LEVELS_LUT[i] < scale) {
-                        newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        break;
-                    }
-                }
-
-                if(scale > this.viewer.fitWidthScale && newScale < this.viewer.fitWidthScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                        value : this.viewer.fitWidthScale,
-                        label: "Fit width"
-                    };
-                } else if(scale < this.viewer.fitHeightScale && newScale > this.viewer.fitHeightScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                        value : this.viewer.fitHeightScale,
-                        label: "Fit height"
-                    };
-                } else if(scale > this.viewer.fitPageScale && newScale < this.viewer.fitPageScale) {
-                    scaleItem = {
-                        id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                        value : this.viewer.fitPageScale,
-                        label: "Fit page"
-                    };
-                } else{
-                    scaleItem = {
-                        id: newScale,
-                        value : newScale,
-                        label: (newScale * 100.0).toFixed(0) + "%"
-                    };
-                }
-
-                var result = this.scaleItems[scaleItem.id];
-                if(result == undefined){
-                    this.scaleItems[scaleItem.id] = scaleItem;
-                    result = scaleItem;
-                }else{
-                    result.value = scaleItem.value;
-                }
-                return result;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined){
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            zoomIn: function() {
-                var nextScale = this.getNextZoomInScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
-            },
-            zoomOut: function() {
-                var nextScale = this.getNextZoomOutScale(this.getZoomLevel().value);
-                this.zoomTo(nextScale);
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                this.viewer.element[0].scrollTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
+    MultiPagesViewerAPI.prototype = {
+        getZoomLevels: function () {
+            return this.viewer.zoomLevels;
+        },
+        zoomTo: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.viewer.setScale(scaleItem);
             }
-        };
+        },
+        getZoomLevel: function () {
+            return this.viewer.scaleItem;
+        },
+        zoomIn: function() {
+            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+            if(index < this.viewer.zoomLevels.length) {
+                this.zoomTo(this.viewer.zoomLevels[index + 1]);
+            }
+        },
+        zoomOut: function() {
+            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+            if(index > 0) {
+                this.zoomTo(this.viewer.zoomLevels[index - 1]);
+            }
+        },
+        getCurrentPage: function () {
+            return this.viewer.currentPage;
+        },
+        goToPage: function (pageIndex) {
+            if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                return;
+            }
 
-        return (MultiPagesViewerAPI);
-    }]);
+            //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+            var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
+                offsetTop -= 1;
+            }
+            this.viewer.element[0].scrollTop = offsetTop;
+        },
+        goToNextPage: function () {
+            this.goToPage(this.viewer.currentPage + 1);
+        },
+        goToPrevPage: function () {
+            this.goToPage(this.viewer.currentPage - 1);
+        },
+        getNumPages: function () {
+            return this.viewer.pages.length;
+        },
+        rotatePagesRight: function() {
+            var numPages = this.viewer.pages.length;
+            var rotation = this.rotation + 90;
+            if(rotation === 360 || rotation === -360) {
+                rotation = 0;
+            }
+            this.rotation = rotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.viewer.pages[iPage].rotate(rotation);
+            }
+
+            this.viewer.setContainerSize(this.viewer.initialScale);
+        },
+        rotatePagesLeft: function() {
+            var numPages = this.viewer.pages.length;
+            var rotation = this.rotation - 90;
+            if(rotation === 360 || rotation === -360){
+                rotation = 0;
+            }
+            this.rotation = rotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.viewer.pages[iPage].rotate(rotation);
+            }
+
+            this.viewer.setContainerSize(this.viewer.initialScale);
+        },
+        rotatePageRight: function(pageIndex) {
+            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: 90 });
+        },
+        rotatePageLeft: function(pageIndex) {
+            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: -90 });
+        },
+        rotatePage: function(args) {
+            this.viewer.rotate(args);
+        }
+    };
+
+    return (MultiPagesViewerAPI);
+}]);
+
 
 'use strict';
 /**
@@ -9445,36 +9510,27 @@ itPdfViewer.factory('CustomStyle', [function () {
 /**
  * TODO itPdfViewer desc
  */
-itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
-	var linker = function (scope, element, attrs) {
-		scope.onPassword = function (reason) {
-			return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
-		};
+itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function (scope, element, attrs) {
+        scope.onPassword = function (reason) {
+            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
 
-		scope.$watch("src", function (src) {
-			if(typeof src === typeof ""){
-				scope.url = src;
-			}else{
-				scope.file = src;
-			}
-		});
+        MultiPagesAddEventWatcher(scope);
+    };
 
-		scope.trustSrc = function(src) {
-			return $sce.trustAsResourceUrl(src);
-		};
-	};
-
-	return {
-		scope: {
-			src: "=",
-			options: "="
-		},
-		restrict: 'E',
-		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
-		link: linker
-	};
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<pdf-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></pdf-viewer>' +
+                    '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
+        link: linker
+    };
 }]);
 'use strict';
 /**
@@ -9521,12 +9577,12 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage, textContent) {
+        function PDFPage(pdfPage) {
             this.base = MultiPagesPage;
             this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
-            this.textContent = textContent;
+            this.textContent = null;
             this.renderTask = null;
         }
 
@@ -9539,11 +9595,11 @@ itPdfViewer
             MultiPagesPage.prototype.clear.call(this);
             this.renderTask = null;
         };
-        PDFPage.prototype.getViewport = function (scale) {
-            return this.pdfPage.getViewport(scale);
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation, 0, 0);
         };
-        PDFPage.prototype.resize = function (scale) {
-            MultiPagesPage.prototype.resize.call(this, scale);
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
 
             this.textLayer = angular.element("<div class='text-layer'></div>");
             this.textLayer.css("width", this.viewport.width + "px");
@@ -9573,16 +9629,22 @@ itPdfViewer
 
             if(this.canvasRendered){
                 self.container.append(self.canvas);
-                self.container.append(self.textLayer);
+                if(self.textContent) {
+                    self.container.append(self.textLayer);
+                }
             }else{
+
+                self.container.append(self.canvas);
+
                 this.renderTask = this.pdfPage.render({
                     canvasContext: this.canvas[0].getContext('2d'),
                     viewport: this.viewport
                 });
 
-                self.container.append(self.canvas);
+
 
                 this.renderTask.then(function () {
+
                     self.rendered = true;
                     self.renderTask = null;
                     self.canvasRendered = true;
@@ -9639,42 +9701,67 @@ itPdfViewer
         PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
             this.element.empty();
             this.pages = [];
-            this.pageMargin = pageMargin;
-            this.initialScale = initialScale;
-            this.hasTextLayer = renderTextLayer;
-            var isFile = typeof obj != typeof "";
+            if (obj !== undefined && obj !== null && obj !== '') {
+                this.pageMargin = pageMargin;
+                this.initialScale = initialScale;
+                this.hasTextLayer = renderTextLayer;
+                var isFile = typeof obj != typeof "";
 
-            if(this.getDocumentTask != undefined){
-                var self = this;
-                this.getDocumentTask.destroy().then(function (){
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function (){
+                        if(isFile){
+                            self.setFile(obj);
+                        }else {
+                            self.setUrl(obj);
+                        }
+                    });
+                } else {
                     if(isFile){
-                        self.setFile(obj);
+                        this.setFile(obj);
                     }else {
-                        self.setUrl(obj);
+                        this.setUrl(obj);
                     }
-
-                });
-            } else {
-                if(isFile){
-                    this.setFile(obj);
-                }else {
-                    this.setUrl(obj);
                 }
             }
         };
         PDFViewer.prototype.setUrl = function (url) {
-            if (url !== undefined && url !== null && url !== '') {
-                var self = this;
-                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-                this.getDocumentTask.then(function (pdf) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+
+                    // Append all page containers to the $element...
+                    for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                        self.element.append(pageList[iPage].container);
+                    }
+
+                    self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
 
-                    self.getAllPages( function (pageList, pagesRefMap) {
+                    self.getAllPages(function (pageList, pagesRefMap) {
                         self.pages = pageList;
                         self.pagesRefMap = pagesRefMap;
 
                         // Append all page containers to the $element...
-                        for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
                             self.element.append(pageList[iPage].container);
                         }
 
@@ -9683,67 +9770,39 @@ itPdfViewer
                 }, function (message) {
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
-            }
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            if (file !== undefined && file !== null) {
-                var self = this;
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var arrayBuffer = e.target.result;
-                    var uint8Array = new Uint8Array(arrayBuffer);
-                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                    getDocumentTask.then(function (pdf) {
-                        self.pdf = pdf;
+            };
 
-                        self.getAllPages(function (pageList, pagesRefMap) {
-                            self.pages = pageList;
-                            self.pagesRefMap = pagesRefMap;
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
 
-                            // Append all page containers to the $element...
-                            for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                                self.element.append(pageList[iPage].container);
-                            }
-
-                            self.setContainerSize(self.initialScale);
-                        });
-                    }, function (message) {
-                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                    });
-                };
-
-                reader.onprogress = function (e) {
-                    self.downloadProgress(e);
-                };
-
-                reader.onloadend = function (e) {
-                    var error = e.target.error;
-                    if(error !== null) {
-                        var message = "File API error: ";
-                        switch(e.code) {
-                            case error.ENCODING_ERR:
-                                message += "Encoding error.";
-                                break;
-                            case error.NOT_FOUND_ERR:
-                                message += "File not found.";
-                                break;
-                            case error.NOT_READABLE_ERR:
-                                message += "File could not be read.";
-                                break;
-                            case error.SECURITY_ERR:
-                                message += "Security issue with file.";
-                                break;
-                            default:
-                                message += "Unknown error.";
-                                break;
-                        }
-
-                        self.onDataDownloaded("failed", 0, 0, message);
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
                     }
-                };
 
-                reader.readAsArrayBuffer(file);
-            }
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
         };
         PDFViewer.prototype.getAllPages = function (callback) {
             var pageList = [],
@@ -9761,7 +9820,7 @@ itPdfViewer
                         var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
                         pagesRefMap[refStr] = page.pageIndex + 1;
 
-                        var pdfPage = new PDFPage(page, null);
+                        var pdfPage = new PDFPage(page);
                         pageList[page.pageIndex] = pdfPage;
 
                         --remainingPages;
@@ -9780,7 +9839,7 @@ itPdfViewer
 
                     var getPageTask = this.pdf.getPage(iPage + 1);
                     getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page, null);
+                        pageList[page.pageIndex] = new PDFPage(page);
 
                         --remainingPages;
                         if(remainingPages === 0) {
@@ -10241,26 +10300,24 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 /**
  * TODO itTiffViewer desc
  */
-itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
-	var linker = function(scope, element, attrs) {
+itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function(scope, element, attrs) {
+        MultiPagesAddEventWatcher(scope);
+    };
 
-		scope.trustSrc = function(src) {
-			return $sce.trustAsResourceUrl(src);
-		};
-	};
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<tiff-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></tiff-viewer>' +
+                    '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
+        link: linker
 
-	return {
-		scope: {
-			src: "=",
-			options: "="
-		},
-		restrict: 'E',
-		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<tiff-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
-		link: linker
-
-	};
+    };
 }]);
 'use strict';
 /**
@@ -10269,12 +10326,12 @@ itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
 itTiffViewer
     .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
 
-        function TIFFPage(pageIndex, src, view) {
-            this.base = MultiPagesPage;
-            this.base(pageIndex, view);
+        function TIFFPage(pageIndex, getSrc, view) {
+        			this.base = MultiPagesPage;
+        			this.base(pageIndex, view);
 
-            this.src = src;
-        }
+        			this.getSrc = getSrc;
+        		}
 
         TIFFPage.prototype = new MultiPagesPage;
 
@@ -10295,15 +10352,24 @@ itTiffViewer
                 self.container.append(self.canvas);
 
                 var ctx = self.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, self.viewport.transform);
                 var img = new Image;
                 img.onload = function(){
-                    ctx.drawImage(img,0,0, self.viewport.width, self.viewport.height); // Or at whatever offset you like
-
+                    ctx.drawImage(img,0,0); // Or at whatever offset you like
+                    self.canvasRendered = true;
                     if(callback) {
                         callback(self, MultiPagesConstants.PAGE_RENDERED);
                     }
                 };
-                img.src = this.src;
+
+                $timeout(function () {
+                    if(self.src == undefined){
+                        self.src =  self.getSrc(self.id - 1);
+                    }
+
+                    img.src = self.src;
+                }, 50);
+
             }
         };
 
