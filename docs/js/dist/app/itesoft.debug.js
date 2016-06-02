@@ -38,6 +38,54 @@ var IteSoft = angular.module('itesoft', [
     'ngWebSocket'
 ]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -92,54 +140,6 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
 
 /**
  * @ngdoc directive
@@ -9585,7 +9585,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                     this.api.onZoomLevelsChanged (this.zoomLevels);
                 }
 
-                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue) {
+                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
                     this.render();
                     return;
                 }
@@ -10205,12 +10205,12 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage, textContent) {
+        function PDFPage(pdfPage) {
             this.base = MultiPagesPage;
             this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
-            this.textContent = textContent;
+            this.textContent = null;
             this.renderTask = null;
         }
 
@@ -10448,7 +10448,7 @@ itPdfViewer
                         var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
                         pagesRefMap[refStr] = page.pageIndex + 1;
 
-                        var pdfPage = new PDFPage(page, null);
+                        var pdfPage = new PDFPage(page);
                         pageList[page.pageIndex] = pdfPage;
 
                         --remainingPages;
@@ -10467,7 +10467,7 @@ itPdfViewer
 
                     var getPageTask = this.pdf.getPage(iPage + 1);
                     getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page, null);
+                        pageList[page.pageIndex] = new PDFPage(page);
 
                         --remainingPages;
                         if(remainingPages === 0) {
