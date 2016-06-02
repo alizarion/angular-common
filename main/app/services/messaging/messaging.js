@@ -18,6 +18,15 @@
  *     <th>Default value</th>
  *     <th>Description</th>
  * </tr>
+ *
+ * <tr>
+ *     <td><code>ItMessagingProvider.SERVICE_URL = 'Your itesoft-messaging URL';</code></td>
+ *     <td>''</td>
+ *     <td>angular.module('myModule')<br>.config(['ItMessagingProvider', function(ItMessagingProvider) {<br>
+ *      ItMessagingProvider.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+ *      <br>
+ *  }])</td>
+ * </tr>
  * <tr>
  *     <td><code>Message json format</code></td>
  *     <td>''</td>
@@ -57,6 +66,7 @@
  *         callback function will be triggered where websocket connexion is interupted.
  *      </td>
  * </tr>
+ *
  * <tr>
  *     <td>itmsg.onMessage(callbackFunction(message,topics)</td>
  *     <td>''</td>
@@ -90,8 +100,9 @@
 
                       return input;
                     };
+                    }]).config(['ItMessagingProvider', function(ItMessagingProvider) {
+                        ItMessagingProvider.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
                     }])
-
                      .filter('topic',[ function() {
                         return function(input) {
 
@@ -112,11 +123,11 @@
                      .controller('MainController',['ItMessaging','itNotifier','$scope',function(ItMessaging,itNotifier,$scope){
 
                       var self = this;
-
-                      self.BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+                      var itmsg = new ItMessaging();
+                      self.BASE_URL = itmsg.getServiceUrl();
                       self.SHOWCASE_TOPIC = "group:all";
                       self.API_KEY = 'my-secret-api-key';
-                      var itmsg = new ItMessaging(self.BASE_URL);
+
 
                       self.messages = [];
                       self.topics = [];
@@ -331,26 +342,31 @@
          </file>
  </example>
  **/
-IteSoft.service('ItMessaging',[
-    '$log',
-    '$http',
-    '$q',
-    '$websocket',
-    '$rootScope',
-    function($log,
-             $http,
-             $q,
-             $websocket,
-             $rootScope){
+IteSoft.provider('ItMessaging',[
+    function(){
 
-        function ItMessaging(url){
+        var providerState = this;
+        providerState.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+
+        this.$get = ['$log',
+            '$http',
+            '$q',
+            '$websocket',
+            '$rootScope',
+            function($log,
+                     $http,
+                     $q,
+                     $websocket,
+                     $rootScope){
+
+        function ItMessaging(token){
 
             var self = this;
-            self.URL = url;
+            self.URL = providerState.SERVICE_URL ;
             self.onMessageCallbacks = [];
             self.onCloseCallbacks   = [];
 
-            self.token = null;
+            self.token = token;
 
             this.getToken = function(apiKey,userID){
                 console.warn('This function is only for demo purpose,'+
@@ -390,9 +406,13 @@ IteSoft.service('ItMessaging',[
                 },function(error){
                     $log.error(error);
                     deferred.reject(deferred);
-                })
+                });
                 return deferred.promise;
             }
+
+            this.getServiceUrl = function(){
+                return self.URL;
+            };
 
             this.connect = function(token){
                 if(token){
@@ -532,5 +552,5 @@ IteSoft.service('ItMessaging',[
         return function(url){
             return new ItMessaging(url);
         };
-
+            }]
     }])
