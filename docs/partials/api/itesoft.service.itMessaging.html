@@ -12,6 +12,15 @@
     <th>Default value</th>
     <th>Description</th>
 </tr>
+
+<tr>
+    <td><code>ItMessagingProvider.SERVICE_URL = &#39;Your itesoft-messaging URL&#39;;</code></td>
+    <td>&#39;&#39;</td>
+    <td>angular.module(&#39;myModule&#39;)<br>.config([&#39;ItMessagingProvider&#39;, function(ItMessagingProvider) {<br>
+     ItMessagingProvider.SERVICE_URL = &#39;tstbuydpoc01:3333/itesoft-messaging&#39;;
+     <br>
+ }])</td>
+</tr>
 <tr>
     <td><code>Message json format</code></td>
     <td>&#39;&#39;</td>
@@ -51,6 +60,7 @@
         callback function will be triggered where websocket connexion is interupted.
      </td>
 </tr>
+
 <tr>
     <td>itmsg.onMessage(callbackFunction(message,topics)</td>
     <td>&#39;&#39;</td>
@@ -60,8 +70,7 @@
      </td>
 </tr>
 
-</table>
-</div></div>
+</table></div></div>
 <h2 id="dependencies">Dependencies</h2>
 <ul class="dependencies"><li><code ng:non-bindable=""><a href="#/api/ng.$websocket">$websocket</a></code>
 </li>
@@ -188,8 +197,9 @@
 
                   return input;
                 };
+                }]).config(['ItMessagingProvider', function(ItMessagingProvider) {
+                    ItMessagingProvider.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
                 }])
-
                  .filter('topic',[ function() {
                     return function(input) {
 
@@ -210,11 +220,11 @@
                  .controller('MainController',['ItMessaging','itNotifier','$scope',function(ItMessaging,itNotifier,$scope){
 
                   var self = this;
-
-                  self.BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+                  var itmsg = new ItMessaging();
+                  self.BASE_URL = itmsg.getServiceUrl();
                   self.SHOWCASE_TOPIC = "group:all";
                   self.API_KEY = 'my-secret-api-key';
-                  var itmsg = new ItMessaging(self.BASE_URL);
+
 
                   self.messages = [];
                   self.topics = [];

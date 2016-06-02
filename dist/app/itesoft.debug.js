@@ -38,6 +38,54 @@ var IteSoft = angular.module('itesoft', [
     'ngWebSocket'
 ]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -92,54 +140,6 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
 
 /**
  * @ngdoc directive
@@ -1383,1183 +1383,6 @@ IteSoft
         }
     }]
 );
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetail',[function() {
-        return {
-            restrict: 'EA',
-            require: '^itMasterDetail',
-            transclude: true,
-            scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
-                '   ng-if="currentItemWrapper.currentItem" ' +
-                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
-                ' <div class="it-fill" ng-transclude>' +
-                '</div>' +
-                '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
-                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
-                'ng-if="!currentItemWrapper.currentItem">' +
-                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
-                '</div>'
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailContent
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailContent',function() {
-        return {
-            restrict: 'EA',
-            require: '^itDetail',
-            transclude: true,
-            scope:false,
-            template : '<div class="row it-fill">' +
-                ' <div class="col-md-12  it-fill" ng-transclude>'+
-
-                            '</div>'+
-                       '</div>'
-
-        }
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailHeader',function() {
-        return {
-            restrict: 'EA',
-            require : '^itDetail',
-            scope : false,
-            transclude: true,
-            template : '<div class="fluid-container"><div class="row it-md-header">'+
-                '<div class="col-md-2 it-fill  col-xs-2">' +
-                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
-                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
-                '</span>' +
-                ' </a>'+
-                '</div>'+
-                '<div class="col-md-10 col-xs-10 it-fill ">'+
-                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'
-        }
-
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMaster
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Most important part of master-detail component, that
- *
- * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- * <table class="table">
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- *
- */
-IteSoft
-    .directive('itMaster',function(){
-        return {
-            restrict : 'EA',
-            require : '^itMasterDetail',
-            priority : -1,
-            transclude : true,
-            scope : {
-                itMasterData : '=',
-                itLang:'=',
-                itCol:'=',
-                itMasterDetailControl:'=',
-                itLockOnChange: '=',
-                itNoDataMsg: '@',
-                itNoDetailMsg:'@'
-            },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
-                '<div class="row" ng-transclude>'+
-                '</div>'+
-                '<div class="row it-master-grid it-fill" >'+
-                '<div class="col-md-12 it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
-                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            controller : ['$scope',
-                '$filter',
-                '$q',
-                '$timeout',
-                'itPopup',
-                '$templateCache',
-                '$route',
-                '$window',
-                function ($scope,
-                          $filter,
-                          $q,
-                          $timeout,
-                          itPopup,
-                          $templateCache,
-                          $route,
-                          $window){
-
-                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
-                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
-                        ' ng-checked="row.isSelected"></div>');
-
-                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
-                        '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
-
-                    function ItemWrapper(item){
-                        var _self = this;
-                        angular.forEach($scope.itMasterData,function(entry,index){
-
-                            if(angular.equals(entry,item)) {
-                                _self.index = index;
-                            }
-                        });
-                        _self.originalItem = item;
-                        _self.currentItem = angular.copy(item);
-                        _self.hasChanged = false;
-                        _self.isWatched = false;
-                        _self.unlockOnEquals = true;
-                    }
-
-                    $scope.$parent.$masterCol = $scope.itCol;
-                    ItemWrapper.prototype.unlockCurrent = function(){
-                        this.hasChanged = false;
-                        this.isWatched = false;
-                    };
-
-                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
-                        this.hasChanged = true;
-                        this.isWatched = true;
-                        this.unlockOnEquals = !autoUnlock;
-                    };
-
-
-
-                    $scope.$parent.currentItemWrapper = null;
-
-                    function _selectionChangedHandler(row){
-                        if(!$scope.itMasterDetailControl.disableMultiSelect){
-                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
-                                $scope.$parent.currentItemWrapper = null;
-                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
-                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
-                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
-                            }
-                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }else {
-//                            _displayDetail(row.entity);
-//                            _scrollToEntity(row.entity);
-                        }
-                    }
-
-                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-
-                    $scope.gridOptions  = {
-                        rowHeight: 40,
-                        data : $scope.itMasterData,
-                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
-                        showGridFooter: true,
-                        enableMinHeightCheck :true,
-                        enableColumnResizing: true,
-                        enableHorizontalScrollbar : 0,
-                        enableVerticalScrollbar : 2,
-                        onRegisterApi : function(gridApi){
-                            $scope.gridApi = gridApi;
-                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-
-                        },
-                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
-                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
-                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
-                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
-                            '</div>',
-                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
-                            '</div>'
-                    };
-
-                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
-                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
-                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
-                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
-                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
-                                '<span ui-grid-visible="col.sort.direction" ' +
-                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
-                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
-                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
-                                ' </div> <div ui-grid-filter></div> </div>';
-                        },true)
-                    }
-
-                    $scope.gridOptions.columnDefs =
-                        $scope.itMasterDetailControl.columnDefs;
-
-                    function _displayDetail(item) {
-                        var deferred = $q.defer();
-                        if($scope.$parent.currentItemWrapper != null){
-                            if($scope.$parent.currentItemWrapper.hasChanged &&
-                                $scope.itLockOnChange){
-                                deferred.reject('undo or save before change');
-                                return deferred.promise;
-                            }
-                        }
-                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
-                        deferred.resolve('');
-                        return deferred.promise;
-                    }
-
-                    $scope.onRowClick = function(row,col) {
-                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
-                            _displayDetail(col.entity).then(function (msg) {
-                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
-                                    $scope.gridApi.selection.clearSelectedRows();
-                                    if ($scope.$parent.$parent.mobile) {
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                }
-                                $scope.gridApi.selection.toggleRowSelection(col.entity);
-                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
-                            }, function (msg) {
-                                itPopup.alert($scope.itMasterDetailControl.navAlert);
-                            });
-                        }
-                    };
-
-
-                    function _scrollToEntity(entity){
-                        $scope.gridApi.core.scrollTo(entity);
-                    }
-
-                    $scope.itMasterDetailControl.selectItem =function (item){
-                        $scope.onRowClick(null,{entity:item});
-                    };
-
-                    /**
-                     * Method to filter rows
-                     */
-                    $scope.refreshData = function() {
-                        var renderableEntities = $filter('itUIGridGlobalFilter')
-                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
-
-                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
-                            var match = false;
-                            renderableEntities.forEach(function(entity){
-
-                                if(angular.equals(row.entity,entity)){
-                                    match  = true;
-                                }
-                            });
-                            if ( !match ){
-                                $scope.gridApi.core.setRowInvisible(row);
-                            } else {
-                                $scope.gridApi.core.clearRowInvisible(row);
-                            }
-                        });
-                    };
-
-
-                    function _unlockCurrent(){
-                        $scope.$applyAsync(function(){
-                            if($scope.$parent.currentItemWrapper!==null){
-                                $scope.$parent.currentItemWrapper.hasChanged = false;
-                                $scope.$parent.currentItemWrapper.isWatched = false;
-                            }
-                        });
-
-                    }
-
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            _unlockCurrent();
-                        }
-                    };
-
-                    $scope.$on('unlockCurrentItem',function(){
-                        _unlockCurrent();
-                    });
-
-                    /**
-                     * Method to scroll to specific item.
-                     * @param entity item to scroll to.
-                     */
-                    $scope.itMasterDetailControl.scrollToItem =function (entity){
-                        _scrollToEntity(entity);
-                    };
-
-                    /**
-                     * Method to get Selected items.
-                     * @returns {Array} of selected items
-                     */
-                    $scope.itMasterDetailControl.getSelectedItems = function(){
-                        if(typeof $scope.gridApi !== 'undefined' ) {
-                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
-                                return $scope.gridApi.selection.getSelectedRows();
-                            }
-                        }
-                        return [];
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     * @deprecated
-                     */
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     */
-                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
-                        return   $scope.$parent.currentItemWrapper;
-                    };
-
-                    /**
-                     * Method to get filtered items.
-                     * @returns {Array} of filtered items.
-                     */
-                    $scope.itMasterDetailControl.getFilteredItems = function(){
-                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
-                        var entities  = [];
-                        angular.forEach(rows,function(row){
-                            entities.push(row.entity);
-                        });
-                        return entities;
-                    };
-
-
-                    /**
-                     * Method to select the current Item.
-                     * @param entity item to select.
-                     * @returns {deferred.promise|*} success if the item is found.
-                     */
-                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
-
-                        var deferred = $q.defer();
-                        $scope.gridApi.selection.clearSelectedRows();
-                        _displayDetail(entity).then(function(){
-                            $timeout(function() {
-                                var entityIndex = $scope.itMasterData.indexOf(entity);
-                                if(entityIndex>=0) {
-
-                                    $scope.gridApi.selection.selectRow(entity);
-                                    _scrollToEntity(entity);
-                                    if( $scope.$parent.$parent.mobile){
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                    deferred.resolve();
-                                } else {
-                                    deferred.reject();
-                                }
-
-                            });
-                        },function(){
-                            deferred.reject();
-                        });
-                        return deferred.promise;
-                    };
-
-                    /**
-                     * Method to undo changes on the current item.
-                     */
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        }
-                    };
-
-                    /**
-                     * Method to fill windows height to the master part.
-                     */
-                    $scope.itMasterDetailControl.fillHeight = function(){
-                        //  evalLayout.fillHeight();
-                    };
-
-
-                    /**
-                     * Handler to unlock the current item.
-                     */
-                    $scope.$on('unlockCurrentItem',function(){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        });
-                    });
-
-                    /**
-                     * Handler to lock the current item.
-                     */
-                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
-                        });
-                    });
-
-                    function confirmLeavePage(e) {
-                        if($scope.$parent.currentItemWrapper!=null){
-                            if ( $scope.$parent.currentItemWrapper.hasChanged
-                                && $scope.itLockOnChange ) {
-                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
-                                e.preventDefault();
-                            }
-                        }
-                    }
-                    $scope.itAppScope = $scope.$parent;
-
-                    //  $scope.itAppScope.$navAlert = {};
-
-                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
-
-                    var w = angular.element($window);
-                    w.bind('resize', function () {
-                        $scope.gridApi.core.handleWindowResize();
-                    });
-
-                    $scope.itMasterDetailControl.initState = true;
-                    $scope.$on("$locationChangeStart", confirmLeavePage);
-                    $scope.itMasterDetailControl = angular.extend({navAlert:{
-                        text:'Please save or revert your pending change',
-                        title:'Unsaved changes',
-                        buttons: [
-                            {
-                                text: 'OK',
-                                type: 'btn-info',
-                                onTap: function () {
-                                    return false;
-                                }
-                            }]
-                    }}, $scope.itMasterDetailControl );
-
-
-                    /*  watchers */
-                    $scope.$watch('itLang',function(){
-                        $scope.gridApi.grid.refresh();
-                    });
-
-                    $scope.$watch('itMasterData',function(){
-                        $scope.gridOptions.data = [];
-                        $scope.itMasterData.forEach(function(entry){
-                            $scope.gridOptions.data.push(entry);
-                        });
-
-                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
-                            $scope.$parent.currentItemWrapper = null;
-                        } else {
-                            if( $scope.itMasterData.length === 0){
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }
-                        $scope.gridApi.grid.refresh();
-                        if($scope.itMasterDetailControl !== null){
-                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
-                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
-
-                                $scope.$applyAsync(function(){
-                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
-                                });
-                            }
-                        }
-                        $scope.refreshData();
-
-                    },true);
-
-                   $timeout(function(){
-                        var event = document.createEvent('Event');
-                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                        $window.dispatchEvent(event);
-                    },250);
-
-                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-
-                        if($scope.$parent.currentItemWrapper != null ){
-                            if(!$scope.$parent.currentItemWrapper.isWatched)
-                            {
-                                $scope.$parent.currentItemWrapper.isWatched = true;
-                            }
-                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
-                                $scope.$parent.currentItemWrapper.hasChanged =
-                                    !angular.equals(newValue,
-                                        $scope.$parent.currentItemWrapper.originalItem);
-                            } else   {
-                                $scope.$parent.currentItemWrapper.hasChanged = true;
-                            }
-                        }
-                    }, true);
-
-                    $scope.$watch('filterText',function(){
-                        $scope.refreshData();
-                    },true);
-
-                    $scope.$watch('itNoDetailMsg',function(){
-                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-                    });
-                }]
-
-
-        }
-    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
-        return function(data, grid, query) {
-            var matches = [];
-            //no filter defined so bail
-            if (query === undefined || query === '') {
-                return data;
-            }
-            query = query.toLowerCase();
-
-            function _deepFind(obj, path) {
-                var paths = path.split('.')
-                    , current = obj
-                    , i;
-
-                for (i = 0; i < paths.length; ++i) {
-                    if (current[paths[i]] == undefined) {
-                        return undefined;
-                    } else {
-                        current = current[paths[i]];
-                    }
-                }
-                return current;
-            }
-
-            var scope = $rootScope.$new(true);
-            for (var i = 0; i < data.length; i++) {
-                for (var j = 0; j < grid.columnDefs.length; j++) {
-                    var dataItem = data[i];
-
-                    var fieldName = grid.columnDefs[j].field;
-                    var renderedData = _deepFind(dataItem,fieldName);
-                    // apply cell filter
-                    if (grid.columnDefs[j].cellFilter) {
-                        scope.value = renderedData;
-                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
-                    }
-                    //as soon as search term is found, add to match and move to next dataItem
-                    if(typeof renderedData !== 'undefined' && renderedData != null){
-                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
-                            matches.push(dataItem);
-                            break;
-                        }
-                    }
-                }
-            }
-            scope.$destroy();
-            return matches;
-        };
-    }] );
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master-detail main content.
- *
- * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
- * and have 2 child elements: 1 `<it-master>` for the list selectable content,
- * and `<it-detail>` that display the content of the selected item.
- *
- * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
- * this object will
- *
- * <table class="table">
- *  <tr>
- *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
- *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
- *  </tr>
- *  <tr>
- *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
- *   <td>Disable | Enable  multiple row selection for entire grid .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *
- *   <tr>
- *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
- *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- * @example
-    <example module="itesoft">
-         <file name="index.html">
-             <div ng-controller="MasterDetailController">
-                 <it-master-detail >
-                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
-                 <it-master-header it-search-placeholder="Recherche" >
-                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-                 </it-master-header>
-                 </it-master>
-                 <it-detail>
-                 <it-detail-header>
-                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-                 <span class="fa fa-floppy-o fa-lg"></span>
-                 </button>
-                 <button class=" btn btn-info" title="Check">
-                 <span class="fa fa-file-code-o fa-lg"></span>
-                 </button>
-                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-                 <span class="fa fa-undo fa-lg"></span>
-                 </button>
-
-                 </it-detail-header>
-                 <it-detail-content>
-                 <it-modal-full-screen>
-                             <div class="form-group">
-                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                     it-label="code"
-                                     ng-model="currentItemWrapper.currentItem.code"
-                                     name=""
-                                     ng-required="true"/>
-                             </div>
-                             <div class="form-group">
-                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                 it-label="description"
-                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
-                             </div>
-                             <div class="form-group">
-                             <input type="checkbox"
-                                 it-toggle
-                                 ng-model="currentItemWrapper.currentItem.enabledde"
-                                 it-label="tete"/>
-                             </div>
-                 </it-modal-full-screen>
-                 </it-detail-content>
-                 </it-detail>
-                 </it-master-detail>
-             </div>
-         </file>
-         <file name="controller.js">
-             angular.module('itesoft')
-              .controller('MasterDetailController', ['$scope', function($scope) {
-
-                                            $scope.data =
-                                               [
-                                                    {
-                                                        "code" : "Code 1",
-                                                        "description": "Description 1",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 2",
-                                                        "description": "Description 2",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 3",
-                                                        "description": "Description 3",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 4",
-                                                        "description": "Description 4",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 5",
-                                                        "description": "Description 5",
-                                                        "enabledde" : true
-                                                    }
-                                                ];
-
-                                            $scope.masterDetails = {};
-
-                                            $scope.masterDetails = {
-                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
-                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
-                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
-                                            };
-
-                                             $scope.masterDetails.disableMultiSelect = false;
-                                            $scope.masterDetails.navAlert = {
-                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                                title:'{{\'FOO\' | translate}}',
-                                                buttons: [
-                                                        {
-                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
-                                                            type:  'btn-warning',
-                                                            onTap: function() {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
-                                                            type: 'btn-primary',
-                                                            onTap: function () {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span class="fa fa-undo fa-lg"></span>',
-                                                            type: 'btn-success',
-                                                            onTap: function () {
-                                                                $scope.undoChange();
-                                                                return true;
-
-                                                            }
-                                                        }
-                                                    ]
-                                            };
-
-                                            function _removeItems(items,dataList){
-                                                angular.forEach(items,function(entry){
-                                                    var index = dataList.indexOf(entry);
-                                                    dataList.splice(index, 1);
-                                                })
-                                            }
-
-                                            $scope.deleteSelectedItems = function(){
-                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                                            };
-
-
-                                            $scope.saveCurrentItem = function(){
-                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
-
-                                                    $scope.$broadcast('unlockCurrentItem');
-                                                };
-
-                                            $scope.undoChange = function(){
-                                                $scope.masterDetails.undoChangeCurrentItem();
-                                                $scope.masterDetails.fillHeight();
-                                            };
-
-                                            $scope.addNewItem = function(){
-                                                var newItem =  {
-                                                    "code" : "Code " + ($scope.data.length+1) ,
-                                                    "description": "Description " + ($scope.data.length+1),
-                                                    "enabledde" : true
-                                                };
-                                                $scope.data.push(newItem);
-                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                                                    $scope.$broadcast('lockCurrentItem',false);
-                                                },function(error){
-
-                                                });
-                                            };
-
-                                            $scope.hasChanged = function(){
-                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
-                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }]);
-          </file>
-         <file src="test.css">
-         </file>
-    </example>
- */
-IteSoft
-    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
-        return {
-            restrict: 'EA',
-            transclude : true,
-            scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
-            controller : [
-                '$scope',
-                'screenSize',
-                function(
-                    $scope,
-                    screenSize
-                    )
-                {
-                    $scope.activeState = 'master';
-                    $scope.desktop = screenSize.on('md, lg', function(match){
-                        $scope.desktop = match;
-
-                    });
-
-                    $scope.mobile = screenSize.on('xs, sm', function(match){
-                        $scope.mobile = match;
-                    });
-
-                    $scope.goToDetail = function(){
-                        $scope.activeState = 'detail';
-                    };
-
-                    $scope.$watch('mobile',function(){
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            $scope.activeState = 'detail';
-                        } else {
-                            $scope.activeState = 'master';
-                        }
-                    });
-
-                    $scope.$watch('$$childHead.currentItemWrapper',function() {
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
-                                ||  $scope.$$childHead.currentItemWrapper === null )){
-                            $scope.activeState = 'master';
-                        } else {
-                            if($scope.mobile &&
-                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
-                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
-                                $scope.activeState = 'master';
-                            }
-                        }
-                    });
-
-                    $scope.goToMaster = function(){
-
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
-                                $scope.$$childHead.$$childHead.itLockOnChange){
-                                itPopup.alert(  $scope.$$childHead.$navAlert);
-                            } else {
-                                $scope.activeState = 'master';
-                                $timeout(function(){
-                                    $window.dispatchEvent(new Event('resize'));
-                                },300)
-
-                            }
-                        } else {
-                            $scope.activeState = 'master';
-                            $timeout(function(){
-                                $window.dispatchEvent(new Event('resize'));
-                            },300)
-
-                        }
-
-                    };
-                }]
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
- * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *
- *       </it-detail-header>
- *
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itMasterHeader',function() {
-        return {
-            restrict: 'EA',
-            require: '^itMaster',
-            scope: false,
-            transclude : true,
-            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
-                '<div class="btn-toolbar it-fill" ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '<div class="col-xs-12 col-md-12 pull-right">'+
-                '<div>'+
-                '<form>'+
-                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
-                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
-                '</div>'+
-                '</form>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            link: function (scope, element, attrs) {
-                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
-                    scope.placeholderText = newVal;
-                });
-            }
-        }
-
-    });
 'use strict';
 
 /**
@@ -4376,6 +3199,1183 @@ IteSoft
             }
         }
 }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetail',[function() {
+        return {
+            restrict: 'EA',
+            require: '^itMasterDetail',
+            transclude: true,
+            scope: false,
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
+                '   ng-if="currentItemWrapper.currentItem" ' +
+                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
+                ' <div class="it-fill" ng-transclude>' +
+                '</div>' +
+                '</div>' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
+                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
+                'ng-if="!currentItemWrapper.currentItem">' +
+                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
+                '</div>'
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailContent
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailContent',function() {
+        return {
+            restrict: 'EA',
+            require: '^itDetail',
+            transclude: true,
+            scope:false,
+            template : '<div class="row it-fill">' +
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
+
+                            '</div>'+
+                       '</div>'
+
+        }
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailHeader',function() {
+        return {
+            restrict: 'EA',
+            require : '^itDetail',
+            scope : false,
+            transclude: true,
+            template : '<div class="fluid-container"><div class="row it-md-header">'+
+                '<div class="col-md-2 it-fill  col-xs-2">' +
+                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
+                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
+                '</span>' +
+                ' </a>'+
+                '</div>'+
+                '<div class="col-md-10 col-xs-10 it-fill ">'+
+                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'
+        }
+
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMaster
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Most important part of master-detail component, that
+ *
+ * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ * <table class="table">
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ *
+ */
+IteSoft
+    .directive('itMaster',function(){
+        return {
+            restrict : 'EA',
+            require : '^itMasterDetail',
+            priority : -1,
+            transclude : true,
+            scope : {
+                itMasterData : '=',
+                itLang:'=',
+                itCol:'=',
+                itMasterDetailControl:'=',
+                itLockOnChange: '=',
+                itNoDataMsg: '@',
+                itNoDetailMsg:'@'
+            },
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
+                '<div class="row" ng-transclude>'+
+                '</div>'+
+                '<div class="row it-master-grid it-fill" >'+
+                '<div class="col-md-12 it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
+                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            controller : ['$scope',
+                '$filter',
+                '$q',
+                '$timeout',
+                'itPopup',
+                '$templateCache',
+                '$route',
+                '$window',
+                function ($scope,
+                          $filter,
+                          $q,
+                          $timeout,
+                          itPopup,
+                          $templateCache,
+                          $route,
+                          $window){
+
+                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
+                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
+                        ' ng-checked="row.isSelected"></div>');
+
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
+                        '<input type="checkbox" ' +
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
+
+                    function ItemWrapper(item){
+                        var _self = this;
+                        angular.forEach($scope.itMasterData,function(entry,index){
+
+                            if(angular.equals(entry,item)) {
+                                _self.index = index;
+                            }
+                        });
+                        _self.originalItem = item;
+                        _self.currentItem = angular.copy(item);
+                        _self.hasChanged = false;
+                        _self.isWatched = false;
+                        _self.unlockOnEquals = true;
+                    }
+
+                    $scope.$parent.$masterCol = $scope.itCol;
+                    ItemWrapper.prototype.unlockCurrent = function(){
+                        this.hasChanged = false;
+                        this.isWatched = false;
+                    };
+
+                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
+                        this.hasChanged = true;
+                        this.isWatched = true;
+                        this.unlockOnEquals = !autoUnlock;
+                    };
+
+
+
+                    $scope.$parent.currentItemWrapper = null;
+
+                    function _selectionChangedHandler(row){
+                        if(!$scope.itMasterDetailControl.disableMultiSelect){
+                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
+                                $scope.$parent.currentItemWrapper = null;
+                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
+                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
+                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
+                            }
+                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }else {
+//                            _displayDetail(row.entity);
+//                            _scrollToEntity(row.entity);
+                        }
+                    }
+
+                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+
+                    $scope.gridOptions  = {
+                        rowHeight: 40,
+                        data : $scope.itMasterData,
+                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
+                        showGridFooter: true,
+                        enableMinHeightCheck :true,
+                        enableColumnResizing: true,
+                        enableHorizontalScrollbar : 0,
+                        enableVerticalScrollbar : 2,
+                        onRegisterApi : function(gridApi){
+                            $scope.gridApi = gridApi;
+                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+
+                        },
+                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
+                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
+                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
+                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
+                            '</div>',
+                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
+                            '</div>'
+                    };
+
+                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
+                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
+                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
+                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
+                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
+                                '<span ui-grid-visible="col.sort.direction" ' +
+                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
+                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
+                                ' </div> <div ui-grid-filter></div> </div>';
+                        },true)
+                    }
+
+                    $scope.gridOptions.columnDefs =
+                        $scope.itMasterDetailControl.columnDefs;
+
+                    function _displayDetail(item) {
+                        var deferred = $q.defer();
+                        if($scope.$parent.currentItemWrapper != null){
+                            if($scope.$parent.currentItemWrapper.hasChanged &&
+                                $scope.itLockOnChange){
+                                deferred.reject('undo or save before change');
+                                return deferred.promise;
+                            }
+                        }
+                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
+                        deferred.resolve('');
+                        return deferred.promise;
+                    }
+
+                    $scope.onRowClick = function(row,col) {
+                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
+                            _displayDetail(col.entity).then(function (msg) {
+                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
+                                    $scope.gridApi.selection.clearSelectedRows();
+                                    if ($scope.$parent.$parent.mobile) {
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                }
+                                $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
+                            }, function (msg) {
+                                itPopup.alert($scope.itMasterDetailControl.navAlert);
+                            });
+                        }
+                    };
+
+
+                    function _scrollToEntity(entity){
+                        $scope.gridApi.core.scrollTo(entity);
+                    }
+
+                    $scope.itMasterDetailControl.selectItem =function (item){
+                        $scope.onRowClick(null,{entity:item});
+                    };
+
+                    /**
+                     * Method to filter rows
+                     */
+                    $scope.refreshData = function() {
+                        var renderableEntities = $filter('itUIGridGlobalFilter')
+                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
+
+                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
+                            var match = false;
+                            renderableEntities.forEach(function(entity){
+
+                                if(angular.equals(row.entity,entity)){
+                                    match  = true;
+                                }
+                            });
+                            if ( !match ){
+                                $scope.gridApi.core.setRowInvisible(row);
+                            } else {
+                                $scope.gridApi.core.clearRowInvisible(row);
+                            }
+                        });
+                    };
+
+
+                    function _unlockCurrent(){
+                        $scope.$applyAsync(function(){
+                            if($scope.$parent.currentItemWrapper!==null){
+                                $scope.$parent.currentItemWrapper.hasChanged = false;
+                                $scope.$parent.currentItemWrapper.isWatched = false;
+                            }
+                        });
+
+                    }
+
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            _unlockCurrent();
+                        }
+                    };
+
+                    $scope.$on('unlockCurrentItem',function(){
+                        _unlockCurrent();
+                    });
+
+                    /**
+                     * Method to scroll to specific item.
+                     * @param entity item to scroll to.
+                     */
+                    $scope.itMasterDetailControl.scrollToItem =function (entity){
+                        _scrollToEntity(entity);
+                    };
+
+                    /**
+                     * Method to get Selected items.
+                     * @returns {Array} of selected items
+                     */
+                    $scope.itMasterDetailControl.getSelectedItems = function(){
+                        if(typeof $scope.gridApi !== 'undefined' ) {
+                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
+                                return $scope.gridApi.selection.getSelectedRows();
+                            }
+                        }
+                        return [];
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     * @deprecated
+                     */
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     */
+                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
+                        return   $scope.$parent.currentItemWrapper;
+                    };
+
+                    /**
+                     * Method to get filtered items.
+                     * @returns {Array} of filtered items.
+                     */
+                    $scope.itMasterDetailControl.getFilteredItems = function(){
+                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
+                        var entities  = [];
+                        angular.forEach(rows,function(row){
+                            entities.push(row.entity);
+                        });
+                        return entities;
+                    };
+
+
+                    /**
+                     * Method to select the current Item.
+                     * @param entity item to select.
+                     * @returns {deferred.promise|*} success if the item is found.
+                     */
+                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
+
+                        var deferred = $q.defer();
+                        $scope.gridApi.selection.clearSelectedRows();
+                        _displayDetail(entity).then(function(){
+                            $timeout(function() {
+                                var entityIndex = $scope.itMasterData.indexOf(entity);
+                                if(entityIndex>=0) {
+
+                                    $scope.gridApi.selection.selectRow(entity);
+                                    _scrollToEntity(entity);
+                                    if( $scope.$parent.$parent.mobile){
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                    deferred.resolve();
+                                } else {
+                                    deferred.reject();
+                                }
+
+                            });
+                        },function(){
+                            deferred.reject();
+                        });
+                        return deferred.promise;
+                    };
+
+                    /**
+                     * Method to undo changes on the current item.
+                     */
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        }
+                    };
+
+                    /**
+                     * Method to fill windows height to the master part.
+                     */
+                    $scope.itMasterDetailControl.fillHeight = function(){
+                        //  evalLayout.fillHeight();
+                    };
+
+
+                    /**
+                     * Handler to unlock the current item.
+                     */
+                    $scope.$on('unlockCurrentItem',function(){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        });
+                    });
+
+                    /**
+                     * Handler to lock the current item.
+                     */
+                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
+                        });
+                    });
+
+                    function confirmLeavePage(e) {
+                        if($scope.$parent.currentItemWrapper!=null){
+                            if ( $scope.$parent.currentItemWrapper.hasChanged
+                                && $scope.itLockOnChange ) {
+                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                    $scope.itAppScope = $scope.$parent;
+
+                    //  $scope.itAppScope.$navAlert = {};
+
+                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
+
+                    var w = angular.element($window);
+                    w.bind('resize', function () {
+                        $scope.gridApi.core.handleWindowResize();
+                    });
+
+                    $scope.itMasterDetailControl.initState = true;
+                    $scope.$on("$locationChangeStart", confirmLeavePage);
+                    $scope.itMasterDetailControl = angular.extend({navAlert:{
+                        text:'Please save or revert your pending change',
+                        title:'Unsaved changes',
+                        buttons: [
+                            {
+                                text: 'OK',
+                                type: 'btn-info',
+                                onTap: function () {
+                                    return false;
+                                }
+                            }]
+                    }}, $scope.itMasterDetailControl );
+
+
+                    /*  watchers */
+                    $scope.$watch('itLang',function(){
+                        $scope.gridApi.grid.refresh();
+                    });
+
+                    $scope.$watch('itMasterData',function(){
+                        $scope.gridOptions.data = [];
+                        $scope.itMasterData.forEach(function(entry){
+                            $scope.gridOptions.data.push(entry);
+                        });
+
+                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
+                            $scope.$parent.currentItemWrapper = null;
+                        } else {
+                            if( $scope.itMasterData.length === 0){
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }
+                        $scope.gridApi.grid.refresh();
+                        if($scope.itMasterDetailControl !== null){
+                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
+                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
+
+                                $scope.$applyAsync(function(){
+                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
+                                });
+                            }
+                        }
+                        $scope.refreshData();
+
+                    },true);
+
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                    },250);
+
+                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
+
+                        if($scope.$parent.currentItemWrapper != null ){
+                            if(!$scope.$parent.currentItemWrapper.isWatched)
+                            {
+                                $scope.$parent.currentItemWrapper.isWatched = true;
+                            }
+                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
+                                $scope.$parent.currentItemWrapper.hasChanged =
+                                    !angular.equals(newValue,
+                                        $scope.$parent.currentItemWrapper.originalItem);
+                            } else   {
+                                $scope.$parent.currentItemWrapper.hasChanged = true;
+                            }
+                        }
+                    }, true);
+
+                    $scope.$watch('filterText',function(){
+                        $scope.refreshData();
+                    },true);
+
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
+                }]
+
+
+        }
+    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
+        return function(data, grid, query) {
+            var matches = [];
+            //no filter defined so bail
+            if (query === undefined || query === '') {
+                return data;
+            }
+            query = query.toLowerCase();
+
+            function _deepFind(obj, path) {
+                var paths = path.split('.')
+                    , current = obj
+                    , i;
+
+                for (i = 0; i < paths.length; ++i) {
+                    if (current[paths[i]] == undefined) {
+                        return undefined;
+                    } else {
+                        current = current[paths[i]];
+                    }
+                }
+                return current;
+            }
+
+            var scope = $rootScope.$new(true);
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < grid.columnDefs.length; j++) {
+                    var dataItem = data[i];
+
+                    var fieldName = grid.columnDefs[j].field;
+                    var renderedData = _deepFind(dataItem,fieldName);
+                    // apply cell filter
+                    if (grid.columnDefs[j].cellFilter) {
+                        scope.value = renderedData;
+                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
+                    }
+                    //as soon as search term is found, add to match and move to next dataItem
+                    if(typeof renderedData !== 'undefined' && renderedData != null){
+                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
+                            matches.push(dataItem);
+                            break;
+                        }
+                    }
+                }
+            }
+            scope.$destroy();
+            return matches;
+        };
+    }] );
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master-detail main content.
+ *
+ * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 `<it-master>` for the list selectable content,
+ * and `<it-detail>` that display the content of the selected item.
+ *
+ * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
+ * this object will
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
+ *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
+ *   <td>Disable | Enable  multiple row selection for entire grid .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *
+ *   <tr>
+ *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
+ *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ * @example
+    <example module="itesoft">
+         <file name="index.html">
+             <div ng-controller="MasterDetailController">
+                 <it-master-detail >
+                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+                 <it-master-header it-search-placeholder="Recherche" >
+                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+                 </it-master-header>
+                 </it-master>
+                 <it-detail>
+                 <it-detail-header>
+                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+                 <span class="fa fa-floppy-o fa-lg"></span>
+                 </button>
+                 <button class=" btn btn-info" title="Check">
+                 <span class="fa fa-file-code-o fa-lg"></span>
+                 </button>
+                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+                 <span class="fa fa-undo fa-lg"></span>
+                 </button>
+
+                 </it-detail-header>
+                 <it-detail-content>
+                 <it-modal-full-screen>
+                             <div class="form-group">
+                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+                                     it-label="code"
+                                     ng-model="currentItemWrapper.currentItem.code"
+                                     name=""
+                                     ng-required="true"/>
+                             </div>
+                             <div class="form-group">
+                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+                                 it-label="description"
+                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                             </div>
+                             <div class="form-group">
+                             <input type="checkbox"
+                                 it-toggle
+                                 ng-model="currentItemWrapper.currentItem.enabledde"
+                                 it-label="tete"/>
+                             </div>
+                 </it-modal-full-screen>
+                 </it-detail-content>
+                 </it-detail>
+                 </it-master-detail>
+             </div>
+         </file>
+         <file name="controller.js">
+             angular.module('itesoft')
+              .controller('MasterDetailController', ['$scope', function($scope) {
+
+                                            $scope.data =
+                                               [
+                                                    {
+                                                        "code" : "Code 1",
+                                                        "description": "Description 1",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 2",
+                                                        "description": "Description 2",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 3",
+                                                        "description": "Description 3",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 4",
+                                                        "description": "Description 4",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 5",
+                                                        "description": "Description 5",
+                                                        "enabledde" : true
+                                                    }
+                                                ];
+
+                                            $scope.masterDetails = {};
+
+                                            $scope.masterDetails = {
+                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
+                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
+                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+
+                                            };
+
+                                             $scope.masterDetails.disableMultiSelect = false;
+                                            $scope.masterDetails.navAlert = {
+                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
+                                                title:'{{\'FOO\' | translate}}',
+                                                buttons: [
+                                                        {
+                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                            type:  'btn-warning',
+                                                            onTap: function() {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                            type: 'btn-primary',
+                                                            onTap: function () {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span class="fa fa-undo fa-lg"></span>',
+                                                            type: 'btn-success',
+                                                            onTap: function () {
+                                                                $scope.undoChange();
+                                                                return true;
+
+                                                            }
+                                                        }
+                                                    ]
+                                            };
+
+                                            function _removeItems(items,dataList){
+                                                angular.forEach(items,function(entry){
+                                                    var index = dataList.indexOf(entry);
+                                                    dataList.splice(index, 1);
+                                                })
+                                            }
+
+                                            $scope.deleteSelectedItems = function(){
+                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+                                            };
+
+
+                                            $scope.saveCurrentItem = function(){
+                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+
+                                                    $scope.$broadcast('unlockCurrentItem');
+                                                };
+
+                                            $scope.undoChange = function(){
+                                                $scope.masterDetails.undoChangeCurrentItem();
+                                                $scope.masterDetails.fillHeight();
+                                            };
+
+                                            $scope.addNewItem = function(){
+                                                var newItem =  {
+                                                    "code" : "Code " + ($scope.data.length+1) ,
+                                                    "description": "Description " + ($scope.data.length+1),
+                                                    "enabledde" : true
+                                                };
+                                                $scope.data.push(newItem);
+                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
+                                                    $scope.$broadcast('lockCurrentItem',false);
+                                                },function(error){
+
+                                                });
+                                            };
+
+                                            $scope.hasChanged = function(){
+                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
+                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
+                                                } else {
+                                                    return false;
+                                                }
+                                            }
+                                        }]);
+          </file>
+         <file src="test.css">
+         </file>
+    </example>
+ */
+IteSoft
+    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
+        return {
+            restrict: 'EA',
+            transclude : true,
+            scope :true,
+            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
+            controller : [
+                '$scope',
+                'screenSize',
+                function(
+                    $scope,
+                    screenSize
+                    )
+                {
+                    $scope.activeState = 'master';
+                    $scope.desktop = screenSize.on('md, lg', function(match){
+                        $scope.desktop = match;
+
+                    });
+
+                    $scope.mobile = screenSize.on('xs, sm', function(match){
+                        $scope.mobile = match;
+                    });
+
+                    $scope.goToDetail = function(){
+                        $scope.activeState = 'detail';
+                    };
+
+                    $scope.$watch('mobile',function(){
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            $scope.activeState = 'detail';
+                        } else {
+                            $scope.activeState = 'master';
+                        }
+                    });
+
+                    $scope.$watch('$$childHead.currentItemWrapper',function() {
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
+                                ||  $scope.$$childHead.currentItemWrapper === null )){
+                            $scope.activeState = 'master';
+                        } else {
+                            if($scope.mobile &&
+                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
+                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
+                                $scope.activeState = 'master';
+                            }
+                        }
+                    });
+
+                    $scope.goToMaster = function(){
+
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
+                                itPopup.alert(  $scope.$$childHead.$navAlert);
+                            } else {
+                                $scope.activeState = 'master';
+                                $timeout(function(){
+                                    $window.dispatchEvent(new Event('resize'));
+                                },300)
+
+                            }
+                        } else {
+                            $scope.activeState = 'master';
+                            $timeout(function(){
+                                $window.dispatchEvent(new Event('resize'));
+                            },300)
+
+                        }
+
+                    };
+                }]
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
+ * can contain the action buttons of selected items.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *
+ *       </it-detail-header>
+ *
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itMasterHeader',function() {
+        return {
+            restrict: 'EA',
+            require: '^itMaster',
+            scope: false,
+            transclude : true,
+            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
+                '<div class="btn-toolbar it-fill" ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '<div class="col-xs-12 col-md-12 pull-right">'+
+                '<div>'+
+                '<form>'+
+                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
+                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
+                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
+                '</div>'+
+                '</form>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            link: function (scope, element, attrs) {
+                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
+                    scope.placeholderText = newVal;
+                });
+            }
+        }
+
+    });
 'use strict';
 /**
  * TODO itInclude desc
@@ -4811,6 +4811,190 @@ IteSoft
 
         };
     }]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * @ngdoc directive
@@ -5288,190 +5472,6 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -7352,55 +7352,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 
 IteSoft
@@ -7515,6 +7466,611 @@ IteSoft
         }
     });
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name itesoft.service:itMessaging
+ * @module itesoft
+ * @since 1.2
+ * @requires $websocket
+ * @requires $log
+ * @requires $q
+ *
+ * @description
+ * Service that provide all functions to connect and  dialog with itesoft-messaging system.
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ *
+ * <tr>
+ *     <td><code>ItMessagingProvider.SERVICE_URL = 'Your itesoft-messaging URL';</code></td>
+ *     <td>''</td>
+ *     <td>angular.module('myModule')<br>.config(['ItMessagingProvider', function(ItMessagingProvider) {<br>
+ *      ItMessagingProvider.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+ *      <br>
+ *  }])</td>
+ * </tr>
+ * <tr>
+ *     <td><code>Message json format</code></td>
+ *     <td>''</td>
+ *     <td><div tabindex="-1" class="json"><span class="sBrace structure-1" id="s-1">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-2">"data"</span><span class="sColon" id="s-3">:</span><span class="sBrace structure-2" id="s-4">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-5">"youBusinessKey"</span><span class="sColon" id="s-6">:</span><span class="sObjectV" id="s-7">"some&nbsp;business&nbsp;data"</span><span class="sComma" id="s-8">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-9">"youBusinessKey2"</span><span class="sColon" id="s-10">:</span><span class="sObjectV" id="s-11">"other&nbsp;business&nbsp;data"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBrace structure-2" id="s-12">}</span><span class="sComma" id="s-13">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-14">"creationDate"</span><span class="sColon" id="s-15">:</span><span class="sObjectV" id="s-16">"2016-05-31T15:15:14.436+0000"</span><span class="sComma" id="s-17">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-18">"from"</span><span class="sColon" id="s-19">:</span><span class="sObjectV" id="s-20">"senderID"</span><span class="sComma" id="s-21">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-22">"notification"</span><span class="sColon" id="s-23">:</span><span class="sBrace structure-2" id="s-24">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-25">"title"</span><span class="sColon" id="s-26">:</span><span class="sObjectV" id="s-27">"notification&nbsp;title&nbsp;"</span><span class="sComma" id="s-28">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-29">"body"</span><span class="sColon" id="s-30">:</span><span class="sObjectV" id="s-31">"notification&nbsp;body"</span><span class="sComma" id="s-32">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-33">"icon"</span><span class="sColon" id="s-34">:</span><span class="sObjectV" id="s-35">"some-icon-to-render"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBrace structure-2" id="s-36">}</span><span class="sComma" id="s-37">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-38">"to"</span><span class="sColon" id="s-39">:</span><span class="sBracket structure-2" id="s-40">[ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sArrayV" id="s-41">"/topic/topicGroup:topicName"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBracket structure-2" id="s-42">]</span><br><span class="sBrace structure-1" id="s-43">}</span></div></td>
+ * </tr>
+ * <tr>
+ *  <td>service constructor  var itmsg = new ItMessaging(BASE_URL);</td>
+ *  <td>''</th>
+ *  <td>new ItMessaging(BASE_URL), BASE_URL of your itesoft-messaging backend service without protocol ex: localhost:8080/itesoft-messaging </td>
+ * </tr>
+ * <tr>
+ *     <td> itmsg.connect(token);</td>
+ *     <td>''</td>
+ *     <td>to establish a websocket connexion with itesoft-messaging service, using the token that have returned by your backend using his api key </td>
+ * </tr>
+ * <tr>
+ *     <td>itmsg.subscribeToTopic('/topic/'+topicName,observers)</td>
+ *     <td>''</td>
+ *     <td>return promise, method to subscribe some users(observers) to topic ,<br>
+ *         if topic does not exist, it will be automatically created<br>
+ *         if you try to subscribe observers to topic which has been created by a backend system(using api key not with token) you will get and error.<br>
+ *         commonly if your topic is conversation between observer, use the "/topic/conversation:" key to start naming it.
+ *      </td>
+ * </tr>
+ * <tr>
+ *     <td>itmsg.unSubscribeToTopic('/topic/'+topicName,observers)</td>
+ *     <td>''</td>
+ *     <td>return promise, method to unsubscribe some users(observers) from topic ,<br>
+ *         if you try to unsubscribe observers to topic which has been created by a backend system(using api key not with token) you will get and error.<br>
+ *         observers that has been registred to topic using api key, can be unregistred using api key not a token.
+ *      </td>
+ * </tr>
+ * <tr>
+ *     <td>itmsg.onClose(callbackFunction(event)</td>
+ *     <td>''</td>
+ *     <td>
+ *         callback function will be triggered where websocket connexion is interupted.
+ *      </td>
+ * </tr>
+ *
+ * <tr>
+ *     <td>itmsg.onMessage(callbackFunction(message,topics)</td>
+ *     <td>''</td>
+ *     <td>
+ *        callback function is triggered when message arrive, they will pass 3 arguments, message that has been received <br>
+ *        and topics, that represent list of the topics that the user have subscribe.
+ *      </td>
+ * </tr>
+ *
+ * </table>
+ *
+ * @example
+    <example module="itesoft">
+
+         <file name="Controller.js">
+                 angular.module('itesoft')
+                 .filter('conversation',[ function() {
+                    return function(input,args) {
+                      var result ='';
+                      var stringResult = '';
+                      if(input.startsWith('conversation:')){
+                        input = input.replace('conversation:','');
+                        input = input.replace(args+':','');
+                          input = input.replace(args,'');
+                        result =  input.split(':');
+                        angular.forEach(result,function(entry){
+                            stringResult = stringResult + ' ' +entry;
+                        })
+                        return stringResult;
+                      }
+
+                      return input;
+                    };
+                    }]).config(['ItMessagingProvider', function(ItMessagingProvider) {
+                        ItMessagingProvider.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+                    }])
+                     .filter('topic',[ function() {
+                        return function(input) {
+
+                          var result = [];
+                          if(input){
+                            angular.forEach(input, function(entry){
+                                  if(entry.address.startsWith('conversation:')){
+                                    result.push(entry);
+                                  }
+
+                            });
+
+                            return result;
+                          }
+                          return input;
+                        };
+                    }])
+                     .controller('MainController',['ItMessaging','itNotifier','$scope',function(ItMessaging,itNotifier,$scope){
+
+                      var self = this;
+                      var itmsg = new ItMessaging();
+                      self.BASE_URL = itmsg.getServiceUrl();
+                      self.SHOWCASE_TOPIC = "group:all";
+                      self.API_KEY = 'my-secret-api-key';
+
+
+                      self.messages = [];
+                      self.topics = [];
+                      self.selectedTopic = null;
+                      self.username = null;
+
+                      function Message(messageText){
+                        this.to = [];
+                        this.data =  {
+                          "message" : messageText
+                        };
+                        this.notification = {
+                          title: self.username + ' sent you a message',
+                          body : self.username + ' sent you a message',
+                          icon : 'comment-o'
+                        }
+                      }
+
+                      self.isConnected = false;
+                      self.username = null;
+
+                      itmsg.onMessage(function(message,topics){
+                        self.topics = topics;
+
+                        self.messages.push(message);
+
+                        _scrollToBottom();
+                      });
+
+                      itmsg.onClose(function(event){
+                         itNotifier.notifyError({
+                                    content: "Error popup",
+                                    dismissOnTimeout: false
+                                },
+                                {
+                                    CODE:500,
+                                    TYPE:'error',
+                                    MESSAGE:'Something bad happened',
+                                    DETAIL:'You don\'t wanna know',
+                                    DONE:1
+                                });
+
+                         self.isConnected = false;
+                      });
+
+                      this.login = function(username){
+                        self.username = username;
+                        itmsg.getToken(self.API_KEY ,username).then(function(token){
+                         self.isConnected = itmsg.connect(token);
+                         itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
+                        });
+                      }
+
+                      this.sendMessage = function(messageText){
+                        var m = new Message(messageText);
+                        var r =  _textMessageExtractor(messageText);
+                        var topicName = null;
+                        if(r.topicName){
+                          topicName =r.topicName;
+                        } else if(self.selectedTopic) {
+                           topicName =self.selectedTopic.address;
+                        } else {
+                          topicName = self.SHOWCASE_TOPIC;
+                        }
+                        m.to.push('/topic/'+topicName);
+                        itmsg.subscribeToTopic(topicName,r.observers)
+                            .then(function(ok){
+                                 itmsg.sendMessage(m);
+                        });
+                        self.$textMessage = '';
+                      }
+
+                      this.selectCurrentTopic = function(topic){
+                        self.selectedTopic = topic;
+                      }
+
+                      this.unSubscribe = function(topicName){
+                        itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
+                      }
+
+
+                      function _textMessageExtractor(messageText){
+                            var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
+                     var myArray;
+                     var users = [];
+                     var result = {
+                                observers : [],
+                                topicName : null
+                            };
+                     while ((myArray = regex.exec(messageText)) != null)
+                     {
+                       users.push(myArray[2])
+                     }
+                     users.sort();
+                     if(users.length > 0){
+                              result.topicName = 'conversation:'+ self.username;
+                                for ( var user  in  users){
+                                  result.topicName = result.topicName + ':' + users[user];
+                                  result.observers.push(
+                                    {
+                                    'id' : users[user]
+                                    }
+                                );
+                                }
+                                result.observers.push({
+                                  'id': self.username
+                                });
+                        }
+                     return result;
+                     }
+
+
+                     function _scrollToBottom(){
+                         setTimeout(function() {
+                          var scroller = document.getElementById('conversation-content');
+                          scroller.scrollTop = scroller.scrollHeight;
+                        },250);
+                      }
+
+                     }])
+         </file>
+         <file name="index.html">
+             <div  style="height:600px !important;" ng-controller="MainController as main">
+                 <div class="row-height-1">
+                 <div ng-if="main.username">
+                 <h3 >hi @{{main.username}}</h3>
+                 <p>Use @Username to chat with other users</p>
+                 </div>
+                 </div>
+                 <div class="row row-height-9" ng-if="main.isConnected">
+                 <div class="col-md-6 col-xs-6  it-fill">
+                 <div class="col-xs-12 jumbotron  it-fill">
+                 {{main.selectedTopic}}
+                 </div>
+                 </div>
+                 <div class="col-md-6 col-xs-6  it-fill">
+                 <div class="col-xs-12 jumbotron  it-fill">
+                 <div class="row-height-2 " style=" overflow-x: scroll!important;">
+                 <div>
+                 <div class="pull-left it-messaging-tag label label-info">
+                 <a href=""  ng-click="main.selectCurrentTopic(null)">all</a>
+                 </div>
+
+                 <div class="pull-left it-messaging-tag label label-info" ng-repeat="t in main.topics |topic:t.address  ">
+                 <a href=""  ng-click="main.selectCurrentTopic(t)">{{t.address | conversation:main.username}}</a><a href="" ng-click="main.unSubscribe(t.address)">  x</a>
+                 </div>
+                 </div>
+
+                 </div>
+                 <div class="row-height-8 "  id="conversation-content"  style="overflow:auto;margin-top: -30px;background-color:white;">
+                 <div ng-repeat="m in main.messages | orderBy: 'creationDate':false">
+                 <div class="it-messaging-message" ng-if="main.selectedTopic ? m.to.indexOf('/topic/'+main.selectedTopic.address)>=0 :true">
+                 <div class="it-messaging-chat" ng-if="m.data.message" ng-class="{mine :(main.username==m.from) ,others : (main.username!=m.from) }">
+                 <span class="sender"> @{{m.from}} :</span>
+                 <span class="message-text">{{m.data.message}}</span>
+
+                 </div>
+                 <div ng-if="!m.data.message">
+                 <span ng-if="m.notification"><i class="fa fa-{{m.notification.icon}}"></i>  {{m.notification.body}} </span>
+                 </div>
+
+                 <div class="small">{{m.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="row-height-2 ">
+                 <form  novalidate name="messageForm" ng-submit="main.sendMessage(main.$textMessage)">
+                 <input ng-model="main.$textMessage" name=""  style="width : 100%">
+
+                 </form>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+
+                 <div class="row row-height-6" ng-if="!main.isConnected">
+                 <div class="col-md-6  col-xs-6 col-xs-offset-3 col-md-offset-3 jumbotron  it-fill">
+                 <br>
+                 <form class="form-group"  novalidate name="myForm" ng-submit="main.login(username)">
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 disabled="true"
+                 type="text"
+                 it-label="API URL"
+                 ng-model="main.BASE_URL">
+                 </div>
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 disabled="true"
+                 type="text"
+                 it-label="API KEY"
+                 ng-model="main.API_KEY">
+                 </div>
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 required=""
+                 ng-maxlength="10"
+                 type="text"
+                 it-label="Username"
+                 name="Username"
+                 ng-model="username">
+                 </div>
+                 <button class="btn btn-primary" type="submit">Sign in</button>
+                 </form>
+                 </div>
+
+                 </div>
+
+                 <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+
+             </div>
+         </file>
+ </example>
+ **/
+IteSoft.provider('ItMessaging',[
+    function(){
+
+        var providerState = this;
+        providerState.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+
+        this.$get = ['$log',
+            '$http',
+            '$q',
+            '$websocket',
+            '$rootScope',
+            function($log,
+                     $http,
+                     $q,
+                     $websocket,
+                     $rootScope){
+
+        function ItMessaging(token){
+
+            var self = this;
+            self.URL = providerState.SERVICE_URL ;
+            self.onMessageCallbacks = [];
+            self.onCloseCallbacks   = [];
+
+            self.token = token;
+
+            this.getToken = function(apiKey,userID){
+                console.warn('This function is only for demo purpose,'+
+                    ' do NOT use it in production mode, ' +
+                    'the security of your apiKey will not be granted');
+                var deferred = $q.defer();
+
+                $http({
+                    url: 'http://'+ this.URL + '/rest/token',
+                    method: "GET",
+                    params: {
+                        'username' : userID
+                    },
+                    headers: {
+                        'api-key': apiKey
+                    }
+                }).then(function(response){
+                    deferred.resolve(response.data.token);
+                },function(error){
+                    $log.error('error on api endpoint');
+                    deferred.reject('error on api endpoint');
+                })
+                return deferred.promise;
+            };
+
+
+            function _updateTopics(){
+                var deferred = $q.defer();
+                $http({
+                    url: 'http://'+self.URL+'/rest/topics',
+                    method: "GET",
+                    headers: {
+                        'token': self.token
+                    }
+                }).then(function(response){
+                    deferred.resolve(response.data);
+                },function(error){
+                    $log.error(error);
+                    deferred.reject(deferred);
+                });
+                return deferred.promise;
+            }
+
+            this.getServiceUrl = function(){
+                return self.URL;
+            };
+
+            this.connect = function(token){
+                if(token){
+                    self.token = token;
+                    self.dataStream = $websocket('ws://'+ self.URL  +'/websocket/' + token);
+                    self.dataStream.onMessage(function(msg){
+                        _updateTopics().then(function(topics){
+                            _onMessageHandler(msg,topics);
+                        })
+                    });
+
+                    self.dataStream.onClose(function(event){
+                        _onCloseHandler(event);
+                    })
+
+                    return true;
+                }
+            };
+
+            this.onMessage = function(callback) {
+                self.onMessageCallbacks.push({
+                    fn: callback
+                });
+                return self;
+            };
+
+            this.onClose = function(callback) {
+                self.onCloseCallbacks.push({
+                    fn: callback
+                });
+                return self;
+            };
+
+            function _onMessageHandler(message,topics){
+                var pattern;
+                var currentCallback;
+
+                for (var i = 0; i < self.onMessageCallbacks.length; i++) {
+                    currentCallback = self.onMessageCallbacks[i];
+                    var jsonResult = angular.fromJson(message.data);
+                    if(angular.isArray(jsonResult)){
+                        angular.forEach(jsonResult,function(entry){
+                            $rootScope.$applyAsync(function(){
+                                currentCallback.fn.apply(this,[entry,topics]);
+                            })
+
+                        })
+
+                    } else {
+                        $rootScope.$applyAsync(function(){
+                            currentCallback.fn.apply(this,[jsonResult,topics]);
+                        })
+
+                    }
+                }
+            }
+
+            function _onCloseHandler(event){
+                var pattern;
+                var currentCallback;
+                for (var i = 0; i < self.onCloseCallbacks.length; i++) {
+                    currentCallback = self.onCloseCallbacks[i];
+                    $rootScope.$applyAsync(function(){
+                        currentCallback.fn.apply(this,event);
+                    })
+                }
+            }
+
+            this.subscribeToTopic = function(topicname,observers){
+                var deferred = $q.defer();
+                if(self.token!=null){
+                    $http({
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/register',
+                        method: "POST",
+                        data : observers,
+                        headers: {
+                            'token': self.token
+                        }
+                    }).then(function(response){
+                        deferred.resolve(response.data)
+                        _updateTopics();
+                    },function(error){
+                        $log.error(error);
+                        deferred.reject(error);
+                    })
+                } else {
+                    $log.error('You cannot register observers to topic without token');
+                    deferred.reject('no token');
+                }
+                return deferred.promise;
+            }
+
+            this.unsubscribeToTopic = function(topicname,observers){
+                var deferred = $q.defer();
+                if(self.token!=null){
+                    $http({
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/unregister',
+                        method: "POST",
+                        data : observers,
+                        headers: {
+                            'token': self.token
+                        }
+                    }).then(function(response){
+                        deferred.resolve(response.data)
+                        _updateTopics();
+                    },function(error){
+                        $log.error(error);
+                        deferred.reject(error);
+                    })
+                } else {
+                    $log.error('You cannot register observers to topic without token');
+                    deferred.reject('no token');
+                }
+                return deferred.promise;
+            }
+
+            this.sendMessage = function(messageObj){
+                var deferred = $q.defer();
+                $http({
+                    url: 'http://'+self.URL+'/rest/messages',
+                    method: "POST",
+                    headers: {
+                        'token': self.token
+                    },
+                    data : messageObj
+                }).then(function(response){
+                    deferred.resolve(response.data);
+                },function(error){
+                    $log.error(error);
+                    deferred.reject(error);
+                });
+                return deferred.promise;
+            }
+
+        }
+
+        return function(url){
+            return new ItMessaging(url);
+        };
+            }]
+    }])
 
 'use strict';
 /**
@@ -7745,542 +8301,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
-'use strict';
-
-/**
- * @ngdoc service
- * @name itesoft.service:itMessaging
- * @module itesoft
- * @since 1.2
- * @requires $websocket
- * @requires $log
- * @requires $q
- *
- * @description
- * Service that provide all functions to connect and  dialog with itesoft-messaging system.
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>Message json format</code></td>
- *     <td>''</td>
- *     <td><div tabindex="-1" class="json"><span class="sBrace structure-1" id="s-1">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-2">"data"</span><span class="sColon" id="s-3">:</span><span class="sBrace structure-2" id="s-4">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-5">"youBusinessKey"</span><span class="sColon" id="s-6">:</span><span class="sObjectV" id="s-7">"some&nbsp;business&nbsp;data"</span><span class="sComma" id="s-8">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-9">"youBusinessKey2"</span><span class="sColon" id="s-10">:</span><span class="sObjectV" id="s-11">"other&nbsp;business&nbsp;data"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBrace structure-2" id="s-12">}</span><span class="sComma" id="s-13">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-14">"creationDate"</span><span class="sColon" id="s-15">:</span><span class="sObjectV" id="s-16">"2016-05-31T15:15:14.436+0000"</span><span class="sComma" id="s-17">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-18">"from"</span><span class="sColon" id="s-19">:</span><span class="sObjectV" id="s-20">"senderID"</span><span class="sComma" id="s-21">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-22">"notification"</span><span class="sColon" id="s-23">:</span><span class="sBrace structure-2" id="s-24">{ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-25">"title"</span><span class="sColon" id="s-26">:</span><span class="sObjectV" id="s-27">"notification&nbsp;title&nbsp;"</span><span class="sComma" id="s-28">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-29">"body"</span><span class="sColon" id="s-30">:</span><span class="sObjectV" id="s-31">"notification&nbsp;body"</span><span class="sComma" id="s-32">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-33">"icon"</span><span class="sColon" id="s-34">:</span><span class="sObjectV" id="s-35">"some-icon-to-render"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBrace structure-2" id="s-36">}</span><span class="sComma" id="s-37">,</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sObjectK" id="s-38">"to"</span><span class="sColon" id="s-39">:</span><span class="sBracket structure-2" id="s-40">[ <a href="javascript:;"><i class="fa fa-minus-square-o"></i></a> </span><br><span>&nbsp;&nbsp;&nbsp;</span><span>&nbsp;&nbsp;&nbsp;</span><span class="sArrayV" id="s-41">"/topic/topicGroup:topicName"</span><br><span>&nbsp;&nbsp;&nbsp;</span><span class="sBracket structure-2" id="s-42">]</span><br><span class="sBrace structure-1" id="s-43">}</span></div></td>
- * </tr>
- * <tr>
- *  <td>service constructor  var itmsg = new ItMessaging(BASE_URL);</td>
- *  <td>''</th>
- *  <td>new ItMessaging(BASE_URL), BASE_URL of your itesoft-messaging backend service without protocol ex: localhost:8080/itesoft-messaging </td>
- * </tr>
- * <tr>
- *     <td> itmsg.connect(token);</td>
- *     <td>''</td>
- *     <td>to establish a websocket connexion with itesoft-messaging service, using the token that have returned by your backend using his api key </td>
- * </tr>
- * <tr>
- *     <td>itmsg.subscribeToTopic('/topic/'+topicName,observers)</td>
- *     <td>''</td>
- *     <td>return promise, method to subscribe some users(observers) to topic ,<br>
- *         if topic does not exist, it will be automatically created<br>
- *         if you try to subscribe observers to topic which has been created by a backend system(using api key not with token) you will get and error.<br>
- *         commonly if your topic is conversation between observer, use the "/topic/conversation:" key to start naming it.
- *      </td>
- * </tr>
- * <tr>
- *     <td>itmsg.unSubscribeToTopic('/topic/'+topicName,observers)</td>
- *     <td>''</td>
- *     <td>return promise, method to unsubscribe some users(observers) from topic ,<br>
- *         if you try to unsubscribe observers to topic which has been created by a backend system(using api key not with token) you will get and error.<br>
- *         observers that has been registred to topic using api key, can be unregistred using api key not a token.
- *      </td>
- * </tr>
- * <tr>
- *     <td>itmsg.onClose(callbackFunction(event)</td>
- *     <td>''</td>
- *     <td>
- *         callback function will be triggered where websocket connexion is interupted.
- *      </td>
- * </tr>
- * <tr>
- *     <td>itmsg.onMessage(callbackFunction(message,topics)</td>
- *     <td>''</td>
- *     <td>
- *        callback function is triggered when message arrive, they will pass 3 arguments, message that has been received <br>
- *        and topics, that represent list of the topics that the user have subscribe.
- *      </td>
- * </tr>
- *
- * </table>
- *
- * @example
-    <example module="itesoft">
-
-         <file name="Controller.js">
-                 angular.module('itesoft')
-                 .filter('conversation',[ function() {
-                    return function(input,args) {
-                      var result ='';
-                      var stringResult = '';
-                      if(input.startsWith('conversation:')){
-                        input = input.replace('conversation:','');
-                        input = input.replace(args+':','');
-                          input = input.replace(args,'');
-                        result =  input.split(':');
-                        angular.forEach(result,function(entry){
-                            stringResult = stringResult + ' ' +entry;
-                        })
-                        return stringResult;
-                      }
-
-                      return input;
-                    };
-                    }])
-
-                     .filter('topic',[ function() {
-                        return function(input) {
-
-                          var result = [];
-                          if(input){
-                            angular.forEach(input, function(entry){
-                                  if(entry.address.startsWith('conversation:')){
-                                    result.push(entry);
-                                  }
-
-                            });
-
-                            return result;
-                          }
-                          return input;
-                        };
-                    }])
-                     .controller('MainController',['ItMessaging','itNotifier','$scope',function(ItMessaging,itNotifier,$scope){
-
-                      var self = this;
-
-                      self.BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
-                      self.SHOWCASE_TOPIC = "group:all";
-                      self.API_KEY = 'my-secret-api-key';
-                      var itmsg = new ItMessaging(self.BASE_URL);
-
-                      self.messages = [];
-                      self.topics = [];
-                      self.selectedTopic = null;
-                      self.username = null;
-
-                      function Message(messageText){
-                        this.to = [];
-                        this.data =  {
-                          "message" : messageText
-                        };
-                        this.notification = {
-                          title: self.username + ' sent you a message',
-                          body : self.username + ' sent you a message',
-                          icon : 'comment-o'
-                        }
-                      }
-
-                      self.isConnected = false;
-                      self.username = null;
-
-                      itmsg.onMessage(function(message,topics){
-                        self.topics = topics;
-
-                        self.messages.push(message);
-
-                        _scrollToBottom();
-                      });
-
-                      itmsg.onClose(function(event){
-                         itNotifier.notifyError({
-                                    content: "Error popup",
-                                    dismissOnTimeout: false
-                                },
-                                {
-                                    CODE:500,
-                                    TYPE:'error',
-                                    MESSAGE:'Something bad happened',
-                                    DETAIL:'You don\'t wanna know',
-                                    DONE:1
-                                });
-
-                         self.isConnected = false;
-                      });
-
-                      this.login = function(username){
-                        self.username = username;
-                        itmsg.getToken(self.API_KEY ,username).then(function(token){
-                         self.isConnected = itmsg.connect(token);
-                         itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
-                        });
-                      }
-
-                      this.sendMessage = function(messageText){
-                        var m = new Message(messageText);
-                        var r =  _textMessageExtractor(messageText);
-                        var topicName = null;
-                        if(r.topicName){
-                          topicName =r.topicName;
-                        } else if(self.selectedTopic) {
-                           topicName =self.selectedTopic.address;
-                        } else {
-                          topicName = self.SHOWCASE_TOPIC;
-                        }
-                        m.to.push('/topic/'+topicName);
-                        itmsg.subscribeToTopic(topicName,r.observers)
-                            .then(function(ok){
-                                 itmsg.sendMessage(m);
-                        });
-                        self.$textMessage = '';
-                      }
-
-                      this.selectCurrentTopic = function(topic){
-                        self.selectedTopic = topic;
-                      }
-
-                      this.unSubscribe = function(topicName){
-                        itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
-                      }
-
-
-                      function _textMessageExtractor(messageText){
-                            var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
-                     var myArray;
-                     var users = [];
-                     var result = {
-                                observers : [],
-                                topicName : null
-                            };
-                     while ((myArray = regex.exec(messageText)) != null)
-                     {
-                       users.push(myArray[2])
-                     }
-                     users.sort();
-                     if(users.length > 0){
-                              result.topicName = 'conversation:'+ self.username;
-                                for ( var user  in  users){
-                                  result.topicName = result.topicName + ':' + users[user];
-                                  result.observers.push(
-                                    {
-                                    'id' : users[user]
-                                    }
-                                );
-                                }
-                                result.observers.push({
-                                  'id': self.username
-                                });
-                        }
-                     return result;
-                     }
-
-
-                     function _scrollToBottom(){
-                         setTimeout(function() {
-                          var scroller = document.getElementById('conversation-content');
-                          scroller.scrollTop = scroller.scrollHeight;
-                        },250);
-                      }
-
-                     }])
-         </file>
-         <file name="index.html">
-             <div  style="height:600px !important;" ng-controller="MainController as main">
-                 <div class="row-height-1">
-                 <div ng-if="main.username">
-                 <h3 >hi @{{main.username}}</h3>
-                 <p>Use @Username to chat with other users</p>
-                 </div>
-                 </div>
-                 <div class="row row-height-9" ng-if="main.isConnected">
-                 <div class="col-md-6 col-xs-6  it-fill">
-                 <div class="col-xs-12 jumbotron  it-fill">
-                 {{main.selectedTopic}}
-                 </div>
-                 </div>
-                 <div class="col-md-6 col-xs-6  it-fill">
-                 <div class="col-xs-12 jumbotron  it-fill">
-                 <div class="row-height-2 " style=" overflow-x: scroll!important;">
-                 <div>
-                 <div class="pull-left it-messaging-tag label label-info">
-                 <a href=""  ng-click="main.selectCurrentTopic(null)">all</a>
-                 </div>
-
-                 <div class="pull-left it-messaging-tag label label-info" ng-repeat="t in main.topics |topic:t.address  ">
-                 <a href=""  ng-click="main.selectCurrentTopic(t)">{{t.address | conversation:main.username}}</a><a href="" ng-click="main.unSubscribe(t.address)">  x</a>
-                 </div>
-                 </div>
-
-                 </div>
-                 <div class="row-height-8 "  id="conversation-content"  style="overflow:auto;margin-top: -30px;background-color:white;">
-                 <div ng-repeat="m in main.messages | orderBy: 'creationDate':false">
-                 <div class="it-messaging-message" ng-if="main.selectedTopic ? m.to.indexOf('/topic/'+main.selectedTopic.address)>=0 :true">
-                 <div class="it-messaging-chat" ng-if="m.data.message" ng-class="{mine :(main.username==m.from) ,others : (main.username!=m.from) }">
-                 <span class="sender"> @{{m.from}} :</span>
-                 <span class="message-text">{{m.data.message}}</span>
-
-                 </div>
-                 <div ng-if="!m.data.message">
-                 <span ng-if="m.notification"><i class="fa fa-{{m.notification.icon}}"></i>  {{m.notification.body}} </span>
-                 </div>
-
-                 <div class="small">{{m.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="row-height-2 ">
-                 <form  novalidate name="messageForm" ng-submit="main.sendMessage(main.$textMessage)">
-                 <input ng-model="main.$textMessage" name=""  style="width : 100%">
-
-                 </form>
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-
-                 <div class="row row-height-6" ng-if="!main.isConnected">
-                 <div class="col-md-6  col-xs-6 col-xs-offset-3 col-md-offset-3 jumbotron  it-fill">
-                 <br>
-                 <form class="form-group"  novalidate name="myForm" ng-submit="main.login(username)">
-                 <div class="form-group">
-                 <input it-input class="form-control floating-label"
-                 disabled="true"
-                 type="text"
-                 it-label="API URL"
-                 ng-model="main.BASE_URL">
-                 </div>
-                 <div class="form-group">
-                 <input it-input class="form-control floating-label"
-                 disabled="true"
-                 type="text"
-                 it-label="API KEY"
-                 ng-model="main.API_KEY">
-                 </div>
-                 <div class="form-group">
-                 <input it-input class="form-control floating-label"
-                 required=""
-                 ng-maxlength="10"
-                 type="text"
-                 it-label="Username"
-                 name="Username"
-                 ng-model="username">
-                 </div>
-                 <button class="btn btn-primary" type="submit">Sign in</button>
-                 </form>
-                 </div>
-
-                 </div>
-
-                 <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-
-             </div>
-         </file>
- </example>
- **/
-IteSoft.service('ItMessaging',[
-    '$log',
-    '$http',
-    '$q',
-    '$websocket',
-    '$rootScope',
-    function($log,
-             $http,
-             $q,
-             $websocket,
-             $rootScope){
-
-        function ItMessaging(url){
-
-            var self = this;
-            self.URL = url;
-            self.onMessageCallbacks = [];
-            self.onCloseCallbacks   = [];
-
-            self.token = null;
-
-            this.getToken = function(apiKey,userID){
-                console.warn('This function is only for demo purpose,'+
-                    ' do NOT use it in production mode, ' +
-                    'the security of your apiKey will not be granted');
-                var deferred = $q.defer();
-
-                $http({
-                    url: 'http://'+ this.URL + '/rest/token',
-                    method: "GET",
-                    params: {
-                        'username' : userID
-                    },
-                    headers: {
-                        'api-key': apiKey
-                    }
-                }).then(function(response){
-                    deferred.resolve(response.data.token);
-                },function(error){
-                    $log.error('error on api endpoint');
-                    deferred.reject('error on api endpoint');
-                })
-                return deferred.promise;
-            };
-
-
-            function _updateTopics(){
-                var deferred = $q.defer();
-                $http({
-                    url: 'http://'+self.URL+'/rest/topics',
-                    method: "GET",
-                    headers: {
-                        'token': self.token
-                    }
-                }).then(function(response){
-                    deferred.resolve(response.data);
-                },function(error){
-                    $log.error(error);
-                    deferred.reject(deferred);
-                })
-                return deferred.promise;
-            }
-
-            this.connect = function(token){
-                if(token){
-                    self.token = token;
-                    self.dataStream = $websocket('ws://'+ self.URL  +'/websocket/' + token);
-                    self.dataStream.onMessage(function(msg){
-                        _updateTopics().then(function(topics){
-                            _onMessageHandler(msg,topics);
-                        })
-                    });
-
-                    self.dataStream.onClose(function(event){
-                        _onCloseHandler(event);
-                    })
-
-                    return true;
-                }
-            };
-
-            this.onMessage = function(callback) {
-                self.onMessageCallbacks.push({
-                    fn: callback
-                });
-                return self;
-            };
-
-            this.onClose = function(callback) {
-                self.onCloseCallbacks.push({
-                    fn: callback
-                });
-                return self;
-            };
-
-            function _onMessageHandler(message,topics){
-                var pattern;
-                var currentCallback;
-
-                for (var i = 0; i < self.onMessageCallbacks.length; i++) {
-                    currentCallback = self.onMessageCallbacks[i];
-                    var jsonResult = angular.fromJson(message.data);
-                    if(angular.isArray(jsonResult)){
-                        angular.forEach(jsonResult,function(entry){
-                            $rootScope.$applyAsync(function(){
-                                currentCallback.fn.apply(this,[entry,topics]);
-                            })
-
-                        })
-
-                    } else {
-                        $rootScope.$applyAsync(function(){
-                            currentCallback.fn.apply(this,[jsonResult,topics]);
-                        })
-
-                    }
-                }
-            }
-
-            function _onCloseHandler(event){
-                var pattern;
-                var currentCallback;
-                for (var i = 0; i < self.onCloseCallbacks.length; i++) {
-                    currentCallback = self.onCloseCallbacks[i];
-                    $rootScope.$applyAsync(function(){
-                        currentCallback.fn.apply(this,event);
-                    })
-                }
-            }
-
-            this.subscribeToTopic = function(topicname,observers){
-                var deferred = $q.defer();
-                if(self.token!=null){
-                    $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/register',
-                        method: "POST",
-                        data : observers,
-                        headers: {
-                            'token': self.token
-                        }
-                    }).then(function(response){
-                        deferred.resolve(response.data)
-                        _updateTopics();
-                    },function(error){
-                        $log.error(error);
-                        deferred.reject(error);
-                    })
-                } else {
-                    $log.error('You cannot register observers to topic without token');
-                    deferred.reject('no token');
-                }
-                return deferred.promise;
-            }
-
-            this.unsubscribeToTopic = function(topicname,observers){
-                var deferred = $q.defer();
-                if(self.token!=null){
-                    $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/unregister',
-                        method: "POST",
-                        data : observers,
-                        headers: {
-                            'token': self.token
-                        }
-                    }).then(function(response){
-                        deferred.resolve(response.data)
-                        _updateTopics();
-                    },function(error){
-                        $log.error(error);
-                        deferred.reject(error);
-                    })
-                } else {
-                    $log.error('You cannot register observers to topic without token');
-                    deferred.reject('no token');
-                }
-                return deferred.promise;
-            }
-
-            this.sendMessage = function(messageObj){
-                var deferred = $q.defer();
-                $http({
-                    url: 'http://'+self.URL+'/rest/messages',
-                    method: "POST",
-                    headers: {
-                        'token': self.token
-                    },
-                    data : messageObj
-                }).then(function(response){
-                    deferred.resolve(response.data);
-                },function(error){
-                    $log.error(error);
-                    deferred.reject(error);
-                });
-                return deferred.promise;
-            }
-
-        }
-
-        return function(url){
-            return new ItMessaging(url);
-        };
-
-    }])
 'use strict';
 /**
  * @ngdoc service
@@ -9213,6 +9233,784 @@ itImageViewer.directive('itImageViewer', ['$sce', function($sce){
 
 'use strict';
 /**
+ * TODO itProgressbarViewer desc
+ */
+itMultiPagesViewer.directive('itProgressbarViewer', [function(){
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="loader" >' +
+        '<div class="progress-bar">' +
+        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
+        '</div>' +
+        '</div>'
+    };
+}]);
+'use strict';
+/**
+ * TODO itToolbarViewer desc
+ */
+itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
+    var linker = function (scope, element, attrs) {
+
+        scope.$watch("api.getZoomLevel()", function (value) {
+            scope.scale = value;
+        });
+
+        scope.$watch("api.getCurrentPage()", function (value) {
+            scope.currentPage = value;
+        });
+
+        scope.onZoomLevelChanged = function() {
+            scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onPageChanged = function() {
+            scope.api.goToPage(scope.currentPage);
+        };
+    };
+
+    return {
+        scope: {
+            api: "="
+        },
+        restrict: 'E',
+        template :  '<div class="toolbar">' +
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                            '<button ng-click="api.zoomOut()">-</button> ' +
+                            '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
+                            '</select> ' +
+                            '<button ng-click="api.zoomIn()">+</button> ' +
+                        '</div>' +
+
+                        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+                            '<span>Page : </span>' +
+                            '<button ng-click="api.goToPrevPage()"><</button> ' +
+                            '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+                            '<button ng-click="api.goToNextPage()">></button> ' +
+                            '<span> of {{api.getNumPages()}}</span> ' +
+                        '</div>' +
+
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                          '</div>' +
+                    '</div>',
+        link: linker
+    };
+}])
+
+'use strict';
+/**
+ * TODO MultiPagesConstants desc
+ */
+itMultiPagesViewer.constant("MultiPagesConstants", {
+    PAGE_RENDER_FAILED : -1,
+    PAGE_RENDER_CANCELLED : 0,
+    PAGE_RENDERED : 1,
+    PAGE_ALREADY_RENDERED : 2,
+    ZOOM_LEVELS_LUT : [
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
+        2.0, 2.2, 2.4, 2.6, 2.8,
+        3.0, 3.3, 3.6, 3.9,
+        4.0, 4.5,
+        5.0],
+    ZOOM_FIT_WIDTH : "fit_width",
+    ZOOM_FIT_PAGE : "fit_page",
+    ZOOM_FIT_HEIGHT : "fit_height"
+})
+
+'use strict';
+/**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+
+    function MultiPagesPage(pageIndex, view) {
+    			this.id = pageIndex + 1;
+    			this.container = angular.element("<div class='page'></div>");
+    			this.container.attr("id", "page_" + pageIndex);
+
+    			this.canvasRendered = false;
+    			this.rendered = false;
+
+    			//transform
+                this.rotation = 0;
+                this.scale = 1.0;
+    			this.view = view;
+
+    		}
+
+    MultiPagesPage.prototype = {
+        clear: function () {
+            this.rendered = false;
+            this.container.empty();
+        },
+        getViewport: function (scale, rotation) {
+            return new PageViewport(this.view, scale, rotation, 0, 0, true);
+        },
+        transform : function() {
+            this.clear();
+            this.viewport = this.getViewport(this.scale, this.rotation);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
+
+            this.container.css("width", this.viewport.width + "px");
+            this.container.css("height", this.viewport.height + "px");
+        },
+        resize: function (scale) {
+            this.scale = scale;
+            this.transform();
+        },
+        rotate: function (rotation) {
+            this.rotation = rotation;
+            this.transform();
+            /*// The canvas may have been originally rotated, rotate relative to that.
+            //var relativeRotation = rotation - this.canvas._viewport.rotation;
+            var relativeRotation = rotation;
+            var absRotation = Math.abs(relativeRotation);
+            var scaleX = 1, scaleY = 1;
+
+            if (absRotation === 90 || absRotation === 270) {
+                // Scale x and y because of the rotation.
+                *//*scaleX = this.viewport.height / this.viewport.width;
+                scaleY = this.viewport.width / this.viewport.height;*//*
+
+
+               if(this.viewport.width > this.viewport.height) {
+                    var margin = (this.viewport.width - this.viewport.height);
+                    this.container.css("margin", margin + "px auto");
+                }
+
+            }else {
+                this.container.css("margin", null);
+            }
+
+            this.viewport.rotation = relativeRotation;
+            var cssTransform = 'rotate(' + relativeRotation + 'deg) ' +
+                'scale(' + scaleX + ',' + scaleY + ')';
+            this.container.css('transform', cssTransform);*/
+        },
+        isVisible: function () {
+            var pageContainer = this.container[0];
+            var parentContainer = this.container.parent()[0];
+
+            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+            var pageBottom = pageTop + pageContainer.offsetHeight;
+
+            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+        },
+        render: function (callback) {
+            throw "NotImplementedError - render";
+        }
+    };
+
+    return (MultiPagesPage);
+}]);
+
+'use strict';
+/**
+ * TODO MultiPagesViewer desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+    function getElementInnerSize(element, margin) {
+    			var tallTempElement = angular.element("<div></div>");
+    			tallTempElement.css("height", "10000px");
+
+    			element.append(tallTempElement);
+
+    			var w = tallTempElement[0].offsetWidth;
+
+    			tallTempElement.remove();
+
+    			var h = element[0].offsetHeight;
+    			if(h === 0) {
+    				// TODO: Should we get the parent height?
+    				h = 2 * margin;
+    			}
+
+    			w -= 2 * margin;
+    			h -= 2 * margin;
+
+    			return {
+    				width: w,
+    				height: h
+    			};
+    		}
+
+    function MultiPagesViewer(api, element) {
+        this.pages = [];
+        this.scaleItem = null;
+        this.fitWidthScale = 1.0;
+        this.fitHeightScale = 1.0;
+        this.fitPageScale = 1.0;
+        this.element = element;
+        this.pageMargin = 0;
+        this.currentPage = 0;
+        this.lastScrollDir = 0;
+        this.scaleItems = {};
+        this.zoomLevels = [];
+        this.api = api;
+
+        // Hooks for the client...
+        this.onPageRendered = null;
+        this.onDataDownloaded = null;
+        this.onCurrentPageChanged = null;
+    }
+
+    MultiPagesViewer.prototype = {
+        getAPI: function () {
+            return this.api;
+        },
+        updateScaleItem : function(scaleItem) {
+            var result = this.scaleItems[scaleItem.id];
+            if(result == undefined){
+                this.scaleItems[scaleItem.id] = scaleItem;
+                result = scaleItem;
+            }else{
+                result.value = scaleItem.value;
+            }
+
+            this.zoomLevels.push(result);
+
+            return result;
+        },
+        setContainerSize: function (initialScale) {
+            if(this.pages.length > 0) {
+                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                this.zoomLevels = [];
+                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                for(var i = 0;i < numZoomLevels;++i) {
+                    var scaleItem = null;
+                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                           value : this.fitWidthScale,
+                           label: "Fit width"
+                       });
+                   }
+
+                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                           value : this.fitHeightScale,
+                           label: "Fit height"
+                       });
+                   }
+
+                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                       scaleItem = this.updateScaleItem({
+                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                           value : this.fitPageScale,
+                           label: "Fit page"
+                       });
+                   }
+
+                   var label = (newScale * 100.0).toFixed(0) + "%";
+                   scaleItem = this.updateScaleItem({
+                       id: label,
+                       value : newScale,
+                       label: label
+                   });
+                }
+
+                if (this.scaleItem == undefined && this.scaleItems[initialScale] != undefined) {
+                    this.scaleItem = this.scaleItems[initialScale];
+                }
+
+                this.setScale(this.scaleItem || this.scaleItems[1]);
+            }
+        },
+        rotate : function (args) {
+            if(args != undefined) {
+                var page = this.pages[args.pageIndex | (this.currentPage -1)];
+                if(page != undefined) {
+                    var rotation = page.viewport.rotation + args.rotation;
+                    if(rotation === 360 || rotation === -360){
+                        rotation = 0;
+                    }
+                    page.viewport.rotation = rotation;
+                    page.rotate(rotation);
+                    this.setContainerSize(this.initialScale);
+                }
+            }
+        },
+        setScale: function (scaleItem) {
+            if(scaleItem != undefined){
+                this.scaleItem = scaleItem;
+            }
+            var sci = scaleItem  || this.zoomLevels[0];
+
+            var numPages = this.pages.length;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                // Resize to current scaleItem...
+                this.pages[iPage].resize(sci.value);
+            }
+
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        calcScale: function (desiredScale) {
+            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                // Find the widest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var page = this.pages[0];
+                var maxWidth = page.getViewport(1.0, page.rotation).width;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    page = this.pages[iPage];
+                    maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
+                }
+
+                return this.containerSize.width / maxWidth;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                // Find the highest page in the document and fit it to the container.
+                var numPages = this.pages.length;
+                var page = this.pages[0];
+                var maxHeight = page.getViewport(1.0, page.rotation).height;
+                for(var iPage = 1;iPage < numPages;++iPage) {
+                    page = this.pages[iPage];
+                    maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
+                }
+
+                return this.containerSize.height / maxHeight;
+            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                // Find the smaller dimension of the container and fit the 1st page to it.
+                var page = this.pages[0];
+                var page0Viewport = page.getViewport(1.0, page.rotation);
+
+                if(this.containerSize.height < this.containerSize.width) {
+                    return this.containerSize.height / page0Viewport.height;
+                }
+
+                return this.containerSize.width / page0Viewport.width;
+            }
+
+            var scale = parseFloat(desiredScale);
+            if(isNaN(scale)) {
+                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                return 1.0;
+            }
+
+            return scale;
+        },
+        removeDistantPages: function (curPageID, lastPageID, distance) {
+            var numPages = this.pages.length;
+
+            var firstActivePageID = Math.max(curPageID - distance, 0);
+            var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
+
+            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                this.pages[iPage].clear();
+            }
+
+            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                this.pages[iPage].clear();
+            }
+        },
+        renderAllVisiblePages: function (scrollDir) {
+            if(scrollDir != undefined){
+                this.lastScrollDir = scrollDir;
+            }
+
+            var self = this;
+            var numPages = this.pages.length;
+            var currentPageID = -1;
+            var lastPageID = 0;
+            var atLeastOnePageInViewport = false;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+
+                if(page.isVisible()) {
+                    var parentContainer = page.container.parent()[0];
+                    var pageContainer = page.container[0];
+                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                    var pageCenter = pageContainer.offsetHeight / 2;
+                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
+                        currentPageID = iPage;
+                    }
+
+                    atLeastOnePageInViewport = true;
+                    lastPageID = iPage;
+                    page.render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                } else {
+                    if(atLeastOnePageInViewport) {
+                        break;
+                    }
+                }
+            }
+
+            if(this.lastScrollDir !== 0) {
+                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
+                if(nextPageID >= 0 && nextPageID < numPages) {
+                    this.pages[nextPageID].render(function (page, status) {
+                        if(status === MultiPagesConstants.PAGE_RENDERED) {
+                            self.onPageRendered("success", page.id, self.pages.length, "");
+                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        }
+                    });
+                }
+            }
+
+            this.removeDistantPages(currentPageID, lastPageID, 1);
+
+            this.currentPage = currentPageID + 1;
+            if(this.onCurrentPageChanged){
+                this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        hookScope: function(scope) {
+            var self = this;
+            var lastScrollY = 0;
+            var watcher = new SizeWatcher(self.element[0], 200);
+            scope.$watchGroup(watcher.group, function(values) {
+                self.setContainerSize(self.initialScale);
+            });
+
+            var onProgress = function(operation, state, value, total, message) {
+                if (operation === "render" && value === 1) {
+                    if (state === "success") {
+                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                    }
+                    else {
+                        $log.debug("Failed to render 1st page!\n\n" + message);
+                    }
+                }
+                else if (operation === "download" && state === "loading") {
+                    self.api.downloadProgress = (value / total) * 100.0;
+                }
+                else {
+                    if (state === "failed") {
+                        $log.debug("Something went really bad!\n\n" + message);
+                    }
+                }
+            };
+
+            scope.onPageRendered = function(status, pageID, numPages, message) {
+                onProgress("render", status, pageID, numPages, message);
+            };
+
+            scope.onDataDownloaded = function(status, loaded, total, message) {
+                onProgress("download", status, loaded, total, message);
+            };
+
+            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+            scope.$on('$destroy', function() {
+                if(self.onDestroy != null){
+                    try	{
+
+                    }catch (ex)
+                    {
+                        $log.log(ex);
+                    }
+                    self.onDestroy();
+                }
+                watcher.cancel();
+                self.element.empty();
+                $log.debug("viewer destroyed");
+            });
+
+            self.element.bind("scroll", function(event) {
+                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
+                scope.scrollTimeout = $timeout(function() {
+                    var scrollTop = self.element[0].scrollTop;
+
+                    var scrollDir = scrollTop - lastScrollY;
+                    lastScrollY = scrollTop;
+
+                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                }, 350);
+            });
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        }
+    };
+
+    return (MultiPagesViewer);
+}]);
+'use strict';
+/**
+ * TODO MultiPagesViewerAPI desc
+ */
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+
+        function MultiPagesViewerAPI(viewer) {
+        			this.viewer = viewer;
+        			this.rotation = 0;
+        		};
+
+        MultiPagesViewerAPI.prototype = {
+            getZoomLevels: function () {
+                return this.viewer.zoomLevels;
+            },
+            zoomTo: function (scaleItem) {
+                if(scaleItem != undefined) {
+                    this.viewer.setScale(scaleItem);
+                }
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            zoomIn: function() {
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index < this.viewer.zoomLevels.length) {
+                    this.zoomTo(this.viewer.zoomLevels[index + 1]);
+                }
+            },
+            zoomOut: function() {
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index > 0) {
+                    this.zoomTo(this.viewer.zoomLevels[index - 1]);
+                }
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            goToPage: function (pageIndex) {
+                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                    return;
+                }
+
+                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+                var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+                if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                this.viewer.element[0].scrollTop = offsetTop;
+            },
+            goToNextPage: function () {
+                this.goToPage(this.viewer.currentPage + 1);
+            },
+            goToPrevPage: function () {
+                this.goToPage(this.viewer.currentPage - 1);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            },
+            rotatePagesRight: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation + 90;
+                if(rotation === 360 || rotation === -360) {
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePagesLeft: function() {
+                var numPages = this.viewer.pages.length;
+                var rotation = this.rotation - 90;
+                if(rotation === 360 || rotation === -360){
+                    rotation = 0;
+                }
+                this.rotation = rotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.viewer.pages[iPage].rotate(rotation);
+                }
+
+                this.viewer.setContainerSize(this.viewer.initialScale);
+            },
+            rotatePageRight: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: 90 });
+            },
+            rotatePageLeft: function(pageIndex) {
+                this.viewer.rotate({ pageIndex : pageIndex, rotation: -90 });
+            }
+        };
+
+        return (MultiPagesViewerAPI);
+    }]);
+
+'use strict';
+/**
+ * TODO PageViewport desc
+ */
+itMultiPagesViewer.factory('PageViewport', [function() {
+
+        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+            this.viewBox = viewBox;
+            this.scale = scale;
+            this.rotation = rotation;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+
+            // creating transform to convert pdf coordinate system to the normal
+            // canvas like coordinates taking in account scale and rotation
+            var centerX = (viewBox[2] + viewBox[0]) / 2;
+            var centerY = (viewBox[3] + viewBox[1]) / 2;
+            var rotateA, rotateB, rotateC, rotateD;
+            rotation = rotation % 360;
+            rotation = rotation < 0 ? rotation + 360 : rotation;
+            switch (rotation) {
+                case 180:
+                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                    break;
+                case 90:
+                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                    break;
+                case 270:
+                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                    break;
+                //case 0:
+                default:
+                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                    break;
+            }
+
+            if (dontFlip) {
+                rotateC = -rotateC; rotateD = -rotateD;
+            }
+
+            var offsetCanvasX, offsetCanvasY;
+            var width, height;
+            if (rotateA === 0) {
+                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            } else {
+                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            }
+            // creating transform for the following operations:
+            // translate(-centerX, -centerY), rotate and flip vertically,
+            // scale, and translate(offsetCanvasX, offsetCanvasY)
+            this.transform = [
+                rotateA * scale,
+                rotateB * scale,
+                rotateC * scale,
+                rotateD * scale,
+                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+            ];
+
+            this.width = width;
+            this.height = height;
+            this.fontScale = scale;
+        }
+        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+            /**
+             * Clones viewport with additional properties.
+             * @param args {Object} (optional) If specified, may contain the 'scale' or
+             * 'rotation' properties to override the corresponding properties in
+             * the cloned viewport.
+             * @returns {PDFJS.PageViewport} Cloned viewport.
+             */
+            clone: function PageViewPort_clone(args) {
+                args = args || {};
+                var scale = 'scale' in args ? args.scale : this.scale;
+                var rotation = 'rotation' in args ? args.rotation : this.rotation;
+                return new PageViewport(this.viewBox.slice(), scale, rotation,
+                    this.offsetX, this.offsetY, args.dontFlip);
+            },
+            /**
+             * Converts PDF point to the viewport coordinates. For examples, useful for
+             * converting PDF location into canvas pixel coordinates.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the viewport coordinate space.
+             * @see {@link convertToPdfPoint}
+             * @see {@link convertToViewportRectangle}
+             */
+            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+                return Util.applyTransform([x, y], this.transform);
+            },
+            /**
+             * Converts PDF rectangle to the viewport coordinates.
+             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+             * @returns {Array} Contains corresponding coordinates of the rectangle
+             * in the viewport coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToViewportRectangle:
+                function PageViewport_convertToViewportRectangle(rect) {
+                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                    return [tl[0], tl[1], br[0], br[1]];
+                },
+            /**
+             * Converts viewport coordinates to the PDF location. For examples, useful
+             * for converting canvas pixel location into PDF one.
+             * @param x {number} X coordinate.
+             * @param y {number} Y coordinate.
+             * @returns {Object} Object that contains 'x' and 'y' properties of the
+             * point in the PDF coordinate space.
+             * @see {@link convertToViewportPoint}
+             */
+            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+                return Util.applyInverseTransform([x, y], this.transform);
+            }
+        };
+
+        return (PageViewport);
+    }]);
+
+'use strict';
+/**
+ * TODO SizeWatcher desc
+ */
+itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
+        return function (element, rate) {
+            var self = this;
+            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
+            self.monitor = $interval(self.update, rate);
+            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
+            self.cancel = function() { $interval.cancel(self.monitor); };
+        };
+    }]);
+
+'use strict';
+/**
  * TODO CustomStyle desc
  */
 itPdfViewer.factory('CustomStyle', [function () {
@@ -10065,784 +10863,6 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
         };
 
         return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itProgressbarViewer desc
- */
-itMultiPagesViewer.directive('itProgressbarViewer', [function(){
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="loader" >' +
-        '<div class="progress-bar">' +
-        '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
-        '</div>' +
-        '</div>'
-    };
-}]);
-'use strict';
-/**
- * TODO itToolbarViewer desc
- */
-itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
-    var linker = function (scope, element, attrs) {
-
-        scope.$watch("api.getZoomLevel()", function (value) {
-            scope.scale = value;
-        });
-
-        scope.$watch("api.getCurrentPage()", function (value) {
-            scope.currentPage = value;
-        });
-
-        scope.onZoomLevelChanged = function() {
-            scope.api.zoomTo(scope.scale);
-        };
-
-        scope.onPageChanged = function() {
-            scope.api.goToPage(scope.currentPage);
-        };
-    };
-
-    return {
-        scope: {
-            api: "="
-        },
-        restrict: 'E',
-        template :  '<div class="toolbar">' +
-                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-                            '<button ng-click="api.zoomOut()">-</button> ' +
-                            '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
-                            '</select> ' +
-                            '<button ng-click="api.zoomIn()">+</button> ' +
-                        '</div>' +
-
-                        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-                            '<span>Page : </span>' +
-                            '<button ng-click="api.goToPrevPage()"><</button> ' +
-                            '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-                            '<button ng-click="api.goToNextPage()">></button> ' +
-                            '<span> of {{api.getNumPages()}}</span> ' +
-                        '</div>' +
-
-                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
-                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
-                          '</div>' +
-                    '</div>',
-        link: linker
-    };
-}])
-
-'use strict';
-/**
- * TODO MultiPagesConstants desc
- */
-itMultiPagesViewer.constant("MultiPagesConstants", {
-    PAGE_RENDER_FAILED : -1,
-    PAGE_RENDER_CANCELLED : 0,
-    PAGE_RENDERED : 1,
-    PAGE_ALREADY_RENDERED : 2,
-    ZOOM_LEVELS_LUT : [
-        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-        1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
-        2.0, 2.2, 2.4, 2.6, 2.8,
-        3.0, 3.3, 3.6, 3.9,
-        4.0, 4.5,
-        5.0],
-    ZOOM_FIT_WIDTH : "fit_width",
-    ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
-})
-
-'use strict';
-/**
- * TODO MultiPagesPage desc
- */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
-
-    function MultiPagesPage(pageIndex, view) {
-    			this.id = pageIndex + 1;
-    			this.container = angular.element("<div class='page'></div>");
-    			this.container.attr("id", "page_" + pageIndex);
-
-    			this.canvasRendered = false;
-    			this.rendered = false;
-
-    			//transform
-                this.rotation = 0;
-                this.scale = 1.0;
-    			this.view = view;
-
-    		}
-
-    MultiPagesPage.prototype = {
-        clear: function () {
-            this.rendered = false;
-            this.container.empty();
-        },
-        getViewport: function (scale, rotation) {
-            return new PageViewport(this.view, scale, rotation, 0, 0, true);
-        },
-        transform : function() {
-            this.clear();
-            this.viewport = this.getViewport(this.scale, this.rotation);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
-
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
-        },
-        resize: function (scale) {
-            this.scale = scale;
-            this.transform();
-        },
-        rotate: function (rotation) {
-            this.rotation = rotation;
-            this.transform();
-            /*// The canvas may have been originally rotated, rotate relative to that.
-            //var relativeRotation = rotation - this.canvas._viewport.rotation;
-            var relativeRotation = rotation;
-            var absRotation = Math.abs(relativeRotation);
-            var scaleX = 1, scaleY = 1;
-
-            if (absRotation === 90 || absRotation === 270) {
-                // Scale x and y because of the rotation.
-                *//*scaleX = this.viewport.height / this.viewport.width;
-                scaleY = this.viewport.width / this.viewport.height;*//*
-
-
-               if(this.viewport.width > this.viewport.height) {
-                    var margin = (this.viewport.width - this.viewport.height);
-                    this.container.css("margin", margin + "px auto");
-                }
-
-            }else {
-                this.container.css("margin", null);
-            }
-
-            this.viewport.rotation = relativeRotation;
-            var cssTransform = 'rotate(' + relativeRotation + 'deg) ' +
-                'scale(' + scaleX + ',' + scaleY + ')';
-            this.container.css('transform', cssTransform);*/
-        },
-        isVisible: function () {
-            var pageContainer = this.container[0];
-            var parentContainer = this.container.parent()[0];
-
-            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-            var pageBottom = pageTop + pageContainer.offsetHeight;
-
-            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
-        },
-        render: function (callback) {
-            throw "NotImplementedError - render";
-        }
-    };
-
-    return (MultiPagesPage);
-}]);
-
-'use strict';
-/**
- * TODO MultiPagesViewer desc
- */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
-    function getElementInnerSize(element, margin) {
-    			var tallTempElement = angular.element("<div></div>");
-    			tallTempElement.css("height", "10000px");
-
-    			element.append(tallTempElement);
-
-    			var w = tallTempElement[0].offsetWidth;
-
-    			tallTempElement.remove();
-
-    			var h = element[0].offsetHeight;
-    			if(h === 0) {
-    				// TODO: Should we get the parent height?
-    				h = 2 * margin;
-    			}
-
-    			w -= 2 * margin;
-    			h -= 2 * margin;
-
-    			return {
-    				width: w,
-    				height: h
-    			};
-    		}
-
-    function MultiPagesViewer(api, element) {
-        this.pages = [];
-        this.scaleItem = null;
-        this.fitWidthScale = 1.0;
-        this.fitHeightScale = 1.0;
-        this.fitPageScale = 1.0;
-        this.element = element;
-        this.pageMargin = 0;
-        this.currentPage = 0;
-        this.lastScrollDir = 0;
-        this.scaleItems = {};
-        this.zoomLevels = [];
-        this.api = api;
-
-        // Hooks for the client...
-        this.onPageRendered = null;
-        this.onDataDownloaded = null;
-        this.onCurrentPageChanged = null;
-    }
-
-    MultiPagesViewer.prototype = {
-        getAPI: function () {
-            return this.api;
-        },
-        updateScaleItem : function(scaleItem) {
-            var result = this.scaleItems[scaleItem.id];
-            if(result == undefined){
-                this.scaleItems[scaleItem.id] = scaleItem;
-                result = scaleItem;
-            }else{
-                result.value = scaleItem.value;
-            }
-
-            this.zoomLevels.push(result);
-
-            return result;
-        },
-        setContainerSize: function (initialScale) {
-            if(this.pages.length > 0) {
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.zoomLevels = [];
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    var scaleItem = null;
-                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
-                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                           value : this.fitWidthScale,
-                           label: "Fit width"
-                       });
-                   }
-
-                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                           value : this.fitHeightScale,
-                           label: "Fit height"
-                       });
-                   }
-
-                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                           value : this.fitPageScale,
-                           label: "Fit page"
-                       });
-                   }
-
-                   var label = (newScale * 100.0).toFixed(0) + "%";
-                   scaleItem = this.updateScaleItem({
-                       id: label,
-                       value : newScale,
-                       label: label
-                   });
-                }
-
-                if (this.scaleItem == undefined && this.scaleItems[initialScale] != undefined) {
-                    this.scaleItem = this.scaleItems[initialScale];
-                }
-
-                this.setScale(this.scaleItem || this.scaleItems[1]);
-            }
-        },
-        rotate : function (args) {
-            if(args != undefined) {
-                var page = this.pages[args.pageIndex | (this.currentPage -1)];
-                if(page != undefined) {
-                    var rotation = page.viewport.rotation + args.rotation;
-                    if(rotation === 360 || rotation === -360){
-                        rotation = 0;
-                    }
-                    page.viewport.rotation = rotation;
-                    page.rotate(rotation);
-                    this.setContainerSize(this.initialScale);
-                }
-            }
-        },
-        setScale: function (scaleItem) {
-            if(scaleItem != undefined){
-                this.scaleItem = scaleItem;
-            }
-            var sci = scaleItem  || this.zoomLevels[0];
-
-            var numPages = this.pages.length;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                // Resize to current scaleItem...
-                this.pages[iPage].resize(sci.value);
-            }
-
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
-        },
-        calcScale: function (desiredScale) {
-            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
-                // Find the widest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var page = this.pages[0];
-                var maxWidth = page.getViewport(1.0, page.rotation).width;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    page = this.pages[iPage];
-                    maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
-                }
-
-                return this.containerSize.width / maxWidth;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
-                // Find the highest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var page = this.pages[0];
-                var maxHeight = page.getViewport(1.0, page.rotation).height;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    page = this.pages[iPage];
-                    maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
-                }
-
-                return this.containerSize.height / maxHeight;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
-                // Find the smaller dimension of the container and fit the 1st page to it.
-                var page = this.pages[0];
-                var page0Viewport = page.getViewport(1.0, page.rotation);
-
-                if(this.containerSize.height < this.containerSize.width) {
-                    return this.containerSize.height / page0Viewport.height;
-                }
-
-                return this.containerSize.width / page0Viewport.width;
-            }
-
-            var scale = parseFloat(desiredScale);
-            if(isNaN(scale)) {
-                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
-                return 1.0;
-            }
-
-            return scale;
-        },
-        removeDistantPages: function (curPageID, lastPageID, distance) {
-            var numPages = this.pages.length;
-
-            var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
-
-            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
-                this.pages[iPage].clear();
-            }
-
-            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
-                this.pages[iPage].clear();
-            }
-        },
-        renderAllVisiblePages: function (scrollDir) {
-            if(scrollDir != undefined){
-                this.lastScrollDir = scrollDir;
-            }
-
-            var self = this;
-            var numPages = this.pages.length;
-            var currentPageID = -1;
-            var lastPageID = 0;
-            var atLeastOnePageInViewport = false;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-
-                if(page.isVisible()) {
-                    var parentContainer = page.container.parent()[0];
-                    var pageContainer = page.container[0];
-                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                    var pageCenter = pageContainer.offsetHeight / 2;
-                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
-                        currentPageID = iPage;
-                    }
-
-                    atLeastOnePageInViewport = true;
-                    lastPageID = iPage;
-                    page.render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                } else {
-                    if(atLeastOnePageInViewport) {
-                        break;
-                    }
-                }
-            }
-
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
-            }
-
-            this.removeDistantPages(currentPageID, lastPageID, 1);
-
-            this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
-                this.onCurrentPageChanged( currentPageID + 1);
-            }
-        },
-        hookScope: function(scope) {
-            var self = this;
-            var lastScrollY = 0;
-            var watcher = new SizeWatcher(self.element[0], 200);
-            scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(self.initialScale);
-            });
-
-            var onProgress = function(operation, state, value, total, message) {
-                if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
-                    }
-                    else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
-                    }
-                }
-                else if (operation === "download" && state === "loading") {
-                    self.api.downloadProgress = (value / total) * 100.0;
-                }
-                else {
-                    if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
-                    }
-                }
-            };
-
-            scope.onPageRendered = function(status, pageID, numPages, message) {
-                onProgress("render", status, pageID, numPages, message);
-            };
-
-            scope.onDataDownloaded = function(status, loaded, total, message) {
-                onProgress("download", status, loaded, total, message);
-            };
-
-            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
-            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
-
-            scope.$on('$destroy', function() {
-                if(self.onDestroy != null){
-                    try	{
-
-                    }catch (ex)
-                    {
-                        $log.log(ex);
-                    }
-                    self.onDestroy();
-                }
-                watcher.cancel();
-                self.element.empty();
-                $log.debug("viewer destroyed");
-            });
-
-            self.element.bind("scroll", function(event) {
-                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
-                scope.scrollTimeout = $timeout(function() {
-                    var scrollTop = self.element[0].scrollTop;
-
-                    var scrollDir = scrollTop - lastScrollY;
-                    lastScrollY = scrollTop;
-
-                    var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
-                    self.renderAllVisiblePages(normalizedScrollDir);
-                }, 350);
-            });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
-        }
-    };
-
-    return (MultiPagesViewer);
-}]);
-'use strict';
-/**
- * TODO MultiPagesViewerAPI desc
- */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-
-        function MultiPagesViewerAPI(viewer) {
-        			this.viewer = viewer;
-        			this.rotation = 0;
-        		};
-
-        MultiPagesViewerAPI.prototype = {
-            getZoomLevels: function () {
-                return this.viewer.zoomLevels;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined) {
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            zoomIn: function() {
-                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-                if(index < this.viewer.zoomLevels.length) {
-                    this.zoomTo(this.viewer.zoomLevels[index + 1]);
-                }
-            },
-            zoomOut: function() {
-                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-                if(index > 0) {
-                    this.zoomTo(this.viewer.zoomLevels[index - 1]);
-                }
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-                if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
-                    offsetTop -= 1;
-                }
-                this.viewer.element[0].scrollTop = offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
-            },
-            rotatePagesRight: function() {
-                var numPages = this.viewer.pages.length;
-                var rotation = this.rotation + 90;
-                if(rotation === 360 || rotation === -360) {
-                    rotation = 0;
-                }
-                this.rotation = rotation;
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    this.viewer.pages[iPage].rotate(rotation);
-                }
-
-                this.viewer.setContainerSize(this.viewer.initialScale);
-            },
-            rotatePagesLeft: function() {
-                var numPages = this.viewer.pages.length;
-                var rotation = this.rotation - 90;
-                if(rotation === 360 || rotation === -360){
-                    rotation = 0;
-                }
-                this.rotation = rotation;
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    this.viewer.pages[iPage].rotate(rotation);
-                }
-
-                this.viewer.setContainerSize(this.viewer.initialScale);
-            },
-            rotatePageRight: function(pageIndex) {
-                this.viewer.rotate({ pageIndex : pageIndex, rotation: 90 });
-            },
-            rotatePageLeft: function(pageIndex) {
-                this.viewer.rotate({ pageIndex : pageIndex, rotation: -90 });
-            }
-        };
-
-        return (MultiPagesViewerAPI);
-    }]);
-
-'use strict';
-/**
- * TODO PageViewport desc
- */
-itMultiPagesViewer.factory('PageViewport', [function() {
-
-        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
-            this.viewBox = viewBox;
-            this.scale = scale;
-            this.rotation = rotation;
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-
-            // creating transform to convert pdf coordinate system to the normal
-            // canvas like coordinates taking in account scale and rotation
-            var centerX = (viewBox[2] + viewBox[0]) / 2;
-            var centerY = (viewBox[3] + viewBox[1]) / 2;
-            var rotateA, rotateB, rotateC, rotateD;
-            rotation = rotation % 360;
-            rotation = rotation < 0 ? rotation + 360 : rotation;
-            switch (rotation) {
-                case 180:
-                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
-                    break;
-                case 90:
-                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
-                    break;
-                case 270:
-                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
-                    break;
-                //case 0:
-                default:
-                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
-                    break;
-            }
-
-            if (dontFlip) {
-                rotateC = -rotateC; rotateD = -rotateD;
-            }
-
-            var offsetCanvasX, offsetCanvasY;
-            var width, height;
-            if (rotateA === 0) {
-                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
-                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
-                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
-            } else {
-                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
-                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
-                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
-            }
-            // creating transform for the following operations:
-            // translate(-centerX, -centerY), rotate and flip vertically,
-            // scale, and translate(offsetCanvasX, offsetCanvasY)
-            this.transform = [
-                rotateA * scale,
-                rotateB * scale,
-                rotateC * scale,
-                rotateD * scale,
-                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
-                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
-            ];
-
-            this.width = width;
-            this.height = height;
-            this.fontScale = scale;
-        }
-        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
-            /**
-             * Clones viewport with additional properties.
-             * @param args {Object} (optional) If specified, may contain the 'scale' or
-             * 'rotation' properties to override the corresponding properties in
-             * the cloned viewport.
-             * @returns {PDFJS.PageViewport} Cloned viewport.
-             */
-            clone: function PageViewPort_clone(args) {
-                args = args || {};
-                var scale = 'scale' in args ? args.scale : this.scale;
-                var rotation = 'rotation' in args ? args.rotation : this.rotation;
-                return new PageViewport(this.viewBox.slice(), scale, rotation,
-                    this.offsetX, this.offsetY, args.dontFlip);
-            },
-            /**
-             * Converts PDF point to the viewport coordinates. For examples, useful for
-             * converting PDF location into canvas pixel coordinates.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the viewport coordinate space.
-             * @see {@link convertToPdfPoint}
-             * @see {@link convertToViewportRectangle}
-             */
-            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
-                return Util.applyTransform([x, y], this.transform);
-            },
-            /**
-             * Converts PDF rectangle to the viewport coordinates.
-             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
-             * @returns {Array} Contains corresponding coordinates of the rectangle
-             * in the viewport coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToViewportRectangle:
-                function PageViewport_convertToViewportRectangle(rect) {
-                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
-                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
-                    return [tl[0], tl[1], br[0], br[1]];
-                },
-            /**
-             * Converts viewport coordinates to the PDF location. For examples, useful
-             * for converting canvas pixel location into PDF one.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the PDF coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
-                return Util.applyInverseTransform([x, y], this.transform);
-            }
-        };
-
-        return (PageViewport);
-    }]);
-
-'use strict';
-/**
- * TODO SizeWatcher desc
- */
-itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
-        return function (element, rate) {
-            var self = this;
-            (self.update = function() { self.dimensions = [element.offsetWidth, element.offsetHeight]; })();
-            self.monitor = $interval(self.update, rate);
-            self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
-            self.cancel = function() { $interval.cancel(self.monitor); };
-        };
     }]);
 
 'use strict';
