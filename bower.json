@@ -29,5 +29,8 @@
     "angular-atmosphere": "https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js",
     "libtiff": "https://gitlab.com/itesoft/tiff.js.git",
     "pdfjs-dist": "https://gitlab.com/itesoft/pdfjs.dist.git"
+  },
+  "dependencies": {
+    "angular-websocket": "^2.0.0"
   }
 }

@@ -34,5 +34,6 @@ var IteSoft = angular.module('itesoft', [
     'ui.codemirror',
     'it-pdf-viewer',
     'it-image-viewer',
-    'it-tiff-viewer'
+    'it-tiff-viewer',
+    'ngWebSocket'
 ]);
