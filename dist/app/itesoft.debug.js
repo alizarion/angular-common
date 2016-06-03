@@ -93,1296 +93,6 @@ IteSoft.directive('itCircularBtn',
         }]
 );
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
-
-        var supportedLocales = ['en_US',
-            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
-
-        return {
-            cleanAmount: function (amountString, aLocale) {
-                var result = 0;
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-
-                //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //pas de traitement particulier pour le francais
-                //si la locale est en-US
-                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
-                    //suppression de la virgule permettant de séparer les milliers
-                    amountString = amountString.replace(",", "");
-                    //si la locale est de-DE
-                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
-                    //suppression du point permettant de séparer les milliers
-                    amountString = amountString.replace(".", "");
-                    //remplacement de la virgule par un point
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //Formattage des montants avec la locale
-                result = parseFloat(amountString);
-
-                console.log('result1 ' + result);
-
-                if (result == undefined) {
-                    result = parseFloat(amountString);
-                }
-
-                console.log('result2 ' + result);
-
-                return result;
-            },
-
-            formatAmount: function (amount, aLocale, currency) {
-                var result = '';
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-                if (amount != undefined) {
-                    var amountString = amount.toString();
-
-                    //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                        amountString = amountString.replace(",", ".");
-                    }
-                }
-                //Formattage des montants avec la locale avec 2 décimales après la virgule
-                if(angular.isDefined(currency)){
-                    //met en Uppercase la devise
-                    currency=$filter('uppercase')(currency);
-                    if(angular.equals(currency ,'TND')){
-                        // 3 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
-
-                    }else if(angular.equals(currency ,'JPY')){
-                        // 0 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
-
-                    }else{
-                        // 2 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
-                    }
-
-                }else{
-                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
-                }
-
-                return result;
-            }
-        }
-
-
-    }
-    ]
-)
-;
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLazyGrid
- * @module itesoft
- * @restrict ECA
- * @since 1.1
- * @description
- * The itLazyGrid widgets provides lazy grid feature on ui-grid
- *
- *
- * ```html
- *    <it-lazy-grid option="option" ></it-lazy-grid>
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  </table>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- Query RSQL send to REST API:
-    <pre><code class="lang-html">{{query}}</code></pre>
-     <div style="height:300px;display:block;">
-        <it-lazy-grid options="options" ></it-lazy-grid>
-     </div>
-    </div>
- </div>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = {
-            // call when lazyGrid is instantiate
-            onRegisterApi: function (lazyGrid) {
-                $scope.lazyGrid = lazyGrid;
-                $scope.lazyGrid.appScope = $scope;
-                $scope.lazyGrid.fn.initialize();
-                $scope.lazyGrid.fn.callBack = load;
-                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
-                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
-
-                // Call after each loaded event
-                $scope.lazyGrid.on.loaded = function () {
-                };
-
-                // Call when user click
-                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
-                    $scope.selectedInvoice = row.entity;
-                };
-
-                // Loading columnDef
-                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
-                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
-                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
-                 ];
-
-                //Call when grid is ready to use (with config)
-                $scope.$applyAsync(function () {
-                   $scope.lazyGrid.fn.initialLoad();
-                });
-        }};
-
-         // ui-grid loading function, will be call on:
-         //-filter
-         //-pagination
-         //-sorter
-        function load(query) {
-
-            // ignore this, it's just for demo
-            if(query.size == 2){
-                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else if(query.size == 4){
-                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else{
-                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
-                 ]};
-             }
-            // end ignore this, it's just for demo
-            query = query.build();
-            // query RSQL to send to REST API
-            console.log(query);
-            $scope.query = query;
-            $scope.lazyGrid.fields.gridOptions.data = data.items;
-            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
-
-            $scope.isBusy = false;
-            $scope.lazyGrid.on.loaded();
-        }
-     }
- ]
- );
- </file>
- </example>
- */
-IteSoft.directive('itLazyGrid',
-                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
-        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
-            return {
-                restrict: 'AE',
-                scope: {
-                    options: '='
-                },
-                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
-                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
-                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
-                '<div class="ui-grid-filter-container"> ' +
-                '<span class="{{col.headerCellClass}}"> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
-                'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
-                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span></div> ' +
-                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
-                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
-                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
-                ' </script> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
-                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
-                '<div role="navigation" class="ui-grid-pager-container"> ' +
-                '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
-                'ng-disabled="cantPageBackward()">' +
-                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '<input type="button" title="" ' +
-                'ng-click="pageFirstPageClick()" > </input>'+
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'ng-disabled="cantPageBackward()">' +
-                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pagePreviousPageClick()"/>' +
-                '</label>' +
-                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
-                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
-                '{{ paginationApi.getTotalPages() }} ' +
-                '</span> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
-                'ng-disabled="cantPageForward()">' +
-                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageNextPageClick()"/>' +
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
-                'ng-disabled="cantPageToLast()">' +
-                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageLastPageClick()"/>' +
-                '</label>' +
-                ' </div> ' +
-                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
-                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
-                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
-                '</div> ' +
-                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
-                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
-                '</span> </div> ' +
-                '<div class="ui-grid-pager-count-container">' +
-                '<div class="ui-grid-pager-count"> ' +
-                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
-                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
-                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
-                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
-                ' </div> </div> </div> ' +
-                '</script>',
-                controllerAs: 'lazyGrid',
-                controller: ['$scope', function ($scope) {
-
-
-                    //Get current locale
-                    var locale = localStorageService.get('Locale');
-
-                    var self = this;
-
-                    self.options = $scope.options;
-
-                    /**
-                     * Fields
-                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
-                     */
-                    self.fields = {
-                        template: {pagination: $templateCache.get('paginationTemplate.html')},
-                        filter: [],
-                        externalFilter: {},
-                        gridApi: {},
-                        gridOptions: {},
-                        paginationOptions: {},
-                        appScope: {},
-                        promise: {refresh: {}}
-                    };
-
-                    /**
-                     * Event callback method
-                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
-                     */
-                    self.on = {
-                        loaded: onLoaded,
-                        ready: onReady,
-                        filterChange: onFilterChange,
-                        sortChange: onSortChange,
-                        paginationChanged: onPaginationChanged,
-                        rowSelectionChanged: onRowSelectionChanged
-                    };
-                    /**
-                     * Public Method
-                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
-                     */
-                    self.fn = {
-                        callBack: self.options.callBack,
-                        initialize: initialize,
-                        refresh: refresh,
-                        initialLoad: initialLoad,
-                        addExternalFilter: addExternalFilter,
-                        refreshDefaultFilter:refreshDefaultFilter
-                    };
-
-
-                    /**
-                     *
-                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
-                     */
-                    self.fields.paginationOptions = {
-                        pageNumber: 1,
-                        pageSize: 10,
-                        sort: {
-                            name: undefined,
-                            direction: undefined
-                        }
-                    };
-                    /**
-                     * Default grid options
-                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
-                     */
-                    self.fields.gridOptions = {
-                        enableFiltering: true,
-                        enableSorting: true,
-                        enableColumnMenus: false,
-                        useExternalPagination: true,
-                        useExternalSorting: true,
-                        enableRowSelection: true,
-                        enableRowHeaderSelection: false,
-                        multiSelect: false,
-                        modifierKeysToMultiSelect: false,
-                        noUnselect: true,
-                        useExternalFiltering: true,
-                        data: [],
-                        columnDefs: [],
-                        paginationTemplate: self.fields.template.pagination,
-                        onRegisterApi: function (gridApi) {
-                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
-                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
-                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
-                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
-                            self.fields.gridApi = gridApi;
-                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
-                        }
-                    };
-                    /**
-                     * Apply external filter
-                     * @private
-                     */
-                    function _applyExternalFilter() {
-                        $log.debug("LazyGrid:Apply External filter");
-                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
-                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
-                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
-                                self.fields.filter.push(queryParam);
-                            }
-                        });
-                    }
-
-                    /**
-                     * Apply filter
-                     * @private
-                     */
-                    function _applyFilter() {
-                        $log.debug("LazyGrid:Apply filter");
-                        var key = '';
-                        var value = '';
-                        var condition = OPERATOR.EQUALS;
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
-                                key = self.fields.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
-                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
-                                        // if filter key is override
-                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
-                                        if (rsqlKey != undefined) {
-                                            key = rsqlKey;
-                                        }
-
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
-                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
-                                        }
-
-                                        //Si la donnée doit être traitée comme un nombre
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
-                                            value = itAmountCleanerService.cleanAmount(value, locale);
-                                        }
-
-                                        var queryParam = itQueryParamFactory.create(key, value, condition);
-                                        self.fields.filter.push(queryParam);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    /**
-                     * Apply default filter configured inside columnDef filter option
-                     * @private
-                     */
-                    function _applyDefaultFilter() {
-                        $log.debug("LazyGrid:Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
-                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
-                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
-                                        //    self.fields.filter.push(queryParamClient);
-                                        //}
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Refresh datagrid by reset filters and applying default filter
-                     */
-                    function refreshDefaultFilter(){
-                        $log.debug("LazyGrid:Reset Filter and Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters)
-                                    && angular.isDefined(column.colDef.filters[0])) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }else{
-                                        //efface tous les filtres
-                                        angular.forEach(column.colDef.filters, function(filter){
-                                            filter.term="";
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Call after each loading
-                     */
-                    function onLoaded() {
-                    }
-
-                    /**
-                     * Call when grid is ready, when config is loaded (columnDef is present)
-                     */
-                    function onReady() {
-                    }
-
-                    /**
-                     * Call on filter change
-                     */
-                    function onFilterChange() {
-                        $log.debug("LazyGrid:Filter Changed");
-                        self.fields.filter = [];
-                        if (angular.isDefined(self.fields.promise.refresh)) {
-                            $timeout.cancel(self.fields.promise.refresh);
-                        }
-                        self.fields.promise.refresh = $timeout(function () {
-                                self.fn.refresh();
-                            }
-                            , 1000);
-
-                    }
-
-                    /**
-                     * Call on sort change
-                     * @param grid
-                     * @param sortColumns
-                     */
-                    function onSortChange(grid, sortColumns) {
-                        $log.debug("LazyGrid:Sort Changed");
-                        self.fields.filter = [];
-                        if (sortColumns.length == 0) {
-                            self.fields.paginationOptions.sort.name = undefined;
-                            self.fields.paginationOptions.sort.direction = undefined;
-                        } else {
-                            var sortKey = sortColumns[0].name;
-                            /**
-                             * Surcharge avec la clé rsql
-                             */
-                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
-                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
-                            }
-                            self.fields.paginationOptions.sort.name = sortKey;
-                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
-                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
-                        }
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Call when page changed
-                     * @param newPage
-                     * @param pageSize
-                     */
-                    function onPaginationChanged(newPage, pageSize) {
-                        $log.debug("LazyGrid:Pagination Changed");
-                        self.fields.filter = [];
-                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
-                            self.fields.paginationOptions.pageNumber = newPage;
-                            self.fields.paginationOptions.pageSize = pageSize;
-                            self.fn.refresh();
-                        }
-                    }
-
-                    /**
-                     * Call when user click on row
-                     */
-                    function onRowSelectionChanged() {
-                        $log.debug("LazyGrid:Row Selection Changed");
-                    }
-
-                    /**
-                     * Call to refresh data
-                     */
-                    function refresh() {
-                        $log.debug("LazyGrid:Refresh");
-                        _applyExternalFilter();
-                        _applyFilter();
-                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
-                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
-                        self.fn.callBack(query);
-                    }
-
-                    /**
-                     * Initial loading
-                     */
-                    function initialLoad() {
-                        $log.debug("LazyGrid:Initial load");
-
-                        //application des filtres pour récupérer le nom de filtre actifs
-                        _applyFilter();
-                        if (self.fields.filter.length <= 0) {
-                            _applyDefaultFilter();
-                        }
-                        //remise à 0 des informations de filtre
-                        self.fields.filter = [];
-
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Add external filter like clientId
-                     * @param filter external filter to always apply
-                     * @param filter.key
-                     * @param filter.value
-                     * @param filter.condition
-                     */
-                    function addExternalFilter(filter) {
-                        if (angular.isUndefined(filter.key)) {
-                            $log.error("External filter object must have key");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.condition)) {
-                            $log.error("External filter object must have condition");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.value)) {
-                            self.fields.externalFilter[filter.key] = {};
-                        } else {
-                            self.fields.externalFilter[filter.key] = filter;
-                        }
-                    }
-
-
-                    /**
-                     * Call before using
-                     * @returns {*}
-                     */
-                    function initialize() {
-
-                    }
-
-                    if (angular.isDefined(self.options.onRegisterApi)) {
-                        self.options.onRegisterApi(self);
-                        $log.debug('LazyGrid:onRegisterApi')
-                    }
-
-
-                }]
-            }
-        }
-    ]
-).constant("OPERATOR", {
-        "EQUALS": "==",
-        "LIKE": "==%",
-        "NOT_EQUALS": "!=",
-        "LESS_THAN": "=lt=",
-        "LESS_EQUALS": "=le=",
-        "GREATER_THAN": "=gt=",
-        "GREATER_EQUALS": "=ge="
-})
-.constant('NOTIFICATION_TYPE', {
-    INFO: "INFO",
-    WARNING: "WARNING",
-    ERROR: "ERROR",
-    SUCCESS: "SUCCESS",
-    DISMISS: "DISMISS"
-})
-;
-/**
- * Created by SZA on 20/01/2016.
- */
-
-'use strict';
-/**
- * Singleton that provide paginatorConfig
- */
-IteSoft.factory('itPaginatorConfigService',
-        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
-            function ($q, $log, itNotifier, $filter, MetadataService) {
-
-                var self = this;
-                var deferred = $q.defer();
-
-                /**
-                 * fields
-                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
-                 */
-                self.fields = {
-                    options: [],
-                    defaultOption: "",
-                    loaded: false
-                };
-
-                /**
-                 * public method
-                 * @type {{initialize: initialize}}
-                 */
-                self.fn = {
-                    initialize: initialize
-                };
-
-                return self;
-                /**
-                 * filter initialization
-                 * @returns {*}
-                 */
-                function initialize() {
-                    if (!self.fields.loaded) {
-                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
-                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
-                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
-                            function (options) {
-                                self.fields.defaultOption = options[1].value;
-                                var paginatorOptions = options[0].value;
-                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
-                                    self.fields.options = paginatorOptions.split(',');
-                                } else {
-                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
-                                }
-
-                                $log.debug("PaginatorConfigService: loaded");
-                                self.fields.loaded = true;
-                                deferred.resolve('ok');
-                            },
-                            function (failed) {
-                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
-                            });
-                    } else {
-                        $log.debug("PaginatorConfigService: loaded");
-                        deferred.resolve('ok');
-                    }
-                    return deferred.promise;
-
-                }
-
-            }
-        ]
-    );
-'use strict';
-/**
- * Query param service
- */
-IteSoft.factory('itQueryParamFactory', [function () {
-    function QueryParam(key, value, operator) {
-        this.key = key;
-        this.value = value;
-        this.operator = operator;
-    }
-    return {
-        /**
-         * create a queryParam
-         * @param key: name
-         * @param value: myName
-         * @param operator: OPERATOR.equals
-         * @returns {QueryParam}
-         */
-        create: function (key, value, operator) {
-            return new QueryParam(key, value, operator);
-        }
-    }
-}]);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
-        function Query(parameters, start, size, sort) {
-            this.parameters = parameters;
-            this.start = start;
-            this.size = size;
-            this.sort = sort;
-            /**
-             * Method that return RSQL path
-             * @returns {string}: query=id==1 and name=="name"
-             */
-            this.build = function () {
-                var result = '';
-                if (parameters != undefined) {
-                    this.parameters.forEach(function (entry) {
-                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
-
-                            //Si c'est une date max, on définit l'heure à 23h59
-                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
-                                entry.value.setHours(23);
-                                entry.value.setMinutes(59);
-                                entry.value.setSeconds(59);
-                                entry.value.setMilliseconds(999);
-                            }
-
-                            if (result.length > 0) {
-                                result += " and ";
-                            }
-
-                            //formattage ISO des dates
-                            if (entry.value instanceof Date) {
-                                entry.value = entry.value.toISOString();
-                            }
-
-                            if (entry.operator == OPERATOR.LIKE) {
-                                entry.value = entry.value + '%';
-                            }
-                            result += entry.key + entry.operator + entry.value;
-                        }
-                    });
-                }
-                result = 'query=' + result;
-                if (size != null && angular.isDefined(size) && size != '') {
-                    result += "&size=" + this.size;
-                }
-                if (start != null && angular.isDefined(start) && start != '') {
-                    result += "&start=" + this.start;
-                }
-                //le sorting en décroissant s'écrit -fieldName
-                if (sort != undefined) {
-                    if (this.sort.name != undefined) {
-                        result += "&sort="
-                        if (this.sort.direction == "desc") {
-                            result += "-"
-                        }
-                        result += this.sort.name;
-                    }
-                }
-                return result;
-
-            };
-
-
-        }
-
-        return {
-            create: function (parameters, start, size, sort) {
-                return new Query(parameters, start, size, sort);
-            }
-        }
-    }
-    ]
-);
 "use strict";
 /**
  * @ngdoc directive
@@ -4376,6 +3086,54 @@ IteSoft
             }
         }
 }]);
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 /**
  * TODO itInclude desc
@@ -4707,6 +3465,377 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 "use strict";
 /**
  * You do not talk about FIGHT CLUB!!
@@ -4746,6 +3875,877 @@ IteSoft
             }
         };
     }]);
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
+
+        var supportedLocales = ['en_US',
+            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
+
+        return {
+            cleanAmount: function (amountString, aLocale) {
+                var result = 0;
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+
+                //Suppression des " " pour séparer les milliers et des caractères non numériques
+                amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //pas de traitement particulier pour le francais
+                //si la locale est en-US
+                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
+                    //suppression de la virgule permettant de séparer les milliers
+                    amountString = amountString.replace(",", "");
+                    //si la locale est de-DE
+                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
+                    //suppression du point permettant de séparer les milliers
+                    amountString = amountString.replace(".", "");
+                    //remplacement de la virgule par un point
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //Formattage des montants avec la locale
+                result = parseFloat(amountString);
+
+                console.log('result1 ' + result);
+
+                if (result == undefined) {
+                    result = parseFloat(amountString);
+                }
+
+                console.log('result2 ' + result);
+
+                return result;
+            },
+
+            formatAmount: function (amount, aLocale, currency) {
+                var result = '';
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+                if (amount != undefined) {
+                    var amountString = amount.toString();
+
+                    //Suppression des " " pour séparer les milliers et des caractères non numériques
+                    amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                        amountString = amountString.replace(",", ".");
+                    }
+                }
+                //Formattage des montants avec la locale avec 2 décimales après la virgule
+                if(angular.isDefined(currency)){
+                    //met en Uppercase la devise
+                    currency=$filter('uppercase')(currency);
+                    if(angular.equals(currency ,'TND')){
+                        // 3 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
+
+                    }else if(angular.equals(currency ,'JPY')){
+                        // 0 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
+
+                    }else{
+                        // 2 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                    }
+
+                }else{
+                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                }
+
+                return result;
+            }
+        }
+
+
+    }
+    ]
+)
+;
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLazyGrid
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.1
+ * @description
+ * The itLazyGrid widgets provides lazy grid feature on ui-grid
+ *
+ *
+ * ```html
+ *    <it-lazy-grid option="option" ></it-lazy-grid>
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  </table>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ Query RSQL send to REST API:
+    <pre><code class="lang-html">{{query}}</code></pre>
+     <div style="height:300px;display:block;">
+        <it-lazy-grid options="options" ></it-lazy-grid>
+     </div>
+    </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = {
+            // call when lazyGrid is instantiate
+            onRegisterApi: function (lazyGrid) {
+                $scope.lazyGrid = lazyGrid;
+                $scope.lazyGrid.appScope = $scope;
+                $scope.lazyGrid.fn.initialize();
+                $scope.lazyGrid.fn.callBack = load;
+                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
+                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
+
+                // Call after each loaded event
+                $scope.lazyGrid.on.loaded = function () {
+                };
+
+                // Call when user click
+                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
+                    $scope.selectedInvoice = row.entity;
+                };
+
+                // Loading columnDef
+                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
+                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
+                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
+                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
+                 ];
+
+                //Call when grid is ready to use (with config)
+                $scope.$applyAsync(function () {
+                   $scope.lazyGrid.fn.initialLoad();
+                });
+        }};
+
+         // ui-grid loading function, will be call on:
+         //-filter
+         //-pagination
+         //-sorter
+        function load(query) {
+
+            // ignore this, it's just for demo
+            if(query.size == 2){
+                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else if(query.size == 4){
+                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else{
+                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
+                 ]};
+             }
+            // end ignore this, it's just for demo
+            query = query.build();
+            // query RSQL to send to REST API
+            console.log(query);
+            $scope.query = query;
+            $scope.lazyGrid.fields.gridOptions.data = data.items;
+            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
+
+            $scope.isBusy = false;
+            $scope.lazyGrid.on.loaded();
+        }
+     }
+ ]
+ );
+ </file>
+ </example>
+ */
+IteSoft.directive('itLazyGrid',
+                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
+        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
+            return {
+                restrict: 'AE',
+                scope: {
+                    options: '='
+                },
+                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
+                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
+                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
+                '<div class="ui-grid-filter-container"> ' +
+                '<span class="{{col.headerCellClass}}"> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
+                'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
+                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span></div> ' +
+                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
+                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
+                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
+                ' </script> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
+                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
+                '<div role="navigation" class="ui-grid-pager-container"> ' +
+                '<div role="menubar" class="ui-grid-pager-control"> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
+                'ng-disabled="cantPageBackward()">' +
+                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
+                '<input type="button" title="" ' +
+                'ng-click="pageFirstPageClick()" > </input>'+
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'ng-disabled="cantPageBackward()">' +
+                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pagePreviousPageClick()"/>' +
+                '</label>' +
+                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
+                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
+                '{{ paginationApi.getTotalPages() }} ' +
+                '</span> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
+                'ng-disabled="cantPageForward()">' +
+                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageNextPageClick()"/>' +
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
+                'ng-disabled="cantPageToLast()">' +
+                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageLastPageClick()"/>' +
+                '</label>' +
+                ' </div> ' +
+                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
+                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
+                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
+                '</div> ' +
+                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
+                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
+                '</span> </div> ' +
+                '<div class="ui-grid-pager-count-container">' +
+                '<div class="ui-grid-pager-count"> ' +
+                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
+                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
+                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
+                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
+                ' </div> </div> </div> ' +
+                '</script>',
+                controllerAs: 'lazyGrid',
+                controller: ['$scope', function ($scope) {
+
+
+                    //Get current locale
+                    var locale = localStorageService.get('Locale');
+
+                    var self = this;
+
+                    self.options = $scope.options;
+
+                    /**
+                     * Fields
+                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
+                     */
+                    self.fields = {
+                        template: {pagination: $templateCache.get('paginationTemplate.html')},
+                        filter: [],
+                        externalFilter: {},
+                        gridApi: {},
+                        gridOptions: {},
+                        paginationOptions: {},
+                        appScope: {},
+                        promise: {refresh: {}}
+                    };
+
+                    /**
+                     * Event callback method
+                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
+                     */
+                    self.on = {
+                        loaded: onLoaded,
+                        ready: onReady,
+                        filterChange: onFilterChange,
+                        sortChange: onSortChange,
+                        paginationChanged: onPaginationChanged,
+                        rowSelectionChanged: onRowSelectionChanged
+                    };
+                    /**
+                     * Public Method
+                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
+                     */
+                    self.fn = {
+                        callBack: self.options.callBack,
+                        initialize: initialize,
+                        refresh: refresh,
+                        initialLoad: initialLoad,
+                        addExternalFilter: addExternalFilter,
+                        refreshDefaultFilter:refreshDefaultFilter
+                    };
+
+
+                    /**
+                     *
+                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
+                     */
+                    self.fields.paginationOptions = {
+                        pageNumber: 1,
+                        pageSize: 10,
+                        sort: {
+                            name: undefined,
+                            direction: undefined
+                        }
+                    };
+                    /**
+                     * Default grid options
+                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
+                     */
+                    self.fields.gridOptions = {
+                        enableFiltering: true,
+                        enableSorting: true,
+                        enableColumnMenus: false,
+                        useExternalPagination: true,
+                        useExternalSorting: true,
+                        enableRowSelection: true,
+                        enableRowHeaderSelection: false,
+                        multiSelect: false,
+                        modifierKeysToMultiSelect: false,
+                        noUnselect: true,
+                        useExternalFiltering: true,
+                        data: [],
+                        columnDefs: [],
+                        paginationTemplate: self.fields.template.pagination,
+                        onRegisterApi: function (gridApi) {
+                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
+                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
+                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
+                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
+                            self.fields.gridApi = gridApi;
+                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
+                        }
+                    };
+                    /**
+                     * Apply external filter
+                     * @private
+                     */
+                    function _applyExternalFilter() {
+                        $log.debug("LazyGrid:Apply External filter");
+                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
+                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
+                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
+                                self.fields.filter.push(queryParam);
+                            }
+                        });
+                    }
+
+                    /**
+                     * Apply filter
+                     * @private
+                     */
+                    function _applyFilter() {
+                        $log.debug("LazyGrid:Apply filter");
+                        var key = '';
+                        var value = '';
+                        var condition = OPERATOR.EQUALS;
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
+                                key = self.fields.gridApi.grid.columns[i].field;
+                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
+                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
+                                    if (value != undefined && value != '') {
+                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
+                                        // if filter key is override
+                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
+                                        if (rsqlKey != undefined) {
+                                            key = rsqlKey;
+                                        }
+
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
+                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
+                                        }
+
+                                        //Si la donnée doit être traitée comme un nombre
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
+                                            value = itAmountCleanerService.cleanAmount(value, locale);
+                                        }
+
+                                        var queryParam = itQueryParamFactory.create(key, value, condition);
+                                        self.fields.filter.push(queryParam);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    /**
+                     * Apply default filter configured inside columnDef filter option
+                     * @private
+                     */
+                    function _applyDefaultFilter() {
+                        $log.debug("LazyGrid:Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
+                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
+                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
+                                        //    self.fields.filter.push(queryParamClient);
+                                        //}
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Refresh datagrid by reset filters and applying default filter
+                     */
+                    function refreshDefaultFilter(){
+                        $log.debug("LazyGrid:Reset Filter and Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters)
+                                    && angular.isDefined(column.colDef.filters[0])) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }else{
+                                        //efface tous les filtres
+                                        angular.forEach(column.colDef.filters, function(filter){
+                                            filter.term="";
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Call after each loading
+                     */
+                    function onLoaded() {
+                    }
+
+                    /**
+                     * Call when grid is ready, when config is loaded (columnDef is present)
+                     */
+                    function onReady() {
+                    }
+
+                    /**
+                     * Call on filter change
+                     */
+                    function onFilterChange() {
+                        $log.debug("LazyGrid:Filter Changed");
+                        self.fields.filter = [];
+                        if (angular.isDefined(self.fields.promise.refresh)) {
+                            $timeout.cancel(self.fields.promise.refresh);
+                        }
+                        self.fields.promise.refresh = $timeout(function () {
+                                self.fn.refresh();
+                            }
+                            , 1000);
+
+                    }
+
+                    /**
+                     * Call on sort change
+                     * @param grid
+                     * @param sortColumns
+                     */
+                    function onSortChange(grid, sortColumns) {
+                        $log.debug("LazyGrid:Sort Changed");
+                        self.fields.filter = [];
+                        if (sortColumns.length == 0) {
+                            self.fields.paginationOptions.sort.name = undefined;
+                            self.fields.paginationOptions.sort.direction = undefined;
+                        } else {
+                            var sortKey = sortColumns[0].name;
+                            /**
+                             * Surcharge avec la clé rsql
+                             */
+                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
+                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
+                            }
+                            self.fields.paginationOptions.sort.name = sortKey;
+                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
+                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
+                        }
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Call when page changed
+                     * @param newPage
+                     * @param pageSize
+                     */
+                    function onPaginationChanged(newPage, pageSize) {
+                        $log.debug("LazyGrid:Pagination Changed");
+                        self.fields.filter = [];
+                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
+                            self.fields.paginationOptions.pageNumber = newPage;
+                            self.fields.paginationOptions.pageSize = pageSize;
+                            self.fn.refresh();
+                        }
+                    }
+
+                    /**
+                     * Call when user click on row
+                     */
+                    function onRowSelectionChanged() {
+                        $log.debug("LazyGrid:Row Selection Changed");
+                    }
+
+                    /**
+                     * Call to refresh data
+                     */
+                    function refresh() {
+                        $log.debug("LazyGrid:Refresh");
+                        _applyExternalFilter();
+                        _applyFilter();
+                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
+                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
+                        self.fn.callBack(query);
+                    }
+
+                    /**
+                     * Initial loading
+                     */
+                    function initialLoad() {
+                        $log.debug("LazyGrid:Initial load");
+
+                        //application des filtres pour récupérer le nom de filtre actifs
+                        _applyFilter();
+                        if (self.fields.filter.length <= 0) {
+                            _applyDefaultFilter();
+                        }
+                        //remise à 0 des informations de filtre
+                        self.fields.filter = [];
+
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Add external filter like clientId
+                     * @param filter external filter to always apply
+                     * @param filter.key
+                     * @param filter.value
+                     * @param filter.condition
+                     */
+                    function addExternalFilter(filter) {
+                        if (angular.isUndefined(filter.key)) {
+                            $log.error("External filter object must have key");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.condition)) {
+                            $log.error("External filter object must have condition");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.value)) {
+                            self.fields.externalFilter[filter.key] = {};
+                        } else {
+                            self.fields.externalFilter[filter.key] = filter;
+                        }
+                    }
+
+
+                    /**
+                     * Call before using
+                     * @returns {*}
+                     */
+                    function initialize() {
+
+                    }
+
+                    if (angular.isDefined(self.options.onRegisterApi)) {
+                        self.options.onRegisterApi(self);
+                        $log.debug('LazyGrid:onRegisterApi')
+                    }
+
+
+                }]
+            }
+        }
+    ]
+).constant("OPERATOR", {
+        "EQUALS": "==",
+        "LIKE": "==%",
+        "NOT_EQUALS": "!=",
+        "LESS_THAN": "=lt=",
+        "LESS_EQUALS": "=le=",
+        "GREATER_THAN": "=gt=",
+        "GREATER_EQUALS": "=ge="
+})
+.constant('NOTIFICATION_TYPE', {
+    INFO: "INFO",
+    WARNING: "WARNING",
+    ERROR: "ERROR",
+    SUCCESS: "SUCCESS",
+    DISMISS: "DISMISS"
+})
+;
+/**
+ * Created by SZA on 20/01/2016.
+ */
+
+'use strict';
+/**
+ * Singleton that provide paginatorConfig
+ */
+IteSoft.factory('itPaginatorConfigService',
+        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
+            function ($q, $log, itNotifier, $filter, MetadataService) {
+
+                var self = this;
+                var deferred = $q.defer();
+
+                /**
+                 * fields
+                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
+                 */
+                self.fields = {
+                    options: [],
+                    defaultOption: "",
+                    loaded: false
+                };
+
+                /**
+                 * public method
+                 * @type {{initialize: initialize}}
+                 */
+                self.fn = {
+                    initialize: initialize
+                };
+
+                return self;
+                /**
+                 * filter initialization
+                 * @returns {*}
+                 */
+                function initialize() {
+                    if (!self.fields.loaded) {
+                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
+                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
+                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
+                            function (options) {
+                                self.fields.defaultOption = options[1].value;
+                                var paginatorOptions = options[0].value;
+                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
+                                    self.fields.options = paginatorOptions.split(',');
+                                } else {
+                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
+                                }
+
+                                $log.debug("PaginatorConfigService: loaded");
+                                self.fields.loaded = true;
+                                deferred.resolve('ok');
+                            },
+                            function (failed) {
+                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
+                            });
+                    } else {
+                        $log.debug("PaginatorConfigService: loaded");
+                        deferred.resolve('ok');
+                    }
+                    return deferred.promise;
+
+                }
+
+            }
+        ]
+    );
+'use strict';
+/**
+ * Query param service
+ */
+IteSoft.factory('itQueryParamFactory', [function () {
+    function QueryParam(key, value, operator) {
+        this.key = key;
+        this.value = value;
+        this.operator = operator;
+    }
+    return {
+        /**
+         * create a queryParam
+         * @param key: name
+         * @param value: myName
+         * @param operator: OPERATOR.equals
+         * @returns {QueryParam}
+         */
+        create: function (key, value, operator) {
+            return new QueryParam(key, value, operator);
+        }
+    }
+}]);
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
+        function Query(parameters, start, size, sort) {
+            this.parameters = parameters;
+            this.start = start;
+            this.size = size;
+            this.sort = sort;
+            /**
+             * Method that return RSQL path
+             * @returns {string}: query=id==1 and name=="name"
+             */
+            this.build = function () {
+                var result = '';
+                if (parameters != undefined) {
+                    this.parameters.forEach(function (entry) {
+                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
+
+                            //Si c'est une date max, on définit l'heure à 23h59
+                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
+                                entry.value.setHours(23);
+                                entry.value.setMinutes(59);
+                                entry.value.setSeconds(59);
+                                entry.value.setMilliseconds(999);
+                            }
+
+                            if (result.length > 0) {
+                                result += " and ";
+                            }
+
+                            //formattage ISO des dates
+                            if (entry.value instanceof Date) {
+                                entry.value = entry.value.toISOString();
+                            }
+
+                            if (entry.operator == OPERATOR.LIKE) {
+                                entry.value = entry.value + '%';
+                            }
+                            result += entry.key + entry.operator + entry.value;
+                        }
+                    });
+                }
+                result = 'query=' + result;
+                if (size != null && angular.isDefined(size) && size != '') {
+                    result += "&size=" + this.size;
+                }
+                if (start != null && angular.isDefined(start) && start != '') {
+                    result += "&start=" + this.start;
+                }
+                //le sorting en décroissant s'écrit -fieldName
+                if (sort != undefined) {
+                    if (this.sort.name != undefined) {
+                        result += "&sort="
+                        if (this.sort.direction == "desc") {
+                            result += "-"
+                        }
+                        result += this.sort.name;
+                    }
+                }
+                return result;
+
+            };
+
+
+        }
+
+        return {
+            create: function (parameters, start, size, sort) {
+                return new Query(parameters, start, size, sort);
+            }
+        }
+    }
+    ]
+);
 "use strict";
 /**
  * @ngdoc directive
@@ -4811,190 +4811,6 @@ IteSoft
 
         };
     }]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -5472,7 +5288,6 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itSidePanel
@@ -5528,7 +5343,7 @@ IteSoft
  *                </li>
  *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
  *              <li><b>full</b>
-*                   <ul>
+ *                   <ul>
  *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
  *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
  *                  </ul>
@@ -5571,156 +5386,36 @@ IteSoft
  <example module="itesoft">
  <file name="custom.css">
 
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+ it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
        background-color: blue;
      }
 
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+ it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
        background-color: green;
      }
 
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+ it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
        background-color: gray;
      }
 
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+ .it-side-panel-container .it-side-panel .it-side-panel-footer {
         text-align: center;
         display: table;
         width: 100%;
      }
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+ .it-side-panel-container .it-side-panel .it-side-panel-footer div{
         display: table-cell;
         vertical-align:middle;
      }
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+ .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
         margin:0px;
      }
 
  </file>
  <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
 
  <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
  <it-side-panel-header>
@@ -5755,7 +5450,6 @@ IteSoft
 IteSoft
     .directive('itSidePanel', ['$window', function ($window) {
 
-
         function _link(scope, element, attrs) {
 
             scope.itSidePanelElement = element;
@@ -5777,13 +5471,12 @@ IteSoft
             restrict: 'E',
             transclude: true,
             controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
+            scope: true,
+            template: '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+            '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+            '<span class="fa {{itIconClass}}"></span>' +
+            '</div>' +
+            '<div class="it-side-panel" ng-transclude></div>' +
             '</div>'
 
         };
@@ -5845,7 +5538,7 @@ IteSoft
             var IT_HEIGHT_MODE_WINDOW = 'window';
             var IT_HEIGHT_MODE_FULL = 'full';
             var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL, IT_HEIGHT_MODE_AUTO];
 
             var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
 
@@ -5916,36 +5609,36 @@ IteSoft
 
                     //Do not update side panel height property when
                     // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if(Math.abs(top) < _self.scope.windowHeight){
+                    if (Math.abs(top) < _self.scope.windowHeight) {
 
                         var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if(_self.scope.isNoneTopPosition()){
+                        if (_self.scope.isNoneTopPosition()) {
                             itTopPosition = 0;
                         }
 
-                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+                        var newHeight = (_self.scope.windowHeight - top - itTopPosition);
 
-                        var heightHeader = (newHeight*0.10);
+                        var heightHeader = (newHeight * 0.10);
                         var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height',heightHeader+'px');
+                        sidePanelHeader.css('height', heightHeader + 'px');
 
-                        var heightFooter = (newHeight*0.10);
+                        var heightFooter = (newHeight * 0.10);
                         var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height',heightFooter+'px');
+                        sidePanelFooter.css('height', heightFooter + 'px');
 
                         var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+                        sidePanelContent.css('height', (newHeight * 0.8) + 'px');
 
                     }
                 }
 
 
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                if (_self.scope.showPanel) {
+                    var newWidth = (_self.scope.windowWidth / 12 * _self.scope.itSidePanelcolMd);
                     _self.scope.sidePanelContainerWidth = newWidth;
                     sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
+                    //if its the firt time initialise all components width an right
+                } else {
                     _self.scope.modifySidePanelCssProperties();
                 }
 
@@ -5954,10 +5647,10 @@ IteSoft
             /**
              * Update Side panel Css properties (right and width)
              */
-            _self.scope.modifySidePanelCssProperties = function (){
+            _self.scope.modifySidePanelCssProperties = function () {
 
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
                 var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
 
                 _self.scope.sidePanelContainerWidth = newWidth;
@@ -5981,35 +5674,33 @@ IteSoft
              */
             _self.scope.toggleSidePanel = function () {
                 _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
                 var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
 
-                if(_self.scope.showPanel){
+                if (_self.scope.showPanel) {
 
                     //Reset the right property of Side panel button
                     iconButtonElement.css('right', "");
 
                     //Do the transition in order to the side panel be visible
                     //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
+                    $timeout(function () {
                         _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    }, 50);
 
 
                 } else {
-
                     var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length - 2));
                     _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
 
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight + 'px');
                 }
             };
 
-            _self.scope.setItSidePanelElement = function(element){
+            _self.scope.setItSidePanelElement = function (element) {
                 _self.scope.itSidePanelElement = element;
             };
 
@@ -6018,45 +5709,44 @@ IteSoft
              * Set the Side Panel Height Mode from "it-height-mode" attributes
              * @param attrs directive attributes object
              */
-            _self.scope.setHeightMode = function (attrs){
+            _self.scope.setHeightMode = function (attrs) {
                 _self.scope.itHeightMode = attrs.itHeightMode;
 
                 //If attribute is not defined set the default height Mode
                 if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
                     _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
 
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1) {
                     var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
                     //Get the provided mode
                     _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
+                } else {
 
                     //If height mode is defined but unknown set to the default  height mode
                     _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                    $log.error('"' + HEIGHT_MODE_NAME + '" with value "' + _self.scope.itHeightMode + '"is unknown. ' +
+                        'The default value is taken : "' + DEFAULT_HEIGHT_MODE + '"');
                 }
 
                 //Set height of header, content and footer
                 var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
+                sidePanelHeader.css('height', '10%');
 
                 var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
+                sidePanelFooter.css('height', '10%');
 
                 var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
                 sidePanelContent.css('height', '80%');
 
 
-
                 //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
+                switch (_self.scope.itHeightMode) {
                     case IT_HEIGHT_MODE_FULL:
 
                         var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
                         var sidePanelContainerHeight = sidePanelContainer.css('height');
 
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                        if (sidePanelContainerHeight > _self.scope.windowHeight) {
                             sidePanelContainer.css('height', '100%');
                             var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
                             sidePanel.css('height', '100%');
@@ -6075,7 +5765,7 @@ IteSoft
                         sidePanelContent.css('overflow', 'auto');
                         break;
                     default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                        $log.error('Height mode : "' + _self.scope.itHeightMode + '" is unknown.');
                 }
             };
 
@@ -6119,7 +5809,7 @@ IteSoft
                 } else {
                     _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
                     $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                        'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
                 }
             };
 
@@ -6199,7 +5889,7 @@ IteSoft
 
                     _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
                     $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                        'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
                 }
             };
 
@@ -7466,6 +7156,190 @@ IteSoft
         }
     });
 
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
 /**
  * @ngdoc filter
  * @name itesoft.filter:itUnicode
@@ -7514,236 +7388,6 @@ IteSoft
         };
 }]);
 
-
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itLanguageChangeHandler
- * @module itesoft
- * @since 1.2
- * @requires localStorageService
- * @requires itPopup
- *
- * @description
- * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
- * <br/>1) Asks confirmation (optional) before changing the language;
- * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
- * <br/>3) Allows the consuming service to receive returned results by a callback method.
- * <br/>
- * <table class="table">
- *  <tr>
- *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
- *   <td>Method to change the current language.
- *    <br/>lang (required). The new language culture, e.g. "en_GB".
- *    <br/>scope (optional). The current scope.
- *    <br/>callback (optional). The callback function.
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
- *   <td>Method to get the current configuration options.
- *   <br />storage: local (default value) for localStorage or query for url query parameter
- *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
- *   <br />onChangePopup:
- *   <br />title: title of popup confirmation
- *   <br />text: text of popup confirmation
- *   <br />buttonCancelLabel: label text for the cancel button
- *   <br />buttonOkLabel: label text for the ok button
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
- *   <td>Method to get the current language.</td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
- *   <td>Method to get the default locale from an optional language code.
- *    <br/>lang (optional). The language code, e.g. "en".
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
- *   <td>Method to get the language code from an optional locale.
- *    <br/>locale (optional). The locale, e.g. "en_GB".
- *   </td>
- *  </tr>
- * </table>
- *
- * @example
- <example module="itesoft">
-
- <file name="Controller.js">
-    angular.module('itesoft')
-        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
-                    // example for storage option configuration value
-                    itLanguageChangeHandlerProvider.options.storage = "local";
-                     
-                    localStorageServiceProvider.setPrefix('itesoft');
-
-                }])
-        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
-            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
-
-            // new language setting returned by a callback function.
-            var languageChanged = function(data){
-              $scope.currentLanguage = data.currentLanguage;
-            };
-        
-            $scope.changeLanguage = function(){
-              if($scope.locale) {
-                
-                // new language setting returned by a promise.
-                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
-              }
-            }
-        }]);
- </file>
- <file name="index.html">
- <div ng-controller="MainController">
-    <br /> Set language: <input type="text" ng-model="locale" /> 
-    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
-
-    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
-    <br /> Initial language: {{initialLanguage}}
-    <br /> Updated current language: {{currentLanguage}}
-</div>
- </file>
- </example>
- */
-IteSoft.provider('itLanguageChangeHandler', function () {
-    var self = this;
-    this.options = {
-        storage: 'local', //local for localStorage or query for url query parameter
-        displayConfirm: true,// true | false
-        onChangePopup: {
-            title: "Confirm language change",
-            text: "By modifying the language any recent changes may be lost. Continue?",
-            buttonCancelLabel: 'NO',
-            buttonOkLabel: 'YES'
-        }
-    };
-
-    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
-        return {
-            translate: $translate,
-            getConfig: function () {
-                return self.options;
-            },
-            changeLanguage: function (lang, scope, callback) {
-                var data = {
-                    currentLanguage:
-                        this.getCurrentLanguage()
-                };
-                if (self.options.displayConfirm) {
-                    $translate.use(lang);
-                    var confirmPopup = itPopup.confirm({
-                        title: self.options.onChangePopup.title,
-                        text: self.options.onChangePopup.text,
-                        cancelText: self.options.onChangePopup.buttonCancelLabel,
-                        okText: self.options.onChangePopup.buttonOkLabel
-                    });
-                    (function (data) {
-                        var locale = data;
-                        confirmPopup.then(function (res) {
-                            //Traduction
-                            $translate.use(lang);
-
-                            if (self.options.storage === 'query') {
-
-                                try {
-                                    $location.search('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-                            else {
-                                // Save to local storage
-                                try {
-                                    localStorageService.set('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-
-                            // Change language to chosen language.
-                            if (scope) {
-                                scope.currentLanguage = lang;
-                                if (scope.user) {
-                                    scope.user.language = $translate.use();
-                                }
-                            }
-
-                            data = {
-                                currentLanguage: lang,
-                            };
-
-                            if (callback) {
-                                callback(data);
-                            }
-
-                            //Reload de la page
-                            $rootScope.$applyAsync(function () {
-                                location.reload();
-                            });
-
-                        }, function () {
-                            $translate.use(locale.currentLanguage);
-                        });
-                    })(data);
-                }
-                return;
-            },
-            getCurrentLanguage: function () {
-                if (self.options.storage === 'query') {
-                    if ($location.search().Locale) {
-                        return $location.search().Locale.replace(/-/g, '_');
-                    } 
-                    else {
-                        return this.getDefaultLocale(this.translate.use());
-                    }
-                }
-                else {
-                    // load from local storage
-                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
-                }
-            },
-            getDefaultLocale: function (lang) {
-                if (!lang) {
-                    lang = $translate.preferredLanguage();
-                }
-
-                switch (lang) {
-                    case "en":
-                        return "en_GB";
-                    case "de":
-                        return "de_DE";
-                    default:
-                    case "fr":
-                        return "fr_FR";
-                }
-            },
-            getLanguageCode: function (locale) {
-                switch (locale) {
-                    case "en_GB":
-                    case "en-GB":
-                    case "en_US":
-                    case "en-US":
-                        return "en";
-                    case "de_DE":
-                    case "de-DE":
-                        return "de";
-                    default:
-                    case "fr_FR":
-                    case "fr-FR":
-                    case "fr_CA":
-                    case "fr-CA":
-                        return "fr";
-                }
-            }
-        }
-    }];
-});
 
 'use strict';
 
@@ -8403,6 +8047,236 @@ IteSoft.provider('ItMessaging',[
         };
             }]
     }])
+
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itLanguageChangeHandler
+ * @module itesoft
+ * @since 1.2
+ * @requires localStorageService
+ * @requires itPopup
+ *
+ * @description
+ * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
+ * <br/>1) Asks confirmation (optional) before changing the language;
+ * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
+ * <br/>3) Allows the consuming service to receive returned results by a callback method.
+ * <br/>
+ * <table class="table">
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
+ *   <td>Method to change the current language.
+ *    <br/>lang (required). The new language culture, e.g. "en_GB".
+ *    <br/>scope (optional). The current scope.
+ *    <br/>callback (optional). The callback function.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
+ *   <td>Method to get the current configuration options.
+ *   <br />storage: local (default value) for localStorage or query for url query parameter
+ *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
+ *   <br />onChangePopup:
+ *   <br />title: title of popup confirmation
+ *   <br />text: text of popup confirmation
+ *   <br />buttonCancelLabel: label text for the cancel button
+ *   <br />buttonOkLabel: label text for the ok button
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
+ *   <td>Method to get the current language.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
+ *   <td>Method to get the default locale from an optional language code.
+ *    <br/>lang (optional). The language code, e.g. "en".
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
+ *   <td>Method to get the language code from an optional locale.
+ *    <br/>locale (optional). The locale, e.g. "en_GB".
+ *   </td>
+ *  </tr>
+ * </table>
+ *
+ * @example
+ <example module="itesoft">
+
+ <file name="Controller.js">
+    angular.module('itesoft')
+        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
+                    // example for storage option configuration value
+                    itLanguageChangeHandlerProvider.options.storage = "local";
+                     
+                    localStorageServiceProvider.setPrefix('itesoft');
+
+                }])
+        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
+            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
+
+            // new language setting returned by a callback function.
+            var languageChanged = function(data){
+              $scope.currentLanguage = data.currentLanguage;
+            };
+        
+            $scope.changeLanguage = function(){
+              if($scope.locale) {
+                
+                // new language setting returned by a promise.
+                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
+              }
+            }
+        }]);
+ </file>
+ <file name="index.html">
+ <div ng-controller="MainController">
+    <br /> Set language: <input type="text" ng-model="locale" /> 
+    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
+
+    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
+    <br /> Initial language: {{initialLanguage}}
+    <br /> Updated current language: {{currentLanguage}}
+</div>
+ </file>
+ </example>
+ */
+IteSoft.provider('itLanguageChangeHandler', function () {
+    var self = this;
+    this.options = {
+        storage: 'local', //local for localStorage or query for url query parameter
+        displayConfirm: true,// true | false
+        onChangePopup: {
+            title: "Confirm language change",
+            text: "By modifying the language any recent changes may be lost. Continue?",
+            buttonCancelLabel: 'NO',
+            buttonOkLabel: 'YES'
+        }
+    };
+
+    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
+        return {
+            translate: $translate,
+            getConfig: function () {
+                return self.options;
+            },
+            changeLanguage: function (lang, scope, callback) {
+                var data = {
+                    currentLanguage:
+                        this.getCurrentLanguage()
+                };
+                if (self.options.displayConfirm) {
+                    $translate.use(lang);
+                    var confirmPopup = itPopup.confirm({
+                        title: self.options.onChangePopup.title,
+                        text: self.options.onChangePopup.text,
+                        cancelText: self.options.onChangePopup.buttonCancelLabel,
+                        okText: self.options.onChangePopup.buttonOkLabel
+                    });
+                    (function (data) {
+                        var locale = data;
+                        confirmPopup.then(function (res) {
+                            //Traduction
+                            $translate.use(lang);
+
+                            if (self.options.storage === 'query') {
+
+                                try {
+                                    $location.search('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+                            else {
+                                // Save to local storage
+                                try {
+                                    localStorageService.set('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+
+                            // Change language to chosen language.
+                            if (scope) {
+                                scope.currentLanguage = lang;
+                                if (scope.user) {
+                                    scope.user.language = $translate.use();
+                                }
+                            }
+
+                            data = {
+                                currentLanguage: lang,
+                            };
+
+                            if (callback) {
+                                callback(data);
+                            }
+
+                            //Reload de la page
+                            $rootScope.$applyAsync(function () {
+                                location.reload();
+                            });
+
+                        }, function () {
+                            $translate.use(locale.currentLanguage);
+                        });
+                    })(data);
+                }
+                return;
+            },
+            getCurrentLanguage: function () {
+                if (self.options.storage === 'query') {
+                    if ($location.search().Locale) {
+                        return $location.search().Locale.replace(/-/g, '_');
+                    } 
+                    else {
+                        return this.getDefaultLocale(this.translate.use());
+                    }
+                }
+                else {
+                    // load from local storage
+                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
+                }
+            },
+            getDefaultLocale: function (lang) {
+                if (!lang) {
+                    lang = $translate.preferredLanguage();
+                }
+
+                switch (lang) {
+                    case "en":
+                        return "en_GB";
+                    case "de":
+                        return "de_DE";
+                    default:
+                    case "fr":
+                        return "fr_FR";
+                }
+            },
+            getLanguageCode: function (locale) {
+                switch (locale) {
+                    case "en_GB":
+                    case "en-GB":
+                    case "en_US":
+                    case "en-US":
+                        return "en";
+                    case "de_DE":
+                    case "de-DE":
+                        return "de";
+                    default:
+                    case "fr_FR":
+                    case "fr-FR":
+                    case "fr_CA":
+                    case "fr-CA":
+                        return "fr";
+                }
+            }
+        }
+    }];
+});
 
 'use strict';
 /**
