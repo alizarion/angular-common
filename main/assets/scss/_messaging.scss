@@ -41,3 +41,32 @@
 .it-messaging-message .message-text {
   font-size:11px;
 }
+
+.it-messaging-message .it-messaging-notification .sender {
+  font-weight: 700;
+  background-color: black;
+  color: white;
+  padding: 2px;
+}
+
+.it-messaging-message .it-messaging-notification {
+  padding: 5px;
+  border: solid 1px #FFF3C2;
+}
+
+.it-messaging-message .it-messaging-notification.warning {
+  background-color : #FFF3C2;
+}
+
+
+.it-messaging-message .it-messaging-notification.success {
+  background-color : #E1F4FA;
+}
+
+.it-messaging-message .it-messaging-notification.error {
+  background-color : #FCD4D8;
+}
+
+.it-messaging-message .it-messaging-notification.info {
+  background-color : #EDF2F1;
+}
