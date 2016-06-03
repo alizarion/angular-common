@@ -106,29 +106,30 @@
                     <li ng-repeat="(url, name) in sections">
                         <a ng-href="{{url}}"> <b>{{name}}</b></a>
                     </li>
-
-
+                   <li>
+                     <input type="text" style="margin: 10px;color:white;"  class="form-control "
+                                                 ng-model="$root.search" placeholder="Search the docs"
+                                                        abindex="1" accesskey="s" >
+                   </li>
                     
                 </ul>
+
+
             </div>
+
         </div>
 
 
     </it-side-menu-header>
 
     <it-side-menu>
-        <div class="container-fluid menu-search">
-            <div class="form-group">
-                <input type="text"  class="form-control col-lg-8" ng-model="$root.search" placeholder="search the docs"
-                       tabindex="1" accesskey="s" >
-            </div>
-        </div>
+
         <ul class="nav navbar-nav nav-pills nav-stacked list-group">
 
             <li  ng-show="pages.length" it-collapsed-item="">
                 <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Pages</h5></a>
                 <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li ng-repeat="page in pages track by page.url | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
+                    <li ng-repeat="page in pages | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
                         <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
                     </li>
                 </ul>
@@ -136,11 +137,11 @@
         </ul>
 
         <ul ng-repeat="module in modules track by module.url" class="nav navbar-nav nav-pills nav-stacked list-group">
-
+           <a href="{{module.url}}"> <h2>{{module.name}}</h2></a>
             <li  ng-show="module.others.length" it-collapsed-item="">
                 <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Module</h5></a>
                 <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li ng-repeat="page in module.others track by page.url | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
+                    <li ng-repeat="page in module.others| filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
                         <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
                     </li>
                 </ul>
@@ -159,7 +160,7 @@
             <li ng-show="module.controllers.length" it-collapsed-item="">
                 <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Controller</h5></a>
                 <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li ng-repeat="page in module.controllers track by page.url | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
+                    <li ng-repeat="page in module.controllers  | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
                         <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
                     </li>
                 </ul>
@@ -168,17 +169,16 @@
             <li ng-show="module.filters.length" it-collapsed-item="">
                 <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Filter</h5></a>
                 <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li ng-repeat="page in module.filters track by page.url | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
+                    <li ng-repeat="page in module.filters | filter:{shortName:$root.search}" ng-class="navClass(page)" class="api-list-item expand">
                         <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
                     </li>
                 </ul>
             </li>
 
             <li  ng-show="module.services.length" it-collapsed-item="">
-                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; service</h5></a>
+                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Service</h5></a>
                 <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
-                    <li ng-repeat="service in module.services track by service.instance.url | filter:{name:$root.search}" ng-class="navClass(service.instance, service.provider)" class="api-list-item expand">
-                        <a ng-show="service.provider" class="pull-right" href="{{service.provider.url}}" tabindex="2"><i class="icon-cog"></i></a>
+                    <li ng-repeat="service in module.services  | filter:{name:$root.search}" class="api-list-item expand">
                         <a href="{{service.instance.url}}" tabindex="2">{{service.name}}</a>
                     </li>
                 </ul>
