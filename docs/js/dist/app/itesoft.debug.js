@@ -1148,242 +1148,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     ]
 );
 "use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
-"use strict";
 /**
  * @ngdoc directive
  * @name itesoft.directive:itDetail
@@ -2560,6 +2324,242 @@ IteSoft
         }
 
     });
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 'use strict';
 
 /**
@@ -4746,71 +4746,6 @@ IteSoft
             }
         };
     }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- * @since 1.0
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
 'use strict';
 
 /**
@@ -4995,6 +4930,71 @@ IteSoft
  </file>
  </example>
  */
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
 'use strict';
 /**
  * @ngdoc directive
@@ -5472,7 +5472,6 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itSidePanel
@@ -5528,7 +5527,7 @@ IteSoft
  *                </li>
  *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
  *              <li><b>full</b>
-*                   <ul>
+ *                   <ul>
  *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
  *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
  *                  </ul>
@@ -5571,156 +5570,36 @@ IteSoft
  <example module="itesoft">
  <file name="custom.css">
 
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+ it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
        background-color: blue;
      }
 
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+ it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
        background-color: green;
      }
 
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+ it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
        background-color: gray;
      }
 
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+ .it-side-panel-container .it-side-panel .it-side-panel-footer {
         text-align: center;
         display: table;
         width: 100%;
      }
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+ .it-side-panel-container .it-side-panel .it-side-panel-footer div{
         display: table-cell;
         vertical-align:middle;
      }
 
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+ .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
         margin:0px;
      }
 
  </file>
  <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
 
  <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
  <it-side-panel-header>
@@ -5755,7 +5634,6 @@ IteSoft
 IteSoft
     .directive('itSidePanel', ['$window', function ($window) {
 
-
         function _link(scope, element, attrs) {
 
             scope.itSidePanelElement = element;
@@ -5777,13 +5655,12 @@ IteSoft
             restrict: 'E',
             transclude: true,
             controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
+            scope: true,
+            template: '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+            '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+            '<span class="fa {{itIconClass}}"></span>' +
+            '</div>' +
+            '<div class="it-side-panel" ng-transclude></div>' +
             '</div>'
 
         };
@@ -5845,7 +5722,7 @@ IteSoft
             var IT_HEIGHT_MODE_WINDOW = 'window';
             var IT_HEIGHT_MODE_FULL = 'full';
             var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL,IT_HEIGHT_MODE_AUTO];
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL, IT_HEIGHT_MODE_AUTO];
 
             var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
 
@@ -5916,36 +5793,36 @@ IteSoft
 
                     //Do not update side panel height property when
                     // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if(Math.abs(top) < _self.scope.windowHeight){
+                    if (Math.abs(top) < _self.scope.windowHeight) {
 
                         var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if(_self.scope.isNoneTopPosition()){
+                        if (_self.scope.isNoneTopPosition()) {
                             itTopPosition = 0;
                         }
 
-                        var newHeight = (_self.scope.windowHeight-top-itTopPosition);
+                        var newHeight = (_self.scope.windowHeight - top - itTopPosition);
 
-                        var heightHeader = (newHeight*0.10);
+                        var heightHeader = (newHeight * 0.10);
                         var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height',heightHeader+'px');
+                        sidePanelHeader.css('height', heightHeader + 'px');
 
-                        var heightFooter = (newHeight*0.10);
+                        var heightFooter = (newHeight * 0.10);
                         var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height',heightFooter+'px');
+                        sidePanelFooter.css('height', heightFooter + 'px');
 
                         var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight*0.8)+'px');
+                        sidePanelContent.css('height', (newHeight * 0.8) + 'px');
 
                     }
                 }
 
 
-                if(_self.scope.showPanel){
-                    var newWidth = (_self.scope.windowWidth/12*_self.scope.itSidePanelcolMd);
+                if (_self.scope.showPanel) {
+                    var newWidth = (_self.scope.windowWidth / 12 * _self.scope.itSidePanelcolMd);
                     _self.scope.sidePanelContainerWidth = newWidth;
                     sidePanelContainer.css('width', newWidth + 'px');
-                //if its the firt time initialise all components width an right
-                }else {
+                    //if its the firt time initialise all components width an right
+                } else {
                     _self.scope.modifySidePanelCssProperties();
                 }
 
@@ -5954,10 +5831,10 @@ IteSoft
             /**
              * Update Side panel Css properties (right and width)
              */
-            _self.scope.modifySidePanelCssProperties = function (){
+            _self.scope.modifySidePanelCssProperties = function () {
 
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_RIGHT_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
                 var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
 
                 _self.scope.sidePanelContainerWidth = newWidth;
@@ -5981,35 +5858,33 @@ IteSoft
              */
             _self.scope.toggleSidePanel = function () {
                 _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-
                 var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
                 var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
 
-                if(_self.scope.showPanel){
+                if (_self.scope.showPanel) {
 
                     //Reset the right property of Side panel button
                     iconButtonElement.css('right', "");
 
                     //Do the transition in order to the side panel be visible
                     //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function(){
+                    $timeout(function () {
                         _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    },50);
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    }, 50);
 
 
                 } else {
-
                     var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length-2));
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length - 2));
                     _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
 
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight+'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight+'px');
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight + 'px');
                 }
             };
 
-            _self.scope.setItSidePanelElement = function(element){
+            _self.scope.setItSidePanelElement = function (element) {
                 _self.scope.itSidePanelElement = element;
             };
 
@@ -6018,45 +5893,44 @@ IteSoft
              * Set the Side Panel Height Mode from "it-height-mode" attributes
              * @param attrs directive attributes object
              */
-            _self.scope.setHeightMode = function (attrs){
+            _self.scope.setHeightMode = function (attrs) {
                 _self.scope.itHeightMode = attrs.itHeightMode;
 
                 //If attribute is not defined set the default height Mode
                 if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
                     _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
 
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1 ) {
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1) {
                     var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
                     //Get the provided mode
                     _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else{
+                } else {
 
                     //If height mode is defined but unknown set to the default  height mode
                     _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"'+HEIGHT_MODE_NAME+'" with value "'+_self.scope.itHeightMode+'"is unknown. ' +
-                        'The default value is taken : "'+DEFAULT_HEIGHT_MODE+'"');
+                    $log.error('"' + HEIGHT_MODE_NAME + '" with value "' + _self.scope.itHeightMode + '"is unknown. ' +
+                        'The default value is taken : "' + DEFAULT_HEIGHT_MODE + '"');
                 }
 
                 //Set height of header, content and footer
                 var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height','10%');
+                sidePanelHeader.css('height', '10%');
 
                 var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height','10%');
+                sidePanelFooter.css('height', '10%');
 
                 var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
                 sidePanelContent.css('height', '80%');
 
 
-
                 //Configure height of Side Panel elements depending on the provided height mode
-                switch(_self.scope.itHeightMode) {
+                switch (_self.scope.itHeightMode) {
                     case IT_HEIGHT_MODE_FULL:
 
                         var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
                         var sidePanelContainerHeight = sidePanelContainer.css('height');
 
-                        if(sidePanelContainerHeight > _self.scope.windowHeight){
+                        if (sidePanelContainerHeight > _self.scope.windowHeight) {
                             sidePanelContainer.css('height', '100%');
                             var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
                             sidePanel.css('height', '100%');
@@ -6075,7 +5949,7 @@ IteSoft
                         sidePanelContent.css('overflow', 'auto');
                         break;
                     default:
-                        $log.error('Height mode : "'+_self.scope.itHeightMode+'" is unknown.');
+                        $log.error('Height mode : "' + _self.scope.itHeightMode + '" is unknown.');
                 }
             };
 
@@ -6119,7 +5993,7 @@ IteSoft
                 } else {
                     _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
                     $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                     'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                        'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
                 }
             };
 
@@ -6199,7 +6073,7 @@ IteSoft
 
                     _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
                     $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                    'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                        'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
                 }
             };
 
@@ -6276,6 +6150,120 @@ IteSoft
         };
     });
 
+
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
 
 /**
  * Created by sza on 22/04/2016.
@@ -7352,120 +7340,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
     }
 ]);
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
 /**
  * @ngdoc filter
  * @name itesoft.filter:itUnicode
@@ -7514,236 +7388,6 @@ IteSoft
         };
 }]);
 
-
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itLanguageChangeHandler
- * @module itesoft
- * @since 1.2
- * @requires localStorageService
- * @requires itPopup
- *
- * @description
- * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
- * <br/>1) Asks confirmation (optional) before changing the language;
- * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
- * <br/>3) Allows the consuming service to receive returned results by a callback method.
- * <br/>
- * <table class="table">
- *  <tr>
- *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
- *   <td>Method to change the current language.
- *    <br/>lang (required). The new language culture, e.g. "en_GB".
- *    <br/>scope (optional). The current scope.
- *    <br/>callback (optional). The callback function.
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
- *   <td>Method to get the current configuration options.
- *   <br />storage: local (default value) for localStorage or query for url query parameter
- *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
- *   <br />onChangePopup:
- *   <br />title: title of popup confirmation
- *   <br />text: text of popup confirmation
- *   <br />buttonCancelLabel: label text for the cancel button
- *   <br />buttonOkLabel: label text for the ok button
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
- *   <td>Method to get the current language.</td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
- *   <td>Method to get the default locale from an optional language code.
- *    <br/>lang (optional). The language code, e.g. "en".
- *   </td>
- *  </tr>
- *  <tr>
- *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
- *   <td>Method to get the language code from an optional locale.
- *    <br/>locale (optional). The locale, e.g. "en_GB".
- *   </td>
- *  </tr>
- * </table>
- *
- * @example
- <example module="itesoft">
-
- <file name="Controller.js">
-    angular.module('itesoft')
-        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
-                    // example for storage option configuration value
-                    itLanguageChangeHandlerProvider.options.storage = "local";
-                     
-                    localStorageServiceProvider.setPrefix('itesoft');
-
-                }])
-        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
-            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
-
-            // new language setting returned by a callback function.
-            var languageChanged = function(data){
-              $scope.currentLanguage = data.currentLanguage;
-            };
-        
-            $scope.changeLanguage = function(){
-              if($scope.locale) {
-                
-                // new language setting returned by a promise.
-                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
-              }
-            }
-        }]);
- </file>
- <file name="index.html">
- <div ng-controller="MainController">
-    <br /> Set language: <input type="text" ng-model="locale" /> 
-    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
-
-    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
-    <br /> Initial language: {{initialLanguage}}
-    <br /> Updated current language: {{currentLanguage}}
-</div>
- </file>
- </example>
- */
-IteSoft.provider('itLanguageChangeHandler', function () {
-    var self = this;
-    this.options = {
-        storage: 'local', //local for localStorage or query for url query parameter
-        displayConfirm: true,// true | false
-        onChangePopup: {
-            title: "Confirm language change",
-            text: "By modifying the language any recent changes may be lost. Continue?",
-            buttonCancelLabel: 'NO',
-            buttonOkLabel: 'YES'
-        }
-    };
-
-    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
-        return {
-            translate: $translate,
-            getConfig: function () {
-                return self.options;
-            },
-            changeLanguage: function (lang, scope, callback) {
-                var data = {
-                    currentLanguage:
-                        this.getCurrentLanguage()
-                };
-                if (self.options.displayConfirm) {
-                    $translate.use(lang);
-                    var confirmPopup = itPopup.confirm({
-                        title: self.options.onChangePopup.title,
-                        text: self.options.onChangePopup.text,
-                        cancelText: self.options.onChangePopup.buttonCancelLabel,
-                        okText: self.options.onChangePopup.buttonOkLabel
-                    });
-                    (function (data) {
-                        var locale = data;
-                        confirmPopup.then(function (res) {
-                            //Traduction
-                            $translate.use(lang);
-
-                            if (self.options.storage === 'query') {
-
-                                try {
-                                    $location.search('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-                            else {
-                                // Save to local storage
-                                try {
-                                    localStorageService.set('Locale', lang);
-                                } catch (e) {
-                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
-                                }
-                            }
-
-                            // Change language to chosen language.
-                            if (scope) {
-                                scope.currentLanguage = lang;
-                                if (scope.user) {
-                                    scope.user.language = $translate.use();
-                                }
-                            }
-
-                            data = {
-                                currentLanguage: lang,
-                            };
-
-                            if (callback) {
-                                callback(data);
-                            }
-
-                            //Reload de la page
-                            $rootScope.$applyAsync(function () {
-                                location.reload();
-                            });
-
-                        }, function () {
-                            $translate.use(locale.currentLanguage);
-                        });
-                    })(data);
-                }
-                return;
-            },
-            getCurrentLanguage: function () {
-                if (self.options.storage === 'query') {
-                    if ($location.search().Locale) {
-                        return $location.search().Locale.replace(/-/g, '_');
-                    } 
-                    else {
-                        return this.getDefaultLocale(this.translate.use());
-                    }
-                }
-                else {
-                    // load from local storage
-                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
-                }
-            },
-            getDefaultLocale: function (lang) {
-                if (!lang) {
-                    lang = $translate.preferredLanguage();
-                }
-
-                switch (lang) {
-                    case "en":
-                        return "en_GB";
-                    case "de":
-                        return "de_DE";
-                    default:
-                    case "fr":
-                        return "fr_FR";
-                }
-            },
-            getLanguageCode: function (locale) {
-                switch (locale) {
-                    case "en_GB":
-                    case "en-GB":
-                    case "en_US":
-                    case "en-US":
-                        return "en";
-                    case "de_DE":
-                    case "de-DE":
-                        return "de";
-                    default:
-                    case "fr_FR":
-                    case "fr-FR":
-                    case "fr_CA":
-                    case "fr-CA":
-                        return "fr";
-                }
-            }
-        }
-    }];
-});
 
 'use strict';
 
@@ -8403,6 +8047,236 @@ IteSoft.provider('ItMessaging',[
         };
             }]
     }])
+
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itLanguageChangeHandler
+ * @module itesoft
+ * @since 1.2
+ * @requires localStorageService
+ * @requires itPopup
+ *
+ * @description
+ * itLanguageChangeHandlerProvider modifies the current language to a new language. Features:
+ * <br/>1) Asks confirmation (optional) before changing the language;
+ * <br/>2) Stores the new culture setting either in the browser's local storage ["local"] (default),  or as a query string parameter ["query"]
+ * <br/>3) Allows the consuming service to receive returned results by a callback method.
+ * <br/>
+ * <table class="table">
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.changeLanguage(lang, [scope, callback])</code></td>
+ *   <td>Method to change the current language.
+ *    <br/>lang (required). The new language culture, e.g. "en_GB".
+ *    <br/>scope (optional). The current scope.
+ *    <br/>callback (optional). The callback function.
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getConfig()</code></td>
+ *   <td>Method to get the current configuration options.
+ *   <br />storage: local (default value) for localStorage or query for url query parameter
+ *   <br />displayConfirm: Whether or not to display a confirmation popup. True by default.
+ *   <br />onChangePopup:
+ *   <br />title: title of popup confirmation
+ *   <br />text: text of popup confirmation
+ *   <br />buttonCancelLabel: label text for the cancel button
+ *   <br />buttonOkLabel: label text for the ok button
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getCurrentLanguage()</code></td>
+ *   <td>Method to get the current language.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getDefaultLocale(lang)</code></td>
+ *   <td>Method to get the default locale from an optional language code.
+ *    <br/>lang (optional). The language code, e.g. "en".
+ *   </td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>itLanguageChangeHandler.getLanguageCode(locale)</code></td>
+ *   <td>Method to get the language code from an optional locale.
+ *    <br/>locale (optional). The locale, e.g. "en_GB".
+ *   </td>
+ *  </tr>
+ * </table>
+ *
+ * @example
+ <example module="itesoft">
+
+ <file name="Controller.js">
+    angular.module('itesoft')
+        .config(['itLanguageChangeHandlerProvider','localStorageServiceProvider', function (itLanguageChangeHandlerProvider, localStorageServiceProvider) {
+                    // example for storage option configuration value
+                    itLanguageChangeHandlerProvider.options.storage = "local";
+                     
+                    localStorageServiceProvider.setPrefix('itesoft');
+
+                }])
+        .controller('MainController',['$translate', '$scope','itLanguageChangeHandler', function($translate, $scope,itLanguageChangeHandler) {
+            $scope.initialLanguage = itLanguageChangeHandler.getCurrentLanguage();
+
+            // new language setting returned by a callback function.
+            var languageChanged = function(data){
+              $scope.currentLanguage = data.currentLanguage;
+            };
+        
+            $scope.changeLanguage = function(){
+              if($scope.locale) {
+                
+                // new language setting returned by a promise.
+                itLanguageChangeHandler.changeLanguage($scope.locale, languageChanged);
+              }
+            }
+        }]);
+ </file>
+ <file name="index.html">
+ <div ng-controller="MainController">
+    <br /> Set language: <input type="text" ng-model="locale" /> 
+    <button class="btn btn-warning" ng-click="changeLanguage()">change language</button>
+
+    <br /> Storage type: {{itLanguageChangeHandler.getConfig().storage}}
+    <br /> Initial language: {{initialLanguage}}
+    <br /> Updated current language: {{currentLanguage}}
+</div>
+ </file>
+ </example>
+ */
+IteSoft.provider('itLanguageChangeHandler', function () {
+    var self = this;
+    this.options = {
+        storage: 'local', //local for localStorage or query for url query parameter
+        displayConfirm: true,// true | false
+        onChangePopup: {
+            title: "Confirm language change",
+            text: "By modifying the language any recent changes may be lost. Continue?",
+            buttonCancelLabel: 'NO',
+            buttonOkLabel: 'YES'
+        }
+    };
+
+    this.$get = ['$rootScope', '$translate', '$location', '$q', 'localStorageService', 'itPopup', function ($rootScope, $translate, $location, $q, localStorageService, itPopup) {
+        return {
+            translate: $translate,
+            getConfig: function () {
+                return self.options;
+            },
+            changeLanguage: function (lang, scope, callback) {
+                var data = {
+                    currentLanguage:
+                        this.getCurrentLanguage()
+                };
+                if (self.options.displayConfirm) {
+                    $translate.use(lang);
+                    var confirmPopup = itPopup.confirm({
+                        title: self.options.onChangePopup.title,
+                        text: self.options.onChangePopup.text,
+                        cancelText: self.options.onChangePopup.buttonCancelLabel,
+                        okText: self.options.onChangePopup.buttonOkLabel
+                    });
+                    (function (data) {
+                        var locale = data;
+                        confirmPopup.then(function (res) {
+                            //Traduction
+                            $translate.use(lang);
+
+                            if (self.options.storage === 'query') {
+
+                                try {
+                                    $location.search('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting query parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+                            else {
+                                // Save to local storage
+                                try {
+                                    localStorageService.set('Locale', lang);
+                                } catch (e) {
+                                    reject("Error setting local storage parameter, lang, to locale value: " + lang + " Error: " + e.message);
+                                }
+                            }
+
+                            // Change language to chosen language.
+                            if (scope) {
+                                scope.currentLanguage = lang;
+                                if (scope.user) {
+                                    scope.user.language = $translate.use();
+                                }
+                            }
+
+                            data = {
+                                currentLanguage: lang,
+                            };
+
+                            if (callback) {
+                                callback(data);
+                            }
+
+                            //Reload de la page
+                            $rootScope.$applyAsync(function () {
+                                location.reload();
+                            });
+
+                        }, function () {
+                            $translate.use(locale.currentLanguage);
+                        });
+                    })(data);
+                }
+                return;
+            },
+            getCurrentLanguage: function () {
+                if (self.options.storage === 'query') {
+                    if ($location.search().Locale) {
+                        return $location.search().Locale.replace(/-/g, '_');
+                    } 
+                    else {
+                        return this.getDefaultLocale(this.translate.use());
+                    }
+                }
+                else {
+                    // load from local storage
+                    return localStorageService.get('Locale') || this.getDefaultLocale(this.translate.use());
+                }
+            },
+            getDefaultLocale: function (lang) {
+                if (!lang) {
+                    lang = $translate.preferredLanguage();
+                }
+
+                switch (lang) {
+                    case "en":
+                        return "en_GB";
+                    case "de":
+                        return "de_DE";
+                    default:
+                    case "fr":
+                        return "fr_FR";
+                }
+            },
+            getLanguageCode: function (locale) {
+                switch (locale) {
+                    case "en_GB":
+                    case "en-GB":
+                    case "en_US":
+                    case "en-US":
+                        return "en";
+                    case "de_DE":
+                    case "de-DE":
+                        return "de";
+                    default:
+                    case "fr_FR":
+                    case "fr-FR":
+                    case "fr_CA":
+                    case "fr-CA":
+                        return "fr";
+                }
+            }
+        }
+    }];
+});
 
 'use strict';
 /**
