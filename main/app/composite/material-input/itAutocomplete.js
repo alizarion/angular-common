@@ -110,6 +110,30 @@
  *          Reference to the selected item id
  *      </td>
  *  </tr>
+ *  <tr>
+ *      <td>
+ *          on-change
+ *      </td>
+ *      <td>
+ *          Function to call when value changed
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          on-blur
+ *      </td>
+ *      <td>
+ *          Function to when blur
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          on-focus
+ *      </td>
+ *      <td>
+ *          Function to call when focus
+ *      </td>
+ *  </tr>
  *  </table>
  *
  *
@@ -308,10 +332,18 @@
  <h1>ReadOnly</h1>
  <div class="row">
      <div  class="col-xs-3">
-     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"        selected-option="firstRate"  options="options" ></it-autocomplete>
+     <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"   selected-option="firstRate"  options="options" ></it-autocomplete>
      </div>
      </div>
  </div>
+ <h1>Focus and Blur</h1>
+ <div class="row">
+ <div  class="col-xs-3">
+ <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"       on-blur="test('blur')" on-focus="test('focus')"   selected-option="firstRate"  options="options" ></it-autocomplete>
+ </div>
+ </div>
+ </div>
+
  </file>
  <file name="Module.js">
  angular.module('itesoft-showcase',['ngMessages','itesoft']);
@@ -370,7 +402,7 @@
                     if(angular.isDefined(object)){
                         return object.id;
                     }else{
-                        $log.error("unable to get id of null object");
+                        $log.info("unable to get id of null object");
                     }
                 },
                 getLabelFromObject: function(object){
@@ -476,6 +508,10 @@
                 ]
             };
             $scope.selectedOption = "Lorraine";
+
+            $scope.test = function(input){
+                $log.debug(input);
+            }
      }
  ]);
  </file>
@@ -537,7 +573,14 @@ IteSoft
                  * change
                  */
                 onChange: "&",
-
+                /**
+                 * focus
+                 */
+                onFocus: "&?",
+                /**
+                 * blur
+                 */
+                onBlur: "&?",
                 /**
                  * eventToEmit
                  */
@@ -727,7 +770,7 @@ IteSoft
                             }
                             return t
                         }
-                    }
+                    };
 
                     /**
                      * Create a random name to have an autogenerate id for log
@@ -737,6 +780,7 @@ IteSoft
                     }else{
                         self.fields.name = self.fields.name;
                     }
+
                     /**
                      * public function
                      * @type {{}}
@@ -744,6 +788,8 @@ IteSoft
                     self.fn = {
                         select: select,
                         change: change,
+                        blur: blur,
+                        focus: focus,
                         init: initSelect,
                         fullInit: initItems,
                         hideItems: hideItems,
@@ -1125,6 +1171,28 @@ IteSoft
                     }
 
                     /**
+                     * Call when blur on input
+                     * @param $event
+                     */
+                    function blur($event){
+                        hideItems($event);
+                        if($scope.onBlur){
+                            $scope.onBlur();
+                        }
+                    }
+
+                    /**
+                     * Call when focus on input
+                     * @param $event
+                     */
+                    function focus($event){
+                        showItems($event);
+                        if($scope.onFocus){
+                            $scope.onFocus();
+                        }
+                    }
+
+                    /**
                      * Manage keyboard interaction up down enter
                      * @type {Array}
                      */
@@ -1293,8 +1361,9 @@ IteSoft
             ],
             template: '<div class="col-xs-12 it-autocomplete-div">' +
             '<div class="it-autocomplete-div-visible" > '+
-            '   <input ng-disabled="itAutocompleteCtrl.fields.disabled"  ng-readonly="itAutocompleteCtrl.fields.readonly" placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)" ng-focus="itAutocompleteCtrl.fn.showItems($event)" ' +
-            'ng-blur="itAutocompleteCtrl.fn.hideItems($event)" type="text" class="form-control it-autocomplete-input" ' +
+            '   <input ng-disabled="itAutocompleteCtrl.fields.disabled" ng-focus="itAutocompleteCtrl.fn.focus($event)" ng-readonly="itAutocompleteCtrl.fields.readonly" ' +
+            'placeholder="{{itAutocompleteCtrl.fields.placeholder}}" ng-keydown="itAutocompleteCtrl.fn.keyBoardInteration($event)"' +
+            'ng-blur="itAutocompleteCtrl.fn.blur($event);" type="text" class="form-control it-autocomplete-input" ' +
             'ng-class="inputClass" ng-change="itAutocompleteCtrl.fn.change($event)" ng-model="itAutocompleteCtrl.fields.inputSearch"> ' +
             '   <div class="it-autocomplete-btn"  ng-disabled="itAutocompleteCtrl.fields.disabled" ng-click="itAutocompleteCtrl.fn.showItems($event)" ng-blur="itAutocompleteCtrl.fn.hideItems($event)" > ' +
             '&#9679;&#9679;&#9679;</div>'+
