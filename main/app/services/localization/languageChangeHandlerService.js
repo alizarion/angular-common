@@ -119,7 +119,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                         this.getCurrentLanguage()
                 };
                 if (self.options.displayConfirm) {
-                    $translate.use(lang);
                     var confirmPopup = itPopup.confirm({
                         title: self.options.onChangePopup.title,
                         text: self.options.onChangePopup.text,
@@ -129,8 +128,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     (function (data) {
                         var locale = data;
                         confirmPopup.then(function (res) {
-                            //Traduction
-                            $translate.use(lang);
 
                             if (self.options.storage === 'query') {
 
