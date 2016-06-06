@@ -101,6 +101,30 @@
          Reference to the selected item id
      </td>
  </tr>
+ <tr>
+     <td>
+         on-change
+     </td>
+     <td>
+         Function to call when value changed
+     </td>
+ </tr>
+ <tr>
+     <td>
+         on-blur
+     </td>
+     <td>
+         Function to when blur
+     </td>
+ </tr>
+ <tr>
+     <td>
+         on-focus
+     </td>
+     <td>
+         Function to call when focus
+     </td>
+ </tr>
  </table></p>
 <p><h3 id="description_skinning">Skinning</h3>
 Following is the list of structural style classes:</p>
@@ -308,10 +332,18 @@ You can use a custom filter method by adding search-mode="'custom'" parameter
 <h3 id="example_readonly">ReadOnly</h3>
 <div class="row">
     <div  class="col-xs-3">
-    <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"        selected-option="firstRate"  options="options" ></it-autocomplete>
+    <it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"   selected-option="firstRate"  options="options" ></it-autocomplete>
     </div>
     </div>
 </div>
+<h3 id="example_focus-and-blur">Focus and Blur</h3>
+<div class="row">
+<div  class="col-xs-3">
+<it-autocomplete  items="firstNameOptions" name="'customPredicate'" readonly="'true'" search-mode="'custom'"       on-blur="test('blur')" on-focus="test('focus')"   selected-option="firstRate"  options="options" ></it-autocomplete>
+</div>
+</div>
+</div>
+
 </script>
 </div>
 <div class="tab-pane" title="Module.js">
@@ -376,7 +408,7 @@ angular.module('itesoft-showcase').controller('HomeCtrl',
                    if(angular.isDefined(object)){
                        return object.id;
                    }else{
-                       $log.error("unable to get id of null object");
+                       $log.info("unable to get id of null object");
                    }
                },
                getLabelFromObject: function(object){
@@ -482,11 +514,15 @@ angular.module('itesoft-showcase').controller('HomeCtrl',
                ]
            };
            $scope.selectedOption = "Lorraine";
+
+           $scope.test = function(input){
+               $log.debug(input);
+           }
     }
 ]);
 </script>
 </div>
-</div><h4 id="example_readonly_demo">Demo</h4>
+</div><h4 id="example_focus-and-blur_demo">Demo</h4>
 <div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-6" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>
