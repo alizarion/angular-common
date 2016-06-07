@@ -4541,6 +4541,10 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to get the list of zoom level items.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
+ *   <td>Callback to be notify when the property zoom levels change.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.api.getCurrentPage()</code></td>
  *   <td>Method to get the current page.</td>
  *  </tr>
@@ -4565,7 +4569,7 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to rotate to the right (90°) all pages.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api.rotatePagesLeft</code></td>
+ *   <td><code>options.api.rotatePagesLeft()</code></td>
  *   <td>Method to rotate to the left (-90°) all pages.</td>
  *  </tr>
  *  <tr>
@@ -4577,6 +4581,10 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to rotate to the left (per -90°) the current page.</td>
  *  </tr>
  *  <tr>
+ *  <tr>
+ *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
+ *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
  *  </tr>
@@ -4597,7 +4605,7 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
     angular.module('itesoft-showcase',['itesoft'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { console.log(api); } }; }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */
@@ -7702,7 +7710,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                         this.getCurrentLanguage()
                 };
                 if (self.options.displayConfirm) {
-                    $translate.use(lang);
                     var confirmPopup = itPopup.confirm({
                         title: self.options.onChangePopup.title,
                         text: self.options.onChangePopup.text,
@@ -7712,8 +7719,6 @@ IteSoft.provider('itLanguageChangeHandler', function () {
                     (function (data) {
                         var locale = data;
                         confirmPopup.then(function (res) {
-                            //Traduction
-                            $translate.use(lang);
 
                             if (self.options.storage === 'query') {
 
@@ -9373,32 +9378,23 @@ itImageViewer
 /**
  * TODO itImageViewer desc
  */
-itImageViewer.directive('itImageViewer', ['$sce', function($sce){
-    var linker = function (scope, element, attrs) {
-        scope.trustSrc = function(src) {
-            return $sce.trustAsResourceUrl(src);
-        };
+itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+     var linker = function(scope, element, attrs) {
+         MultiPagesAddEventWatcher(scope);
+     };
 
-        //notify callback when api set in options for SCPAS team
-        scope.$watch("options.api", function (value) {
-             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
-                scope.options.onApiLoaded(scope.options.api);
-             }
-        });
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    '<image-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
-        link: linker
-    };
-}]);
+     return {
+         scope: {
+             src: "=",
+             options: "="
+         },
+         restrict: 'E',
+         template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                     '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                     '<image-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}"  api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
+         link: linker
+     };
+ }]);
 
 'use strict';
 /**
@@ -9473,6 +9469,52 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
 
 'use strict';
 /**
+ * TODO MultiPagesPage desc
+ */
+itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce) {
+    return function (scope) {
+        if(scope){
+            scope.$watch("src", function (src) {
+                if(typeof src === typeof "") {
+                    scope.url = src;
+                }else{
+                    scope.file = src;
+                }
+            });
+
+            scope.$watch("options.thumbnailApi", function (thumbnailApi) {
+                if(thumbnailApi) {
+                    thumbnailApi.onPageClicked = function (pageIndex) {
+                        if(scope.options.api) {
+                            scope.options.api.goToPage(pageIndex);
+                        }
+                    };
+                }
+            });
+
+            scope.$watch("options.api", function (api) {
+                if(api) {
+                    if(scope.options && scope.options.onApiLoaded) {
+                        scope.options.onApiLoaded(api);
+                    }
+
+                    api.onPageRotation = function (args) {
+                        if(scope.options.thumbnailApi) {
+                            scope.options.thumbnailApi.rotatePage(args);
+                        }
+                    };
+                }
+            });
+
+            scope.trustSrc = function(src) {
+                return $sce.trustAsResourceUrl(src)
+            };
+        }
+    };
+}]);
+
+'use strict';
+/**
  * TODO MultiPagesConstants desc
  */
 itMultiPagesViewer.constant("MultiPagesConstants", {
@@ -9496,22 +9538,22 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageViewport) {
+itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport', function ($log, MultiPagesConstants, PageViewport) {
 
     function MultiPagesPage(pageIndex, view) {
-    			this.id = pageIndex + 1;
-    			this.container = angular.element("<div class='page'></div>");
-    			this.container.attr("id", "page_" + pageIndex);
+        this.id = pageIndex + 1;
+        this.container = angular.element("<div class='page' ng-click='api.onPageClicked(" + this.id + ")'></div>");
+        this.container.attr("id", "page_" + pageIndex);
 
-    			this.canvasRendered = false;
-    			this.rendered = false;
+        this.canvasRendered = false;
+        this.rendered = false;
 
-    			//transform
-                this.rotation = 0;
-                this.scale = 1.0;
-    			this.view = view;
+        //transform
+          this.rotation = 0;
+          this.scale = 1.0;
+        this.view = view;
 
-    		}
+    }
 
     MultiPagesPage.prototype = {
         clear: function () {
@@ -9523,22 +9565,22 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
         },
         transform : function() {
             this.clear();
-            this.viewport = this.getViewport(this.scale, this.rotation);
-            this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
+              this.viewport = this.getViewport(this.scale, this.rotation);
+              this.canvasRendered = false;
+              this.canvas = angular.element("<canvas></canvas>");
+              this.canvas.attr("width", this.viewport.width);
+              this.canvas.attr("height", this.viewport.height);
 
-            this.container.css("width", this.viewport.width + "px");
-            this.container.css("height", this.viewport.height + "px");
+              this.container.css("width", this.viewport.width + "px");
+              this.container.css("height", this.viewport.height + "px");
         },
         resize: function (scale) {
             this.scale = scale;
             this.transform();
         },
         rotate: function (rotation) {
-            this.rotation = rotation;
-            this.transform();
+              this.rotation = rotation;
+              this.transform();
             /*// The canvas may have been originally rotated, rotate relative to that.
             //var relativeRotation = rotation - this.canvas._viewport.rotation;
             var relativeRotation = rotation;
@@ -9586,31 +9628,31 @@ itMultiPagesViewer.factory('MultiPagesPage', ['PageViewport', function (PageView
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log, $timeout, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
     function getElementInnerSize(element, margin) {
-    			var tallTempElement = angular.element("<div></div>");
-    			tallTempElement.css("height", "10000px");
+        var tallTempElement = angular.element("<div></div>");
+        tallTempElement.css("height", "10000px");
 
-    			element.append(tallTempElement);
+        element.append(tallTempElement);
 
-    			var w = tallTempElement[0].offsetWidth;
+        var w = tallTempElement[0].offsetWidth;
 
-    			tallTempElement.remove();
+        tallTempElement.remove();
 
-    			var h = element[0].offsetHeight;
-    			if(h === 0) {
-    				// TODO: Should we get the parent height?
-    				h = 2 * margin;
-    			}
+        var h = element[0].offsetHeight;
+        if(h === 0) {
+            // TODO: Should we get the parent height?
+            h = 2 * margin;
+        }
 
-    			w -= 2 * margin;
-    			h -= 2 * margin;
+        w -= 2 * margin;
+        h -= 2 * margin;
 
-    			return {
-    				width: w,
-    				height: h
-    			};
-    		}
+        return {
+            width: w,
+            height: h
+        };
+    }
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
@@ -9652,6 +9694,8 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
         setContainerSize: function (initialScale) {
             if(this.pages.length > 0) {
                 this.containerSize = getElementInnerSize(this.element, this.pageMargin);
+
+                var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
 
                 this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
                 this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
@@ -9695,25 +9739,24 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                    });
                 }
 
-                if (this.scaleItem == undefined && this.scaleItems[initialScale] != undefined) {
-                    this.scaleItem = this.scaleItems[initialScale];
+                if (this.scaleItem == undefined && initialScale) {
+                    if(this.scaleItems[initialScale] != undefined) {
+                        this.scaleItem = this.scaleItems[initialScale];
+                    }else{
+                        $log.debug("InitialScale not found : " + initialScale);
+                    }
                 }
 
-                this.setScale(this.scaleItem || this.scaleItems[1]);
-            }
-        },
-        rotate : function (args) {
-            if(args != undefined) {
-                var page = this.pages[args.pageIndex | (this.currentPage -1)];
-                if(page != undefined) {
-                    var rotation = page.viewport.rotation + args.rotation;
-                    if(rotation === 360 || rotation === -360){
-                        rotation = 0;
-                    }
-                    page.viewport.rotation = rotation;
-                    page.rotate(rotation);
-                    this.setContainerSize(this.initialScale);
+                if(this.api.onZoomLevelsChanged ) {
+                    this.api.onZoomLevelsChanged (this.zoomLevels);
                 }
+
+                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
+                    this.render();
+                    return;
+                }
+
+                this.setScale(this.scaleItem || this.scaleItems["100%"]);
             }
         },
         setScale: function (scaleItem) {
@@ -9729,11 +9772,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 this.pages[iPage].resize(sci.value);
             }
 
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
-            }else{
-                this.renderAllVisiblePages();
-            }
+            this.render();
         },
         calcScale: function (desiredScale) {
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
@@ -9850,6 +9889,51 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                 this.onCurrentPageChanged( currentPageID + 1);
             }
         },
+        render: function () {
+            if(this.currentPage != 0 && this.currentPage != 1) {
+                this.api.goToPage(this.currentPage);
+            }else{
+                this.renderAllVisiblePages();
+            }
+        },
+        rotate : function (args) {
+            if(args != undefined) {
+                var page = this.pages[args.pageIndex];
+                if(page != undefined) {
+                    var rotation = page.viewport.rotation + args.rotation;
+                    if(rotation === 360 || rotation === -360){
+                        rotation = 0;
+                    }
+                    page.viewport.rotation = rotation;
+                    page.rotate(rotation);
+                    if(this.api.onPageRotation) {
+                        this.api.onPageRotation(args);
+                    }
+                    this.setContainerSize(this.initialScale);
+                }
+            }
+        },
+        downloadProgress: function(progressData) {
+            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+            // give us the total size of the document (total == undefined). In this case,
+            // we guess the total size in order to correctly show a progress bar if needed (even
+            // if the actual progress indicator will be incorrect).
+            var total = 0;
+            if (typeof progressData.total === "undefined")
+            {
+                while (total < progressData.loaded)
+                {
+                    total += 1024 * 1024;
+                }
+            }
+            else {
+                total = progressData.total;
+            }
+
+            if(this.onDataDownloaded){
+                this.onDataDownloaded("loading", progressData.loaded, total, "");
+            }
+        },
         hookScope: function(scope) {
             var self = this;
             var lastScrollY = 0;
@@ -9861,6 +9945,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
             var onProgress = function(operation, state, value, total, message) {
                 if (operation === "render" && value === 1) {
                     if (state === "success") {
+                         $compile(self.element.contents())(scope);
                         $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
                     }
                     else {
@@ -9915,127 +10000,111 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout' , 'MultiPages
                     self.renderAllVisiblePages(normalizedScrollDir);
                 }, 350);
             });
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
-                }
-            }
-            else {
-                total = progressData.total;
-            }
-
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
         }
     };
 
     return (MultiPagesViewer);
 }]);
+
 'use strict';
 /**
  * TODO MultiPagesViewerAPI desc
  */
 itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
 
-        function MultiPagesViewerAPI(viewer) {
-        			this.viewer = viewer;
-        			this.rotation = 0;
-        		};
+    function MultiPagesViewerAPI(viewer) {
+        this.viewer = viewer;
+        this.rotation = 0;
+    };
 
-        MultiPagesViewerAPI.prototype = {
-            getZoomLevels: function () {
-                return this.viewer.zoomLevels;
-            },
-            zoomTo: function (scaleItem) {
-                if(scaleItem != undefined) {
-                    this.viewer.setScale(scaleItem);
-                }
-            },
-            getZoomLevel: function () {
-                return this.viewer.scaleItem;
-            },
-            zoomIn: function() {
-                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-                if(index < this.viewer.zoomLevels.length) {
-                    this.zoomTo(this.viewer.zoomLevels[index + 1]);
-                }
-            },
-            zoomOut: function() {
-                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-                if(index > 0) {
-                    this.zoomTo(this.viewer.zoomLevels[index - 1]);
-                }
-            },
-            getCurrentPage: function () {
-                return this.viewer.currentPage;
-            },
-            goToPage: function (pageIndex) {
-                if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                    return;
-                }
-
-                //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-                var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-                if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
-                    offsetTop -= 1;
-                }
-                this.viewer.element[0].scrollTop = offsetTop;
-            },
-            goToNextPage: function () {
-                this.goToPage(this.viewer.currentPage + 1);
-            },
-            goToPrevPage: function () {
-                this.goToPage(this.viewer.currentPage - 1);
-            },
-            getNumPages: function () {
-                return this.viewer.pages.length;
-            },
-            rotatePagesRight: function() {
-                var numPages = this.viewer.pages.length;
-                var rotation = this.rotation + 90;
-                if(rotation === 360 || rotation === -360) {
-                    rotation = 0;
-                }
-                this.rotation = rotation;
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    this.viewer.pages[iPage].rotate(rotation);
-                }
-
-                this.viewer.setContainerSize(this.viewer.initialScale);
-            },
-            rotatePagesLeft: function() {
-                var numPages = this.viewer.pages.length;
-                var rotation = this.rotation - 90;
-                if(rotation === 360 || rotation === -360){
-                    rotation = 0;
-                }
-                this.rotation = rotation;
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    this.viewer.pages[iPage].rotate(rotation);
-                }
-
-                this.viewer.setContainerSize(this.viewer.initialScale);
-            },
-            rotatePageRight: function(pageIndex) {
-                this.viewer.rotate({ pageIndex : pageIndex, rotation: 90 });
-            },
-            rotatePageLeft: function(pageIndex) {
-                this.viewer.rotate({ pageIndex : pageIndex, rotation: -90 });
+    MultiPagesViewerAPI.prototype = {
+        getZoomLevels: function () {
+            return this.viewer.zoomLevels;
+        },
+        zoomTo: function (scaleItem) {
+            if(scaleItem != undefined) {
+                this.viewer.setScale(scaleItem);
             }
-        };
+        },
+        getZoomLevel: function () {
+            return this.viewer.scaleItem;
+        },
+        zoomIn: function() {
+            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+            if(index < this.viewer.zoomLevels.length) {
+                this.zoomTo(this.viewer.zoomLevels[index + 1]);
+            }
+        },
+        zoomOut: function() {
+            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+            if(index > 0) {
+                this.zoomTo(this.viewer.zoomLevels[index - 1]);
+            }
+        },
+        getCurrentPage: function () {
+            return this.viewer.currentPage;
+        },
+        goToPage: function (pageIndex) {
+            if(pageIndex < 1 || pageIndex > this.getNumPages()) {
+                return;
+            }
 
-        return (MultiPagesViewerAPI);
-    }]);
+            //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
+            var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
+            if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
+                offsetTop -= 1;
+            }
+            this.viewer.element[0].scrollTop = offsetTop;
+        },
+        goToNextPage: function () {
+            this.goToPage(this.viewer.currentPage + 1);
+        },
+        goToPrevPage: function () {
+            this.goToPage(this.viewer.currentPage - 1);
+        },
+        getNumPages: function () {
+            return this.viewer.pages.length;
+        },
+        rotatePagesRight: function() {
+            var numPages = this.viewer.pages.length;
+            var rotation = this.rotation + 90;
+            if(rotation === 360 || rotation === -360) {
+                rotation = 0;
+            }
+            this.rotation = rotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.viewer.pages[iPage].rotate(rotation);
+            }
+
+            this.viewer.setContainerSize(this.viewer.initialScale);
+        },
+        rotatePagesLeft: function() {
+            var numPages = this.viewer.pages.length;
+            var rotation = this.rotation - 90;
+            if(rotation === 360 || rotation === -360){
+                rotation = 0;
+            }
+            this.rotation = rotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.viewer.pages[iPage].rotate(rotation);
+            }
+
+            this.viewer.setContainerSize(this.viewer.initialScale);
+        },
+        rotatePageRight: function(pageIndex) {
+            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: 90 });
+        },
+        rotatePageLeft: function(pageIndex) {
+            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: -90 });
+        },
+        rotatePage: function(args) {
+            this.viewer.rotate(args);
+        }
+    };
+
+    return (MultiPagesViewerAPI);
+}]);
+
 
 'use strict';
 /**
@@ -10235,43 +10304,27 @@ itPdfViewer.factory('CustomStyle', [function () {
 /**
  * TODO itPdfViewer desc
  */
-itPdfViewer.directive('itPdfViewer', ['$sce', function($sce) {
-	var linker = function (scope, element, attrs) {
-		scope.onPassword = function (reason) {
-			return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
-		};
+itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function (scope, element, attrs) {
+        scope.onPassword = function (reason) {
+            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
 
-		scope.$watch("src", function (src) {
-			if(typeof src === typeof ""){
-				scope.url = src;
-			}else{
-				scope.file = src;
-			}
-		});
+        MultiPagesAddEventWatcher(scope);
+    };
 
-		scope.trustSrc = function(src) {
-			return $sce.trustAsResourceUrl(src);
-		};
-
-        //notify callback when api set in options for SCPAS team
-        scope.$watch("options.api", function (value) {
-             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
-                scope.options.onApiLoaded(scope.options.api);
-             }
-        });
-	};
-
-	return {
-		scope: {
-			src: "=",
-			options: "="
-		},
-		restrict: 'E',
-		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
-		link: linker
-	};
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<pdf-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></pdf-viewer>' +
+                    '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
+        link: linker
+    };
 }]);
 'use strict';
 /**
@@ -10318,12 +10371,12 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage, textContent) {
+        function PDFPage(pdfPage) {
             this.base = MultiPagesPage;
             this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
-            this.textContent = textContent;
+            this.textContent = null;
             this.renderTask = null;
         }
 
@@ -10347,76 +10400,82 @@ itPdfViewer
             this.textLayer.css("height", this.viewport.height + "px");
         };
         PDFPage.prototype.render = function (callback) {
-                var self = this;
-                if(this.rendered) {
-                    if(this.renderTask === null) {
+            var self = this;
+            if(this.rendered) {
+                if(this.renderTask === null) {
+                    if(callback) {
+                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                    }
+                } else {
+                    this.renderTask.then(function () {
                         if(callback) {
-                            callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                         }
-                    } else {
-                        this.renderTask.then(function () {
-                            if(callback) {
-                                callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                            }
-                        }, function (reason) {
-                            $log.debug('stopped ' + reason);
+                    }, function (reason) {
+                        $log.debug('stopped ' + reason);
+                    });
+                }
+
+                return;
+            }
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+                if(self.textContent) {
+                    self.container.append(self.textLayer);
+                }
+            }else{
+
+                self.container.append(self.canvas);
+
+                this.renderTask = this.pdfPage.render({
+                    canvasContext: this.canvas[0].getContext('2d'),
+                    viewport: this.viewport
+                });
+
+
+
+                this.renderTask.then(function () {
+
+                    self.rendered = true;
+                    self.renderTask = null;
+                    self.canvasRendered = true;
+                    //self.container.append(self.canvas);
+
+                    if(self.textContent) {
+                        // Render the text layer...
+                        var textLayerBuilder = new TextLayerBuilder({
+                            textLayerDiv: self.textLayer[0],
+                            pageIndex: self.id,
+                            viewport: self.viewport
                         });
+
+                        textLayerBuilder.setTextContent(self.textContent);
+                        textLayerBuilder.renderLayer();
+                        self.container.append(self.textLayer);
                     }
 
-                    return;
-                }
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                }, function (message) {
+                    self.rendered = false;
+                    self.renderTask = null;
 
-                this.rendered = true;
-
-                if(this.canvasRendered){
-                    self.container.append(self.canvas);
-                    self.container.append(self.textLayer);
-                }else{
-                    this.renderTask = this.pdfPage.render({
-                        canvasContext: this.canvas[0].getContext('2d'),
-                        viewport: this.viewport
-                    });
-
-                    self.container.append(self.canvas);
-
-                    this.renderTask.then(function () {
-                        self.rendered = true;
-                        self.renderTask = null;
-                        self.canvasRendered = true;
-                        //self.container.append(self.canvas);
-
-                        if(self.textContent) {
-                            // Render the text layer...
-                            var textLayerBuilder = new TextLayerBuilder({
-                                textLayerDiv: self.textLayer[0],
-                                pageIndex: self.id,
-                                viewport: self.viewport
-                            });
-
-                            textLayerBuilder.setTextContent(self.textContent);
-                            textLayerBuilder.renderLayer();
-                            self.container.append(self.textLayer);
-                        }
-
+                    if(message === "cancelled") {
                         if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDERED);
+                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
                         }
-                    }, function (message) {
-                        self.rendered = false;
-                        self.renderTask = null;
-
-                        if(message === "cancelled") {
-                            if(callback) {
-                                callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
-                            }
-                        } else {
-                            if(callback) {
-                                callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
-                            }
+                    } else {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
                         }
-                    });
-                }
-            };
+                    }
+                });
+            }
+        };
 
         return (PDFPage);
     }])
@@ -10436,42 +10495,67 @@ itPdfViewer
         PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
             this.element.empty();
             this.pages = [];
-            this.pageMargin = pageMargin;
-            this.initialScale = initialScale;
-            this.hasTextLayer = renderTextLayer;
-            var isFile = typeof obj != typeof "";
+            if (obj !== undefined && obj !== null && obj !== '') {
+                this.pageMargin = pageMargin;
+                this.initialScale = initialScale;
+                this.hasTextLayer = renderTextLayer;
+                var isFile = typeof obj != typeof "";
 
-            if(this.getDocumentTask != undefined){
-                var self = this;
-                this.getDocumentTask.destroy().then(function (){
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function (){
+                        if(isFile){
+                            self.setFile(obj);
+                        }else {
+                            self.setUrl(obj);
+                        }
+                    });
+                } else {
                     if(isFile){
-                        self.setFile(obj);
+                        this.setFile(obj);
                     }else {
-                        self.setUrl(obj);
+                        this.setUrl(obj);
                     }
-
-                });
-            } else {
-                if(isFile){
-                    this.setFile(obj);
-                }else {
-                    this.setUrl(obj);
                 }
             }
         };
         PDFViewer.prototype.setUrl = function (url) {
-            if (url !== undefined && url !== null && url !== '') {
-                var self = this;
-                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-                this.getDocumentTask.then(function (pdf) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+
+                    // Append all page containers to the $element...
+                    for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                        self.element.append(pageList[iPage].container);
+                    }
+
+                    self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
 
-                    self.getAllPages( function (pageList, pagesRefMap) {
+                    self.getAllPages(function (pageList, pagesRefMap) {
                         self.pages = pageList;
                         self.pagesRefMap = pagesRefMap;
 
                         // Append all page containers to the $element...
-                        for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
                             self.element.append(pageList[iPage].container);
                         }
 
@@ -10480,67 +10564,39 @@ itPdfViewer
                 }, function (message) {
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
-            }
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            if (file !== undefined && file !== null) {
-                var self = this;
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var arrayBuffer = e.target.result;
-                    var uint8Array = new Uint8Array(arrayBuffer);
-                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                    getDocumentTask.then(function (pdf) {
-                        self.pdf = pdf;
+            };
 
-                        self.getAllPages(function (pageList, pagesRefMap) {
-                            self.pages = pageList;
-                            self.pagesRefMap = pagesRefMap;
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
 
-                            // Append all page containers to the $element...
-                            for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                                self.element.append(pageList[iPage].container);
-                            }
-
-                            self.setContainerSize(self.initialScale);
-                        });
-                    }, function (message) {
-                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                    });
-                };
-
-                reader.onprogress = function (e) {
-                    self.downloadProgress(e);
-                };
-
-                reader.onloadend = function (e) {
-                    var error = e.target.error;
-                    if(error !== null) {
-                        var message = "File API error: ";
-                        switch(e.code) {
-                            case error.ENCODING_ERR:
-                                message += "Encoding error.";
-                                break;
-                            case error.NOT_FOUND_ERR:
-                                message += "File not found.";
-                                break;
-                            case error.NOT_READABLE_ERR:
-                                message += "File could not be read.";
-                                break;
-                            case error.SECURITY_ERR:
-                                message += "Security issue with file.";
-                                break;
-                            default:
-                                message += "Unknown error.";
-                                break;
-                        }
-
-                        self.onDataDownloaded("failed", 0, 0, message);
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
                     }
-                };
 
-                reader.readAsArrayBuffer(file);
-            }
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
         };
         PDFViewer.prototype.getAllPages = function (callback) {
             var pageList = [],
@@ -10558,7 +10614,7 @@ itPdfViewer
                         var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
                         pagesRefMap[refStr] = page.pageIndex + 1;
 
-                        var pdfPage = new PDFPage(page, null);
+                        var pdfPage = new PDFPage(page);
                         pageList[page.pageIndex] = pdfPage;
 
                         --remainingPages;
@@ -10577,7 +10633,7 @@ itPdfViewer
 
                     var getPageTask = this.pdf.getPage(iPage + 1);
                     getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page, null);
+                        pageList[page.pageIndex] = new PDFPage(page);
 
                         --remainingPages;
                         if(remainingPages === 0) {
@@ -11038,33 +11094,24 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 /**
  * TODO itTiffViewer desc
  */
-itTiffViewer.directive('itTiffViewer', ['$sce', function($sce) {
-	var linker = function(scope, element, attrs) {
+itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function(scope, element, attrs) {
+        MultiPagesAddEventWatcher(scope);
+    };
 
-		scope.trustSrc = function(src) {
-			return $sce.trustAsResourceUrl(src);
-		};
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<tiff-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></tiff-viewer>' +
+                    '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
+        link: linker
 
-		//notify callback when api set in options for SCPAS team
-        scope.$watch("options.api", function (value) {
-             if(scope.options && scope.options.onApiLoaded && scope.options.api) {
-                scope.options.onApiLoaded(scope.options.api);
-             }
-        });
-	};
-
-	return {
-		scope: {
-			src: "=",
-			options: "="
-		},
-		restrict: 'E',
-		template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-					'<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-					'<tiff-viewer class="multipage-viewer" src="{{trustSrc(src)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
-		link: linker
-
-	};
+    };
 }]);
 'use strict';
 /**
