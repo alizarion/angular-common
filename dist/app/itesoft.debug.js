@@ -6360,19 +6360,19 @@ IteSoft
         function ($resource, CONFIG) {
             return {
                 custom: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/custom/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/blocks/custom/'+CONFIG.CURRENT_PACKAGE+'/:name'),
                 all: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/all/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/blocks/all/'+CONFIG.CURRENT_PACKAGE+'/:name'),
                 original: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/original/:name'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/blocks/original/:name'),
                 customByOriginal: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/original/'+CONFIG.CURRENT_PACKAGE+'/:name/custom'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/original/'+CONFIG.CURRENT_PACKAGE+'/:name/custom'),
                 restore: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/blocks/restore/'+CONFIG.CURRENT_PACKAGE+'/:name'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/blocks/restore/'+CONFIG.CURRENT_PACKAGE+'/:name'),
                 build: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/packages/build'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/build'),
                 preview: $resource(
-                    CONFIG.REST_TEMPLATE_API_URL + '/packages/preview'),
+                    CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/preview'),
                 'new': function (name, ref, position, content, roleAllowed, version) {
                     return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
                 },
@@ -6463,8 +6463,7 @@ IteSoft
  <file name="Module.js">
      angular.module('itesoft-showcase',['itesoft','ngResource'])
      .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "REST_TEMPLATE_API_URL": "http://localhost:8082",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
                 "ENABLE_TEMPLATE_EDITOR": true,
                 "SKIP_LOGIN" : true,
@@ -6670,10 +6669,10 @@ IteSoft.directive('itBlock',
  </div>
  </file>
  <file name="Module.js">
+
  angular.module('itesoft-showcase',['ngResource','itesoft'])
  .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "REST_TEMPLATE_API_URL": "http://localhost:8082",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
                 "ENABLE_TEMPLATE_EDITOR": false,
                 "SKIP_LOGIN" : true,
@@ -6681,6 +6680,7 @@ IteSoft.directive('itBlock',
                 "VERSION": "v1",
             })
  </file>
+
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl',
  ['$scope','$rootScope',
@@ -6694,31 +6694,30 @@ IteSoft.directive('itBlockControlPanel',
             return {
                 restrict: 'EA',
                 scope: true,
+                //language=html
                 template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '<div ng-if="itBlockControlPanelController.editorIsOpen" class="col-xs-12"/> ' +
-                '<div class="block-control-panel-action-container col-xs-12">' +
-                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true" ><i class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false" ><i class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i class="fa fa-stop"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i class="fa fa-play"></i></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank" ><i class="fa fa-floppy-o"></i></a></it-circular-btn>' +
-                '<span ng-if="!itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Press Ctrl and move your mouse over a block)</span>' +
-                '<span ng-if="itBlockControlPanelController.focusable" class="col-xs-8 block-control-panel-help">(Release Ctrl over an element to select it)</span>' +
-                '</div>' +
-                '<div class=" btn btn-danger offline-editor"  ng-if="!itBlockControlPanelController.editorIsOpen" aria-label="Left Align">' +
-                '<span class="fa fa-exclamation" aria-hidden="true"></span>' +
-                '<a  target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}" >{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\' | translate}}</a>' +
-                '</div>' +
-                '<div class="block-lists"  ng-if="$root.editSite">' +
-                '<div ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
+                '\n    <div class="col-xs-12"/>' +
+                '\n    <div class="block-lists">\n        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"\n             aria-label="Left Align">\n            <span class="fa fa-exclamation" aria-hidden="true"></span>\n            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|\n                translate}}</a>\n        </div>' +
+                '<div class="row" style="margin-bottom: 10px;">'+
+                '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl\n                and move your mouse over a block)\n            </div>' +
+                '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release\n                Ctrl over an element to select it)\n            </div>' +
+                '    </div>' +
+                '<div>'+
+                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true"><i class="fa fa-pencil"></i>\n            </it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false"><i class="fa fa-eye"></i>\n            </it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i>\n            </it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i\n                    class="fa fa-stop"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i\n                    class="fa fa-play"></i></it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank"><i\n                    class="fa fa-floppy-o"></i></a></it-circular-btn>' +
+                '</div>'+
+                '<div ng-if="$root.editSite" ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'"\n             ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
                 ' class="{{itBlockControlPanelController.getClass(block)}}">' +
                 '<div class="block-lists-name">{{block.name}}</div>' +
                 '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i></it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i  class="fa fa-pencil"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i  class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i  class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i>\n                </it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i class="fa fa-pencil"></i>\n                </it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i\n                        class="fa fa-eye"></i></it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i\n                        class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -6734,7 +6733,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.editorIsOpen = false;
                             self.CONFIG = CONFIG;
                             self.blocks = [];
-                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/export/' + CONFIG.CURRENT_PACKAGE;
+                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/api/rest/export/' + CONFIG.CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
@@ -7051,7 +7050,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'CONFIG',
         self.fields = {
             socket: {},
             request: {
-                url: CONFIG.REST_EDITOR_API_URL,
+                url: CONFIG.REST_TEMPLATE_API_URL+"/api/editor",
                 contentType: 'application/json',
                 logLevel: 'debug',
                 transport: 'websocket',
