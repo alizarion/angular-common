@@ -83,8 +83,7 @@
  <file name="Module.js">
      angular.module('itesoft-showcase',['itesoft','ngResource'])
      .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8080/rest",
-                "REST_EDITOR_API_URL": "http://localhost:8081/editor",
+                "REST_TEMPLATE_API_URL": "http://localhost:8082",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
                 "ENABLE_TEMPLATE_EDITOR": true,
                 "SKIP_LOGIN" : true,
