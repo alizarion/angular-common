@@ -4445,6 +4445,45 @@ IteSoft
             }
         }
 }]);
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4784,45 +4823,6 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 "use strict";
 /**
  * @ngdoc directive
@@ -7899,365 +7899,368 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     <example module="itesoft">
 
          <file name="Controller.js">
+             var BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+             var API_KEY = 'fbd0ca6b-e3e4-47e3-952a-c0e7630f9932';
+                function Message(messageText){
+                          this.to = [];
+                          this.data =  {
+                            "message" : messageText
+                          };
+                          this.notification = {
+                            title: self.username + ' sent you a message',
+                            body : self.username + ' sent you a message',
+                            icon : 'comment-o'
+                       }
+                    }
+
+                     angular.module('itesoft')
+                     .config(['ItMessagingProvider', function(ItMessagingProvider) {
+                            ItMessagingProvider.SERVICE_URL = BASE_URL;
+                       }])
+                     .filter('conversation',[ function() {
+                      return function(input,args) {
+                        var result ='';
+                        var stringResult = '';
+                        if(input.startsWith('conversation:')){
+                          input = input.replace('conversation:','');
+                          input = input.replace(args+':','');
+                            input = input.replace(args,'');
+                          result =  input.split(':');
+                          angular.forEach(result,function(entry){
+                              stringResult = stringResult + ' ' +entry;
+                          })
+                          return stringResult;
+                        }
+
+                        return input;
+                      };
+                      }])
+
+                     .filter('topic',[ function() {
+                          return function(input,arge) {
+
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                    if(entry.reference.startsWith('conversation:')){
+                                      result.push(entry);
+                                    }
+
+                              });
+
+                              return result;
+                            }
+                            return input;
+                          };
+                      }])
+
+                     .filter('group',[ function() {
+                          return function(input,groups) {
+
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                  angular.forEach(entry.to ,function(dest){
+                                    angular.forEach(groups,function(group){
+                                       if(dest.startsWith(group + ':')){
+                                      result.push(entry);
+                                    }
+                                    })
+
+                                  })
+                              });
+                              return result;
+                            }
+                            return input;
+
+                          };
+                      }])
+                     .filter('recipient',[ function() {
+                          return function(input,arge) {
+
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                  angular.forEach(entry.to, function(entry2){
+                                    if(entry2.startsWith(arge+':')){
+                                      result.push(entry);
+                                    }
+
+                              });
+                             });
+                              return result;
+                            }
+                            return input;
+                          };
+                      }])
+                     .controller('MainController',['ItMessaging','itNotifier','$scope','FakeNotifierService',
+                     function(ItMessaging,itNotifier,$scope,FakeNotifierService){
+
+                        var self = this;
+
+                        self.BASE_URL = BASE_URL;
+                        self.SHOWCASE_TOPIC = "group:all";
+                        self.INVOICES_TOPIC = "invoices:xxxxxx"
+                        self.API_KEY = API_KEY;
+                        var itmsg = new ItMessaging(self.BASE_URL);
+
+                        self.messages = [];
+                        self.topics = [];
+                        self.selectedTopic = null;
+                        self.username = null;
+
+                        self.isConnected = false;
+                        self.username = null;
+
+                        itmsg.onMessage(function(message,topics){
+                          self.topics = topics;
+                          self.messages.push(message);
+
+                          _scrollToBottom();
+                        });
+
+                        itmsg.onClose(function(event){
+                           itNotifier.notifyError({
+                                      content: "Error popup",
+                                      dismissOnTimeout: false
+                                  },
+                                  {
+                                      CODE:500,
+                                      TYPE:'error',
+                                      MESSAGE:'Something bad happened',
+                                      DETAIL:'You don\'t wanna know',
+                                      DONE:1
+                                  });
+
+                           self.isConnected = false;
+                        });
+
+                        this.login = function(username){
+                          self.username = username;
+                          itmsg.getToken(self.API_KEY ,{id : username, displayName : username},898090).then(function(token){
+                            var fake  = new FakeNotifierService(token);
+                            fake.startNotify();
+                           self.isConnected = itmsg.connect(token);
+                           itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
+                           itmsg.subscribeToTopic(self.INVOICES_TOPIC,[{id : self.username}]);
+                          });
+                        }
+
+                        this.sendMessage = function(messageText){
+                          var m = new Message(messageText);
+                          var r =  _textMessageExtractor(messageText);
+                          var topicName = null;
+                          if(r.topicName){
+                            topicName =r.topicName;
+                          } else if(self.selectedTopic) {
+                             topicName =self.selectedTopic.reference;
+                          } else {
+                            topicName = self.SHOWCASE_TOPIC;
+                          }
+                          m.to.push('/topic/'+topicName);
+                          itmsg.subscribeToTopic(topicName,r.observers)
+                              .then(function(ok){
+                                   itmsg.sendMessage(m);
+                          });
+                          self.$textMessage = '';
+                        }
+
+                        this.selectCurrentTopic = function(topic){
+                          self.selectedTopic = topic;
+                          _scrollToBottom();
+                        }
+
+                        this.unSubscribe = function(topicName){
+                          itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
+                        }
 
 
-            function Message(messageText){
-                   this.to = [];
-                   this.data =  {
-                     "message" : messageText
-                   };
-                   this.notification = {
-                     title: self.username + ' sent you a message',
-                     body : self.username + ' sent you a message',
-                     icon : 'comment-o'
-                }
-             }
-
-             angular.module('itesoft')
-             .filter('conversation',[ function() {
-               return function(input,args) {
-                 var result ='';
-                 var stringResult = '';
-                 if(input.startsWith('conversation:')){
-                   input = input.replace('conversation:','');
-                   input = input.replace(args+':','');
-                     input = input.replace(args,'');
-                   result =  input.split(':');
-                   angular.forEach(result,function(entry){
-                       stringResult = stringResult + ' ' +entry;
-                   })
-                   return stringResult;
-                 }
-
-                 return input;
-               };
-               }])
-
-             .filter('topic',[ function() {
-                   return function(input,arge) {
-
-                     var result = [];
-                     if(input){
-                       angular.forEach(input, function(entry){
-                             if(entry.address.startsWith('conversation:')){
-                               result.push(entry);
-                             }
-
-                       });
-
-                       return result;
-                     }
-                     return input;
-                   };
-               }])
-             .filter('group',[ function() {
-                   return function(input,groups) {
-
-                     var result = [];
-                     if(input){
-                       angular.forEach(input, function(entry){
-                           angular.forEach(entry.to ,function(dest){
-                             angular.forEach(groups,function(group){
-                                if(dest.startsWith(group + ':')){
-                               result.push(entry);
-                             }
-                             })
-
-                           })
-                       });
-                       return result;
-                     }
-                     return input;
-
-                   };
-               }])
-             .filter('recipient',[ function() {
-                   return function(input,arge) {
-
-                     var result = [];
-                     if(input){
-                       angular.forEach(input, function(entry){
-                           angular.forEach(entry.to, function(entry2){
-                             if(entry2.startsWith(arge+':')){
-                               result.push(entry);
-                             }
-
-                       });
-                      });
-                       return result;
-                     }
-                     return input;
-                   };
-               }])
-             .controller('MainController',['ItMessaging','itNotifier','$scope','FakeNotifierService',
-             function(ItMessaging,itNotifier,$scope,FakeNotifierService){
-
-                 var self = this;
-
-                 self.BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
-                 self.SHOWCASE_TOPIC = "group:all";
-                 self.INVOICES_TOPIC = "invoices:xxxxxx"
-                 self.API_KEY = 'my-secret-api-key';
-                 var itmsg = new ItMessaging(self.BASE_URL);
-
-                 self.messages = [];
-                 self.topics = [];
-                 self.selectedTopic = null;
-                 self.username = null;
-
-                 self.isConnected = false;
-                 self.username = null;
-
-                 itmsg.onMessage(function(message,topics){
-                   self.topics = topics;
-
-                   self.messages.push(message);
-
-                   _scrollToBottom();
-                 });
-
-                 itmsg.onClose(function(event){
-                    itNotifier.notifyError({
-                               content: "Error popup",
-                               dismissOnTimeout: false
-                           },
-                           {
-                               CODE:500,
-                               TYPE:'error',
-                               MESSAGE:'Something bad happened',
-                               DETAIL:'You don\'t wanna know',
-                               DONE:1
-                           });
-
-                    self.isConnected = false;
-                 });
-
-                 this.login = function(username){
-                   self.username = username;
-                   itmsg.getToken(self.API_KEY ,username).then(function(token){
-                     var fake  = new FakeNotifierService(token);
-                     fake.startNotify();
-                    self.isConnected = itmsg.connect(token);
-                    itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
-                    itmsg.subscribeToTopic(self.INVOICES_TOPIC,[{id : self.username}]);
-                   });
-                 }
-
-                 this.sendMessage = function(messageText){
-                   var m = new Message(messageText);
-                   var r =  _textMessageExtractor(messageText);
-                   var topicName = null;
-                   if(r.topicName){
-                     topicName =r.topicName;
-                   } else if(self.selectedTopic) {
-                      topicName =self.selectedTopic.address;
-                   } else {
-                     topicName = self.SHOWCASE_TOPIC;
-                   }
-                   m.to.push('/topic/'+topicName);
-                   itmsg.subscribeToTopic(topicName,r.observers)
-                       .then(function(ok){
-                            itmsg.sendMessage(m);
-                   });
-                   self.$textMessage = '';
-                 }
-
-                 this.selectCurrentTopic = function(topic){
-                   self.selectedTopic = topic;
-                   _scrollToBottom();
-                 }
-
-                 this.unSubscribe = function(topicName){
-                   itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
-                 }
-
-
-                 function _textMessageExtractor(messageText){
-                       var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
+                        function _textMessageExtractor(messageText){
+                              var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
                      var myArray;
                      var users = [];
                      var result = {
-                                   observers : [],
-                                   topicName : null
-                               };
+                                          observers : [],
+                                          topicName : null
+                                      };
                      while ((myArray = regex.exec(messageText)) != null)
                      {
                        users.push(myArray[2])
                      }
                      users.sort();
                      if(users.length > 0){
-                                 result.topicName = 'conversation:'+ self.username;
-                                   for ( var user  in  users){
-                                     result.topicName = result.topicName + ':' + users[user];
-                                     result.observers.push(
-                                       {
-                                       'id' : users[user]
-                                       }
-                                   );
-                                   }
-                                   result.observers.push({
-                                     'id': self.username
-                                   });
-                           }
+                                        result.topicName = 'conversation:'+ self.username;
+                                          for ( var user  in  users){
+                                            result.topicName = result.topicName + ':' + users[user];
+                                            result.observers.push(
+                                              {
+                                              'id' : users[user]
+                                              }
+                                          );
+                                          }
+                                          result.observers.push({
+                                            'id': self.username
+                                          });
+                                  }
                      return result;
-                 }
-
-
-                 function _scrollToBottom(){
-                        setTimeout(function() {
-                        var scroller1 = document.getElementById('conversation-content');
-                        scroller1.scrollTop = scroller1.scrollHeight;
-                        var scroller2 = document.getElementById('notification-content');
-                        scroller2.scrollTop = scroller2.scrollHeight;
-
-                       },250);
                      }
 
-                 }]).service('FakeNotifierService',['ItMessaging','$timeout','$http',function(ItMessaging,$timeout,$http){
 
-                      function FakeNotifierService(token){
-                        var self = this;
+                     function _scrollToBottom(){
+                               setTimeout(function() {
+                               var scroller1 = document.getElementById('conversation-content');
+                               scroller1.scrollTop = scroller1.scrollHeight;
+                               var scroller2 = document.getElementById('notification-content');
+                               scroller2.scrollTop = scroller2.scrollHeight;
 
-                        self.itmsg = new ItMessaging(token);
-                        self.icons = ['warning','success','error','info']
-                        this.startNotify = function(){
-                          var icon = self.icons[Math.floor(Math.random()*self.icons.length)];
-                          setTimeout(function () {
-                            $http({
-                              url : 'http://api.icndb.com/jokes/random',
-                              method:'GET'
+                              },250);
+                            }
 
-                            }).then(function(response){
-                              console.log(response);
+                     }]).service('FakeNotifierService',['ItMessaging','$timeout','$http',function(ItMessaging,$timeout,$http){
 
-                               var m = new Message('');
-                               m.notification = {
-                                 title :Math.random().toString(36).slice(2).substring(0,7),
-                                 body : response.data.value.joke,
-                                 icon: icon
+                             function FakeNotifierService(token){
+                               var self = this;
+
+                               self.itmsg = new ItMessaging(token);
+                               self.icons = ['warning','success','error','info']
+                               this.startNotify = function(){
+                                 var icon = self.icons[Math.floor(Math.random()*self.icons.length)];
+                                 setTimeout(function () {
+                                   $http({
+                                     url : 'http://api.icndb.com/jokes/random',
+                                     method:'GET'
+
+                                   }).then(function(response){
+
+                                      var m = new Message('');
+                                      m.notification = {
+                                        title :Math.random().toString(36).slice(2).substring(0,7),
+                                        body : response.data.value.joke,
+                                        icon: icon
+                                      };
+                                      m.to.push('/topic/invoices:xxxxxx');
+                                      self.itmsg.sendMessage(m);
+                                      self.startNotify()
+
+                                   })
+
+
+                               }, Math.floor(Math.random() * 3000));
+                               }
+                             }
+
+
+                              return function(token){
+                                   return new FakeNotifierService(token);
                                };
-                               m.to.push('/topic/invoices:xxxxxx');
-                               self.itmsg.sendMessage(m);
-                               self.startNotify()
+                    }]);
 
-                            })
-
-
-                        }, Math.floor(Math.random() * 50000));
-                        }
-                      }
-
-
-                       return function(token){
-                            return new FakeNotifierService(token);
-                        };
-                }]);
           </file>
          <file name="index.html">
-                     <div  style="height:600px !important;" ng-controller="MainController as main">
-                     <div class="row-height-1">
-                     <div ng-if="main.username">
-                     <h5  id="example_source_hi-@{{mainusername}}">hi @{{main.username}}</h5>
-                     <p>Use @Username to chat with other users</p>
-                     </div>
-                     </div>
-                     <div class="row row-height-9" ng-if="main.isConnected">
-                     <div class="col-md-6 col-xs-6  it-fill">
-                     <div   class="col-xs-12 jumbotron  it-fill"  >
-                     <div class="it-fill" id="notification-content" style="overflow-y:auto;">
-                     <div ng-repeat="n in main.messages | group:['/topic/invoices'] | orderBy: 'creationDate':false ">
-                     <div class="it-messaging-message">
-                     <div class="it-messaging-notification {{n.notification.icon}}" >
-                     <span class="sender">{{n.notification.title}} </span><b>&nbsp; Notification</b>
-                     <span class="message-text">{{n.notification.body}}</span>
+             <div  style="height:600px !important;" ng-controller="MainController as main">
+                 <div class="row-height-1">
+                 <div ng-if="main.username">
+                 <h9  id="example_source_hi-@{{mainusername}}" id="example_source_hi-@{{mainusername}}" id="example_source_hi-@{{mainusername}}">hi @{{main.username}}</h9>
+                 <p>Use @Username to chat with other users</p>
+                 </div>
+                 </div>
+                 <div class="row row-height-9" ng-if="main.isConnected">
+                 <div class="col-md-6 col-xs-6  it-fill">
+                 <div   class="col-xs-12 jumbotron  it-fill"  >
+                 <div class="it-fill" id="notification-content" style="overflow-y:auto;">
+                 <div ng-repeat="n in main.messages | group:['/topic/invoices'] | orderBy: 'creationDate':false ">
+                 <div class="it-messaging-message">
+                 <div class="it-messaging-notification {{n.notification.icon}}" >
+                 <span class="sender">{{n.notification.title}} </span><b>&nbsp; Notification</b>
+                 <span class="message-text">{{n.notification.body}}</span>
 
-                     </div>
+                 </div>
 
-                     <div class="small">{{n.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
-                     </div>
+                 <div class="small">{{n.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
+                 </div>
 
-                     </div>
+                 </div>
 
-                     </div>
+                 </div>
 
-                     </div>
-                     </div>
-                     <div class="col-md-6 col-xs-6  it-fill">
-                     <div class="col-xs-12 jumbotron  it-fill">
-                     <div class="row-height-2 " style=" overflow-x: scroll!important;">
-                     <div>
-                     <div class="pull-left it-messaging-tag label label-info">
-                     <a href=""  ng-click="main.selectCurrentTopic(null)">all</a>
-                     </div>
+                 </div>
+                 </div>
+                 <div class="col-md-6 col-xs-6  it-fill">
+                 <div class="col-xs-12 jumbotron  it-fill">
+                 <div class="row-height-2 " style=" overflow-x: scroll!important;">
+                 <div>
+                 <div class="pull-left it-messaging-tag label label-info">
+                 <a href=""  ng-click="main.selectCurrentTopic(null)">all</a>
+                 </div>
 
-                     <div class="pull-left it-messaging-tag label label-info" ng-repeat="t in main.topics |topic:t.address  ">
-                     <a href=""  ng-click="main.selectCurrentTopic(t)">{{t.address | conversation:main.username:'conversation'}}</a><a href="" ng-click="main.unSubscribe(t.address)">  x</a>
-                     </div>
-                     </div>
+                 <div class="pull-left it-messaging-tag label label-info" ng-repeat="t in main.topics |topic:t.reference  ">
+                 <a href=""  ng-click="main.selectCurrentTopic(t)">{{t.reference | conversation:main.username:'conversation'}}</a><a href="" ng-click="main.unSubscribe(t.reference)">  x</a>
+                 </div>
+                 </div>
 
-                     </div>
-                     <div class="row-height-8 "  id="conversation-content"  style="overflow:auto;margin-top: -30px;background-color:white;">
-                     <div ng-repeat="m in main.messages | group: ['/topic/conversation','/topic/group']| orderBy: 'creationDate':false">
-                     <div class="it-messaging-message" ng-if="main.selectedTopic ? m.to.indexOf('/topic/'+main.selectedTopic.address)>=0 :true">
-                     <div class="it-messaging-chat" ng-if="m.data.message" ng-class="{mine :(main.username==m.from) ,others : (main.username!=m.from) }">
-                     <span class="sender"> @{{m.from}} :</span>
-                     <span class="message-text">{{m.data.message}}</span>
+                 </div>
+                 <div class="row-height-8 "  id="conversation-content"  style="overflow:auto;margin-top: -30px;background-color:white;">
+                 <div ng-repeat="m in main.messages | group: ['/topic/conversation','/topic/group']| orderBy: 'creationDate':false">
+                 <div class="it-messaging-message" ng-if="main.selectedTopic ? m.to.indexOf('/topic/'+main.selectedTopic.reference)>=0 :true">
+                 <div class="it-messaging-chat" ng-if="m.data.message" ng-class="{mine :(main.username==m.from) ,others : (main.username!=m.from) }">
+                 <span class="sender"> @{{m.from.displayName}} :</span>
+                 <span class="message-text">{{m.data.message}}</span>
 
-                     </div>
-                     <div ng-if="!m.data.message">
-                     <span ng-if="m.notification"><i class="fa fa-{{m.notification.icon}}"></i>  {{m.notification.body}} </span>
-                     </div>
+                 </div>
+                 <div ng-if="!m.data.message">
+                 <span ng-if="m.notification"><i class="fa fa-{{m.notification.icon}}"></i>  {{m.notification.body}} </span>
+                 </div>
 
-                     <div class="small">{{m.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
-                     </div>
-                     </div>
-                     </div>
-                     <div class="row-height-2 ">
-                     <form  novalidate name="messageForm" ng-submit="main.sendMessage(main.$textMessage)">
-                     <input ng-model="main.$textMessage" name=""  style="width : 100%">
+                 <div class="small">{{m.creationDate | date:'yyyy-MM-dd HH:mm'}}</div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="row-height-2 ">
+                 <form  novalidate name="messageForm" ng-submit="main.sendMessage(main.$textMessage)">
+                 <input ng-model="main.$textMessage" name=""  style="width : 100%">
 
-                     </form>
-                     </div>
-                     </div>
-                     </div>
-                     </div>
+                 </form>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
 
-                     <div class="row row-height-6" ng-if="!main.isConnected">
-                     <div class="col-md-6  col-xs-6 col-xs-offset-3 col-md-offset-3 jumbotron  it-fill">
-                     <br>
-                     <form class="form-group"  novalidate name="myForm" ng-submit="main.login(username)">
-                     <div class="form-group">
-                     <input it-input class="form-control floating-label"
-                     disabled="true"
-                     type="text"
-                     it-label="API URL"
-                     ng-model="main.BASE_URL">
-                     </div>
-                     <div class="form-group">
-                     <input it-input class="form-control floating-label"
-                     disabled="true"
-                     type="text"
-                     it-label="API KEY"
-                     ng-model="main.API_KEY">
-                     </div>
-                     <div class="form-group">
-                     <input it-input class="form-control floating-label"
-                     required=""
-                     ng-maxlength="10"
-                     type="text"
-                     it-label="Username"
-                     name="Username"
-                     ng-model="username">
-                     </div>
-                     <button class="btn btn-primary" type="submit">Sign in</button>
-                     </form>
-                     </div>
+                 <div class="row row-height-6" ng-if="!main.isConnected">
+                 <div class="col-md-6  col-xs-6 col-xs-offset-3 col-md-offset-3 jumbotron  it-fill">
+                 <br>
+                 <form class="form-group"  novalidate name="myForm" ng-submit="main.login(username)">
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 disabled="true"
+                 type="text"
+                 it-label="API URL"
+                 ng-model="main.BASE_URL">
+                 </div>
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 disabled="true"
+                 type="text"
+                 it-label="API KEY"
+                 ng-model="main.API_KEY">
+                 </div>
+                 <div class="form-group">
+                 <input it-input class="form-control floating-label"
+                 required=""
+                 ng-maxlength="10"
+                 type="text"
+                 it-label="Username"
+                 name="Username"
+                 ng-model="username">
+                 </div>
+                 <button class="btn btn-primary" type="submit">Sign in</button>
+                 </form>
+                 </div>
 
-                     </div>
+                 </div>
 
-                     <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+                 <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
 
-                     </div>
+             </div>
          </file>
  </example>
  **/
@@ -8287,27 +8290,25 @@ IteSoft.provider('ItMessaging',[
 
             self.token = token;
 
-            this.getToken = function(apiKey,userID){
+            this.getToken = function(apiKey,observer,ttl){
                 console.warn('This function is only for demo purpose,'+
                     ' do NOT use it in production mode, ' +
                     'the security of your apiKey will not be granted');
                 var deferred = $q.defer();
 
                 $http({
-                    url: 'http://'+ this.URL + '/rest/token',
-                    method: "GET",
-                    params: {
-                        'username' : userID
-                    },
+                    url: 'http://'+ this.URL + '/rest/tokens' ,
+                    method: "POST",
+                    data:observer,
                     headers: {
                         'api-key': apiKey
                     }
                 }).then(function(response){
-                    deferred.resolve(response.data.token);
+                    deferred.resolve(response.data.jwt);
                 },function(error){
                     $log.error('error on api endpoint');
                     deferred.reject('error on api endpoint');
-                })
+                });
                 return deferred.promise;
             };
 
@@ -8336,7 +8337,7 @@ IteSoft.provider('ItMessaging',[
             this.connect = function(token){
                 if(token){
                     self.token = token;
-                    self.dataStream = $websocket('ws://'+ self.URL  +'/websocket/' + token);
+                    self.dataStream = $websocket('ws://'+ self.URL  +'/websocket?token=' + token);
                     self.dataStream.onMessage(function(msg){
                         _updateTopics().then(function(topics){
                             _onMessageHandler(msg,topics);
@@ -8404,7 +8405,7 @@ IteSoft.provider('ItMessaging',[
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/register',
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe',
                         method: "POST",
                         data : observers,
                         headers: {
@@ -8428,7 +8429,7 @@ IteSoft.provider('ItMessaging',[
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/unregister',
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/unsubscribe',
                         method: "POST",
                         data : observers,
                         headers: {
