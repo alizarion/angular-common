@@ -83,7 +83,7 @@
 
          <file name="Controller.js">
              var BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
-             var API_KEY = '2571270a-d2ee-48cb-89dc-626a78dba1a1';
+             var API_KEY = 'fbd0ca6b-e3e4-47e3-952a-c0e7630f9932';
             function Message(messageText){
                       this.to = [];
                       this.data =  {
