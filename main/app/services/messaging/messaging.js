@@ -84,259 +84,259 @@
          <file name="Controller.js">
              var BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
              var API_KEY = 'fbd0ca6b-e3e4-47e3-952a-c0e7630f9932';
-            function Message(messageText){
-                      this.to = [];
-                      this.data =  {
-                        "message" : messageText
-                      };
-                      this.notification = {
-                        title: self.username + ' sent you a message',
-                        body : self.username + ' sent you a message',
-                        icon : 'comment-o'
-                   }
-                }
-
-                 angular.module('itesoft')
-                 .config(['ItMessagingProvider', function(ItMessagingProvider) {
-                        ItMessagingProvider.SERVICE_URL = BASE_URL;
-                   }])
-                 .filter('conversation',[ function() {
-                  return function(input,args) {
-                    var result ='';
-                    var stringResult = '';
-                    if(input.startsWith('conversation:')){
-                      input = input.replace('conversation:','');
-                      input = input.replace(args+':','');
-                        input = input.replace(args,'');
-                      result =  input.split(':');
-                      angular.forEach(result,function(entry){
-                          stringResult = stringResult + ' ' +entry;
-                      })
-                      return stringResult;
+                function Message(messageText){
+                          this.to = [];
+                          this.data =  {
+                            "message" : messageText
+                          };
+                          this.notification = {
+                            title: self.username + ' sent you a message',
+                            body : self.username + ' sent you a message',
+                            icon : 'comment-o'
+                       }
                     }
 
-                    return input;
-                  };
-                  }])
-
-                 .filter('topic',[ function() {
-                      return function(input,arge) {
-
-                        var result = [];
-                        if(input){
-                          angular.forEach(input, function(entry){
-                                if(entry.reference.startsWith('conversation:')){
-                                  result.push(entry);
-                                }
-
-                          });
-
-                          return result;
+                     angular.module('itesoft')
+                     .config(['ItMessagingProvider', function(ItMessagingProvider) {
+                            ItMessagingProvider.SERVICE_URL = BASE_URL;
+                       }])
+                     .filter('conversation',[ function() {
+                      return function(input,args) {
+                        var result ='';
+                        var stringResult = '';
+                        if(input.startsWith('conversation:')){
+                          input = input.replace('conversation:','');
+                          input = input.replace(args+':','');
+                            input = input.replace(args,'');
+                          result =  input.split(':');
+                          angular.forEach(result,function(entry){
+                              stringResult = stringResult + ' ' +entry;
+                          })
+                          return stringResult;
                         }
+
                         return input;
                       };
-                  }])
+                      }])
 
-                 .filter('group',[ function() {
-                      return function(input,groups) {
+                     .filter('topic',[ function() {
+                          return function(input,arge) {
 
-                        var result = [];
-                        if(input){
-                          angular.forEach(input, function(entry){
-                              angular.forEach(entry.to ,function(dest){
-                                angular.forEach(groups,function(group){
-                                   if(dest.startsWith(group + ':')){
-                                  result.push(entry);
-                                }
-                                })
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                    if(entry.reference.startsWith('conversation:')){
+                                      result.push(entry);
+                                    }
 
-                              })
-                          });
-                          return result;
-                        }
-                        return input;
-
-                      };
-                  }])
-                 .filter('recipient',[ function() {
-                      return function(input,arge) {
-
-                        var result = [];
-                        if(input){
-                          angular.forEach(input, function(entry){
-                              angular.forEach(entry.to, function(entry2){
-                                if(entry2.startsWith(arge+':')){
-                                  result.push(entry);
-                                }
-
-                          });
-                         });
-                          return result;
-                        }
-                        return input;
-                      };
-                  }])
-                 .controller('MainController',['ItMessaging','itNotifier','$scope','FakeNotifierService',
-                 function(ItMessaging,itNotifier,$scope,FakeNotifierService){
-
-                    var self = this;
-
-                    self.BASE_URL = BASE_URL;
-                    self.SHOWCASE_TOPIC = "group:all";
-                    self.INVOICES_TOPIC = "invoices:xxxxxx"
-                    self.API_KEY = API_KEY;
-                    var itmsg = new ItMessaging(self.BASE_URL);
-
-                    self.messages = [];
-                    self.topics = [];
-                    self.selectedTopic = null;
-                    self.username = null;
-
-                    self.isConnected = false;
-                    self.username = null;
-
-                    itmsg.onMessage(function(message,topics){
-                      self.topics = topics;
-                      self.messages.push(message);
-
-                      _scrollToBottom();
-                    });
-
-                    itmsg.onClose(function(event){
-                       itNotifier.notifyError({
-                                  content: "Error popup",
-                                  dismissOnTimeout: false
-                              },
-                              {
-                                  CODE:500,
-                                  TYPE:'error',
-                                  MESSAGE:'Something bad happened',
-                                  DETAIL:'You don\'t wanna know',
-                                  DONE:1
                               });
 
-                       self.isConnected = false;
-                    });
+                              return result;
+                            }
+                            return input;
+                          };
+                      }])
 
-                    this.login = function(username){
-                      self.username = username;
-                      itmsg.getToken(self.API_KEY ,{id : username, displayName : username},898090).then(function(token){
-                        var fake  = new FakeNotifierService(token);
-                        fake.startNotify();
-                       self.isConnected = itmsg.connect(token);
-                       itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
-                       itmsg.subscribeToTopic(self.INVOICES_TOPIC,[{id : self.username}]);
-                      });
-                    }
+                     .filter('group',[ function() {
+                          return function(input,groups) {
 
-                    this.sendMessage = function(messageText){
-                      var m = new Message(messageText);
-                      var r =  _textMessageExtractor(messageText);
-                      var topicName = null;
-                      if(r.topicName){
-                        topicName =r.topicName;
-                      } else if(self.selectedTopic) {
-                         topicName =self.selectedTopic.reference;
-                      } else {
-                        topicName = self.SHOWCASE_TOPIC;
-                      }
-                      m.to.push('/topic/'+topicName);
-                      itmsg.subscribeToTopic(topicName,r.observers)
-                          .then(function(ok){
-                               itmsg.sendMessage(m);
-                      });
-                      self.$textMessage = '';
-                    }
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                  angular.forEach(entry.to ,function(dest){
+                                    angular.forEach(groups,function(group){
+                                       if(dest.startsWith(group + ':')){
+                                      result.push(entry);
+                                    }
+                                    })
 
-                    this.selectCurrentTopic = function(topic){
-                      self.selectedTopic = topic;
-                      _scrollToBottom();
-                    }
+                                  })
+                              });
+                              return result;
+                            }
+                            return input;
 
-                    this.unSubscribe = function(topicName){
-                      itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
-                    }
+                          };
+                      }])
+                     .filter('recipient',[ function() {
+                          return function(input,arge) {
 
+                            var result = [];
+                            if(input){
+                              angular.forEach(input, function(entry){
+                                  angular.forEach(entry.to, function(entry2){
+                                    if(entry2.startsWith(arge+':')){
+                                      result.push(entry);
+                                    }
 
-                    function _textMessageExtractor(messageText){
-                          var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
-                 var myArray;
-                 var users = [];
-                 var result = {
-                                      observers : [],
-                                      topicName : null
-                                  };
-                 while ((myArray = regex.exec(messageText)) != null)
-                 {
-                   users.push(myArray[2])
-                 }
-                 users.sort();
-                 if(users.length > 0){
-                                    result.topicName = 'conversation:'+ self.username;
-                                      for ( var user  in  users){
-                                        result.topicName = result.topicName + ':' + users[user];
-                                        result.observers.push(
-                                          {
-                                          'id' : users[user]
-                                          }
-                                      );
-                                      }
-                                      result.observers.push({
-                                        'id': self.username
-                                      });
-                              }
-                 return result;
-                 }
+                              });
+                             });
+                              return result;
+                            }
+                            return input;
+                          };
+                      }])
+                     .controller('MainController',['ItMessaging','itNotifier','$scope','FakeNotifierService',
+                     function(ItMessaging,itNotifier,$scope,FakeNotifierService){
 
+                        var self = this;
 
-                 function _scrollToBottom(){
-                           setTimeout(function() {
-                           var scroller1 = document.getElementById('conversation-content');
-                           scroller1.scrollTop = scroller1.scrollHeight;
-                           var scroller2 = document.getElementById('notification-content');
-                           scroller2.scrollTop = scroller2.scrollHeight;
+                        self.BASE_URL = BASE_URL;
+                        self.SHOWCASE_TOPIC = "group:all";
+                        self.INVOICES_TOPIC = "invoices:xxxxxx"
+                        self.API_KEY = API_KEY;
+                        var itmsg = new ItMessaging(self.BASE_URL);
 
-                          },250);
+                        self.messages = [];
+                        self.topics = [];
+                        self.selectedTopic = null;
+                        self.username = null;
+
+                        self.isConnected = false;
+                        self.username = null;
+
+                        itmsg.onMessage(function(message,topics){
+                          self.topics = topics;
+                          self.messages.push(message);
+
+                          _scrollToBottom();
+                        });
+
+                        itmsg.onClose(function(event){
+                           itNotifier.notifyError({
+                                      content: "Error popup",
+                                      dismissOnTimeout: false
+                                  },
+                                  {
+                                      CODE:500,
+                                      TYPE:'error',
+                                      MESSAGE:'Something bad happened',
+                                      DETAIL:'You don\'t wanna know',
+                                      DONE:1
+                                  });
+
+                           self.isConnected = false;
+                        });
+
+                        this.login = function(username){
+                          self.username = username;
+                          itmsg.getToken(self.API_KEY ,{id : username, displayName : username},898090).then(function(token){
+                            var fake  = new FakeNotifierService(token);
+                            fake.startNotify();
+                           self.isConnected = itmsg.connect(token);
+                           itmsg.subscribeToTopic(self.SHOWCASE_TOPIC,[{id : self.username}]);
+                           itmsg.subscribeToTopic(self.INVOICES_TOPIC,[{id : self.username}]);
+                          });
                         }
 
-                 }]).service('FakeNotifierService',['ItMessaging','$timeout','$http',function(ItMessaging,$timeout,$http){
+                        this.sendMessage = function(messageText){
+                          var m = new Message(messageText);
+                          var r =  _textMessageExtractor(messageText);
+                          var topicName = null;
+                          if(r.topicName){
+                            topicName =r.topicName;
+                          } else if(self.selectedTopic) {
+                             topicName =self.selectedTopic.reference;
+                          } else {
+                            topicName = self.SHOWCASE_TOPIC;
+                          }
+                          m.to.push('/topic/'+topicName);
+                          itmsg.subscribeToTopic(topicName,r.observers)
+                              .then(function(ok){
+                                   itmsg.sendMessage(m);
+                          });
+                          self.$textMessage = '';
+                        }
 
-                         function FakeNotifierService(token){
-                           var self = this;
+                        this.selectCurrentTopic = function(topic){
+                          self.selectedTopic = topic;
+                          _scrollToBottom();
+                        }
 
-                           self.itmsg = new ItMessaging(token);
-                           self.icons = ['warning','success','error','info']
-                           this.startNotify = function(){
-                             var icon = self.icons[Math.floor(Math.random()*self.icons.length)];
-                             setTimeout(function () {
-                               $http({
-                                 url : 'http://api.icndb.com/jokes/random',
-                                 method:'GET'
-
-                               }).then(function(response){
-
-                                  var m = new Message('');
-                                  m.notification = {
-                                    title :Math.random().toString(36).slice(2).substring(0,7),
-                                    body : response.data.value.joke,
-                                    icon: icon
-                                  };
-                                  m.to.push('/topic/invoices:xxxxxx');
-                              //   self.itmsg.sendMessage(m);
-                                  self.startNotify()
-
-                               })
-
-
-                           }, Math.floor(Math.random() * 3000));
-                           }
-                         }
+                        this.unSubscribe = function(topicName){
+                          itmsg.unsubscribeToTopic(topicName,[{id : self.username }])
+                        }
 
 
-                          return function(token){
-                               return new FakeNotifierService(token);
-                           };
-                }]);
+                        function _textMessageExtractor(messageText){
+                              var regex = new RegExp(/(^|[^@\w])@(\w{1,15})\b/g);
+                     var myArray;
+                     var users = [];
+                     var result = {
+                                          observers : [],
+                                          topicName : null
+                                      };
+                     while ((myArray = regex.exec(messageText)) != null)
+                     {
+                       users.push(myArray[2])
+                     }
+                     users.sort();
+                     if(users.length > 0){
+                                        result.topicName = 'conversation:'+ self.username;
+                                          for ( var user  in  users){
+                                            result.topicName = result.topicName + ':' + users[user];
+                                            result.observers.push(
+                                              {
+                                              'id' : users[user]
+                                              }
+                                          );
+                                          }
+                                          result.observers.push({
+                                            'id': self.username
+                                          });
+                                  }
+                     return result;
+                     }
+
+
+                     function _scrollToBottom(){
+                               setTimeout(function() {
+                               var scroller1 = document.getElementById('conversation-content');
+                               scroller1.scrollTop = scroller1.scrollHeight;
+                               var scroller2 = document.getElementById('notification-content');
+                               scroller2.scrollTop = scroller2.scrollHeight;
+
+                              },250);
+                            }
+
+                     }]).service('FakeNotifierService',['ItMessaging','$timeout','$http',function(ItMessaging,$timeout,$http){
+
+                             function FakeNotifierService(token){
+                               var self = this;
+
+                               self.itmsg = new ItMessaging(token);
+                               self.icons = ['warning','success','error','info']
+                               this.startNotify = function(){
+                                 var icon = self.icons[Math.floor(Math.random()*self.icons.length)];
+                                 setTimeout(function () {
+                                   $http({
+                                     url : 'http://api.icndb.com/jokes/random',
+                                     method:'GET'
+
+                                   }).then(function(response){
+
+                                      var m = new Message('');
+                                      m.notification = {
+                                        title :Math.random().toString(36).slice(2).substring(0,7),
+                                        body : response.data.value.joke,
+                                        icon: icon
+                                      };
+                                      m.to.push('/topic/invoices:xxxxxx');
+                                      self.itmsg.sendMessage(m);
+                                      self.startNotify()
+
+                                   })
+
+
+                               }, Math.floor(Math.random() * 3000));
+                               }
+                             }
+
+
+                              return function(token){
+                                   return new FakeNotifierService(token);
+                               };
+                    }]);
 
           </file>
          <file name="index.html">
