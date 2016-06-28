@@ -1570,6 +1570,10 @@ IteSoft
  *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
  *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
  *  </tr>
+ * <tr>
+ *   <td><code>attribute it-lock-on-change="true|false"</code></td>
+ *   <td>lock navigation if the selected item has changed.</td>
+ *  </tr>
  *  <tr>
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
  *   <td>Method to revert changes on the selected item.</td>
@@ -3166,8 +3170,8 @@ IteSoft
 
             },
             controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
-                function ($scope, $rootScope, $translate, $document, $timeout, $log) {
+            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log', 'itStringUtilsService',
+                function ($scope, $rootScope, $translate, $document, $timeout, $log, itStringUtilsService ) {
 
                     var self = this;
 
@@ -3235,106 +3239,9 @@ IteSoft
                      */
                     self.fields.optionContainerId = _generateID();
 
-                    self.cleanDomRef = {
-                        _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-                        encode: function (e) {
-                            if (e) {
-                                var t = "";
-                                {
-                                }
-                                var n, r, i, s, o, u, a;
-                                var f = 0;
-                                e = self.cleanDomRef._utf8_encode(e);
-                                while (f < e.length) {
-                                    n = e.charCodeAt(f++);
-                                    r = e.charCodeAt(f++);
-                                    i = e.charCodeAt(f++);
-                                    s = n >> 2;
-                                    o = (n & 3) << 4 | r >> 4;
-                                    u = (r & 15) << 2 | i >> 6;
-                                    a = i & 63;
-                                    if (isNaN(r)) {
-                                        u = a = 64
-                                    } else if (isNaN(i)) {
-                                        a = 64
-                                    }
-                                    t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
-                                }
-                                return t
-                            }
-                        },
-                        decode: function (e) {
-                            var t = "";
-                            var n, r, i;
-                            var s, o, u, a;
-                            var f = 0;
-                            if (e.replace) {
-                                e = e.replace(/[^A-Za-z0-9+/=]/g, "");
-                                while (f < e.length) {
-                                    s = this._keyStr.indexOf(e.charAt(f++));
-                                    o = this._keyStr.indexOf(e.charAt(f++));
-                                    u = this._keyStr.indexOf(e.charAt(f++));
-                                    a = this._keyStr.indexOf(e.charAt(f++));
-                                    n = s << 2 | o >> 4;
-                                    r = (o & 15) << 4 | u >> 2;
-                                    i = (u & 3) << 6 | a;
-                                    t = t + String.fromCharCode(n);
-                                    if (u != 64) {
-                                        t = t + String.fromCharCode(r)
-                                    }
-                                    if (a != 64) {
-                                        t = t + String.fromCharCode(i)
-                                    }
-                                }
-                            }
-                            t = cleanDomRef._utf8_decode(t);
-                            return t
-                        },
-                        _utf8_encode: function (e) {
-                            var t = "";
-                            if (e.replace) {
-                                e = e.replace(/rn/g, "n");
-                                for (var n = 0; n < e.length; n++) {
-                                    var r = e.charCodeAt(n);
-                                    if (r < 128) {
-                                        t += String.fromCharCode(r)
-                                    } else if (r > 127 && r < 2048) {
-                                        t += String.fromCharCode(r >> 6 | 192);
-                                        t += String.fromCharCode(r & 63 | 128)
-                                    } else {
-                                        t += String.fromCharCode(r >> 12 | 224);
-                                        t += String.fromCharCode(r >> 6 & 63 | 128);
-                                        t += String.fromCharCode(r & 63 | 128)
-                                    }
-                                }
-                            }
-                            return t
-                        },
-                        _utf8_decode: function (e) {
-                            var t = "";
-                            var n = 0;
-                            var r = c1 = c2 = 0;
-                            while (n < e.length) {
-                                r = e.charCodeAt(n);
-                                if (r < 128) {
-                                    t += String.fromCharCode(r);
-                                    n++
-                                } else if (r > 191 && r < 224) {
-                                    c2 = e.charCodeAt(n + 1);
-                                    t += String.fromCharCode((r & 31) << 6 | c2 & 63);
-                                    n += 2
-                                } else {
-                                    c2 = e.charCodeAt(n + 1);
-                                    c3 = e.charCodeAt(n + 2);
-                                    t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
-                                    n += 3
-                                }
-                            }
-                            return t
-                        }
-                    };
 
-                    /**
+
+                     /**
                      * Create a random name to have an autogenerate id for log
                      */
                     if (angular.isUndefined(self.fields.name)) {
@@ -3586,7 +3493,7 @@ IteSoft
                             self.fields.selectedItem = _getObject(selectedItem);
                             //self.fields.selectedItem.class = self.fields.selectedSelectClass;
 
-                            var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
+                            var selectedDiv = $document[0].querySelector("#options_" + itStringUtilsService.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
                             scrollTo(selectedDiv,selectedItem);
                         } else {
                             self.fields.selectedItem = undefined;
@@ -3698,7 +3605,7 @@ IteSoft
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
-                                    if (_getLower(_getLabelFromObject(item)).startsWith(_getLower(self.fields.inputSearch))) {
+                                    if (itStringUtilsService.clear(_getLabelFromObject(item)).startsWith(itStringUtilsService.clear(self.fields.inputSearch))) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
                                         i++;
@@ -3718,7 +3625,7 @@ IteSoft
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (itStringUtilsService.clear(_getLabelFromObject(item)).search(itStringUtilsService.clear(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
                                         i++;
@@ -3838,21 +3745,7 @@ IteSoft
                         return uuid;
                     };
 
-                    /**
-                     *
-                     * @param value
-                     * @returns {string}
-                     * @private
-                     */
-                    function _getLower(value) {
-                        var result = "";
-                        if (angular.isDefined(value) && value.toLowerCase) {
-                            result += value.toLowerCase();
-                        } else {
-                            result += value;
-                        }
-                        return result;
-                    }
+
 
                     /**
                      *  Return label from current object by using converter,
@@ -3933,7 +3826,7 @@ IteSoft
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
             '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
-            '               id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
+            '               id="{{\'options_\'+itAutocompleteCtrl.itStringUtilsService.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
             '               ng-mousedown="itAutocompleteCtrl.fn.select(item)">' +
             '               {{itAutocompleteCtrl.fn.getLabelFromObject(item)}}' +
             '           </div>' +
@@ -4445,45 +4338,6 @@ IteSoft
             }
         }
 }]);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4823,6 +4677,45 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 "use strict";
 /**
  * @ngdoc directive
@@ -9191,6 +9084,177 @@ IteSoft
         return itPopup;
     }]);
 
+/**
+ * Created by SZA on 28/06/2016.
+ */
+
+IteSoft
+    .factory('itStringUtilsService', [function () {
+        return {
+            getLower: _getLower,
+            removeAccent: _removeAccent,
+            clear: _clear,
+            cleanDomRef: {
+                _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+                encode: function (e) {
+                    if (e) {
+                        var t = "";
+                        {
+                        }
+                        var n, r, i, s, o, u, a;
+                        var f = 0;
+                        e = this._utf8_encode(e);
+                        while (f < e.length) {
+                            n = e.charCodeAt(f++);
+                            r = e.charCodeAt(f++);
+                            i = e.charCodeAt(f++);
+                            s = n >> 2;
+                            o = (n & 3) << 4 | r >> 4;
+                            u = (r & 15) << 2 | i >> 6;
+                            a = i & 63;
+                            if (isNaN(r)) {
+                                u = a = 64
+                            } else if (isNaN(i)) {
+                                a = 64
+                            }
+                            t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                        }
+                        return t
+                    }
+                },
+                decode: function (e) {
+                    var t = "";
+                    var n, r, i;
+                    var s, o, u, a;
+                    var f = 0;
+                    if (e.replace) {
+                        e = e.replace(/[^A-Za-z0-9+/=]/g, "");
+                        while (f < e.length) {
+                            s = this._keyStr.indexOf(e.charAt(f++));
+                            o = this._keyStr.indexOf(e.charAt(f++));
+                            u = this._keyStr.indexOf(e.charAt(f++));
+                            a = this._keyStr.indexOf(e.charAt(f++));
+                            n = s << 2 | o >> 4;
+                            r = (o & 15) << 4 | u >> 2;
+                            i = (u & 3) << 6 | a;
+                            t = t + String.fromCharCode(n);
+                            if (u != 64) {
+                                t = t + String.fromCharCode(r)
+                            }
+                            if (a != 64) {
+                                t = t + String.fromCharCode(i)
+                            }
+                        }
+                    }
+                    t = this._utf8_decode(t);
+                    return t
+                },
+                _utf8_encode: function (e) {
+                    var t = "";
+                    if (e.replace) {
+                        e = e.replace(/rn/g, "n");
+                        for (var n = 0; n < e.length; n++) {
+                            var r = e.charCodeAt(n);
+                            if (r < 128) {
+                                t += String.fromCharCode(r)
+                            } else if (r > 127 && r < 2048) {
+                                t += String.fromCharCode(r >> 6 | 192);
+                                t += String.fromCharCode(r & 63 | 128)
+                            } else {
+                                t += String.fromCharCode(r >> 12 | 224);
+                                t += String.fromCharCode(r >> 6 & 63 | 128);
+                                t += String.fromCharCode(r & 63 | 128)
+                            }
+                        }
+                    }
+                    return t
+                },
+                _utf8_decode: function (e) {
+                    var t = "";
+                    var n = 0;
+                    var r = c1 = c2 = 0;
+                    while (n < e.length) {
+                        r = e.charCodeAt(n);
+                        if (r < 128) {
+                            t += String.fromCharCode(r);
+                            n++
+                        } else if (r > 191 && r < 224) {
+                            c2 = e.charCodeAt(n + 1);
+                            t += String.fromCharCode((r & 31) << 6 | c2 & 63);
+                            n += 2
+                        } else {
+                            c2 = e.charCodeAt(n + 1);
+                            c3 = e.charCodeAt(n + 2);
+                            t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+                            n += 3
+                        }
+                    }
+                    return t
+                }
+            }
+        };
+
+        /**
+         * Clear content by removing accent and case
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _clear(value) {
+            var result = "";
+            result = _getLower(value);
+            result = _removeAccent(result);
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _getLower(value) {
+            var result = "";
+            if (angular.isDefined(value) && value.toLowerCase) {
+                result += value.toLowerCase();
+            } else {
+                result += value;
+            }
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _removeAccent(value) {
+            var diacritics = [
+                {char: 'A', base: /[\300-\306]/g},
+                {char: 'a', base: /[\340-\346]/g},
+                {char: 'E', base: /[\310-\313]/g},
+                {char: 'e', base: /[\350-\353]/g},
+                {char: 'I', base: /[\314-\317]/g},
+                {char: 'i', base: /[\354-\357]/g},
+                {char: 'O', base: /[\322-\330]/g},
+                {char: 'o', base: /[\362-\370]/g},
+                {char: 'U', base: /[\331-\334]/g},
+                {char: 'u', base: /[\371-\374]/g},
+                {char: 'N', base: /[\321]/g},
+                {char: 'n', base: /[\361]/g},
+                {char: 'C', base: /[\307]/g},
+                {char: 'c', base: /[\347]/g}
+            ];
+            var result = value;
+            diacritics.forEach(function (letter) {
+                result = result.replace(letter.base, letter.char);
+            });
+            return result;
+        }
+
+
+    }])
 'use strict';
 /**
  * TODO Image implementation desc

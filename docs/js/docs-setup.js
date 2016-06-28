@@ -217,7 +217,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "Most important part of master-detail component, that",
-      "keywords": "$broadcast $scope add api application appscope attributes auto binding changed changes child class component content context currentitem data default define detail details directive display displayed ea editing element elements encompass entity equals event false fillheight filter getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html itappscope item items itesoft list lockcurrentitem master master-detail master_row_changed menu mode original parent promise refresh return revert row scope scroll scrolltoitem selectable selected set setcurrentitem table template trigged true undochangecurrentitem unlock unlockcurrentitem unlockonequals wrapper"
+      "keywords": "$broadcast $scope add api application appscope attributes auto binding changed changes child class component content context currentitem data default define detail details directive display displayed ea editing element elements encompass entity equals event false fillheight filter getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html it-lock-on-change itappscope item items itesoft list lockcurrentitem master master-detail master_row_changed menu mode navigation original parent promise refresh return revert row scope scroll scrolltoitem selectable selected set setcurrentitem table template trigged true undochangecurrentitem unlock unlockcurrentitem unlockonequals wrapper"
     },
     {
       "section": "api",
