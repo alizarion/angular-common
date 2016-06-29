@@ -20,8 +20,8 @@ IteSoft
                     CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/build'),
                 preview: $resource(
                     CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/preview'),
-                'new': function (name, ref, position, content, roleAllowed, version) {
-                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
+                'new': function (name, ref, position, content, roleAllowed, version, removed, element) {
+                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version, 'removed':removed=="true"?true:false, 'element':element};
                 },
             }
         }]);
