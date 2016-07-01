@@ -18,20 +18,20 @@ IteSoft
 
     .directive('itSideMenuContent',function(){
         return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : false,
-            link : function(scope){
+            restrict: 'ECA',
+            require: '^itSideMenus',
+            transclude: true,
+            scope: false,
+            link: function (scope) {
                 var sideMenuHeader = angular.element(document
                     .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                    scope.showmenu = true;
-                }
+                scope.menuOpenStyle = { 'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px' };
+                scope.menuCloseStyle = { 'padding-left': '0px' };
+
             },
-            template :
-                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
+            template:
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+            '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
         }
     });
