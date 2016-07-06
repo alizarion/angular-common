@@ -13,33 +13,20 @@ itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce)
                 }
             });
 
-            scope.$watch("options.thumbnailApi", function (thumbnailApi) {
-                if(thumbnailApi) {
-                    thumbnailApi.onPageClicked = function (pageIndex) {
-                        if(scope.options.api) {
-                            scope.options.api.goToPage(pageIndex);
-                        }
-                    };
-                }
-            });
-
-            scope.$watch("options.api", function (api) {
+            scope.$watch("options.$$api", function (api) {
                 if(api) {
+                    scope.options.getApi = function() {
+                        return api;
+                    };
                     if(scope.options && scope.options.onApiLoaded) {
                         scope.options.onApiLoaded(api);
                     }
-
-                    api.onPageRotation = function (args) {
-                        if(scope.options.thumbnailApi) {
-                            scope.options.thumbnailApi.rotatePage(args);
-                        }
-                    };
                 }
             });
 
             scope.trustSrc = function(src) {
                 return $sce.trustAsResourceUrl(src)
-            };
+            }; 
         }
     };
 }]);

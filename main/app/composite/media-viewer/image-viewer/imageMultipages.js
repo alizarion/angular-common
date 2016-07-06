@@ -6,36 +6,37 @@ itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
         function IMAGEPage(pageIndex, img, view) {
-                    this.base = MultiPagesPage;
-                    this.base(pageIndex, view);
-                    this.img = img;
-                }
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
+            this.img = img;
+        }
 
         IMAGEPage.prototype = new MultiPagesPage;
 
-        IMAGEPage.prototype.render = function (callback) {
+        IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
-            if(this.rendered) {
+            /*if(this.rendered) {
                 if(callback) {
                     callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                 }
                 return;
             };
 
-            this.rendered = true;
+            this.rendered = true;*/
 
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
             }else {
-                self.container.append(self.canvas);
+                //self.canvasRendered = true;
+                page.wrapper.append(page.canvas);
 
-                var ctx = self.canvas[0].getContext('2d');
-                ctx.transform.apply(ctx, self.viewport.transform);
-                ctx.drawImage(this.img , 0, 0); // Or at whatever offset you like
+                var ctx = page.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, page.viewport.transform);
+                ctx.drawImage(self.img , 0, 0); // Or at whatever offset you like
 
 
                 if(callback) {
-                    callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    callback(page, MultiPagesConstants.PAGE_RENDERED);
                 }
             }
         };
@@ -69,8 +70,8 @@ itImageViewer
                 var self = this;
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
-
-                    self.setContainerSize(self.initialScale);
+                    self.addPages();
+                    //self.setContainerSize(self.initialScale);
                 });
             }
         };
@@ -82,8 +83,8 @@ itImageViewer
                     var url = e.target.result;
                     self.getAllPages(url, function(pageList) {
                         self.pages = pageList;
-
-                        self.setContainerSize(self.initialScale);
+                        self.addPages();
+                        //self.setContainerSize(self.initialScale);
                     });
                 };
 
@@ -132,7 +133,7 @@ itImageViewer
                 var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
 
-                self.element.append(page.container);
+                //self.addPage(page);
 
                 callback(pageList);
             };
@@ -149,21 +150,29 @@ itImageViewer
             restrict: "E",
             scope: {
                 src: "@",
+                file: "=",
                 api: "=",
-                initialScale: "@",
+                options: "=",
             },
             controller: ['$scope', '$element', function ($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
 
                 var viewer = new IMAGEViewer($element); ;
 
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function () {
-                    viewer.open(this.src, this.initialScale, pageMargin);
+                    viewer.open(this.src, getOption("initialScale"), pageMargin);
                 };
 
                 $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
+                    viewer.open(this.file, getOption("initialScale"), pageMargin);
                 };
 
                 viewer.hookScope($scope);

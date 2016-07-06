@@ -30,12 +30,28 @@
  *   <td>Callback to be notify when the property api is available.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
+ *   <td>Callback to be notify when template not found for the specify extension.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
+ *   <td>Set orientation of the viewer.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
  *   <td>Hide | Show progress bar.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.showToolbar  = true | false</code></td>
  *   <td>Hide | Show tool bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showThumbnail  = true | false</code></td>
+ *   <td>Hide | Show thumbnail.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showSizeMenu  = true | false</code></td>
+ *   <td>Hide | Show size menu.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
@@ -46,7 +62,7 @@
  *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api</code></td>
+ *   <td><code>options.getApi()</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
  *  <tr>
@@ -110,9 +126,17 @@
  *   <td>Method to rotate to the left (per -90°) the current page.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.onError = function (operation, message) { }</code></td>
+ *   <td>Callback to be notify on error.</td>
+ *  </tr>
+ *  <tr>
  *  <tr>
  *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
  *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
+ *   <td>Callback to be notify on page rotation.</td>
  *  </tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
@@ -120,7 +144,26 @@
  * </table>
  *
  * ```html
- *     <it-media-viewer></it-media-viewer>
+ *    <style>
+         //override style selection
+         .multipage-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         .thumbnail-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         //override thumbnail num-page
+         .thumbnail-viewer .num-page {
+         	text-align: center;
+         }
+      </style>
+ *    <it-media-viewer></it-media-viewer>
  * ```
  *
  * @example
@@ -150,16 +193,19 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
     };
 
     var linker = function (scope, element, attrs) {
+
         var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
             switch (ext) {
                 case 'pdf':
                     scope.pdfSrc = value;
                     itScriptService.LoadScripts([
-                        pathJs + '/pdf.js'
+                        pathJs + '/pdf.js',
                     ]).then(function() {
                         //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
                         PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
+                        //PDFJS.imageResourcesPath = pathJs + "/images";
                         scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
                     });
                     break;
@@ -179,26 +225,33 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
                     });
                     break;
                 default :
-                    scope.template = 'No template found for extension : '  + ext;
+                    if(scope.options && scope.options.onTemplateNotFound) {
+                        scope.options.onTemplateNotFound(ext);
+                    }
+                    $log.debug('No template found for extension : ' + ext);
+                    scope.template = null;
                     break;
             }
         };
 
-        var _setValue = function(value) {
-            if(value){
-                if(typeof value === typeof ""){
-                    scope.ext = _splitLast(value, '.').toLowerCase();
-                    _setTemplate(scope.ext, value);
+        var _setValue = function(newValue, oldValue) {
+            if(newValue){
+                if(typeof newValue === typeof ""){
+                    scope.ext = _splitLast(newValue, '.').toLowerCase();
+                    _setTemplate(scope.ext, newValue);
                 } else {
                     if(attrs.type) {
-                        _setTemplate(attrs.type, value);
-                    }else if(value.name != undefined) {
-                        scope.ext = _splitLast(value.name, '.').toLowerCase();
-                        _setTemplate(scope.ext, value);
+                        _setTemplate(attrs.type.toLowerCase(), newValue);
+                    }else if(newValue.name != undefined) {
+                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
+                        _setTemplate(scope.ext, newValue);
                     } else {
-                        scope.template = 'must specify type when using stream';
+                        $log.debug('must specify type when using stream');
+                        scope.template = null;
                     }
                 }
+            } else if(newValue != oldValue) {
+                scope.template = null;
             }
         };
 

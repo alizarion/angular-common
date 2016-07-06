@@ -16,5 +16,7 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
         5.0],
     ZOOM_FIT_WIDTH : "fit_width",
     ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
+    ZOOM_FIT_HEIGHT : "fit_height",
+    ORIENTATION_VERTICAL : "vertical",
+    ORIENTATION_HORIZONTAL : "horizontal"
 })
