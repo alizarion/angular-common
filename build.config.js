@@ -47,7 +47,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/display/fullscreen.css',
         'main/assets/lib/codemirror/addon/fold/foldgutter.css',
         'main/assets/lib/codemirror/addon/lint/lint.css',
-        'main/assets/lib/codemirror/addon/hint/show-hint.css'
+        'main/assets/lib/codemirror/addon/hint/show-hint.css',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.css'
 
     ],
 
@@ -119,7 +120,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
-        'main/assets/lib/angular-websocket/dist/angular-websocket.min.js'
+        'main/assets/lib/angular-websocket/dist/angular-websocket.min.js',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -172,7 +174,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
-        'main/assets/lib/angular-websocket/dist/angular-websocket.js'
+        'main/assets/lib/angular-websocket/dist/angular-websocket.js',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
 
     fileToCopyAndRename:

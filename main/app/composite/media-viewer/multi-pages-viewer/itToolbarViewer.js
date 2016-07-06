@@ -9,7 +9,7 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
             scope.scale = value;
         });
 
-        scope.$watch("api.getCurrentPage()", function (value) {
+        scope.$watch("api.getSelectedPage()", function (value) {
             scope.currentPage = value;
         });
 
@@ -44,9 +44,9 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
                         '</div>' +
 
                         '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
-                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
-                          '</div>' +
+                            '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                            '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                        '</div>' +
                     '</div>',
         link: linker
     };
