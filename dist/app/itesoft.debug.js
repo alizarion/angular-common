@@ -38,6 +38,55 @@ var IteSoft = angular.module('itesoft', [
     'ngWebSocket'
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 /**
@@ -512,2058 +561,6 @@ IteSoft
         }
     }]
 );
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
-
-        var supportedLocales = ['en_US',
-            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
-
-        return {
-            cleanAmount: function (amountString, aLocale) {
-                var result = 0;
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-
-                //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //pas de traitement particulier pour le francais
-                //si la locale est en-US
-                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
-                    //suppression de la virgule permettant de séparer les milliers
-                    amountString = amountString.replace(",", "");
-                    //si la locale est de-DE
-                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
-                    //suppression du point permettant de séparer les milliers
-                    amountString = amountString.replace(".", "");
-                    //remplacement de la virgule par un point
-                    amountString = amountString.replace(",", ".");
-                }
-
-                //Formattage des montants avec la locale
-                result = parseFloat(amountString);
-
-                console.log('result1 ' + result);
-
-                if (result == undefined) {
-                    result = parseFloat(amountString);
-                }
-
-                console.log('result2 ' + result);
-
-                return result;
-            },
-
-            formatAmount: function (amount, aLocale, currency) {
-                var result = '';
-
-
-                //Recherche si la locale passée en argument est acceptée
-                var localeFound = false;
-                supportedLocales.forEach(function (entry) {
-
-                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
-                        localeFound = true;
-                    }
-                })
-
-                if (localeFound == false) {
-                    console.log("Unable to format amount for local "
-                        + aLocale);
-
-                    return '';
-                }
-                if (amount != undefined) {
-                    var amountString = amount.toString();
-
-                    //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.]/g, "");
-
-                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
-                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
-                        amountString = amountString.replace(",", ".");
-                    }
-                }
-                //Formattage des montants avec la locale avec 2 décimales après la virgule
-                if(angular.isDefined(currency)){
-                    //met en Uppercase la devise
-                    currency=$filter('uppercase')(currency);
-                    if(angular.equals(currency ,'TND')){
-                        // 3 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
-
-                    }else if(angular.equals(currency ,'JPY')){
-                        // 0 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
-
-                    }else{
-                        // 2 décimales
-                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
-                    }
-
-                }else{
-                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
-                }
-
-                return result;
-            }
-        }
-
-
-    }
-    ]
-)
-;
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLazyGrid
- * @module itesoft
- * @restrict ECA
- * @since 1.1
- * @description
- * The itLazyGrid widgets provides lazy grid feature on ui-grid
- *
- *
- * ```html
- *    <it-lazy-grid option="option" ></it-lazy-grid>
- * ```
- *
- * <h1>Skinning</h1>
- * Following is the list of structural style classes:
- *
- * <table class="table">
- *  <tr>
- *      <th>
- *          Class
- *      </th>
- *      <th>
- *          Applies
- *      </th>
- *  </tr>
- *  </table>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- Query RSQL send to REST API:
-    <pre><code class="lang-html">{{query}}</code></pre>
-     <div style="height:300px;display:block;">
-        <it-lazy-grid options="options" ></it-lazy-grid>
-     </div>
-    </div>
- </div>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngMessages','itesoft']);
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = {
-            // call when lazyGrid is instantiate
-            onRegisterApi: function (lazyGrid) {
-                $scope.lazyGrid = lazyGrid;
-                $scope.lazyGrid.appScope = $scope;
-                $scope.lazyGrid.fn.initialize();
-                $scope.lazyGrid.fn.callBack = load;
-                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
-                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
-
-                // Call after each loaded event
-                $scope.lazyGrid.on.loaded = function () {
-                };
-
-                // Call when user click
-                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
-                    $scope.selectedInvoice = row.entity;
-                };
-
-                // Loading columnDef
-                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
-                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
-                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
-                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
-                 ];
-
-                //Call when grid is ready to use (with config)
-                $scope.$applyAsync(function () {
-                   $scope.lazyGrid.fn.initialLoad();
-                });
-        }};
-
-         // ui-grid loading function, will be call on:
-         //-filter
-         //-pagination
-         //-sorter
-        function load(query) {
-
-            // ignore this, it's just for demo
-            if(query.size == 2){
-                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else if(query.size == 4){
-                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    ]};
-                }else{
-                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
-                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
-                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
-                 ]};
-             }
-            // end ignore this, it's just for demo
-            query = query.build();
-            // query RSQL to send to REST API
-            console.log(query);
-            $scope.query = query;
-            $scope.lazyGrid.fields.gridOptions.data = data.items;
-            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
-
-            $scope.isBusy = false;
-            $scope.lazyGrid.on.loaded();
-        }
-     }
- ]
- );
- </file>
- </example>
- */
-IteSoft.directive('itLazyGrid',
-                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
-        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
-            return {
-                restrict: 'AE',
-                scope: {
-                    options: '='
-                },
-                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
-                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
-                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
-                '<div class="ui-grid-filter-container"> ' +
-                '<span class="{{col.headerCellClass}}"> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
-                'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
-                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-                'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
-                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span></div> ' +
-                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
-                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
-                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
-                ' </script> ' +
-                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
-                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
-                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
-                '<div role="navigation" class="ui-grid-pager-container"> ' +
-                '<div role="menubar" class="ui-grid-pager-control"> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
-                'ng-disabled="cantPageBackward()">' +
-                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
-                '<input type="button" title="" ' +
-                'ng-click="pageFirstPageClick()" > </input>'+
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
-                'ng-disabled="cantPageBackward()">' +
-                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pagePreviousPageClick()"/>' +
-                '</label>' +
-                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
-                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
-                '{{ paginationApi.getTotalPages() }} ' +
-                '</span> ' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
-                'ng-disabled="cantPageForward()">' +
-                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageNextPageClick()"/>' +
-                '</label>' +
-                '<label data-type="info" data-animation="am-fade-and-scale" ' +
-                'bs-tooltip ' +
-                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
-                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
-                'ng-disabled="cantPageToLast()">' +
-                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
-                '<input type="button" title="" ' +
-                'ng-click="pageLastPageClick()"/>' +
-                '</label>' +
-                ' </div> ' +
-                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
-                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
-                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
-                '</div> ' +
-                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
-                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
-                '</span> </div> ' +
-                '<div class="ui-grid-pager-count-container">' +
-                '<div class="ui-grid-pager-count"> ' +
-                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
-                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
-                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
-                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
-                ' </div> </div> </div> ' +
-                '</script>',
-                controllerAs: 'lazyGrid',
-                controller: ['$scope', function ($scope) {
-
-
-                    //Get current locale
-                    var locale = localStorageService.get('Locale');
-
-                    var self = this;
-
-                    self.options = $scope.options;
-
-                    /**
-                     * Fields
-                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
-                     */
-                    self.fields = {
-                        template: {pagination: $templateCache.get('paginationTemplate.html')},
-                        filter: [],
-                        externalFilter: {},
-                        gridApi: {},
-                        gridOptions: {},
-                        paginationOptions: {},
-                        appScope: {},
-                        promise: {refresh: {}}
-                    };
-
-                    /**
-                     * Event callback method
-                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
-                     */
-                    self.on = {
-                        loaded: onLoaded,
-                        ready: onReady,
-                        filterChange: onFilterChange,
-                        sortChange: onSortChange,
-                        paginationChanged: onPaginationChanged,
-                        rowSelectionChanged: onRowSelectionChanged
-                    };
-                    /**
-                     * Public Method
-                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
-                     */
-                    self.fn = {
-                        callBack: self.options.callBack,
-                        initialize: initialize,
-                        refresh: refresh,
-                        initialLoad: initialLoad,
-                        addExternalFilter: addExternalFilter,
-                        refreshDefaultFilter:refreshDefaultFilter
-                    };
-
-
-                    /**
-                     *
-                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
-                     */
-                    self.fields.paginationOptions = {
-                        pageNumber: 1,
-                        pageSize: 10,
-                        sort: {
-                            name: undefined,
-                            direction: undefined
-                        }
-                    };
-                    /**
-                     * Default grid options
-                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
-                     */
-                    self.fields.gridOptions = {
-                        enableFiltering: true,
-                        enableSorting: true,
-                        enableColumnMenus: false,
-                        useExternalPagination: true,
-                        useExternalSorting: true,
-                        enableRowSelection: true,
-                        enableRowHeaderSelection: false,
-                        multiSelect: false,
-                        modifierKeysToMultiSelect: false,
-                        noUnselect: true,
-                        useExternalFiltering: true,
-                        data: [],
-                        columnDefs: [],
-                        paginationTemplate: self.fields.template.pagination,
-                        onRegisterApi: function (gridApi) {
-                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
-                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
-                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
-                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
-                            self.fields.gridApi = gridApi;
-                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
-                        }
-                    };
-                    /**
-                     * Apply external filter
-                     * @private
-                     */
-                    function _applyExternalFilter() {
-                        $log.debug("LazyGrid:Apply External filter");
-                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
-                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
-                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
-                                self.fields.filter.push(queryParam);
-                            }
-                        });
-                    }
-
-                    /**
-                     * Apply filter
-                     * @private
-                     */
-                    function _applyFilter() {
-                        $log.debug("LazyGrid:Apply filter");
-                        var key = '';
-                        var value = '';
-                        var condition = OPERATOR.EQUALS;
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
-                                key = self.fields.gridApi.grid.columns[i].field;
-                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
-                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
-                                    if (value != undefined && value != '') {
-                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
-                                        // if filter key is override
-                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
-                                        if (rsqlKey != undefined) {
-                                            key = rsqlKey;
-                                        }
-
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
-                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
-                                        }
-
-                                        //Si la donnée doit être traitée comme un nombre
-                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
-                                            value = itAmountCleanerService.cleanAmount(value, locale);
-                                        }
-
-                                        var queryParam = itQueryParamFactory.create(key, value, condition);
-                                        self.fields.filter.push(queryParam);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    /**
-                     * Apply default filter configured inside columnDef filter option
-                     * @private
-                     */
-                    function _applyDefaultFilter() {
-                        $log.debug("LazyGrid:Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
-                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
-                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
-                                        //    self.fields.filter.push(queryParamClient);
-                                        //}
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Refresh datagrid by reset filters and applying default filter
-                     */
-                    function refreshDefaultFilter(){
-                        $log.debug("LazyGrid:Reset Filter and Apply default filter");
-                        if(angular.isDefined(self.fields.gridApi.grid)) {
-                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
-                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters)
-                                    && angular.isDefined(column.colDef.filters[0])) {
-                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
-                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
-                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
-                                    }else{
-                                        //efface tous les filtres
-                                        angular.forEach(column.colDef.filters, function(filter){
-                                            filter.term="";
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    /**
-                     * Call after each loading
-                     */
-                    function onLoaded() {
-                    }
-
-                    /**
-                     * Call when grid is ready, when config is loaded (columnDef is present)
-                     */
-                    function onReady() {
-                    }
-
-                    /**
-                     * Call on filter change
-                     */
-                    function onFilterChange() {
-                        $log.debug("LazyGrid:Filter Changed");
-                        self.fields.filter = [];
-                        if (angular.isDefined(self.fields.promise.refresh)) {
-                            $timeout.cancel(self.fields.promise.refresh);
-                        }
-                        self.fields.promise.refresh = $timeout(function () {
-                                self.fn.refresh();
-                            }
-                            , 1000);
-
-                    }
-
-                    /**
-                     * Call on sort change
-                     * @param grid
-                     * @param sortColumns
-                     */
-                    function onSortChange(grid, sortColumns) {
-                        $log.debug("LazyGrid:Sort Changed");
-                        self.fields.filter = [];
-                        if (sortColumns.length == 0) {
-                            self.fields.paginationOptions.sort.name = undefined;
-                            self.fields.paginationOptions.sort.direction = undefined;
-                        } else {
-                            var sortKey = sortColumns[0].name;
-                            /**
-                             * Surcharge avec la clé rsql
-                             */
-                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
-                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
-                            }
-                            self.fields.paginationOptions.sort.name = sortKey;
-                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
-                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
-                        }
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Call when page changed
-                     * @param newPage
-                     * @param pageSize
-                     */
-                    function onPaginationChanged(newPage, pageSize) {
-                        $log.debug("LazyGrid:Pagination Changed");
-                        self.fields.filter = [];
-                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
-                            self.fields.paginationOptions.pageNumber = newPage;
-                            self.fields.paginationOptions.pageSize = pageSize;
-                            self.fn.refresh();
-                        }
-                    }
-
-                    /**
-                     * Call when user click on row
-                     */
-                    function onRowSelectionChanged() {
-                        $log.debug("LazyGrid:Row Selection Changed");
-                    }
-
-                    /**
-                     * Call to refresh data
-                     */
-                    function refresh() {
-                        $log.debug("LazyGrid:Refresh");
-                        _applyExternalFilter();
-                        _applyFilter();
-                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
-                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
-                        self.fn.callBack(query);
-                    }
-
-                    /**
-                     * Initial loading
-                     */
-                    function initialLoad() {
-                        $log.debug("LazyGrid:Initial load");
-
-                        //application des filtres pour récupérer le nom de filtre actifs
-                        _applyFilter();
-                        if (self.fields.filter.length <= 0) {
-                            _applyDefaultFilter();
-                        }
-                        //remise à 0 des informations de filtre
-                        self.fields.filter = [];
-
-                        self.fn.refresh();
-                    }
-
-                    /**
-                     * Add external filter like clientId
-                     * @param filter external filter to always apply
-                     * @param filter.key
-                     * @param filter.value
-                     * @param filter.condition
-                     */
-                    function addExternalFilter(filter) {
-                        if (angular.isUndefined(filter.key)) {
-                            $log.error("External filter object must have key");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.condition)) {
-                            $log.error("External filter object must have condition");
-                            return;
-                        }
-                        if (angular.isUndefined(filter.value)) {
-                            self.fields.externalFilter[filter.key] = {};
-                        } else {
-                            self.fields.externalFilter[filter.key] = filter;
-                        }
-                    }
-
-
-                    /**
-                     * Call before using
-                     * @returns {*}
-                     */
-                    function initialize() {
-
-                    }
-
-                    if (angular.isDefined(self.options.onRegisterApi)) {
-                        self.options.onRegisterApi(self);
-                        $log.debug('LazyGrid:onRegisterApi')
-                    }
-
-
-                }]
-            }
-        }
-    ]
-).constant("OPERATOR", {
-        "EQUALS": "==",
-        "LIKE": "==%",
-        "NOT_EQUALS": "!=",
-        "LESS_THAN": "=lt=",
-        "LESS_EQUALS": "=le=",
-        "GREATER_THAN": "=gt=",
-        "GREATER_EQUALS": "=ge="
-})
-.constant('NOTIFICATION_TYPE', {
-    INFO: "INFO",
-    WARNING: "WARNING",
-    ERROR: "ERROR",
-    SUCCESS: "SUCCESS",
-    DISMISS: "DISMISS"
-})
-;
-/**
- * Created by SZA on 20/01/2016.
- */
-
-'use strict';
-/**
- * Singleton that provide paginatorConfig
- */
-IteSoft.factory('itPaginatorConfigService',
-        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
-            function ($q, $log, itNotifier, $filter, MetadataService) {
-
-                var self = this;
-                var deferred = $q.defer();
-
-                /**
-                 * fields
-                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
-                 */
-                self.fields = {
-                    options: [],
-                    defaultOption: "",
-                    loaded: false
-                };
-
-                /**
-                 * public method
-                 * @type {{initialize: initialize}}
-                 */
-                self.fn = {
-                    initialize: initialize
-                };
-
-                return self;
-                /**
-                 * filter initialization
-                 * @returns {*}
-                 */
-                function initialize() {
-                    if (!self.fields.loaded) {
-                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
-                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
-                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
-                            function (options) {
-                                self.fields.defaultOption = options[1].value;
-                                var paginatorOptions = options[0].value;
-                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
-                                    self.fields.options = paginatorOptions.split(',');
-                                } else {
-                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
-                                }
-
-                                $log.debug("PaginatorConfigService: loaded");
-                                self.fields.loaded = true;
-                                deferred.resolve('ok');
-                            },
-                            function (failed) {
-                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
-                            });
-                    } else {
-                        $log.debug("PaginatorConfigService: loaded");
-                        deferred.resolve('ok');
-                    }
-                    return deferred.promise;
-
-                }
-
-            }
-        ]
-    );
-'use strict';
-/**
- * Query param service
- */
-IteSoft.factory('itQueryParamFactory', [function () {
-    function QueryParam(key, value, operator) {
-        this.key = key;
-        this.value = value;
-        this.operator = operator;
-    }
-    return {
-        /**
-         * create a queryParam
-         * @param key: name
-         * @param value: myName
-         * @param operator: OPERATOR.equals
-         * @returns {QueryParam}
-         */
-        create: function (key, value, operator) {
-            return new QueryParam(key, value, operator);
-        }
-    }
-}]);
-'use strict';
-/**
- * Service that provide RSQL query
- */
-IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
-        function Query(parameters, start, size, sort) {
-            this.parameters = parameters;
-            this.start = start;
-            this.size = size;
-            this.sort = sort;
-            /**
-             * Method that return RSQL path
-             * @returns {string}: query=id==1 and name=="name"
-             */
-            this.build = function () {
-                var result = '';
-                if (parameters != undefined) {
-                    this.parameters.forEach(function (entry) {
-                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
-
-                            //Si c'est une date max, on définit l'heure à 23h59
-                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
-                                entry.value.setHours(23);
-                                entry.value.setMinutes(59);
-                                entry.value.setSeconds(59);
-                                entry.value.setMilliseconds(999);
-                            }
-
-                            if (result.length > 0) {
-                                result += " and ";
-                            }
-
-                            //formattage ISO des dates
-                            if (entry.value instanceof Date) {
-                                entry.value = entry.value.toISOString();
-                            }
-
-                            if (entry.operator == OPERATOR.LIKE) {
-                                entry.value = entry.value + '%';
-                            }
-                            result += entry.key + entry.operator + entry.value;
-                        }
-                    });
-                }
-                result = 'query=' + result;
-                if (size != null && angular.isDefined(size) && size != '') {
-                    result += "&size=" + this.size;
-                }
-                if (start != null && angular.isDefined(start) && start != '') {
-                    result += "&start=" + this.start;
-                }
-                //le sorting en décroissant s'écrit -fieldName
-                if (sort != undefined) {
-                    if (this.sort.name != undefined) {
-                        result += "&sort="
-                        if (this.sort.direction == "desc") {
-                            result += "-"
-                        }
-                        result += this.sort.name;
-                    }
-                }
-                return result;
-
-            };
-
-
-        }
-
-        return {
-            create: function (parameters, start, size, sort) {
-                return new Query(parameters, start, size, sort);
-            }
-        }
-    }
-    ]
-);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetail',[function() {
-        return {
-            restrict: 'EA',
-            require: '^itMasterDetail',
-            transclude: true,
-            scope: false,
-            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
-                '   ng-if="currentItemWrapper.currentItem" ' +
-                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
-                ' <div class="it-fill" ng-transclude>' +
-                '</div>' +
-                '</div>' +
-                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
-                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
-                'ng-if="!currentItemWrapper.currentItem">' +
-                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
-                '</div>'
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailContent
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail part of the master-detail main content.
- *
- * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- *
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailContent',function() {
-        return {
-            restrict: 'EA',
-            require: '^itDetail',
-            transclude: true,
-            scope:false,
-            template : '<div class="row it-fill">' +
-                ' <div class="col-md-12  it-fill" ng-transclude>'+
-
-                            '</div>'+
-                       '</div>'
-
-        }
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itDetailHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-detail-header>
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itDetailHeader',function() {
-        return {
-            restrict: 'EA',
-            require : '^itDetail',
-            scope : false,
-            transclude: true,
-            template : '<div class="fluid-container"><div class="row it-md-header">'+
-                '<div class="col-md-2 it-fill  col-xs-2">' +
-                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
-                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
-                '</span>' +
-                ' </a>'+
-                '</div>'+
-                '<div class="col-md-10 col-xs-10 it-fill ">'+
-                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'
-        }
-
-    });
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMaster
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Most important part of master-detail component, that
- *
- * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
- * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
- * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
- * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- * <table class="table">
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- * <tr>
- *   <td><code>attribute it-lock-on-change="true|false"</code></td>
- *   <td>lock navigation if the selected item has changed.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- *
- */
-IteSoft
-    .directive('itMaster',function(){
-        return {
-            restrict : 'EA',
-            require : '^itMasterDetail',
-            priority : -1,
-            transclude : true,
-            scope : {
-                itMasterData : '=',
-                itLang:'=',
-                itCol:'=',
-                itMasterDetailControl:'=',
-                itLockOnChange: '=',
-                itNoDataMsg: '@',
-                itNoDetailMsg:'@'
-            },
-            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
-                '<div class="row" ng-transclude>'+
-                '</div>'+
-                '<div class="row it-master-grid it-fill" >'+
-                '<div class="col-md-12 it-fill">'+
-                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
-                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            controller : ['$scope',
-                '$filter',
-                '$q',
-                '$timeout',
-                'itPopup',
-                '$templateCache',
-                '$route',
-                '$window',
-                function ($scope,
-                          $filter,
-                          $q,
-                          $timeout,
-                          itPopup,
-                          $templateCache,
-                          $route,
-                          $window){
-
-                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
-                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
-                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
-                        ' ng-checked="row.isSelected"></div>');
-
-                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
-                        '<input type="checkbox" ' +
-                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
-
-                    function ItemWrapper(item){
-                        var _self = this;
-                        angular.forEach($scope.itMasterData,function(entry,index){
-
-                            if(angular.equals(entry,item)) {
-                                _self.index = index;
-                            }
-                        });
-                        _self.originalItem = item;
-                        _self.currentItem = angular.copy(item);
-                        _self.hasChanged = false;
-                        _self.isWatched = false;
-                        _self.unlockOnEquals = true;
-                    }
-
-                    $scope.$parent.$masterCol = $scope.itCol;
-                    ItemWrapper.prototype.unlockCurrent = function(){
-                        this.hasChanged = false;
-                        this.isWatched = false;
-                    };
-
-                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
-                        this.hasChanged = true;
-                        this.isWatched = true;
-                        this.unlockOnEquals = !autoUnlock;
-                    };
-
-
-
-                    $scope.$parent.currentItemWrapper = null;
-
-                    function _selectionChangedHandler(row){
-                        if(!$scope.itMasterDetailControl.disableMultiSelect){
-                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
-                                $scope.$parent.currentItemWrapper = null;
-                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
-                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
-                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
-                            }
-                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }else {
-//                            _displayDetail(row.entity);
-//                            _scrollToEntity(row.entity);
-                        }
-                    }
-
-                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-
-                    $scope.gridOptions  = {
-                        rowHeight: 40,
-                        data : $scope.itMasterData,
-                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
-                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
-                        showGridFooter: true,
-                        enableMinHeightCheck :true,
-                        enableColumnResizing: true,
-                        enableHorizontalScrollbar : 0,
-                        enableVerticalScrollbar : 2,
-                        onRegisterApi : function(gridApi){
-                            $scope.gridApi = gridApi;
-                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                _selectionChangedHandler(row);
-                            });
-
-                        },
-                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
-                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
-                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
-                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
-                            '</div>',
-                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
-                            '</div>'
-                    };
-
-                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
-                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
-                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
-                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
-                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
-                                '<span ui-grid-visible="col.sort.direction" ' +
-                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
-                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
-                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
-                                ' </div> <div ui-grid-filter></div> </div>';
-                        },true)
-                    }
-
-                    $scope.gridOptions.columnDefs =
-                        $scope.itMasterDetailControl.columnDefs;
-
-                    function _displayDetail(item) {
-                        var deferred = $q.defer();
-                        if($scope.$parent.currentItemWrapper != null){
-                            if($scope.$parent.currentItemWrapper.hasChanged &&
-                                $scope.itLockOnChange){
-                                deferred.reject('undo or save before change');
-                                return deferred.promise;
-                            }
-                        }
-                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
-                        deferred.resolve('');
-                        return deferred.promise;
-                    }
-
-                    $scope.onRowClick = function(row,col) {
-                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
-                            _displayDetail(col.entity).then(function (msg) {
-                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
-                                    $scope.gridApi.selection.clearSelectedRows();
-                                    if ($scope.$parent.$parent.mobile) {
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                }
-                                $scope.gridApi.selection.toggleRowSelection(col.entity);
-                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
-                            }, function (msg) {
-                                itPopup.alert($scope.itMasterDetailControl.navAlert);
-                            });
-                        }
-                    };
-
-
-                    function _scrollToEntity(entity){
-                        $scope.gridApi.core.scrollTo(entity);
-                    }
-
-                    $scope.itMasterDetailControl.selectItem =function (item){
-                        $scope.onRowClick(null,{entity:item});
-                    };
-
-                    /**
-                     * Method to filter rows
-                     */
-                    $scope.refreshData = function() {
-                        var renderableEntities = $filter('itUIGridGlobalFilter')
-                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
-
-                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
-                            var match = false;
-                            renderableEntities.forEach(function(entity){
-
-                                if(angular.equals(row.entity,entity)){
-                                    match  = true;
-                                }
-                            });
-                            if ( !match ){
-                                $scope.gridApi.core.setRowInvisible(row);
-                            } else {
-                                $scope.gridApi.core.clearRowInvisible(row);
-                            }
-                        });
-                    };
-
-
-                    function _unlockCurrent(){
-                        $scope.$applyAsync(function(){
-                            if($scope.$parent.currentItemWrapper!==null){
-                                $scope.$parent.currentItemWrapper.hasChanged = false;
-                                $scope.$parent.currentItemWrapper.isWatched = false;
-                            }
-                        });
-
-                    }
-
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            _unlockCurrent();
-                        }
-                    };
-
-                    $scope.$on('unlockCurrentItem',function(){
-                        _unlockCurrent();
-                    });
-
-                    /**
-                     * Method to scroll to specific item.
-                     * @param entity item to scroll to.
-                     */
-                    $scope.itMasterDetailControl.scrollToItem =function (entity){
-                        _scrollToEntity(entity);
-                    };
-
-                    /**
-                     * Method to get Selected items.
-                     * @returns {Array} of selected items
-                     */
-                    $scope.itMasterDetailControl.getSelectedItems = function(){
-                        if(typeof $scope.gridApi !== 'undefined' ) {
-                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
-                                return $scope.gridApi.selection.getSelectedRows();
-                            }
-                        }
-                        return [];
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     * @deprecated
-                     */
-                    $scope.itMasterDetailControl.getCurrentItem = function(){
-                        return   $scope.$parent.currentItemWrapper.currentItem;
-                    };
-
-                    /**
-                     * Method to get Current item.
-                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
-                     */
-                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
-                        return   $scope.$parent.currentItemWrapper;
-                    };
-
-                    /**
-                     * Method to get filtered items.
-                     * @returns {Array} of filtered items.
-                     */
-                    $scope.itMasterDetailControl.getFilteredItems = function(){
-                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
-                        var entities  = [];
-                        angular.forEach(rows,function(row){
-                            entities.push(row.entity);
-                        });
-                        return entities;
-                    };
-
-
-                    /**
-                     * Method to select the current Item.
-                     * @param entity item to select.
-                     * @returns {deferred.promise|*} success if the item is found.
-                     */
-                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
-
-                        var deferred = $q.defer();
-                        $scope.gridApi.selection.clearSelectedRows();
-                        _displayDetail(entity).then(function(){
-                            $timeout(function() {
-                                var entityIndex = $scope.itMasterData.indexOf(entity);
-                                if(entityIndex>=0) {
-
-                                    $scope.gridApi.selection.selectRow(entity);
-                                    _scrollToEntity(entity);
-                                    if( $scope.$parent.$parent.mobile){
-                                        $scope.$parent.$parent.goToDetail();
-                                    }
-                                    deferred.resolve();
-                                } else {
-                                    deferred.reject();
-                                }
-
-                            });
-                        },function(){
-                            deferred.reject();
-                        });
-                        return deferred.promise;
-                    };
-
-                    /**
-                     * Method to undo changes on the current item.
-                     */
-                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
-                        if($scope.$parent.currentItemWrapper!= null){
-                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
-                            $scope.$parent.currentItemWrapper.currentItem =
-                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        }
-                    };
-
-                    /**
-                     * Method to fill windows height to the master part.
-                     */
-                    $scope.itMasterDetailControl.fillHeight = function(){
-                        //  evalLayout.fillHeight();
-                    };
-
-
-                    /**
-                     * Handler to unlock the current item.
-                     */
-                    $scope.$on('unlockCurrentItem',function(){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.unlockCurrent();
-                        });
-                    });
-
-                    /**
-                     * Handler to lock the current item.
-                     */
-                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
-                        $timeout(function(){
-                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
-                        });
-                    });
-
-                    function confirmLeavePage(e) {
-                        if($scope.$parent.currentItemWrapper!=null){
-                            if ( $scope.$parent.currentItemWrapper.hasChanged
-                                && $scope.itLockOnChange ) {
-                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
-                                e.preventDefault();
-                            }
-                        }
-                    }
-                    $scope.itAppScope = $scope.$parent;
-
-                    //  $scope.itAppScope.$navAlert = {};
-
-                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
-
-                    var w = angular.element($window);
-                    w.bind('resize', function () {
-                        $scope.gridApi.core.handleWindowResize();
-                    });
-
-                    $scope.itMasterDetailControl.initState = true;
-                    $scope.$on("$locationChangeStart", confirmLeavePage);
-                    $scope.itMasterDetailControl = angular.extend({navAlert:{
-                        text:'Please save or revert your pending change',
-                        title:'Unsaved changes',
-                        buttons: [
-                            {
-                                text: 'OK',
-                                type: 'btn-info',
-                                onTap: function () {
-                                    return false;
-                                }
-                            }]
-                    }}, $scope.itMasterDetailControl );
-
-
-                    /*  watchers */
-                    $scope.$watch('itLang',function(){
-                        $scope.gridApi.grid.refresh();
-                    });
-
-                    $scope.$watch('itMasterData',function(){
-                        $scope.gridOptions.data = [];
-                        $scope.itMasterData.forEach(function(entry){
-                            $scope.gridOptions.data.push(entry);
-                        });
-
-                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
-                            $scope.$parent.currentItemWrapper = null;
-                        } else {
-                            if( $scope.itMasterData.length === 0){
-                                $scope.$parent.currentItemWrapper = null;
-                            }
-                        }
-                        $scope.gridApi.grid.refresh();
-                        if($scope.itMasterDetailControl !== null){
-                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
-                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
-
-                                $scope.$applyAsync(function(){
-                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
-                                });
-                            }
-                        }
-                        $scope.refreshData();
-
-                    },true);
-
-                   $timeout(function(){
-                        var event = document.createEvent('Event');
-                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                        $window.dispatchEvent(event);
-                    },250);
-
-                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
-
-                        if($scope.$parent.currentItemWrapper != null ){
-                            if(!$scope.$parent.currentItemWrapper.isWatched)
-                            {
-                                $scope.$parent.currentItemWrapper.isWatched = true;
-                            }
-                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
-                                $scope.$parent.currentItemWrapper.hasChanged =
-                                    !angular.equals(newValue,
-                                        $scope.$parent.currentItemWrapper.originalItem);
-                            } else   {
-                                $scope.$parent.currentItemWrapper.hasChanged = true;
-                            }
-                        }
-                    }, true);
-
-                    $scope.$watch('filterText',function(){
-                        $scope.refreshData();
-                    },true);
-
-                    $scope.$watch('itNoDetailMsg',function(){
-                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
-
-                    });
-                }]
-
-
-        }
-    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
-        return function(data, grid, query) {
-            var matches = [];
-            //no filter defined so bail
-            if (query === undefined || query === '') {
-                return data;
-            }
-            query = query.toLowerCase();
-
-            function _deepFind(obj, path) {
-                var paths = path.split('.')
-                    , current = obj
-                    , i;
-
-                for (i = 0; i < paths.length; ++i) {
-                    if (current[paths[i]] == undefined) {
-                        return undefined;
-                    } else {
-                        current = current[paths[i]];
-                    }
-                }
-                return current;
-            }
-
-            var scope = $rootScope.$new(true);
-            for (var i = 0; i < data.length; i++) {
-                for (var j = 0; j < grid.columnDefs.length; j++) {
-                    var dataItem = data[i];
-
-                    var fieldName = grid.columnDefs[j].field;
-                    var renderedData = _deepFind(dataItem,fieldName);
-                    // apply cell filter
-                    if (grid.columnDefs[j].cellFilter) {
-                        scope.value = renderedData;
-                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
-                    }
-                    //as soon as search term is found, add to match and move to next dataItem
-                    if(typeof renderedData !== 'undefined' && renderedData != null){
-                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
-                            matches.push(dataItem);
-                            break;
-                        }
-                    }
-                }
-            }
-            scope.$destroy();
-            return matches;
-        };
-    }] );
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterDetail
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master-detail main content.
- *
- * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
- * and have 2 child elements: 1 `<it-master>` for the list selectable content,
- * and `<it-detail>` that display the content of the selected item.
- *
- * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
- * this object will
- *
- * <table class="table">
- *  <tr>
- *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
- *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
- *  </tr>
- *  <tr>
- *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
- *   <td>Disable | Enable  multiple row selection for entire grid .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getSelectedItems()</code></td>
- *   <td>Method to get selected items in the master grid.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
- *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
- *   <td>Method to revert changes on the selected item.</td>
- *  </tr>
- * <tr>
- *   <td><code>masterDetail.getFilteredItems()</code></td>
- *   <td>Method to get displayed item after filter.</td>
- *  </tr>
- *  <tr>
- * <tr>
- *   <td><code>masterDetail.fillHeight()</code></td>
- *   <td>method refresh the master detail Height.</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
- *   <td>Method to define the selected item, return promise</td>
- *  </tr>
- *  <tr>
- *   <td><code>masterDetail.scrollToItem(item)</code></td>
- *   <td>Method to scroll to the entity row.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
- *   <td>unlock the selected item from the editing mode.</td>
- *  </tr>
- *  <tr>
- *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
- *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
- *  </tr>
- *  <tr>
- *   <td><code>grid.appScope.itAppScope</code></td>
- *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
- *  </tr>
- *
- *   <tr>
- *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
- *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
- *  </tr>
- *  <tr>
- *   <td><code>MASTER_ROW_CHANGED event</code></td>
- *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- * @example
-    <example module="itesoft">
-         <file name="index.html">
-             <div ng-controller="MasterDetailController">
-                 <it-master-detail >
-                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
-                 <it-master-header it-search-placeholder="Recherche" >
-                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
-                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
-                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
-                 </it-master-header>
-                 </it-master>
-                 <it-detail>
-                 <it-detail-header>
-                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
-                 <span class="fa fa-floppy-o fa-lg"></span>
-                 </button>
-                 <button class=" btn btn-info" title="Check">
-                 <span class="fa fa-file-code-o fa-lg"></span>
-                 </button>
-                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
-                 <span class="fa fa-undo fa-lg"></span>
-                 </button>
-
-                 </it-detail-header>
-                 <it-detail-content>
-                 <it-modal-full-screen>
-                             <div class="form-group">
-                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
-                                     it-label="code"
-                                     ng-model="currentItemWrapper.currentItem.code"
-                                     name=""
-                                     ng-required="true"/>
-                             </div>
-                             <div class="form-group">
-                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
-                                 it-label="description"
-                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
-                             </div>
-                             <div class="form-group">
-                             <input type="checkbox"
-                                 it-toggle
-                                 ng-model="currentItemWrapper.currentItem.enabledde"
-                                 it-label="tete"/>
-                             </div>
-                 </it-modal-full-screen>
-                 </it-detail-content>
-                 </it-detail>
-                 </it-master-detail>
-             </div>
-         </file>
-         <file name="controller.js">
-             angular.module('itesoft')
-              .controller('MasterDetailController', ['$scope', function($scope) {
-
-                                            $scope.data =
-                                               [
-                                                    {
-                                                        "code" : "Code 1",
-                                                        "description": "Description 1",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 2",
-                                                        "description": "Description 2",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 3",
-                                                        "description": "Description 3",
-                                                        "enabledde" : true
-                                                    },
-                                                    {
-                                                        "code" : "Code 4",
-                                                        "description": "Description 4",
-                                                        "enabledde" : false
-                                                    },
-                                                    {
-                                                        "code" : "Code 5",
-                                                        "description": "Description 5",
-                                                        "enabledde" : true
-                                                    }
-                                                ];
-
-                                            $scope.masterDetails = {};
-
-                                            $scope.masterDetails = {
-                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
-                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
-                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
-
-                                            };
-
-                                             $scope.masterDetails.disableMultiSelect = false;
-                                            $scope.masterDetails.navAlert = {
-                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
-                                                title:'{{\'FOO\' | translate}}',
-                                                buttons: [
-                                                        {
-                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
-                                                            type:  'btn-warning',
-                                                            onTap: function() {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
-                                                            type: 'btn-primary',
-                                                            onTap: function () {
-                                                                $scope.saveCurrentItem();
-                                                                return true;
-
-                                                            }
-                                                        },
-                                                        {
-                                                            text: '<span class="fa fa-undo fa-lg"></span>',
-                                                            type: 'btn-success',
-                                                            onTap: function () {
-                                                                $scope.undoChange();
-                                                                return true;
-
-                                                            }
-                                                        }
-                                                    ]
-                                            };
-
-                                            function _removeItems(items,dataList){
-                                                angular.forEach(items,function(entry){
-                                                    var index = dataList.indexOf(entry);
-                                                    dataList.splice(index, 1);
-                                                })
-                                            }
-
-                                            $scope.deleteSelectedItems = function(){
-                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
-                                            };
-
-
-                                            $scope.saveCurrentItem = function(){
-                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
-
-                                                    $scope.$broadcast('unlockCurrentItem');
-                                                };
-
-                                            $scope.undoChange = function(){
-                                                $scope.masterDetails.undoChangeCurrentItem();
-                                                $scope.masterDetails.fillHeight();
-                                            };
-
-                                            $scope.addNewItem = function(){
-                                                var newItem =  {
-                                                    "code" : "Code " + ($scope.data.length+1) ,
-                                                    "description": "Description " + ($scope.data.length+1),
-                                                    "enabledde" : true
-                                                };
-                                                $scope.data.push(newItem);
-                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
-                                                    $scope.$broadcast('lockCurrentItem',false);
-                                                },function(error){
-
-                                                });
-                                            };
-
-                                            $scope.hasChanged = function(){
-                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
-                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
-                                                } else {
-                                                    return false;
-                                                }
-                                            }
-                                        }]);
-          </file>
-         <file src="test.css">
-         </file>
-    </example>
- */
-IteSoft
-    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
-        return {
-            restrict: 'EA',
-            transclude : true,
-            scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
-            controller : [
-                '$scope',
-                'screenSize',
-                function(
-                    $scope,
-                    screenSize
-                    )
-                {
-                    $scope.activeState = 'master';
-                    $scope.desktop = screenSize.on('md, lg', function(match){
-                        $scope.desktop = match;
-
-                    });
-
-                    $scope.mobile = screenSize.on('xs, sm', function(match){
-                        $scope.mobile = match;
-                    });
-
-                    $scope.goToDetail = function(){
-                        $scope.activeState = 'detail';
-                    };
-
-                    $scope.$watch('mobile',function(){
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            $scope.activeState = 'detail';
-                        } else {
-                            $scope.activeState = 'master';
-                        }
-                    });
-
-                    $scope.$watch('$$childHead.currentItemWrapper',function() {
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
-                                ||  $scope.$$childHead.currentItemWrapper === null )){
-                            $scope.activeState = 'master';
-                        } else {
-                            if($scope.mobile &&
-                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
-                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
-                                $scope.activeState = 'master';
-                            }
-                        }
-                    });
-
-                    $scope.goToMaster = function(){
-
-                        if($scope.mobile &&
-                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
-                                &&  $scope.$$childHead.currentItemWrapper != null )){
-                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
-                                $scope.$$childHead.$$childHead.itLockOnChange){
-                                itPopup.alert(  $scope.$$childHead.$navAlert);
-                            } else {
-                                $scope.activeState = 'master';
-                                $timeout(function(){
-                                    $window.dispatchEvent(new Event('resize'));
-                                },300)
-
-                            }
-                        } else {
-                            $scope.activeState = 'master';
-                            $timeout(function(){
-                                $window.dispatchEvent(new Event('resize'));
-                            },300)
-
-                        }
-
-                    };
-                }]
-        }
-    }]);
-
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMasterHeader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
- * can contain the action buttons of selected items.
- * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
- *
- * ```html
- * <it-master-detail>
- *   <!-- Master Content content -->
- *
- *   <it-master>
- *       <it-master-header>
- *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
- *       </it-master-header>
- *   </it-master>
- *
- *   <!-- menu -->
- *   <it-detail>
- *        <it-detail-header>
- *
- *       </it-detail-header>
- *
- *
- *       <it-detail-content>
- *       </it-detail-content>
- *   </it-detail>
- *
- * </it-master-detail>
- * ```
- */
-IteSoft
-    .directive('itMasterHeader',function() {
-        return {
-            restrict: 'EA',
-            require: '^itMaster',
-            scope: false,
-            transclude : true,
-            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
-                '<div class="btn-toolbar it-fill" ng-transclude>'+
-                '</div>'+
-                '</div>'+
-                '<div class="col-xs-12 col-md-12 pull-right">'+
-                '<div>'+
-                '<form>'+
-                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
-                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
-                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
-                '</div>'+
-                '</form>'+
-                '</div>'+
-                '</div>'+
-                '</div>'+
-                '</div>',
-            link: function (scope, element, attrs) {
-                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
-                    scope.placeholderText = newVal;
-                });
-            }
-        }
-
-    });
 'use strict';
 
 /**
@@ -4338,6 +2335,2346 @@ IteSoft
             }
         }
 }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetail',[function() {
+        return {
+            restrict: 'EA',
+            require: '^itMasterDetail',
+            transclude: true,
+            scope: false,
+            template: ' <div ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))"' +
+                '   ng-if="currentItemWrapper.currentItem" ' +
+                ' class="it-master-detail-slide-left col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" >' +
+                ' <div class="it-fill" ng-transclude>' +
+                '</div>' +
+                '</div>' +
+                '<div  ng-show="($parent.$parent.desktop || ($parent.$parent.activeState == \'detail\' &&$parent.$parent.mobile))" ' +
+                'class="col-md-{{$masterCol ? (12-$masterCol) : 6}} it-fill" ' +
+                'ng-if="!currentItemWrapper.currentItem">' +
+                '<div class="it-watermark" >{{$itNoDetail}}</div>' +
+                '</div>'
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailContent
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail part of the master-detail main content.
+ *
+ * To use master details directive, add an {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ *
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailContent',function() {
+        return {
+            restrict: 'EA',
+            require: '^itDetail',
+            transclude: true,
+            scope:false,
+            template : '<div class="row it-fill">' +
+                ' <div class="col-md-12  it-fill" ng-transclude>'+
+
+                            '</div>'+
+                       '</div>'
+
+        }
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itDetailHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for detail header, MUST be include in {@link itesoft.directive:itDetail `<it-detail>`} .
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *           <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-detail-header>
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itDetailHeader',function() {
+        return {
+            restrict: 'EA',
+            require : '^itDetail',
+            scope : false,
+            transclude: true,
+            template : '<div class="fluid-container"><div class="row it-md-header">'+
+                '<div class="col-md-2 it-fill  col-xs-2">' +
+                '<a href="" ng-if="$parent.$parent.$parent.mobile" ng-click="$parent.$parent.$parent.$parent.goToMaster()" class="it-material-design-hamburger__icon pull-left it-fill "> ' +
+                '<span  class="menu-animated it-material-design-hamburger__layer " ng-class="{\'it-material-design-hamburger__icon--to-arrow\':$parent.$parent.$parent.$parent.mobile}"> ' +
+                '</span>' +
+                ' </a>'+
+                '</div>'+
+                '<div class="col-md-10 col-xs-10 it-fill ">'+
+                '<div class="btn-toolbar  it-fill pull-right " ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'
+        }
+
+    });
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMaster
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Most important part of master-detail component, that
+ *
+ * To use master details directive, add an  {@link itesoft.directive:itMasterDetail `<it-master-detail>`} parent element. This will encompass all master details content,
+ * and have 2 child elements: 1  {@link itesoft.directive:itMaster `<it-master>`} for the list selectable content,
+ * and {@link itesoft.directive:itDetail `<it-detail>`} that display the content of the selected item.
+ * * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ * <table class="table">
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>attribute it-lock-on-change="true|false"</code></td>
+ *   <td>lock navigation if the selected item has changed.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ *
+ */
+IteSoft
+    .directive('itMaster',function(){
+        return {
+            restrict : 'EA',
+            require : '^itMasterDetail',
+            priority : -1,
+            transclude : true,
+            scope : {
+                itMasterData : '=',
+                itLang:'=',
+                itCol:'=',
+                itMasterDetailControl:'=',
+                itLockOnChange: '=',
+                itNoDataMsg: '@',
+                itNoDetailMsg:'@'
+            },
+            template : '<div  ng-show="($parent.$parent.activeState == \'master\')" class=" it-master it-master-detail-slide-right col-md-{{itCol ? itCol : 6}} it-fill " ui-i18n="{{itLang}}">'+
+                '<div class="row" ng-transclude>'+
+                '</div>'+
+                '<div class="row it-master-grid it-fill" >'+
+                '<div class="col-md-12 it-fill">'+
+                '<div ui-grid="gridOptions" ui-grid-selection ui-grid-resize-columns  ui-grid-move-columns  ui-grid-auto-resize class="it-master-detail-grid it-fill ">' +
+                '<div class="it-watermark" ng-show="!gridOptions.data.length" >{{itNoDataMsg}}</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            controller : ['$scope',
+                '$filter',
+                '$q',
+                '$timeout',
+                'itPopup',
+                '$templateCache',
+                '$route',
+                '$window',
+                function ($scope,
+                          $filter,
+                          $q,
+                          $timeout,
+                          itPopup,
+                          $templateCache,
+                          $route,
+                          $window){
+
+                    $templateCache.put('ui-grid/selectionRowHeaderButtons','<div class="it-master-detail-row-select"' +
+                        ' ng-class="{\'ui-grid-row-selected\': row.isSelected}" >' +
+                        '<input type="checkbox" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange " tabindex="-1" ' +
+                        ' ng-checked="row.isSelected"></div>');
+
+                    $templateCache.put('ui-grid/selectionSelectAllButtons','<div class="it-master-detail-select-all-header" ng-click="(grid.appScope.$parent.currentItemWrapper.hasChanged && grid.appScope.itLockOnChange  )? \'return false\':headerButtonClick($event)">' +
+                        '<input type="checkbox" ' +
+                        ' ng-change="headerButtonClick($event)" ng-disabled="grid.appScope.$parent.currentItemWrapper.hasChanged  && grid.appScope.itLockOnChange" ng-model="grid.selection.selectAll"></div>');
+
+                    function ItemWrapper(item){
+                        var _self = this;
+                        angular.forEach($scope.itMasterData,function(entry,index){
+
+                            if(angular.equals(entry,item)) {
+                                _self.index = index;
+                            }
+                        });
+                        _self.originalItem = item;
+                        _self.currentItem = angular.copy(item);
+                        _self.hasChanged = false;
+                        _self.isWatched = false;
+                        _self.unlockOnEquals = true;
+                    }
+
+                    $scope.$parent.$masterCol = $scope.itCol;
+                    ItemWrapper.prototype.unlockCurrent = function(){
+                        this.hasChanged = false;
+                        this.isWatched = false;
+                    };
+
+                    ItemWrapper.prototype.lockCurrent = function(autoUnlock){
+                        this.hasChanged = true;
+                        this.isWatched = true;
+                        this.unlockOnEquals = !autoUnlock;
+                    };
+
+
+
+                    $scope.$parent.currentItemWrapper = null;
+
+                    function _selectionChangedHandler(row){
+                        if(!$scope.itMasterDetailControl.disableMultiSelect){
+                            if($scope.gridApi.selection.getSelectedRows().length > 1 ){
+                                $scope.$parent.currentItemWrapper = null;
+                            } else if($scope.gridApi.selection.getSelectedRows().length === 1) {
+                                _displayDetail($scope.gridApi.selection.getSelectedRows()[0]);
+                                _scrollToEntity($scope.gridApi.selection.getSelectedRows()[0]);
+                            }
+                            else if($scope.gridApi.selection.getSelectedRows().length === 0) {
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }else {
+//                            _displayDetail(row.entity);
+//                            _scrollToEntity(row.entity);
+                        }
+                    }
+
+                    $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+
+                    $scope.gridOptions  = {
+                        rowHeight: 40,
+                        data : $scope.itMasterData,
+                        multiSelect: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableSelectAll: !$scope.itMasterDetailControl.disableMultiSelect,
+                        enableRowHeaderSelection:!$scope.itMasterDetailControl.disableMultiSelect,
+                        showGridFooter: true,
+                        enableMinHeightCheck :true,
+                        enableColumnResizing: true,
+                        enableHorizontalScrollbar : 0,
+                        enableVerticalScrollbar : 2,
+                        onRegisterApi : function(gridApi){
+                            $scope.gridApi = gridApi;
+                            gridApi.selection.on.rowSelectionChanged($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+                            gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
+                                _selectionChangedHandler(row);
+                            });
+
+                        },
+                        gridFooterTemplate: '<div class="ui-grid-footer-info ui-grid-grid-footer"> ' +
+                            '<span class="ngLabel badge ">{{"search.totalItems" |t}}  {{grid.appScope.itMasterData.length}}</span> ' +
+                            '<span ng-show="grid.appScope.filterText.length > 0 && grid.appScope.itMasterData.length != grid.renderContainers.body.visibleRowCache.length" class="ngLabel badge alert-info ">{{"search.showingItems" |t}}  {{grid.renderContainers.body.visibleRowCache.length}}</span> ' +
+                            '<span ng-show="!grid.appScope.itMasterDetailControl.disableMultiSelect" class="ngLabel badge">{{"search.selectedItems" | t}} {{grid.appScope.gridApi.selection.getSelectedRows().length}}</span>' +
+                            '</div>',
+                        rowTemplate: '<div ng-click="grid.appScope.onRowClick(col,row)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" class="ui-grid-cell" ng-class="{ \'ui-grid-row-header-cell\': col.isRowHeader }"  ui-grid-cell>' +
+                            '</div>'
+                    };
+
+                    if(typeof $scope.itMasterDetailControl.columnDefs !== 'undefined'){
+                        angular.forEach($scope.itMasterDetailControl.columnDefs, function(columnDef){
+                            columnDef['headerCellTemplate'] = '<div ng-class="{ \'sortable\': sortable }"> <!-- <div class="ui-grid-vertical-bar">&nbsp;</div> --> ' +
+                                '<div class="ui-grid-cell-contents" col-index="renderIndex" title="TOOLTIP"> ' +
+                                '<span>{{ col.displayName CUSTOM_FILTERS }}</span> ' +
+                                '<span ui-grid-visible="col.sort.direction" ' +
+                                'ng-class="{ \'ui-grid-icon-up-dir\': col.sort.direction == asc, \'ui-grid-icon-down-dir\': col.sort.direction == desc, \'ui-grid-icon-blank\': !col.sort.direction }"> &nbsp; ' +
+                                '</span> </div> <div class="ui-grid-column-menu-button" ng-if="grid.options.enableColumnMenus && !col.isRowHeader && col.colDef.enableColumnMenu !== false" ' +
+                                'ng-click="toggleMenu($event)" ng-class="{\'ui-grid-column-menu-button-last-col\': isLastCol}"> <i class="fa fa-align-justify"></i>' +
+                                ' </div> <div ui-grid-filter></div> </div>';
+                        },true)
+                    }
+
+                    $scope.gridOptions.columnDefs =
+                        $scope.itMasterDetailControl.columnDefs;
+
+                    function _displayDetail(item) {
+                        var deferred = $q.defer();
+                        if($scope.$parent.currentItemWrapper != null){
+                            if($scope.$parent.currentItemWrapper.hasChanged &&
+                                $scope.itLockOnChange){
+                                deferred.reject('undo or save before change');
+                                return deferred.promise;
+                            }
+                        }
+                        $scope.$parent.currentItemWrapper  = new ItemWrapper(item);
+                        deferred.resolve('');
+                        return deferred.promise;
+                    }
+
+                    $scope.onRowClick = function(row,col) {
+                        if (col.entity != undefined && typeof row.providedHeaderCellTemplate != 'undefined') {
+                            _displayDetail(col.entity).then(function (msg) {
+                                if (row.providedHeaderCellTemplate !== 'ui-grid/selectionHeaderCell') {
+                                    $scope.gridApi.selection.clearSelectedRows();
+                                    if ($scope.$parent.$parent.mobile) {
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                }
+                                $scope.gridApi.selection.toggleRowSelection(col.entity);
+                                $scope.$emit("MASTER_ROW_CHANGED",col.entity);
+                            }, function (msg) {
+                                itPopup.alert($scope.itMasterDetailControl.navAlert);
+                            });
+                        }
+                    };
+
+
+                    function _scrollToEntity(entity){
+                        $scope.gridApi.core.scrollTo(entity);
+                    }
+
+                    $scope.itMasterDetailControl.selectItem =function (item){
+                        $scope.onRowClick(null,{entity:item});
+                    };
+
+                    /**
+                     * Method to filter rows
+                     */
+                    $scope.refreshData = function() {
+                        var renderableEntities = $filter('itUIGridGlobalFilter')
+                        ($scope.gridOptions.data, $scope.gridOptions, $scope.filterText);
+
+                        angular.forEach($scope.gridApi.grid.rows, function( row ) {
+                            var match = false;
+                            renderableEntities.forEach(function(entity){
+
+                                if(angular.equals(row.entity,entity)){
+                                    match  = true;
+                                }
+                            });
+                            if ( !match ){
+                                $scope.gridApi.core.setRowInvisible(row);
+                            } else {
+                                $scope.gridApi.core.clearRowInvisible(row);
+                            }
+                        });
+                    };
+
+
+                    function _unlockCurrent(){
+                        $scope.$applyAsync(function(){
+                            if($scope.$parent.currentItemWrapper!==null){
+                                $scope.$parent.currentItemWrapper.hasChanged = false;
+                                $scope.$parent.currentItemWrapper.isWatched = false;
+                            }
+                        });
+
+                    }
+
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            _unlockCurrent();
+                        }
+                    };
+
+                    $scope.$on('unlockCurrentItem',function(){
+                        _unlockCurrent();
+                    });
+
+                    /**
+                     * Method to scroll to specific item.
+                     * @param entity item to scroll to.
+                     */
+                    $scope.itMasterDetailControl.scrollToItem =function (entity){
+                        _scrollToEntity(entity);
+                    };
+
+                    /**
+                     * Method to get Selected items.
+                     * @returns {Array} of selected items
+                     */
+                    $scope.itMasterDetailControl.getSelectedItems = function(){
+                        if(typeof $scope.gridApi !== 'undefined' ) {
+                            if (typeof $scope.gridApi.selection.getSelectedRows === 'function') {
+                                return $scope.gridApi.selection.getSelectedRows();
+                            }
+                        }
+                        return [];
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     * @deprecated
+                     */
+                    $scope.itMasterDetailControl.getCurrentItem = function(){
+                        return   $scope.$parent.currentItemWrapper.currentItem;
+                    };
+
+                    /**
+                     * Method to get Current item.
+                     * @returns {$scope.$parent.currentItemWrapper.currentItem|*}
+                     */
+                    $scope.itMasterDetailControl.getCurrentItemWrapper = function(){
+                        return   $scope.$parent.currentItemWrapper;
+                    };
+
+                    /**
+                     * Method to get filtered items.
+                     * @returns {Array} of filtered items.
+                     */
+                    $scope.itMasterDetailControl.getFilteredItems = function(){
+                        var rows = $scope.gridApi.core.getVisibleRows($scope.gridApi.grid);
+                        var entities  = [];
+                        angular.forEach(rows,function(row){
+                            entities.push(row.entity);
+                        });
+                        return entities;
+                    };
+
+
+                    /**
+                     * Method to select the current Item.
+                     * @param entity item to select.
+                     * @returns {deferred.promise|*} success if the item is found.
+                     */
+                    $scope.itMasterDetailControl.setCurrentItem = function(entity){
+
+                        var deferred = $q.defer();
+                        $scope.gridApi.selection.clearSelectedRows();
+                        _displayDetail(entity).then(function(){
+                            $timeout(function() {
+                                var entityIndex = $scope.itMasterData.indexOf(entity);
+                                if(entityIndex>=0) {
+
+                                    $scope.gridApi.selection.selectRow(entity);
+                                    _scrollToEntity(entity);
+                                    if( $scope.$parent.$parent.mobile){
+                                        $scope.$parent.$parent.goToDetail();
+                                    }
+                                    deferred.resolve();
+                                } else {
+                                    deferred.reject();
+                                }
+
+                            });
+                        },function(){
+                            deferred.reject();
+                        });
+                        return deferred.promise;
+                    };
+
+                    /**
+                     * Method to undo changes on the current item.
+                     */
+                    $scope.itMasterDetailControl.undoChangeCurrentItem = function(){
+                        if($scope.$parent.currentItemWrapper!= null){
+                            _displayDetail($scope.$parent.currentItemWrapper.originalItem)
+                            $scope.$parent.currentItemWrapper.currentItem =
+                                angular.copy($scope.$parent.currentItemWrapper.originalItem);
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        }
+                    };
+
+                    /**
+                     * Method to fill windows height to the master part.
+                     */
+                    $scope.itMasterDetailControl.fillHeight = function(){
+                        //  evalLayout.fillHeight();
+                    };
+
+
+                    /**
+                     * Handler to unlock the current item.
+                     */
+                    $scope.$on('unlockCurrentItem',function(){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.unlockCurrent();
+                        });
+                    });
+
+                    /**
+                     * Handler to lock the current item.
+                     */
+                    $scope.$on('lockCurrentItem',function(unlockOnEquals){
+                        $timeout(function(){
+                            $scope.$parent.currentItemWrapper.lockCurrent(unlockOnEquals);
+                        });
+                    });
+
+                    function confirmLeavePage(e) {
+                        if($scope.$parent.currentItemWrapper!=null){
+                            if ( $scope.$parent.currentItemWrapper.hasChanged
+                                && $scope.itLockOnChange ) {
+                                itPopup.alert( $scope.itMasterDetailControl.navAlert);
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                    $scope.itAppScope = $scope.$parent;
+
+                    //  $scope.itAppScope.$navAlert = {};
+
+                    $scope.itAppScope.$navAlert = $scope.itMasterDetailControl.navAlert;
+
+                    var w = angular.element($window);
+                    w.bind('resize', function () {
+                        $scope.gridApi.core.handleWindowResize();
+                    });
+
+                    $scope.itMasterDetailControl.initState = true;
+                    $scope.$on("$locationChangeStart", confirmLeavePage);
+                    $scope.itMasterDetailControl = angular.extend({navAlert:{
+                        text:'Please save or revert your pending change',
+                        title:'Unsaved changes',
+                        buttons: [
+                            {
+                                text: 'OK',
+                                type: 'btn-info',
+                                onTap: function () {
+                                    return false;
+                                }
+                            }]
+                    }}, $scope.itMasterDetailControl );
+
+
+                    /*  watchers */
+                    $scope.$watch('itLang',function(){
+                        $scope.gridApi.grid.refresh();
+                    });
+
+                    $scope.$watch('itMasterData',function(){
+                        $scope.gridOptions.data = [];
+                        $scope.itMasterData.forEach(function(entry){
+                            $scope.gridOptions.data.push(entry);
+                        });
+
+                        if( typeof $scope.itMasterData === 'undefined' || $scope.itMasterData === null){
+                            $scope.$parent.currentItemWrapper = null;
+                        } else {
+                            if( $scope.itMasterData.length === 0){
+                                $scope.$parent.currentItemWrapper = null;
+                            }
+                        }
+                        $scope.gridApi.grid.refresh();
+                        if($scope.itMasterDetailControl !== null){
+                            if(typeof  $scope.itMasterDetailControl.getCurrentItemWrapper() !== 'undefined'
+                                && $scope.itMasterDetailControl.getCurrentItemWrapper()!= null){
+
+                                $scope.$applyAsync(function(){
+                                    _scrollToEntity($scope.itMasterDetailControl.getCurrentItemWrapper().originalItem);
+                                });
+                            }
+                        }
+                        $scope.refreshData();
+
+                    },true);
+
+                   $timeout(function(){
+                        var event = document.createEvent('Event');
+                        event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                        $window.dispatchEvent(event);
+                    },250);
+
+                    $scope.$watch('$parent.currentItemWrapper.currentItem', function(newValue,oldValue){
+
+                        if($scope.$parent.currentItemWrapper != null ){
+                            if(!$scope.$parent.currentItemWrapper.isWatched)
+                            {
+                                $scope.$parent.currentItemWrapper.isWatched = true;
+                            }
+                            if($scope.$parent.currentItemWrapper.unlockOnEquals){
+                                $scope.$parent.currentItemWrapper.hasChanged =
+                                    !angular.equals(newValue,
+                                        $scope.$parent.currentItemWrapper.originalItem);
+                            } else   {
+                                $scope.$parent.currentItemWrapper.hasChanged = true;
+                            }
+                        }
+                    }, true);
+
+                    $scope.$watch('filterText',function(){
+                        $scope.refreshData();
+                    },true);
+
+                    $scope.$watch('itNoDetailMsg',function(){
+                        $scope.$parent.$itNoDetail = $scope.itNoDetailMsg;
+
+                    });
+                }]
+
+
+        }
+    }).filter('itUIGridGlobalFilter',['$rootScope',function($rootScope) {
+        return function(data, grid, query) {
+            var matches = [];
+            //no filter defined so bail
+            if (query === undefined || query === '') {
+                return data;
+            }
+            query = query.toLowerCase();
+
+            function _deepFind(obj, path) {
+                var paths = path.split('.')
+                    , current = obj
+                    , i;
+
+                for (i = 0; i < paths.length; ++i) {
+                    if (current[paths[i]] == undefined) {
+                        return undefined;
+                    } else {
+                        current = current[paths[i]];
+                    }
+                }
+                return current;
+            }
+
+            var scope = $rootScope.$new(true);
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < grid.columnDefs.length; j++) {
+                    var dataItem = data[i];
+
+                    var fieldName = grid.columnDefs[j].field;
+                    var renderedData = _deepFind(dataItem,fieldName);
+                    // apply cell filter
+                    if (grid.columnDefs[j].cellFilter) {
+                        scope.value = renderedData;
+                        renderedData = scope.$eval('value | ' + grid.columnDefs[j].cellFilter);
+                    }
+                    //as soon as search term is found, add to match and move to next dataItem
+                    if(typeof renderedData !== 'undefined' && renderedData != null){
+                        if (renderedData.toString().toLowerCase().indexOf(query) > -1) {
+                            matches.push(dataItem);
+                            break;
+                        }
+                    }
+                }
+            }
+            scope.$destroy();
+            return matches;
+        };
+    }] );
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterDetail
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master-detail main content.
+ *
+ * To use master details directive, add an `<it-master-detail>` parent element. This will encompass all master details content,
+ * and have 2 child elements: 1 `<it-master>` for the list selectable content,
+ * and `<it-detail>` that display the content of the selected item.
+ *
+ * You MUST pass an empty object  `<it-master it-master-detail-control="myMasterDetailControl"></it-master>`
+ * this object will
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>myMasterDetailControl.navAlert = { <br/> text: 'my forbidden navigation text ', <br/> title : 'forbidden navigation title'  <br/>}</code></td>
+ *   <td>Object passed to the navigation modal popup, when navigate triggered on unsaved item.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>myMasterDetailControl.disableMultiSelect  = true | false</code></td>
+ *   <td>Disable | Enable  multiple row selection for entire grid .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getSelectedItems()</code></td>
+ *   <td>Method to get selected items in the master grid.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
+ *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
+ *   <td>Method to revert changes on the selected item.</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>masterDetail.getFilteredItems()</code></td>
+ *   <td>Method to get displayed item after filter.</td>
+ *  </tr>
+ *  <tr>
+ * <tr>
+ *   <td><code>masterDetail.fillHeight()</code></td>
+ *   <td>method refresh the master detail Height.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.setCurrentItem(entity)</code></td>
+ *   <td>Method to define the selected item, return promise</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>masterDetail.scrollToItem(item)</code></td>
+ *   <td>Method to scroll to the entity row.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('unlockCurrentItem')</code></td>
+ *   <td>unlock the selected item from the editing mode.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>$scope.$broadcast('lockCurrentItem',unlockOnEquals)</code></td>
+ *   <td>lock the selected item from the editing mode. unlockOnEquals : default true | auto unlock the item if the changed item is equals to the original selected item, if set to false only the $scope.$broadcast('unlockCurrentItem') can unlock it.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>grid.appScope.itAppScope</code></td>
+ *   <td>access to your application scope from the master-detail context, mainly for template binding</td>
+ *  </tr>
+ *
+ *   <tr>
+ *   <td><code><pre><it-master it-col="3"></it-master></pre></code></td>
+ *   <td>number of bootstrap columns of the master element, detail element automatically take  (12 - it-col), if undefined = 6</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>MASTER_ROW_CHANGED event</code></td>
+ *   <td>When selected row changed an MASTER_ROW_CHANGED event is trigged. He provides the new selected row data.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ * @example
+    <example module="itesoft">
+         <file name="index.html">
+             <div ng-controller="MasterDetailController">
+                 <it-master-detail >
+                 <it-master it-col="4" it-master-data="data" it-lang="'fr'" it-no-data-msg="No data available"  it-no-detail-msg="{{( masterDetails.initState ? (masterDetails.getSelectedItems().length > 0 ?  masterDetails.getSelectedItems().length +' items selected' :  'no item selected') : '') | translate}}"  it-master-detail-control="masterDetails"  it-lock-on-change="true">
+                 <it-master-header it-search-placeholder="Recherche" >
+                 <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="addNewItem()"><span class="fa fa-plus fa-lg"></span></button>
+                 <button class="btn btn-danger" title="Delete" ng-disabled="currentItemWrapper.hasChanged" ng-click="deleteSelectedItems()"><span class="fa fa-trash fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Down"><span class="fa fa-chevron-down fa-lg"></span></button>
+                 <button class="btn btn-success" ng-disabled="currentItemWrapper.hasChanged" title="Up"><span class="fa fa-chevron-up fa-lg"></span></button>
+                 </it-master-header>
+                 </it-master>
+                 <it-detail>
+                 <it-detail-header>
+                 <button class="btn btn-warning" title="Save"  ng-disabled="!currentItemWrapper.hasChanged" ng-click="saveCurrentItem()">
+                 <span class="fa fa-floppy-o fa-lg"></span>
+                 </button>
+                 <button class=" btn btn-info" title="Check">
+                 <span class="fa fa-file-code-o fa-lg"></span>
+                 </button>
+                 <button class="btn btn-success" title="Undo" ng-click="undoChange()">
+                 <span class="fa fa-undo fa-lg"></span>
+                 </button>
+
+                 </it-detail-header>
+                 <it-detail-content>
+                 <it-modal-full-screen>
+                             <div class="form-group">
+                                 <input it-input type="text" class="form-control floating-label" id="priorityDescription"
+                                     it-label="code"
+                                     ng-model="currentItemWrapper.currentItem.code"
+                                     name=""
+                                     ng-required="true"/>
+                             </div>
+                             <div class="form-group">
+                             <input it-input type="text" class="form-control floating-label" id="priorityCategory"
+                                 it-label="description"
+                                 ng-model="currentItemWrapper.currentItem.description" name=""/>
+                             </div>
+                             <div class="form-group">
+                             <input type="checkbox"
+                                 it-toggle
+                                 ng-model="currentItemWrapper.currentItem.enabledde"
+                                 it-label="tete"/>
+                             </div>
+                 </it-modal-full-screen>
+                 </it-detail-content>
+                 </it-detail>
+                 </it-master-detail>
+             </div>
+         </file>
+         <file name="controller.js">
+             angular.module('itesoft')
+              .controller('MasterDetailController', ['$scope', function($scope) {
+
+                                            $scope.data =
+                                               [
+                                                    {
+                                                        "code" : "Code 1",
+                                                        "description": "Description 1",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 2",
+                                                        "description": "Description 2",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 3",
+                                                        "description": "Description 3",
+                                                        "enabledde" : true
+                                                    },
+                                                    {
+                                                        "code" : "Code 4",
+                                                        "description": "Description 4",
+                                                        "enabledde" : false
+                                                    },
+                                                    {
+                                                        "code" : "Code 5",
+                                                        "description": "Description 5",
+                                                        "enabledde" : true
+                                                    }
+                                                ];
+
+                                            $scope.masterDetails = {};
+
+                                            $scope.masterDetails = {
+                                                columnDefs : [{ field: 'code', displayName: 'My value 1',  sortable:true},
+                                                    { field: 'description', displayName: 'My value 2',  sortable:true},
+                                                    { field: 'enabledde', displayName: 'My value 3',   sortable:false}]
+
+                                            };
+
+                                             $scope.masterDetails.disableMultiSelect = false;
+                                            $scope.masterDetails.navAlert = {
+                                                text:'{{\'BUTTON_LANG_EN\' | translate}}',
+                                                title:'{{\'FOO\' | translate}}',
+                                                buttons: [
+                                                        {
+                                                            text:  '<span class="fa fa-floppy-o fa-lg"></span>',
+                                                            type:  'btn-warning',
+                                                            onTap: function() {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span  class="fa fa-file-code-o fa-lg"></span>',
+                                                            type: 'btn-primary',
+                                                            onTap: function () {
+                                                                $scope.saveCurrentItem();
+                                                                return true;
+
+                                                            }
+                                                        },
+                                                        {
+                                                            text: '<span class="fa fa-undo fa-lg"></span>',
+                                                            type: 'btn-success',
+                                                            onTap: function () {
+                                                                $scope.undoChange();
+                                                                return true;
+
+                                                            }
+                                                        }
+                                                    ]
+                                            };
+
+                                            function _removeItems(items,dataList){
+                                                angular.forEach(items,function(entry){
+                                                    var index = dataList.indexOf(entry);
+                                                    dataList.splice(index, 1);
+                                                })
+                                            }
+
+                                            $scope.deleteSelectedItems = function(){
+                                                _removeItems($scope.masterDetails.getSelectedItems(), $scope.data);
+                                            };
+
+
+                                            $scope.saveCurrentItem = function(){
+                                                   angular.copy( $scope.masterDetails.getCurrentItemWrapper().currentItem,$scope.data[$scope.masterDetails.getCurrentItemWrapper().index])
+
+                                                    $scope.$broadcast('unlockCurrentItem');
+                                                };
+
+                                            $scope.undoChange = function(){
+                                                $scope.masterDetails.undoChangeCurrentItem();
+                                                $scope.masterDetails.fillHeight();
+                                            };
+
+                                            $scope.addNewItem = function(){
+                                                var newItem =  {
+                                                    "code" : "Code " + ($scope.data.length+1) ,
+                                                    "description": "Description " + ($scope.data.length+1),
+                                                    "enabledde" : true
+                                                };
+                                                $scope.data.push(newItem);
+                                                $scope.masterDetails.setCurrentItem(newItem).then(function(success){
+                                                    $scope.$broadcast('lockCurrentItem',false);
+                                                },function(error){
+
+                                                });
+                                            };
+
+                                            $scope.hasChanged = function(){
+                                                if($scope.masterDetails.getCurrentItemWrapper() != null){
+                                                    return $scope.masterDetails.getCurrentItemWrapper().hasChanged;
+                                                } else {
+                                                    return false;
+                                                }
+                                            }
+                                        }]);
+          </file>
+         <file src="test.css">
+         </file>
+    </example>
+ */
+IteSoft
+    .directive('itMasterDetail',['itPopup','$timeout','$window',function(itPopup,$timeout,$window){
+        return {
+            restrict: 'EA',
+            transclude : true,
+            scope :true,
+            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
+            controller : [
+                '$scope',
+                'screenSize',
+                function(
+                    $scope,
+                    screenSize
+                    )
+                {
+                    $scope.activeState = 'master';
+                    $scope.desktop = screenSize.on('md, lg', function(match){
+                        $scope.desktop = match;
+
+                    });
+
+                    $scope.mobile = screenSize.on('xs, sm', function(match){
+                        $scope.mobile = match;
+                    });
+
+                    $scope.goToDetail = function(){
+                        $scope.activeState = 'detail';
+                    };
+
+                    $scope.$watch('mobile',function(){
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            $scope.activeState = 'detail';
+                        } else {
+                            $scope.activeState = 'master';
+                        }
+                    });
+
+                    $scope.$watch('$$childHead.currentItemWrapper',function() {
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper === 'undefined'
+                                ||  $scope.$$childHead.currentItemWrapper === null )){
+                            $scope.activeState = 'master';
+                        } else {
+                            if($scope.mobile &&
+                                (typeof $scope.$$childHead.currentItemWrapper.currentItem === 'undefined'
+                                    ||  $scope.$$childHead.currentItemWrapper.currentItem === null )) {
+                                $scope.activeState = 'master';
+                            }
+                        }
+                    });
+
+                    $scope.goToMaster = function(){
+
+                        if($scope.mobile &&
+                            (typeof $scope.$$childHead.currentItemWrapper !== 'undefined'
+                                &&  $scope.$$childHead.currentItemWrapper != null )){
+                            if($scope.$$childHead.currentItemWrapper.hasChanged &&
+                                $scope.$$childHead.$$childHead.itLockOnChange){
+                                itPopup.alert(  $scope.$$childHead.$navAlert);
+                            } else {
+                                $scope.activeState = 'master';
+                                $timeout(function(){
+                                    $window.dispatchEvent(new Event('resize'));
+                                },300)
+
+                            }
+                        } else {
+                            $scope.activeState = 'master';
+                            $timeout(function(){
+                                $window.dispatchEvent(new Event('resize'));
+                            },300)
+
+                        }
+
+                    };
+                }]
+        }
+    }]);
+
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMasterHeader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * A container element for master headers, MUST be include in {@link itesoft.directive:itMaster `<it-master>`},
+ * can contain the action buttons of selected items.
+ * for more information see {@link itesoft.directive:itMasterDetail `<it-master-detail>`}.
+ *
+ * ```html
+ * <it-master-detail>
+ *   <!-- Master Content content -->
+ *
+ *   <it-master>
+ *       <it-master-header>
+ *             <button class="btn btn-primary" title="Add" ng-disabled="currentItemWrapper.hasChanged" ng-click="myAction()"><span class="fa fa-plus fa-lg"></span></button>
+ *       </it-master-header>
+ *   </it-master>
+ *
+ *   <!-- menu -->
+ *   <it-detail>
+ *        <it-detail-header>
+ *
+ *       </it-detail-header>
+ *
+ *
+ *       <it-detail-content>
+ *       </it-detail-content>
+ *   </it-detail>
+ *
+ * </it-master-detail>
+ * ```
+ */
+IteSoft
+    .directive('itMasterHeader',function() {
+        return {
+            restrict: 'EA',
+            require: '^itMaster',
+            scope: false,
+            transclude : true,
+            template :'<div class="fuild-container">   <div class="row it-fill">   <div class="it-md-header col-xs-12 col-md-12">'+
+                '<div class="btn-toolbar it-fill" ng-transclude>'+
+                '</div>'+
+                '</div>'+
+                '<div class="col-xs-12 col-md-12 pull-right">'+
+                '<div>'+
+                '<form>'+
+                '<div class="form-group has-feedback it-master-header-search-group  col-xs-12 col-md-{{$parent.itCol < 4 ? 12 :6 }} pull-right" >'+
+                '<span class="glyphicon glyphicon-search form-control-feedback"></span>'+
+                '<input  class="form-control " type="text" ng-model="$parent.filterText" class="form-control floating-label"  placeholder="{{placeholderText}}"/>'+
+                '</div>'+
+                '</form>'+
+                '</div>'+
+                '</div>'+
+                '</div>'+
+                '</div>',
+            link: function (scope, element, attrs) {
+                scope.$watch(function () { return attrs.itSearchPlaceholder }, function (newVal) {
+                    scope.placeholderText = newVal;
+                });
+            }
+        }
+
+    });
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
+"use strict";
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPrettyprint
+
+ * @module itesoft
+ * @restrict EA
+ * @parent itesoft
+ * @since 1.0
+ * @description
+ * A container for display source code in browser with syntax highlighting.
+ *
+ * @usage
+ * <it-prettyprint>
+ * </it-prettyprint>
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <pre it-prettyprint=""  class="prettyprint lang-html">
+                 <label class="toggle">
+                     <input type="checkbox">
+                         <div class="track">
+                         <div class="handle"></div>
+                     </div>
+                 </label>
+             </pre>
+        </file>
+    </example>
+ */
+IteSoft
+    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
+        var prettyPrintTriggered = false;
+        return {
+            restrict: 'EA',
+            terminal: true,  // Prevent AngularJS compiling code blocks
+            compile: function(element, attrs) {
+                if (!attrs['class']) {
+                    attrs.$set('class', 'prettyprint');
+                } else if (attrs['class'] && attrs['class'].split(' ')
+                    .indexOf('prettyprint') == -1) {
+                    attrs.$set('class', attrs['class'] + ' prettyprint');
+                }
+                return function(scope, element, attrs) {
+                    var entityMap = {
+                          "&": "&amp;",
+                          "<": "&lt;",
+                          ">": "&gt;",
+                          '"': '&quot;',
+                          "'": '&#39;',
+                          "/": '&#x2F;'
+                      };
+
+                       function replace(str) {
+                          return String(str).replace(/[&<>"'\/]/g, function (s) {
+                              return entityMap[s];
+                          });
+                      }
+                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
+
+                };
+            }
+
+        };
+    }]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
+
+        var supportedLocales = ['en_US',
+            'en_GB', 'fr_FR', 'de_DE', 'id_IT'];
+
+        return {
+            cleanAmount: function (amountString, aLocale) {
+                var result = 0;
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+
+                //Suppression des " " pour séparer les milliers et des caractères non numériques
+                amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //pas de traitement particulier pour le francais
+                //si la locale est en-US
+                if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[0])) {
+                    //suppression de la virgule permettant de séparer les milliers
+                    amountString = amountString.replace(",", "");
+                    //si la locale est de-DE
+                }else if(JSON.stringify(aLocale) == JSON.stringify(supportedLocales[3])) {
+                    //suppression du point permettant de séparer les milliers
+                    amountString = amountString.replace(".", "");
+                    //remplacement de la virgule par un point
+                    amountString = amountString.replace(",", ".");
+                }
+
+                //Formattage des montants avec la locale
+                result = parseFloat(amountString);
+
+                console.log('result1 ' + result);
+
+                if (result == undefined) {
+                    result = parseFloat(amountString);
+                }
+
+                console.log('result2 ' + result);
+
+                return result;
+            },
+
+            formatAmount: function (amount, aLocale, currency) {
+                var result = '';
+
+
+                //Recherche si la locale passée en argument est acceptée
+                var localeFound = false;
+                supportedLocales.forEach(function (entry) {
+
+                    if (JSON.stringify(entry) == JSON.stringify(aLocale)) {
+                        localeFound = true;
+                    }
+                })
+
+                if (localeFound == false) {
+                    console.log("Unable to format amount for local "
+                        + aLocale);
+
+                    return '';
+                }
+                if (amount != undefined) {
+                    var amountString = amount.toString();
+
+                    //Suppression des " " pour séparer les milliers et des caractères non numériques
+                    amountString = amountString.replace(/[^0-9,.]/g, "");
+
+                    // SI on est en France ou Italie, on peut taper . ou , pour les décimales
+                    if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
+                        amountString = amountString.replace(",", ".");
+                    }
+                }
+                //Formattage des montants avec la locale avec 2 décimales après la virgule
+                if(angular.isDefined(currency)){
+                    //met en Uppercase la devise
+                    currency=$filter('uppercase')(currency);
+                    if(angular.equals(currency ,'TND')){
+                        // 3 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 3,maximumFractionDigits:3}).format(parseFloat(amountString));
+
+                    }else if(angular.equals(currency ,'JPY')){
+                        // 0 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 0,maximumFractionDigits:0}).format(parseFloat(amountString));
+
+                    }else{
+                        // 2 décimales
+                        result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                    }
+
+                }else{
+                    result = new Intl.NumberFormat(aLocale.replace("_", "-"), {minimumFractionDigits: 2,maximumFractionDigits:2}).format(parseFloat(amountString));
+                }
+
+                return result;
+            }
+        }
+
+
+    }
+    ]
+)
+;
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLazyGrid
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.1
+ * @description
+ * The itLazyGrid widgets provides lazy grid feature on ui-grid
+ *
+ *
+ * ```html
+ *    <it-lazy-grid option="option" ></it-lazy-grid>
+ * ```
+ *
+ * <h1>Skinning</h1>
+ * Following is the list of structural style classes:
+ *
+ * <table class="table">
+ *  <tr>
+ *      <th>
+ *          Class
+ *      </th>
+ *      <th>
+ *          Applies
+ *      </th>
+ *  </tr>
+ *  </table>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ Query RSQL send to REST API:
+    <pre><code class="lang-html">{{query}}</code></pre>
+     <div style="height:300px;display:block;">
+        <it-lazy-grid options="options" ></it-lazy-grid>
+     </div>
+    </div>
+ </div>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngMessages','itesoft']);
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = {
+            // call when lazyGrid is instantiate
+            onRegisterApi: function (lazyGrid) {
+                $scope.lazyGrid = lazyGrid;
+                $scope.lazyGrid.appScope = $scope;
+                $scope.lazyGrid.fn.initialize();
+                $scope.lazyGrid.fn.callBack = load;
+                $scope.lazyGrid.fields.gridOptions.paginationPageSizes = [2,4,20];
+                $scope.lazyGrid.fields.gridOptions.paginationPageSize = 2;
+
+                // Call after each loaded event
+                $scope.lazyGrid.on.loaded = function () {
+                };
+
+                // Call when user click
+                $scope.lazyGrid.on.rowSelectionChanged = function (row) {
+                    $scope.selectedInvoice = row.entity;
+                };
+
+                // Loading columnDef
+                 $scope.lazyGrid.fields.gridOptions.columnDefs = [
+                     {"name":"type", "cellClass":"type", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('dropDownFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_DOCUMENTTYPE", "visible":true, "width":80, "displayName":"Type", "headerTooltip":"Le document est de type soit facture, soit avoir.", "sorterRsqlKey":"type", "filters":[ { "options":{ "data":[ { "id":"", "value":"Tous" }, { "id":"INVOICE", "value":"Facture" }, { "id":"CREDIT", "value":"Avoir" } ] }, "condition":"==", "class":"width-50", "defaultTerm":"" } ] },
+                     { "name": "date", "cellClass": "date", "type": "date", "cellFilter": "date:'dd/MM/yyyy'", "filterHeaderTemplate": $templateCache.get('dateRangeFilter.html'), "headerCellClass": "it-sp-SUPPLIERPORTAL_INVOICES_DATE", "visible": true, "width": "180", "sort": [ { "direction": "desc" } ], "displayName": "Date", "headerTooltip": "Filtre des factures par date d’émission, en indiquant soit une plage de dates, soit la date de début du filtre.", "filters": [ { "emptyOption": "Du", "condition": "=ge=" }, { "emptyOption": "Au", "condition": "=le=" } ] },
+                     {"name":"supplierName", "cellClass":"supplierName", "cellFilter":"translate", "filterHeaderTemplate":$templateCache.get('stringFilter.html'), "headerCellClass":"it-sp-SUPPLIERPORTAL_INVOICES_SUPPLIER", "visible":true, "minWidth":150, "displayName":"Fournisseur", "headerTooltip":"Fournisseur concerné par la facture.", "sorterRsqlKey":"supplier.name", "filters":[ { "options":{ "data":[ ] }, "rsqlKey":"supplier.id", "condition":"==", "class":"width-125", "defaultTerm":"" ,"maxLength":"50"} ]}
+                 ];
+
+                //Call when grid is ready to use (with config)
+                $scope.$applyAsync(function () {
+                   $scope.lazyGrid.fn.initialLoad();
+                });
+        }};
+
+         // ui-grid loading function, will be call on:
+         //-filter
+         //-pagination
+         //-sorter
+        function load(query) {
+
+            // ignore this, it's just for demo
+            if(query.size == 2){
+                 var data = {"metadata":{"count":2,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else if(query.size == 4){
+                 var data = {"metadata":{"count":4,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    ]};
+                }else{
+                 var data = {"metadata":{"count":10,"maxResult":10},"items":[
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                    {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true},
+                   {"id":-26,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1540504800000,"dueDate":null,"number":"F049865665","totalAmount":700,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63640","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-26,"companyName":"ma filiale numéro 4","showImage":true},
+                    {"id":-14,"status":"SP_AVAILABLE_FOR_PAYMENT","date":1477432800000,"dueDate":null,"number":"INV123456","totalAmount":10235.25,"totalNetAmount":40000.556,"site":"SITE","type":"INVOICE","currency":"EUR","code":"63653","scanDate":null,"batchName":"batch_name","dateChangeState":1446937200000,"custom1":null,"custom2":null,"custom3":null,"custom4":null,"custom5":null,"supplierId":-22,"supplierName":"fournisseur1","companyId":-8,"companyName":"ma filiale numéro 6","showImage":true}
+                 ]};
+             }
+            // end ignore this, it's just for demo
+            query = query.build();
+            // query RSQL to send to REST API
+            console.log(query);
+            $scope.query = query;
+            $scope.lazyGrid.fields.gridOptions.data = data.items;
+            $scope.lazyGrid.fields.gridOptions.totalItems = data.metadata.maxResult;
+
+            $scope.isBusy = false;
+            $scope.lazyGrid.on.loaded();
+        }
+     }
+ ]
+ );
+ </file>
+ </example>
+ */
+IteSoft.directive('itLazyGrid',
+                 ['OPERATOR', 'NOTIFICATION_TYPE', 'itQueryFactory', 'itQueryParamFactory', 'itAmountCleanerService', 'localStorageService',  '$rootScope', '$log', '$q', '$templateCache', '$timeout',
+        function (OPERATOR, NOTIFICATION_TYPE, itQueryFactory, itQueryParamFactory, itAmountCleanerService, localStorageService, $rootScope, $log, $q, $templateCache,$timeout) {
+            return {
+                restrict: 'AE',
+                scope: {
+                    options: '='
+                },
+                template: '<div ui-grid="lazyGrid.fields.gridOptions"  ui-grid-selection ui-grid-pagination ui-grid-auto-resize="true" class="it-fill it-sp-lazy-grid">' +
+                '<div class="it-watermark sp-watermark gridWatermark" ng-show="!lazyGrid.fields.gridOptions.data.length"> {{\'GLOBAL.NO_DATA\' |translate}} </div> </div> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="dropDownFilter.html"> <div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
+                '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> </div> ' +
+                '</script> <script type="text/ng-template" id="dateRangeFilter.html"> ' +
+                '<div class="ui-grid-filter-container"> ' +
+                '<span class="{{col.headerCellClass}}"> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
+                'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
+                '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+                'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
+                'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> </span></div> ' +
+                '</script> <script type="text/ng-template" id="stringFilter.html"> ' +
+                '<div class="ui-grid-filter-container {{col.headerCellClass}}" ng-repeat="colFilter in col.filters"> ' +
+                '<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> </div>' +
+                ' </script> ' +
+                '<!------------------------------------------------------------------------------------------------------------------------------- PAGINATOR --------------------------------------------------------------------------------------------------------------------------------> ' +
+                '<script type="text/ng-template" id="paginationTemplate.html"> ' +
+                '<div role="contentinfo" class="ui-grid-pager-panel" ui-grid-pager ng-show="grid.options.enablePaginationControls"> ' +
+                '<div role="navigation" class="ui-grid-pager-container"> ' +
+                '<div role="menubar" class="ui-grid-pager-control"> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.FIRSTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-first it-sp-grid-pager-first " ' +
+                'ng-disabled="cantPageBackward()">' +
+                '<div class="first-triangle"> <div class="first-bar"> </div> </div> ' +
+                '<input type="button" title="" ' +
+                'ng-click="pageFirstPageClick()" > </input>'+
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.PREVPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-previous it-sp-grid-pager-previous" ' +
+                'ng-disabled="cantPageBackward()">' +
+                '<div class="first-triangle"> <div class="prev-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pagePreviousPageClick()"/>' +
+                '</label>' +
+                '<input type="number" class="ui-grid-pager-control-input it-sp-grid-pager-control-input" ng-model="grid.options.paginationCurrentPage" min="1" max="{{ paginationApi.getTotalPages() }}" required/> ' +
+                '<span class="ui-grid-pager-max-pages-number it-sp-grid-pager-max-pages-number" ng-show="paginationApi.getTotalPages() > 0"> <abbr> / </abbr> ' +
+                '{{ paginationApi.getTotalPages() }} ' +
+                '</span> ' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.NEXTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-next it-sp-grid-pager-next" ' +
+                'ng-disabled="cantPageForward()">' +
+                '<div class="last-triangle"> <div class="next-triangle"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageNextPageClick()"/>' +
+                '</label>' +
+                '<label data-type="info" data-animation="am-fade-and-scale" ' +
+                'bs-tooltip ' +
+                'title="{{ \'HELP.LASTPAGE\' | translate }}" ' +
+                'class="btn it-lazy-grid-btn-button-navigator ui-grid-pager-last it-sp-grid-pager-last" ' +
+                'ng-disabled="cantPageToLast()">' +
+                '<div class="last-triangle"> <div class="last-bar"> </div> </div>' +
+                '<input type="button" title="" ' +
+                'ng-click="pageLastPageClick()"/>' +
+                '</label>' +
+                ' </div> ' +
+                '<div class="ui-grid-pager-row-count-picker it-sp-grid-pager-row-count-picker" ng-if="grid.options.paginationPageSizes.length > 1"> ' +
+                '<select ui-grid-one-bind-aria-labelledby-grid="\'items-per-page-label\'" ng-model="grid.options.paginationPageSize" ng-options="o as o for o in grid.options.paginationPageSizes"></select>' +
+                '<span ui-grid-one-bind-id-grid="\'items-per-page-label\'" class="ui-grid-pager-row-count-label"> &nbsp; </span> ' +
+                '</div> ' +
+                '<span ng-if="grid.options.paginationPageSizes.length <= 1" class="ui-grid-pager-row-count-label it-sp-grid-pager-row-count-label"> ' +
+                '{{grid.options.paginationPageSize}}&nbsp;{{sizesLabel}} ' +
+                '</span> </div> ' +
+                '<div class="ui-grid-pager-count-container">' +
+                '<div class="ui-grid-pager-count"> ' +
+                '<span class="it-sp-grid-pager-footer-text" ng-show="grid.options.totalItems > 0"> ' +
+                '{{\'PAGINATION.INVOICE.FROM\' | translate}} {{showingLow}} <abbr> </abbr> ' +
+                '{{\'PAGINATION.INVOICE.TO\' | translate}} {{showingHigh}} {{\'PAGINATION.INVOICE.ON\' | translate}} {{grid.options.totalItems}} ' +
+                '{{\'PAGINATION.INVOICE.TOTAL\' | translate}} </span>' +
+                ' </div> </div> </div> ' +
+                '</script>',
+                controllerAs: 'lazyGrid',
+                controller: ['$scope', function ($scope) {
+
+
+                    //Get current locale
+                    var locale = localStorageService.get('Locale');
+
+                    var self = this;
+
+                    self.options = $scope.options;
+
+                    /**
+                     * Fields
+                     * @type {{filter: Array, externalFilter: {}, gridApi: {}, paginationOptions: {pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}, appScope: {}}}
+                     */
+                    self.fields = {
+                        template: {pagination: $templateCache.get('paginationTemplate.html')},
+                        filter: [],
+                        externalFilter: {},
+                        gridApi: {},
+                        gridOptions: {},
+                        paginationOptions: {},
+                        appScope: {},
+                        promise: {refresh: {}}
+                    };
+
+                    /**
+                     * Event callback method
+                     * @type {{loaded: onLoaded, ready: onReady, filterChange: onFilterChange, sortChange: onSortChange, paginationChanged: onPaginationChanged, rowSelectionChanged: onRowSelectionChanged}}
+                     */
+                    self.on = {
+                        loaded: onLoaded,
+                        ready: onReady,
+                        filterChange: onFilterChange,
+                        sortChange: onSortChange,
+                        paginationChanged: onPaginationChanged,
+                        rowSelectionChanged: onRowSelectionChanged
+                    };
+                    /**
+                     * Public Method
+                     * @type {{callBack: *, initialize: initialize, getGrid: getGrid, refresh: refresh, initialLoad: initialLoad, addExternalFilter: addExternalFilter}}
+                     */
+                    self.fn = {
+                        callBack: self.options.callBack,
+                        initialize: initialize,
+                        refresh: refresh,
+                        initialLoad: initialLoad,
+                        addExternalFilter: addExternalFilter,
+                        refreshDefaultFilter:refreshDefaultFilter
+                    };
+
+
+                    /**
+                     *
+                     * @type {{pageNumber: number, pageSize: number, sort: {name: undefined, direction: undefined}}}
+                     */
+                    self.fields.paginationOptions = {
+                        pageNumber: 1,
+                        pageSize: 10,
+                        sort: {
+                            name: undefined,
+                            direction: undefined
+                        }
+                    };
+                    /**
+                     * Default grid options
+                     * @type {{enableFiltering: boolean, enableSorting: boolean, enableColumnMenus: boolean, useExternalPagination: boolean, useExternalSorting: boolean, enableRowSelection: boolean, enableRowHeaderSelection: boolean, multiSelect: boolean, modifierKeysToMultiSelect: boolean, noUnselect: boolean, useExternalFiltering: boolean, data: Array, columnDefs: Array, paginationTemplate: *, onRegisterApi: self.fields.gridOptions.onRegisterApi}}
+                     */
+                    self.fields.gridOptions = {
+                        enableFiltering: true,
+                        enableSorting: true,
+                        enableColumnMenus: false,
+                        useExternalPagination: true,
+                        useExternalSorting: true,
+                        enableRowSelection: true,
+                        enableRowHeaderSelection: false,
+                        multiSelect: false,
+                        modifierKeysToMultiSelect: false,
+                        noUnselect: true,
+                        useExternalFiltering: true,
+                        data: [],
+                        columnDefs: [],
+                        paginationTemplate: self.fields.template.pagination,
+                        onRegisterApi: function (gridApi) {
+                            gridApi.core.on.filterChanged(self.appScope, self.on.filterChange);
+                            gridApi.core.on.sortChanged(self.appScope, self.on.sortChange);
+                            gridApi.pagination.on.paginationChanged(self.appScope, self.on.paginationChanged);
+                            gridApi.selection.on.rowSelectionChanged(self.appScope, self.on.rowSelectionChanged);
+                            self.fields.gridApi = gridApi;
+                            $log.debug('LazyGrid:UI-grid:onRegisterApi')
+                        }
+                    };
+                    /**
+                     * Apply external filter
+                     * @private
+                     */
+                    function _applyExternalFilter() {
+                        $log.debug("LazyGrid:Apply External filter");
+                        angular.forEach(self.fields.externalFilter, function (externalFilter, key) {
+                            if (!angular.isUndefined(key) && !angular.isUndefined(externalFilter.value) && !angular.isUndefined(externalFilter.condition)) {
+                                var queryParam = itQueryParamFactory.create(key, externalFilter.value, externalFilter.condition);
+                                self.fields.filter.push(queryParam);
+                            }
+                        });
+                    }
+
+                    /**
+                     * Apply filter
+                     * @private
+                     */
+                    function _applyFilter() {
+                        $log.debug("LazyGrid:Apply filter");
+                        var key = '';
+                        var value = '';
+                        var condition = OPERATOR.EQUALS;
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            for (var i = 0; i < self.fields.gridApi.grid.columns.length; i++) {
+                                key = self.fields.gridApi.grid.columns[i].field;
+                                for (var j = 0; j < self.fields.gridApi.grid.columns[i].filters.length; j++) {
+                                    value = self.fields.gridApi.grid.columns[i].filters[j].term;
+                                    if (value != undefined && value != '') {
+                                        $log.debug("LazyGrid:Filter changed, fieds: " + key + ", and value: " + value);
+                                        // if filter key is override
+                                        var rsqlKey = self.fields.gridApi.grid.columns[i].filters[j].rsqlKey;
+                                        if (rsqlKey != undefined) {
+                                            key = rsqlKey;
+                                        }
+
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].condition != undefined) {
+                                            condition = self.fields.gridApi.grid.columns[i].filters[j].condition;
+                                        }
+
+                                        //Si la donnée doit être traitée comme un nombre
+                                        if (self.fields.gridApi.grid.columns[i].filters[j].amount == true) {
+                                            value = itAmountCleanerService.cleanAmount(value, locale);
+                                        }
+
+                                        var queryParam = itQueryParamFactory.create(key, value, condition);
+                                        self.fields.filter.push(queryParam);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    /**
+                     * Apply default filter configured inside columnDef filter option
+                     * @private
+                     */
+                    function _applyDefaultFilter() {
+                        $log.debug("LazyGrid:Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters) && angular.isDefined(column.colDef.filters[0]) && angular.isDefined(column.colDef.filters[0].defaultTerm)) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        //Apparemment ne sert pas car le _applyFilter récupère les données dans les columns
+                                        //if (angular.isDefined(column.colDef.filters[0].defaultTerm) && column.colDef.filters[0].defaultTerm != '') {
+                                        //    var queryParamClient = QueryParamFactory.create(column.field, column.colDef.filters[0].defaultTerm, OPERATOR.EQUALS);
+                                        //    self.fields.filter.push(queryParamClient);
+                                        //}
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Refresh datagrid by reset filters and applying default filter
+                     */
+                    function refreshDefaultFilter(){
+                        $log.debug("LazyGrid:Reset Filter and Apply default filter");
+                        if(angular.isDefined(self.fields.gridApi.grid)) {
+                            angular.forEach(self.fields.gridApi.grid.columns, function (column) {
+                                if (angular.isDefined(column) && angular.isDefined(column.colDef) && angular.isDefined(column.colDef.filters)
+                                    && angular.isDefined(column.colDef.filters[0])) {
+                                    if (!angular.isUndefined(column.field) && !angular.isUndefined(column.colDef.filters[0].defaultTerm)) {
+                                        column.colDef.filters[0].term = column.colDef.filters[0].defaultTerm;
+                                        $log.debug("LazyGrid:Apply default filter: " + column.field + "->" + column.colDef.filters[0].term);
+                                    }else{
+                                        //efface tous les filtres
+                                        angular.forEach(column.colDef.filters, function(filter){
+                                            filter.term="";
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    /**
+                     * Call after each loading
+                     */
+                    function onLoaded() {
+                    }
+
+                    /**
+                     * Call when grid is ready, when config is loaded (columnDef is present)
+                     */
+                    function onReady() {
+                    }
+
+                    /**
+                     * Call on filter change
+                     */
+                    function onFilterChange() {
+                        $log.debug("LazyGrid:Filter Changed");
+                        self.fields.filter = [];
+                        if (angular.isDefined(self.fields.promise.refresh)) {
+                            $timeout.cancel(self.fields.promise.refresh);
+                        }
+                        self.fields.promise.refresh = $timeout(function () {
+                                self.fn.refresh();
+                            }
+                            , 1000);
+
+                    }
+
+                    /**
+                     * Call on sort change
+                     * @param grid
+                     * @param sortColumns
+                     */
+                    function onSortChange(grid, sortColumns) {
+                        $log.debug("LazyGrid:Sort Changed");
+                        self.fields.filter = [];
+                        if (sortColumns.length == 0) {
+                            self.fields.paginationOptions.sort.name = undefined;
+                            self.fields.paginationOptions.sort.direction = undefined;
+                        } else {
+                            var sortKey = sortColumns[0].name;
+                            /**
+                             * Surcharge avec la clé rsql
+                             */
+                            if (angular.isDefined(sortColumns[0]) && angular.isDefined(sortColumns[0].colDef) && angular.isDefined(sortColumns[0].colDef.sorterRsqlKey)) {
+                                sortKey = sortColumns[0].colDef.sorterRsqlKey;
+                            }
+                            self.fields.paginationOptions.sort.name = sortKey;
+                            self.fields.paginationOptions.sort.direction = sortColumns[0].sort.direction;
+                            $log.debug("sort changed, sort key: " + sortColumns[0].name + ", and direction: " + sortColumns[0].sort.direction);
+                        }
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Call when page changed
+                     * @param newPage
+                     * @param pageSize
+                     */
+                    function onPaginationChanged(newPage, pageSize) {
+                        $log.debug("LazyGrid:Pagination Changed");
+                        self.fields.filter = [];
+                        if (self.fields.paginationOptions.pageNumber != newPage || self.fields.paginationOptions.pageSize != pageSize) {
+                            self.fields.paginationOptions.pageNumber = newPage;
+                            self.fields.paginationOptions.pageSize = pageSize;
+                            self.fn.refresh();
+                        }
+                    }
+
+                    /**
+                     * Call when user click on row
+                     */
+                    function onRowSelectionChanged() {
+                        $log.debug("LazyGrid:Row Selection Changed");
+                    }
+
+                    /**
+                     * Call to refresh data
+                     */
+                    function refresh() {
+                        $log.debug("LazyGrid:Refresh");
+                        _applyExternalFilter();
+                        _applyFilter();
+                        var firstRow = (self.fields.paginationOptions.pageNumber - 1) * self.fields.paginationOptions.pageSize;
+                        var query = itQueryFactory.create(self.fields.filter, firstRow, self.fields.paginationOptions.pageSize, self.fields.paginationOptions.sort);
+                        self.fn.callBack(query);
+                    }
+
+                    /**
+                     * Initial loading
+                     */
+                    function initialLoad() {
+                        $log.debug("LazyGrid:Initial load");
+
+                        //application des filtres pour récupérer le nom de filtre actifs
+                        _applyFilter();
+                        if (self.fields.filter.length <= 0) {
+                            _applyDefaultFilter();
+                        }
+                        //remise à 0 des informations de filtre
+                        self.fields.filter = [];
+
+                        self.fn.refresh();
+                    }
+
+                    /**
+                     * Add external filter like clientId
+                     * @param filter external filter to always apply
+                     * @param filter.key
+                     * @param filter.value
+                     * @param filter.condition
+                     */
+                    function addExternalFilter(filter) {
+                        if (angular.isUndefined(filter.key)) {
+                            $log.error("External filter object must have key");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.condition)) {
+                            $log.error("External filter object must have condition");
+                            return;
+                        }
+                        if (angular.isUndefined(filter.value)) {
+                            self.fields.externalFilter[filter.key] = {};
+                        } else {
+                            self.fields.externalFilter[filter.key] = filter;
+                        }
+                    }
+
+
+                    /**
+                     * Call before using
+                     * @returns {*}
+                     */
+                    function initialize() {
+
+                    }
+
+                    if (angular.isDefined(self.options.onRegisterApi)) {
+                        self.options.onRegisterApi(self);
+                        $log.debug('LazyGrid:onRegisterApi')
+                    }
+
+
+                }]
+            }
+        }
+    ]
+).constant("OPERATOR", {
+        "EQUALS": "==",
+        "LIKE": "==%",
+        "NOT_EQUALS": "!=",
+        "LESS_THAN": "=lt=",
+        "LESS_EQUALS": "=le=",
+        "GREATER_THAN": "=gt=",
+        "GREATER_EQUALS": "=ge="
+})
+.constant('NOTIFICATION_TYPE', {
+    INFO: "INFO",
+    WARNING: "WARNING",
+    ERROR: "ERROR",
+    SUCCESS: "SUCCESS",
+    DISMISS: "DISMISS"
+})
+;
+/**
+ * Created by SZA on 20/01/2016.
+ */
+
+'use strict';
+/**
+ * Singleton that provide paginatorConfig
+ */
+IteSoft.factory('itPaginatorConfigService',
+        ['$q', '$log', 'itNotifier', '$filter', 'MetadataService',
+            function ($q, $log, itNotifier, $filter, MetadataService) {
+
+                var self = this;
+                var deferred = $q.defer();
+
+                /**
+                 * fields
+                 * @type {{options: Array, defaultOption: string, loaded: boolean}}
+                 */
+                self.fields = {
+                    options: [],
+                    defaultOption: "",
+                    loaded: false
+                };
+
+                /**
+                 * public method
+                 * @type {{initialize: initialize}}
+                 */
+                self.fn = {
+                    initialize: initialize
+                };
+
+                return self;
+                /**
+                 * filter initialization
+                 * @returns {*}
+                 */
+                function initialize() {
+                    if (!self.fields.loaded) {
+                        var paginatorOptionsPromise = MetadataService.getConfig.get({type: 'paginatorOptions'}).$promise;
+                        var paginatorDefaultOptionPromise = MetadataService.getConfig.get({type: 'paginatorDefaultOption'}).$promise;
+                        $q.all([paginatorOptionsPromise, paginatorDefaultOptionPromise]).then(
+                            function (options) {
+                                self.fields.defaultOption = options[1].value;
+                                var paginatorOptions = options[0].value;
+                                if (angular.isDefined(paginatorOptions) && paginatorOptions != null && angular.isDefined(paginatorOptions.split)) {
+                                    self.fields.options = paginatorOptions.split(',');
+                                } else {
+                                    itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, paginatorOptions);
+                                }
+
+                                $log.debug("PaginatorConfigService: loaded");
+                                self.fields.loaded = true;
+                                deferred.resolve('ok');
+                            },
+                            function (failed) {
+                                itNotifier.notifyError({content: $filter('translate')('ERROR.WS.METADATA_ERROR')}, failed.data);
+                            });
+                    } else {
+                        $log.debug("PaginatorConfigService: loaded");
+                        deferred.resolve('ok');
+                    }
+                    return deferred.promise;
+
+                }
+
+            }
+        ]
+    );
+'use strict';
+/**
+ * Query param service
+ */
+IteSoft.factory('itQueryParamFactory', [function () {
+    function QueryParam(key, value, operator) {
+        this.key = key;
+        this.value = value;
+        this.operator = operator;
+    }
+    return {
+        /**
+         * create a queryParam
+         * @param key: name
+         * @param value: myName
+         * @param operator: OPERATOR.equals
+         * @returns {QueryParam}
+         */
+        create: function (key, value, operator) {
+            return new QueryParam(key, value, operator);
+        }
+    }
+}]);
+'use strict';
+/**
+ * Service that provide RSQL query
+ */
+IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
+        function Query(parameters, start, size, sort) {
+            this.parameters = parameters;
+            this.start = start;
+            this.size = size;
+            this.sort = sort;
+            /**
+             * Method that return RSQL path
+             * @returns {string}: query=id==1 and name=="name"
+             */
+            this.build = function () {
+                var result = '';
+                if (parameters != undefined) {
+                    this.parameters.forEach(function (entry) {
+                        if(angular.isDefined(entry.value) && angular.isDefined(entry.key)) {
+
+                            //Si c'est une date max, on définit l'heure à 23h59
+                            if((entry.value instanceof Date) && (entry.operator == OPERATOR.LESS_EQUALS)){
+                                entry.value.setHours(23);
+                                entry.value.setMinutes(59);
+                                entry.value.setSeconds(59);
+                                entry.value.setMilliseconds(999);
+                            }
+
+                            if (result.length > 0) {
+                                result += " and ";
+                            }
+
+                            //formattage ISO des dates
+                            if (entry.value instanceof Date) {
+                                entry.value = entry.value.toISOString();
+                            }
+
+                            if (entry.operator == OPERATOR.LIKE) {
+                                entry.value = entry.value + '%';
+                            }
+                            result += entry.key + entry.operator + entry.value;
+                        }
+                    });
+                }
+                result = 'query=' + result;
+                if (size != null && angular.isDefined(size) && size != '') {
+                    result += "&size=" + this.size;
+                }
+                if (start != null && angular.isDefined(start) && start != '') {
+                    result += "&start=" + this.start;
+                }
+                //le sorting en décroissant s'écrit -fieldName
+                if (sort != undefined) {
+                    if (this.sort.name != undefined) {
+                        result += "&sort="
+                        if (this.sort.direction == "desc") {
+                            result += "-"
+                        }
+                        result += this.sort.name;
+                    }
+                }
+                return result;
+
+            };
+
+
+        }
+
+        return {
+            create: function (parameters, start, size, sort) {
+                return new Query(parameters, start, size, sort);
+            }
+        }
+    }
+    ]
+);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4677,294 +5014,6 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
-"use strict";
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPrettyprint
-
- * @module itesoft
- * @restrict EA
- * @parent itesoft
- * @since 1.0
- * @description
- * A container for display source code in browser with syntax highlighting.
- *
- * @usage
- * <it-prettyprint>
- * </it-prettyprint>
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <pre it-prettyprint=""  class="prettyprint lang-html">
-                 <label class="toggle">
-                     <input type="checkbox">
-                         <div class="track">
-                         <div class="handle"></div>
-                     </div>
-                 </label>
-             </pre>
-        </file>
-    </example>
- */
-IteSoft
-    .directive('itPrettyprint', ['$rootScope', '$sanitize', function($rootScope, $sanitize) {
-        var prettyPrintTriggered = false;
-        return {
-            restrict: 'EA',
-            terminal: true,  // Prevent AngularJS compiling code blocks
-            compile: function(element, attrs) {
-                if (!attrs['class']) {
-                    attrs.$set('class', 'prettyprint');
-                } else if (attrs['class'] && attrs['class'].split(' ')
-                    .indexOf('prettyprint') == -1) {
-                    attrs.$set('class', attrs['class'] + ' prettyprint');
-                }
-                return function(scope, element, attrs) {
-                    var entityMap = {
-                          "&": "&amp;",
-                          "<": "&lt;",
-                          ">": "&gt;",
-                          '"': '&quot;',
-                          "'": '&#39;',
-                          "/": '&#x2F;'
-                      };
-
-                       function replace(str) {
-                          return String(str).replace(/[&<>"'\/]/g, function (s) {
-                              return entityMap[s];
-                          });
-                      }
-                    element[0].innerHTML = prettyPrintOne(replace(element[0].innerHTML));
-
-                };
-            }
-
-        };
-    }]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -5157,21 +5206,21 @@ IteSoft
 
     .directive('itSideMenuContent',function(){
         return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : false,
-            link : function(scope){
+            restrict: 'ECA',
+            require: '^itSideMenus',
+            transclude: true,
+            scope: false,
+            link: function (scope) {
                 var sideMenuHeader = angular.element(document
                     .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                    scope.showmenu = true;
-                }
+                scope.menuOpenStyle = { 'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px' };
+                scope.menuCloseStyle = { 'padding-left': '0px' };
+
             },
-            template :
-                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
+            template:
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+            '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
         }
     });
 'use strict';
@@ -6517,971 +6566,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
         return self;
     }
 ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanel
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container element for side panel and its Header, Content and Footer
- *
- * <table class="table">
- *   <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-col="3">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *          <it-side-panel it-z-index="700">
- *          </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-icon-class="fa-star-o">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-height-mode="auto | window | full">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set "Height Mode" of the Side Panel.
- *          <ul>
- *              <li><b>auto</b> :
- *                  <ul>
- *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
- *                      <li>Else the height of Side Panel is equal to its content</li>
- *                  </ul>
- *                </li>
- *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
- *              <li><b>full</b>
-*                   <ul>
- *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
- *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
- *                  </ul>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          <pre>
- *              <it-side-panel it-top-position="XX | none">
- *              </it-side-panel>
- *          </pre>
- *      </td>
- *      <td>
- *          set css top position of the Side Panel. Default value is "none" mode
- *          <ul>
- *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
- *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
- *              </li>
- *          </ul>
- *      </td>
- *  </tr>
- * </table>
- *
- * ```html
- * <it-side-panel>
- *      <it-side-panel-header>
- *          <!--Header of Side Panel -->
- *      </it-side-panel-header>
- *      <it-side-panel-content>
- *          <!--Content Side Panel-->
- *      </it-side-panel-content>
- *      <it-side-panel-footer>
- *          <!--Footer Side Panel-->
- *      </it-side-panel-footer>
- * </it-side-panel>
- * ```
- * @example
- <example module="itesoft">
- <file name="custom.css">
-
-     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
-       background-color: blue;
-     }
-
-     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
-       background-color: green;
-     }
-
-     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
-       background-color: gray;
-     }
-
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer {
-        text-align: center;
-        display: table;
-        width: 100%;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
-        display: table-cell;
-        vertical-align:middle;
-     }
-
-     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
-        margin:0px;
-     }
-
- </file>
- <file name="index.html">
-
- <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
- <it-side-panel-header>
- <div><h1>Favorites</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Favorite 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Favorite 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 4</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 5</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 6</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 7</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 8</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 9</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 10</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 11</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 12</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 13</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
- <br>
- <h2>Favorite 14</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 15</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Favorite 16</h2>
- <p>
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
- </p>
-
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
- <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
- <it-side-panel-header>
- <div><h1>Silicon Valley</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Paragraph 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Paragraph 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Paragraph 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
-
-
- <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
- <it-side-panel-header>
- <div><h1>Search</h1></div>
- </it-side-panel-header>
- <it-side-panel-content>
- <div>
- <h2>Search 1</h2>
- <p>
-
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
- Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
- </p>
-
- <br>
- <h2>Search 2</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
- <br>
- <h2>Search 3</h2>
- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
-
- </div>
- </it-side-panel-content>
- <it-side-panel-footer>
- <div><button class="btn btn-default btn-success">Submit</button></div>
- </it-side-panel-footer>
- </it-side-panel>
-
- </file>
- </example>
- */
-IteSoft
-    .directive('itSidePanel', ['$window', function ($window) {
-
-
-        function _link(scope, element, attrs) {
-
-            scope.itSidePanelElement = element;
-
-            scope.setIconClass(scope, attrs);
-
-            scope.setZIndexes(element, attrs);
-
-            scope.setColMd(attrs);
-
-            scope.setHeightMode(attrs);
-
-            scope.setTopPosition(attrs);
-
-        }
-
-        return {
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            controller: '$sidePanelCtrl',
-            scope : true,
-            template:
-            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
-                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
-                    '<span class="fa {{itIconClass}}"></span>' +
-                '</div>'+
-                '<div class="it-side-panel" ng-transclude></div>'+
-            '</div>'
-
-        };
-    }]);
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelContent
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel content, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-content>
- * </it-side-panel-content>
- */
-IteSoft
-    .directive('itSidePanelContent', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require: '^itSidePanel',
-            template:
-                '<div class="it-side-panel-content" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .controller("$sidePanelCtrl", [
-        '$scope',
-        '$window',
-        '$document',
-        '$timeout',
-        '$log',
-        function ($scope, $window, $document, $timeout, $log) {
-
-
-            var COL_MD_NAME = 'it-col';
-            var HEIGHT_MODE_NAME = 'it-height-mode';
-            var TOP_POSITION_NAME = 'it-top-position';
-
-            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
-
-            var Z_INDEX_CSS_KEY = 'z-index';
-
-            var IT_HEIGHT_MODE_WINDOW = 'window';
-            var IT_HEIGHT_MODE_FULL = 'full';
-            var IT_HEIGHT_MODE_AUTO = 'auto';
-            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL, IT_HEIGHT_MODE_AUTO];
-
-            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
-
-
-            var DEFAULT_COL_MD = 4;
-            var MAX_COL_MD = 12;
-            var MIN_COL_MD = 1;
-
-            var DEFAULT_ICON_CLASS = 'fa-search';
-
-
-            var DEFAULT_TOP_POSITION = 'none';
-            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
-
-            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
-            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
-            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
-            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
-            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
-            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
-            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
-
-            var _self = this;
-            _self.scope = $scope;
-            _self.scope.showPanel = false;
-
-            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-            //Set default col-md(s) to the scope
-            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-
-            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
-
-            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
-
-            _self.scope.sidePanelContainerWidth = null;
-            _self.scope.sidePanelContainerRight = null;
-            _self.scope.sidePanelButtonRight = null;
-
-
-            var w = angular.element($window);
-
-
-            /**
-             * Get window Dimensions
-             * @returns {{height: Number, width: Number}}
-             */
-            _self.scope.getWindowDimensions = function () {
-                return {
-                    'height': $window.innerHeight,
-                    'width': $window.innerWidth
-                };
-            };
-
-            /**
-             * Watch the resizing of window Dimensions
-             */
-            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
-
-                _self.scope.windowHeight = newValue.height;
-                _self.scope.windowWidth = newValue.width;
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-
-                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
-
-                    var top = sidePanelContainer[0].getBoundingClientRect().top;
-
-                    //Do not update side panel height property when
-                    // Math.abs('top' value of side panel container) is greater than the height of the window
-                    if (Math.abs(top) < _self.scope.windowHeight) {
-
-                        var itTopPosition = _self.scope.itSidePanelTopPosition;
-                        if (_self.scope.isNoneTopPosition()) {
-                            itTopPosition = 0;
-                        }
-
-                        var newHeight = (_self.scope.windowHeight - top - itTopPosition);
-
-                        var heightHeader = (newHeight * 0.10);
-                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                        sidePanelHeader.css('height', heightHeader + 'px');
-
-                        var heightFooter = (newHeight * 0.10);
-                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                        sidePanelFooter.css('height', heightFooter + 'px');
-
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('height', (newHeight * 0.8) + 'px');
-
-                    }
-                }
-
-
-                if (_self.scope.showPanel) {
-                    var newWidth = (_self.scope.windowWidth / 12 * _self.scope.itSidePanelcolMd);
-                    _self.scope.sidePanelContainerWidth = newWidth;
-                    sidePanelContainer.css('width', newWidth + 'px');
-                    //if its the firt time initialise all components width an right
-                } else {
-                    _self.scope.modifySidePanelCssProperties();
-                }
-
-            }, true);
-
-            /**
-             * Update Side panel Css properties (right and width)
-             */
-            _self.scope.modifySidePanelCssProperties = function () {
-
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
-
-                _self.scope.sidePanelContainerWidth = newWidth;
-                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
-                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                //update side panel container right and width properties
-                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
-                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-
-                //update side panel button right right property
-                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
-            };
-
-            w.bind('resize', function () {
-                _self.scope.$apply();
-            });
-
-            /**
-             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
-             */
-            _self.scope.toggleSidePanel = function () {
-                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
-                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (_self.scope.showPanel) {
-
-                    //Reset the right property of Side panel button
-                    iconButtonElement.css('right', "");
-
-                    //Do the transition in order to the side panel be visible
-                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
-                    $timeout(function () {
-                        _self.scope.sidePanelContainerRight = 0;
-                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-                    }, 50);
-
-
-                } else {
-                    var newRight = sidePanelContainer.css('width');
-                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length - 2));
-                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
-
-                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
-                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight + 'px');
-                }
-            };
-
-            _self.scope.setItSidePanelElement = function (element) {
-                _self.scope.itSidePanelElement = element;
-            };
-
-
-            /**
-             * Set the Side Panel Height Mode from "it-height-mode" attributes
-             * @param attrs directive attributes object
-             */
-            _self.scope.setHeightMode = function (attrs) {
-                _self.scope.itHeightMode = attrs.itHeightMode;
-
-                //If attribute is not defined set the default height Mode
-                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-
-                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1) {
-                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
-                    //Get the provided mode
-                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
-                } else {
-
-                    //If height mode is defined but unknown set to the default  height mode
-                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
-                    $log.error('"' + HEIGHT_MODE_NAME + '" with value "' + _self.scope.itHeightMode + '"is unknown. ' +
-                        'The default value is taken : "' + DEFAULT_HEIGHT_MODE + '"');
-                }
-
-                //Set height of header, content and footer
-                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
-                sidePanelHeader.css('height', '10%');
-
-                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
-                sidePanelFooter.css('height', '10%');
-
-                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                sidePanelContent.css('height', '80%');
-
-
-                //Configure height of Side Panel elements depending on the provided height mode
-                switch (_self.scope.itHeightMode) {
-                    case IT_HEIGHT_MODE_FULL:
-
-                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                        var sidePanelContainerHeight = sidePanelContainer.css('height');
-
-                        if (sidePanelContainerHeight > _self.scope.windowHeight) {
-                            sidePanelContainer.css('height', '100%');
-                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                            sidePanel.css('height', '100%');
-                        }
-                        break;
-                    case IT_HEIGHT_MODE_AUTO:
-                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
-                        break;
-                    case IT_HEIGHT_MODE_WINDOW:
-
-                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
-                        sidePanel.css('height', '100%');
-
-                        //set overflow : auto to the Side Panel Content
-                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
-                        sidePanelContent.css('overflow', 'auto');
-                        break;
-                    default:
-                        $log.error('Height mode : "' + _self.scope.itHeightMode + '" is unknown.');
-                }
-            };
-
-            /**
-             * Retrieve provided iconClass and put the value it in scope
-             * @param scope the scope
-             * @param attrs the attributes provided by directive
-             * @private
-             */
-            _self.scope.setIconClass = function (scope, attrs) {
-                var defaultIconClass = DEFAULT_ICON_CLASS;
-                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
-                    _self.scope.itIconClass = defaultIconClass;
-                } else {
-                    _self.scope.itIconClass = attrs.itIconClass;
-                }
-            };
-
-            /**
-             * Handle col-md of directive.
-             * If itCol is provided to the directive apply its col-md-X
-             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setColMd = function (attrs) {
-                var colMd = DEFAULT_COL_MD;
-                if (!isNaN(parseInt(attrs.itCol))) {
-
-                    if (attrs.itCol > MAX_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
-                            '(' + MAX_COL_MD + '). The maximum value is taken.');
-                    } else if (attrs.itCol < MIN_COL_MD) {
-                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
-                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
-                            '(' + MIN_COL_MD + '). The minimum value is taken.');
-                    } else {
-                        _self.scope.itSidePanelcolMd = attrs.itCol;
-                    }
-                } else {
-                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
-                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
-                        'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
-                }
-            };
-
-            /**
-             * Handle z indexes of directive.
-             * If itZIndex is provided to the directive apply its z-index
-             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
-             * @param element
-             * @param attrs
-             */
-            _self.scope.setZIndexes = function (element, attrs) {
-
-                var zindex = null;
-                if (!isNaN(parseInt(attrs.itZIndex))) {
-                    zindex = parseInt(attrs.itZIndex);
-                }
-
-                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
-                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
-
-                if (zindex !== null) {
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
-                } else {
-
-                    var highestZIndex = _self.scope.findHighestZIndex();
-                    var newHighestZIndex = highestZIndex + 100;
-
-                    //set the zindex to side panel element
-                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
-
-                    //set the zindex to the icon button of the side panel element
-                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
-
-                }
-            };
-
-            /**
-             * Get Dom element from its class
-             * @param element dom element in which the class search will be performed
-             * @param className className. Using 'querySelector' selector convention
-             * @private
-             */
-            _self.scope.getElementFromClass = function (element, className) {
-                var content = angular.element(element[0].querySelector(className));
-                var sidePanel = angular.element(content[0]);
-                return sidePanel;
-            };
-
-            /**
-             * Find the highest z-index of the DOM
-             * @returns {number} the highest z-index value
-             * @private
-             */
-            _self.scope.findHighestZIndex = function () {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            };
-
-            _self.scope.setTopPosition = function (attrs) {
-                var topPosition = attrs.itTopPosition;
-                if (!isNaN(parseInt(topPosition))) {
-                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
-                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
-                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
-
-                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
-
-                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
-                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
-                        'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
-                }
-            };
-
-            /**
-             *
-             * @returns {boolean}
-             */
-            _self.scope.isNoneTopPosition = function () {
-                return _self.scope.itSidePanelTopPosition === 'none';
-            };
-        }
-    ]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelFooter
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel footer, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-footer>
- * </it-side-panel-footer>
- */
-IteSoft
-    .directive('itSidePanelFooter', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-footer" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSidePanelHeader
- * @module itesoft
- * @restrict E
- * @since 1.0
- * @description
- * A container for a Side Panel header, sibling to an directive.
- * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
- * @usage
- * <it-side-panel-header>
- * </it-side-panel-header>
- */
-IteSoft
-    .directive('itSidePanelHeader', function () {
-        function _link(scope) {
-
-        }
-
-        return {
-            scope: false,
-            link: _link,
-            restrict: 'E',
-            transclude: true,
-            require : '^itSidePanel',
-            template:
-                '<div class="it-side-panel-header text-center" ng-transclude></div>'
-        };
-    });
-
-
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 
 'use strict';
@@ -9086,6 +8170,922 @@ IteSoft
         return itPopup;
     }]);
 
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanel
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container element for side panel and its Header, Content and Footer
+ *
+ * <table class="table">
+ *   <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-col="3">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>number of bootstrap columns of the Site Panel element, if undefined = 4</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *          <it-side-panel it-z-index="700">
+ *          </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set the  z-index of the Site Panel elements, by default take highest index of the view.</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-icon-class="fa-star-o">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>set icon class of Site Panel button. Use Font Awesome icons</td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-height-mode="auto | window | full">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set "Height Mode" of the Side Panel.
+ *          <ul>
+ *              <li><b>auto</b> :
+ *                  <ul>
+ *                      <li>if height of Side Panel is greater to the window's : the mode "window" will be applied.</li>
+ *                      <li>Else the height of Side Panel is equal to its content</li>
+ *                  </ul>
+ *                </li>
+ *              <li><b>window</b> : the height of the side panel is equal to the height of the window </li>
+ *              <li><b>full</b>
+*                   <ul>
+ *                      <li>If the height of Side Panel is smaller than the window's, the mode "auto" is applied</li>
+ *                      <li>Else the height of Side Panel covers the height of its content (header, content and footer) without scroll bar.</li>
+ *                  </ul>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          <pre>
+ *              <it-side-panel it-top-position="XX | none">
+ *              </it-side-panel>
+ *          </pre>
+ *      </td>
+ *      <td>
+ *          set css top position of the Side Panel. Default value is "none" mode
+ *          <ul>
+ *              <li><b>none</b> :  Will take the default css "top" property of theSide Panel. Default "top" is "0px". This position can be override by 'it-side-panel .it-side-panel-container' css selector</li>
+ *              <li><b>XX</b> : Has to be a number. It will override the default css top position of Side Panel. <i>Ex : with it-top-position="40", the top position of Side Panel will be "40px"</i>
+ *              </li>
+ *          </ul>
+ *      </td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ * <it-side-panel>
+ *      <it-side-panel-header>
+ *          <!--Header of Side Panel -->
+ *      </it-side-panel-header>
+ *      <it-side-panel-content>
+ *          <!--Content Side Panel-->
+ *      </it-side-panel-content>
+ *      <it-side-panel-footer>
+ *          <!--Footer Side Panel-->
+ *      </it-side-panel-footer>
+ * </it-side-panel>
+ * ```
+ * @example
+ <example module="itesoft">
+ <file name="custom.css">
+
+     it-side-panel:nth-of-type(1) .it-side-panel-container .it-side-panel-button  {
+       background-color: blue;
+     }
+
+     it-side-panel:nth-of-type(2) .it-side-panel-container .it-side-panel-button {
+       background-color: green;
+     }
+
+     it-side-panel:nth-of-type(3) .it-side-panel-container .it-side-panel-button {
+       background-color: gray;
+     }
+
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer {
+        text-align: center;
+        display: table;
+        width: 100%;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer div{
+        display: table-cell;
+        vertical-align:middle;
+     }
+
+     .it-side-panel-container .it-side-panel .it-side-panel-footer .btn {
+        margin:0px;
+     }
+
+ </file>
+ <file name="index.html">
+
+ <it-side-panel it-col="6" it-z-index="1100" it-height-mode="window" it-top-position="40"  it-icon-class="fa-star-o">
+ <it-side-panel-header>
+ <div><h1>Favorites</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Favorite 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Favorite 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 4</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 5</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 6</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 7</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 8</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 9</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 10</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 11</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 12</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 13</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+ <br>
+ <h2>Favorite 14</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 15</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Favorite 16</h2>
+ <p>
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptas, tenetur, nesciunt molestias illo sapiente ab officia soluta vel ipsam aut laboriosam hic veritatis assumenda alias in enim rem commodi optio?
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt quisquam autem debitis perspiciatis explicabo! Officiis, eveniet quas illum commodi cum rerum temporibus repellendus ducimus magnam facilis a aliquam eligendi minus.
+ </p>
+
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+ <it-side-panel it-col="8" it-z-index="1200" it-height-mode="auto" it-top-position="none"  it-icon-class="fa-pied-piper-alt">
+ <it-side-panel-header>
+ <div><h1>Silicon Valley</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Paragraph 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Paragraph 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Paragraph 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+
+
+ <it-side-panel it-col="2" it-z-index="1300" it-height-mode="full" it-top-position="80">
+ <it-side-panel-header>
+ <div><h1>Search</h1></div>
+ </it-side-panel-header>
+ <it-side-panel-content>
+ <div>
+ <h2>Search 1</h2>
+ <p>
+
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.
+ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae, repudiandae, totam vel dignissimos saepe cum assumenda velit tempora blanditiis harum hic neque et magnam tenetur alias provident tempore cumque facilis.
+ </p>
+
+ <br>
+ <h2>Search 2</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+ <br>
+ <h2>Search 3</h2>
+ <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tenetur, delectus suscipit laboriosam commodi harum totam quas! Autem, quaerat, neque, unde qui nobis aperiam culpa dignissimos iusto ipsam similique dolorem dolor.</p>
+
+ </div>
+ </it-side-panel-content>
+ <it-side-panel-footer>
+ <div><button class="btn btn-default btn-success">Submit</button></div>
+ </it-side-panel-footer>
+ </it-side-panel>
+
+ </file>
+ </example>
+ */
+IteSoft
+    .directive('itSidePanel', ['$window', function ($window) {
+
+
+        function _link(scope, element, attrs) {
+
+            scope.itSidePanelElement = element;
+
+            scope.setIconClass(scope, attrs);
+
+            scope.setZIndexes(element, attrs);
+
+            scope.setColMd(attrs);
+
+            scope.setHeightMode(attrs);
+
+            scope.setTopPosition(attrs);
+
+        }
+
+        return {
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            controller: '$sidePanelCtrl',
+            scope : true,
+            template:
+            '<div class="it-side-panel-container" ng-class="{\'it-side-panel-container-show\': showPanel}">' +
+                '<div class="it-side-panel-button it-vertical-text" ng-class="{\'it-side-panel-button-show\':showPanel,\'it-side-panel-button-right\':!showPanel}" ng-click="toggleSidePanel()">' +
+                    '<span class="fa {{itIconClass}}"></span>' +
+                '</div>'+
+                '<div class="it-side-panel" ng-transclude></div>'+
+            '</div>'
+
+        };
+    }]);
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelContent
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel content, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-content>
+ * </it-side-panel-content>
+ */
+IteSoft
+    .directive('itSidePanelContent', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require: '^itSidePanel',
+            template:
+                '<div class="it-side-panel-content" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .controller("$sidePanelCtrl", [
+        '$scope',
+        '$window',
+        '$document',
+        '$timeout',
+        '$log',
+        function ($scope, $window, $document, $timeout, $log) {
+
+
+            var COL_MD_NAME = 'it-col';
+            var HEIGHT_MODE_NAME = 'it-height-mode';
+            var TOP_POSITION_NAME = 'it-top-position';
+
+            var DEFAULT_SIDE_PANEL_BUTTON_WIDTH = 40;
+
+            var Z_INDEX_CSS_KEY = 'z-index';
+
+            var IT_HEIGHT_MODE_WINDOW = 'window';
+            var IT_HEIGHT_MODE_FULL = 'full';
+            var IT_HEIGHT_MODE_AUTO = 'auto';
+            var IT_HEIGHT_MODES = [IT_HEIGHT_MODE_WINDOW, IT_HEIGHT_MODE_FULL, IT_HEIGHT_MODE_AUTO];
+
+            var DEFAULT_HEIGHT_MODE = IT_HEIGHT_MODE_WINDOW;
+
+
+            var DEFAULT_COL_MD = 4;
+            var MAX_COL_MD = 12;
+            var MIN_COL_MD = 1;
+
+            var DEFAULT_ICON_CLASS = 'fa-search';
+
+
+            var DEFAULT_TOP_POSITION = 'none';
+            var TOP_POSITION_MODE_NONE = DEFAULT_TOP_POSITION;
+
+            var IT_SIDE_PANEL_BUTTON_CLASS = '.it-side-panel-button';
+            var IT_SIDE_PANEL_BUTTON_RIGHT_CLASS = '.it-side-panel-button-right';
+            var IT_SIDE_PANEL_CONTAINER_CLASS = '.it-side-panel-container';
+            var IT_SIDE_PANEL_CLASS = '.it-side-panel';
+            var IT_SIDE_PANEL_HEADER_CLASS = '.it-side-panel-header';
+            var IT_SIDE_PANEL_CONTENT_CLASS = '.it-side-panel-content';
+            var IT_SIDE_PANEL_FOOTER_CLASS = '.it-side-panel-footer';
+
+            var _self = this;
+            _self.scope = $scope;
+            _self.scope.showPanel = false;
+
+            _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+            //Set default col-md(s) to the scope
+            _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+
+            _self.scope.itSidePanelTopPosition = DEFAULT_TOP_POSITION;
+
+            _self.scope.sidePanelButtonWidth = DEFAULT_SIDE_PANEL_BUTTON_WIDTH;
+
+            _self.scope.sidePanelContainerWidth = null;
+            _self.scope.sidePanelContainerRight = null;
+            _self.scope.sidePanelButtonRight = null;
+
+
+            var w = angular.element($window);
+
+
+            /**
+             * Get window Dimensions
+             * @returns {{height: Number, width: Number}}
+             */
+            _self.scope.getWindowDimensions = function () {
+                return {
+                    'height': $window.innerHeight,
+                    'width': $window.innerWidth
+                };
+            };
+
+            /**
+             * Watch the resizing of window Dimensions
+             */
+            _self.scope.$watch(_self.scope.getWindowDimensions, function (newValue, oldValue) {
+
+                _self.scope.windowHeight = newValue.height;
+                _self.scope.windowWidth = newValue.width;
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+
+                if (_self.scope.itHeightMode === IT_HEIGHT_MODE_WINDOW) {
+
+                    var top = sidePanelContainer[0].getBoundingClientRect().top;
+
+                    //Do not update side panel height property when
+                    // Math.abs('top' value of side panel container) is greater than the height of the window
+                    if (Math.abs(top) < _self.scope.windowHeight) {
+
+                        var itTopPosition = _self.scope.itSidePanelTopPosition;
+                        if (_self.scope.isNoneTopPosition()) {
+                            itTopPosition = 0;
+                        }
+
+                        var newHeight = (_self.scope.windowHeight - top - itTopPosition);
+
+                        var heightHeader = (newHeight * 0.10);
+                        var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                        sidePanelHeader.css('height', heightHeader + 'px');
+
+                        var heightFooter = (newHeight * 0.10);
+                        var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                        sidePanelFooter.css('height', heightFooter + 'px');
+
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('height', (newHeight * 0.8) + 'px');
+
+                    }
+                }
+
+
+                if (_self.scope.showPanel) {
+                    var newWidth = (_self.scope.windowWidth / 12 * _self.scope.itSidePanelcolMd);
+                    _self.scope.sidePanelContainerWidth = newWidth;
+                    sidePanelContainer.css('width', newWidth + 'px');
+                    //if its the firt time initialise all components width an right
+                } else {
+                    _self.scope.modifySidePanelCssProperties();
+                }
+
+            }, true);
+
+            /**
+             * Update Side panel Css properties (right and width)
+             */
+            _self.scope.modifySidePanelCssProperties = function () {
+
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var sidePanelButtonRight = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+                var newWidth = (_self.scope.windowWidth / 12) * _self.scope.itSidePanelcolMd;
+
+                _self.scope.sidePanelContainerWidth = newWidth;
+                _self.scope.sidePanelContainerRight = -_self.scope.sidePanelContainerWidth;
+                _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                //update side panel container right and width properties
+                sidePanelContainer.css('width', _self.scope.sidePanelContainerWidth + 'px');
+                sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+
+                //update side panel button right right property
+                sidePanelButtonRight.css('right', _self.scope.sidePanelButtonRight + 'px');
+            };
+
+            w.bind('resize', function () {
+                _self.scope.$apply();
+            });
+
+            /**
+             * Change class for display Side Panel or not depending on the value of @{link: _self.scope.showPanel}
+             */
+            _self.scope.toggleSidePanel = function () {
+                _self.scope.showPanel = (_self.scope.showPanel) ? false : true;
+                var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (_self.scope.showPanel) {
+
+                    //Reset the right property of Side panel button
+                    iconButtonElement.css('right', "");
+
+                    //Do the transition in order to the side panel be visible
+                    //Wait few ms to prevent unexpected "iconButtonElement" transition behaviour
+                    $timeout(function () {
+                        _self.scope.sidePanelContainerRight = 0;
+                        sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    }, 50);
+
+
+                } else {
+                    var newRight = sidePanelContainer.css('width');
+                    _self.scope.sidePanelContainerRight = -parseInt(newRight.slice(0, newRight.length - 2));
+                    _self.scope.sidePanelButtonRight = _self.scope.sidePanelContainerWidth;
+
+                    sidePanelContainer.css('right', _self.scope.sidePanelContainerRight + 'px');
+                    iconButtonElement.css('right', _self.scope.sidePanelButtonRight + 'px');
+                }
+            };
+
+            _self.scope.setItSidePanelElement = function (element) {
+                _self.scope.itSidePanelElement = element;
+            };
+
+
+            /**
+             * Set the Side Panel Height Mode from "it-height-mode" attributes
+             * @param attrs directive attributes object
+             */
+            _self.scope.setHeightMode = function (attrs) {
+                _self.scope.itHeightMode = attrs.itHeightMode;
+
+                //If attribute is not defined set the default height Mode
+                if (_self.scope.itHeightMode === '' || typeof _self.scope.itHeightMode === 'undefined') {
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+
+                } else if (IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode) != -1) {
+                    var index = IT_HEIGHT_MODES.indexOf(_self.scope.itHeightMode);
+                    //Get the provided mode
+                    _self.scope.itHeightMode = IT_HEIGHT_MODES[index];
+                } else {
+
+                    //If height mode is defined but unknown set to the default  height mode
+                    _self.scope.itHeightMode = DEFAULT_HEIGHT_MODE;
+                    $log.error('"' + HEIGHT_MODE_NAME + '" with value "' + _self.scope.itHeightMode + '"is unknown. ' +
+                        'The default value is taken : "' + DEFAULT_HEIGHT_MODE + '"');
+                }
+
+                //Set height of header, content and footer
+                var sidePanelHeader = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_HEADER_CLASS);
+                sidePanelHeader.css('height', '10%');
+
+                var sidePanelFooter = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_FOOTER_CLASS);
+                sidePanelFooter.css('height', '10%');
+
+                var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                sidePanelContent.css('height', '80%');
+
+
+                //Configure height of Side Panel elements depending on the provided height mode
+                switch (_self.scope.itHeightMode) {
+                    case IT_HEIGHT_MODE_FULL:
+
+                        var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                        var sidePanelContainerHeight = sidePanelContainer.css('height');
+
+                        if (sidePanelContainerHeight > _self.scope.windowHeight) {
+                            sidePanelContainer.css('height', '100%');
+                            var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                            sidePanel.css('height', '100%');
+                        }
+                        break;
+                    case IT_HEIGHT_MODE_AUTO:
+                        //console.log(IT_HEIGHT_MODE_AUTO+" mode!");
+                        break;
+                    case IT_HEIGHT_MODE_WINDOW:
+
+                        var sidePanel = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CLASS);
+                        sidePanel.css('height', '100%');
+
+                        //set overflow : auto to the Side Panel Content
+                        var sidePanelContent = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTENT_CLASS);
+                        sidePanelContent.css('overflow', 'auto');
+                        break;
+                    default:
+                        $log.error('Height mode : "' + _self.scope.itHeightMode + '" is unknown.');
+                }
+            };
+
+            /**
+             * Retrieve provided iconClass and put the value it in scope
+             * @param scope the scope
+             * @param attrs the attributes provided by directive
+             * @private
+             */
+            _self.scope.setIconClass = function (scope, attrs) {
+                var defaultIconClass = DEFAULT_ICON_CLASS;
+                if (attrs.itIconClass === '' || typeof attrs.itIconClass === 'undefined') {
+                    _self.scope.itIconClass = defaultIconClass;
+                } else {
+                    _self.scope.itIconClass = attrs.itIconClass;
+                }
+            };
+
+            /**
+             * Handle col-md of directive.
+             * If itCol is provided to the directive apply its col-md-X
+             * If no itCol is provided to the directive, the col-md-X applied will be the default col-md-X. Where X is DEFAULT_COL_MD
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setColMd = function (attrs) {
+                var colMd = DEFAULT_COL_MD;
+                if (!isNaN(parseInt(attrs.itCol))) {
+
+                    if (attrs.itCol > MAX_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MAX_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the maximum value ' +
+                            '(' + MAX_COL_MD + '). The maximum value is taken.');
+                    } else if (attrs.itCol < MIN_COL_MD) {
+                        _self.scope.itSidePanelcolMd = MIN_COL_MD;
+                        $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive exceeds the minimum value ' +
+                            '(' + MIN_COL_MD + '). The minimum value is taken.');
+                    } else {
+                        _self.scope.itSidePanelcolMd = attrs.itCol;
+                    }
+                } else {
+                    _self.scope.itSidePanelcolMd = DEFAULT_COL_MD;
+                    $log.warn('Attribute "' + COL_MD_NAME + '" of itSidePanel directive is not a number. ' +
+                        'The default value is taken : "' + _self.scope.itSidePanelcolMd + '"');
+                }
+            };
+
+            /**
+             * Handle z indexes of directive.
+             * If itZIndex is provided to the directive apply its z-index
+             * If no itZIndex is provided to the directive, the z-index applied will be the highest zi-index of the DOM + 100
+             * @param element
+             * @param attrs
+             */
+            _self.scope.setZIndexes = function (element, attrs) {
+
+                var zindex = null;
+                if (!isNaN(parseInt(attrs.itZIndex))) {
+                    zindex = parseInt(attrs.itZIndex);
+                }
+
+                var sidePanelContainer = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_CONTAINER_CLASS);
+                var iconButtonElement = _self.scope.getElementFromClass(element, IT_SIDE_PANEL_BUTTON_CLASS);
+
+                if (zindex !== null) {
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, zindex);
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, zindex + 1);
+                } else {
+
+                    var highestZIndex = _self.scope.findHighestZIndex();
+                    var newHighestZIndex = highestZIndex + 100;
+
+                    //set the zindex to side panel element
+                    sidePanelContainer.css(Z_INDEX_CSS_KEY, newHighestZIndex);
+
+                    //set the zindex to the icon button of the side panel element
+                    iconButtonElement.css(Z_INDEX_CSS_KEY, newHighestZIndex + 1);
+
+                }
+            };
+
+            /**
+             * Get Dom element from its class
+             * @param element dom element in which the class search will be performed
+             * @param className className. Using 'querySelector' selector convention
+             * @private
+             */
+            _self.scope.getElementFromClass = function (element, className) {
+                var content = angular.element(element[0].querySelector(className));
+                var sidePanel = angular.element(content[0]);
+                return sidePanel;
+            };
+
+            /**
+             * Find the highest z-index of the DOM
+             * @returns {number} the highest z-index value
+             * @private
+             */
+            _self.scope.findHighestZIndex = function () {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex) ? zindex : 0 ) > highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            };
+
+            _self.scope.setTopPosition = function (attrs) {
+                var topPosition = attrs.itTopPosition;
+                if (!isNaN(parseInt(topPosition))) {
+                    _self.scope.itSidePanelTopPosition = attrs.itTopPosition;
+                    var sidePanelContainer = _self.scope.getElementFromClass(_self.scope.itSidePanelElement, IT_SIDE_PANEL_CONTAINER_CLASS);
+                    sidePanelContainer.css('top', _self.scope.itSidePanelTopPosition + 'px');
+
+                } else if (!_self.scope.isNoneTopPosition() || typeof topPosition === 'undefined') {
+
+                    _self.scope.itSidePanelTopPosition = TOP_POSITION_MODE_NONE;
+                    $log.warn('Attribute "' + TOP_POSITION_NAME + '" of itSidePanel directive is not a number. ' +
+                        'The mode taken is "' + TOP_POSITION_MODE_NONE + '"');
+                }
+            };
+
+            /**
+             *
+             * @returns {boolean}
+             */
+            _self.scope.isNoneTopPosition = function () {
+                return _self.scope.itSidePanelTopPosition === 'none';
+            };
+        }
+    ]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelFooter
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel footer, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-footer>
+ * </it-side-panel-footer>
+ */
+IteSoft
+    .directive('itSidePanelFooter', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-footer" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSidePanelHeader
+ * @module itesoft
+ * @restrict E
+ * @since 1.0
+ * @description
+ * A container for a Side Panel header, sibling to an directive.
+ * see {@link itesoft.directive:itSidePanel `<it-side-panel>`}.
+ * @usage
+ * <it-side-panel-header>
+ * </it-side-panel-header>
+ */
+IteSoft
+    .directive('itSidePanelHeader', function () {
+        function _link(scope) {
+
+        }
+
+        return {
+            scope: false,
+            link: _link,
+            restrict: 'E',
+            transclude: true,
+            require : '^itSidePanel',
+            template:
+                '<div class="it-side-panel-header text-center" ng-transclude></div>'
+        };
+    });
+
+
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
 /**
  * Created by SZA on 28/06/2016.
  */
@@ -9461,6 +9461,1092 @@ itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', f
          link: linker
      };
  }]);
+
+'use strict';
+/**
+ * TODO itTiffViewer desc
+ */
+itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function(scope, element, attrs) {
+        MultiPagesAddEventWatcher(scope);
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<tiff-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></tiff-viewer>' +
+                    '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
+        link: linker
+
+    };
+}]);
+'use strict';
+/**
+ * TODO Tiff implementation desc
+ */
+itTiffViewer
+    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
+
+        function TIFFPage(pageIndex, getSrc, view) {
+        			this.base = MultiPagesPage;
+        			this.base(pageIndex, view);
+
+        			this.getSrc = getSrc;
+        		}
+
+        TIFFPage.prototype = new MultiPagesPage;
+
+        TIFFPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+            }else {
+                self.container.append(self.canvas);
+
+                var ctx = self.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, self.viewport.transform);
+                var img = new Image;
+                img.onload = function(){
+                    ctx.drawImage(img,0,0); // Or at whatever offset you like
+                    self.canvasRendered = true;
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                };
+
+                $timeout(function () {
+                    if(self.src == undefined){
+                        self.src =  self.getSrc(self.id - 1);
+                    }
+
+                    img.src = self.src;
+                }, 50);
+
+            }
+        };
+
+        return (TIFFPage);
+    }])
+
+    .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
+        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+
+        function TIFFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new MultiPagesViewerAPI(this), element);
+
+            this.tiff = null;
+        }
+
+        TIFFViewer.prototype = new MultiPagesViewer;
+
+        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            this.pageMargin = pageMargin;
+            this.initialScale = initialScale;
+            var isFile = typeof obj != typeof "";
+
+            if(isFile){
+                this.setFile(obj);
+            }else {
+                this.setUrl(obj);
+            }
+        };
+        TIFFViewer.prototype.setUrl = function(url) {
+            if (url !== undefined && url !== null && url !== '') {
+                var self = this;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.responseType = 'arraybuffer';
+                xhr.onprogress =  angular.bind(this, self.downloadProgress);
+                xhr.onload = function (e) {
+                    self.loadTiff(xhr.response);
+                };
+                xhr.send();
+            }
+        };
+        TIFFViewer.prototype.setFile = function(file) {
+            if (file !== undefined && file !== null) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    self.loadTiff(e.target.result);
+                };
+
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
+                        }
+
+                        self.onDataDownloaded("failed", 0, 0, message);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+        };
+        TIFFViewer.prototype.loadTiff = function(arrayBuffer){
+            var self = this;
+            self.onDestroy();
+            self.tiff = new Tiff({buffer: arrayBuffer});
+            self.getAllPages(function(pageList) {
+                self.pages = pageList;
+
+                self.setContainerSize(self.initialScale);
+            });
+        };
+        TIFFViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.tiff.countDirectory(),
+                remainingPages = numPages;
+            var self = this;
+            function _getUrl(index) {
+                self.tiff.setDirectory(index);
+                return self.tiff.toDataURL();
+            };
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                this.tiff.setDirectory(iPage);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
+                pageList[iPage] = page;
+
+                this.element.append(page.container);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        TIFFViewer.prototype.onDestroy = function () {
+            if(self.tiff != null){
+                self.tiff.close();
+                self.tiff = null;
+            }
+        };
+
+        return (TIFFViewer);
+    }])
+
+    .directive("tiffViewer", ['$log' , 'TIFFViewer', function($log, TIFFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope:
+            {
+                src: "@",
+                file: "=",
+                api: "=",
+                initialScale: "@"
+
+            },
+            controller: ['$scope', '$element', function($scope, $element) {
+
+                var viewer = new TIFFViewer($element);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.onSrcChanged = function() {
+                    viewer.open(this.src, this.initialScale, pageMargin);
+                };
+
+                $scope.onFileChanged = function () {
+                    viewer.open(this.file, this.initialScale, pageMargin);
+                };
+
+                viewer.hookScope($scope);
+            }],
+            link: function(scope, element, attrs) {
+                attrs.$observe('src', function(src) {
+                    scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    scope.onFileChanged();
+                });
+            }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO CustomStyle desc
+ */
+itPdfViewer.factory('CustomStyle', [function () {
+        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
+        //              animate-css-transforms-firefox-webkit.html
+        // in some versions of IE9 it is critical that ms appear in this list
+        // before Moz
+        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
+        var _cache = {};
+
+        function CustomStyle() {}
+
+        CustomStyle.getProp = function get(propName, element) {
+            // check cache only when no element is given
+            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
+                return _cache[propName];
+            }
+
+            element = element || document.documentElement;
+            var style = element.style, prefixed, uPropName;
+
+            // test standard property first
+            if (typeof style[propName] === 'string') {
+                return (_cache[propName] = propName);
+            }
+
+            // capitalize
+            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+
+            // test vendor specific properties
+            for (var i = 0, l = prefixes.length; i < l; i++) {
+                prefixed = prefixes[i] + uPropName;
+                if (typeof style[prefixed] === 'string') {
+                    return (_cache[propName] = prefixed);
+                }
+            }
+
+            //if all fails then set to undefined
+            return (_cache[propName] = 'undefined');
+        };
+
+        CustomStyle.setProp = function set(propName, element, str) {
+            var prop = this.getProp(propName);
+            if (prop !== 'undefined') {
+                element.style[prop] = str;
+            }
+        };
+
+        return (CustomStyle);
+    }]);
+
+'use strict';
+/**
+ * TODO itPdfViewer desc
+ */
+itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function (scope, element, attrs) {
+        scope.onPassword = function (reason) {
+            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
+
+        MultiPagesAddEventWatcher(scope);
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                    //'<pdf-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></pdf-viewer>' +
+                    '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO Pdf implementation desc
+ */
+itPdfViewer
+    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function PDFViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        PDFViewerAPI.prototype.findNext = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
+            if(nextHighlightID >= this.viewer.searchResults.length) {
+                nextHighlightID = 0;
+            }
+
+            this.viewer.highlightSearchResult(nextHighlightID);
+        };
+
+        PDFViewerAPI.prototype.findPrev = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
+            if(prevHighlightID < 0) {
+                prevHighlightID = this.viewer.searchResults.length - 1;
+            }
+
+            this.viewer.highlightSearchResult(prevHighlightID);
+        };
+
+        return (PDFViewerAPI);
+    }])
+
+    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+
+        function PDFPage(pdfPage) {
+            this.base = MultiPagesPage;
+            this.base(pdfPage.pageIndex);
+
+            this.pdfPage = pdfPage;
+            this.textContent = null;
+            this.renderTask = null;
+        }
+
+        PDFPage.prototype = new MultiPagesPage;
+
+        PDFPage.prototype.clear = function () {
+            if(this.renderTask !== null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation, 0, 0);
+        };
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
+
+            this.textLayer = angular.element("<div class='text-layer'></div>");
+            this.textLayer.css("width", this.viewport.width + "px");
+            this.textLayer.css("height", this.viewport.height + "px");
+        };
+        PDFPage.prototype.render = function (callback) {
+            var self = this;
+            if(this.rendered) {
+                if(this.renderTask === null) {
+                    if(callback) {
+                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                    }
+                } else {
+                    this.renderTask.then(function () {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                        }
+                    }, function (reason) {
+                        $log.debug('stopped ' + reason);
+                    });
+                }
+
+                return;
+            }
+
+            this.rendered = true;
+
+            if(this.canvasRendered){
+                self.container.append(self.canvas);
+                if(self.textContent) {
+                    self.container.append(self.textLayer);
+                }
+            }else{
+
+                self.container.append(self.canvas);
+
+                this.renderTask = this.pdfPage.render({
+                    canvasContext: this.canvas[0].getContext('2d'),
+                    viewport: this.viewport
+                });
+
+
+
+                this.renderTask.then(function () {
+
+                    self.rendered = true;
+                    self.renderTask = null;
+                    self.canvasRendered = true;
+                    //self.container.append(self.canvas);
+
+                    if(self.textContent) {
+                        // Render the text layer...
+                        var textLayerBuilder = new TextLayerBuilder({
+                            textLayerDiv: self.textLayer[0],
+                            pageIndex: self.id,
+                            viewport: self.viewport
+                        });
+
+                        textLayerBuilder.setTextContent(self.textContent);
+                        textLayerBuilder.renderLayer();
+                        self.container.append(self.textLayer);
+                    }
+
+                    if(callback) {
+                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                }, function (message) {
+                    self.rendered = false;
+                    self.renderTask = null;
+
+                    if(message === "cancelled") {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                        }
+                    } else {
+                        if(callback) {
+                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
+                        }
+                    }
+                });
+            }
+        };
+
+        return (PDFPage);
+    }])
+
+    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
+        function PDFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new PDFViewerAPI(this), element);
+
+            this.pdf = null;
+            // Hooks for the client...
+            this.passwordCallback = null;
+        }
+
+        PDFViewer.prototype = new MultiPagesViewer;
+
+        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if (obj !== undefined && obj !== null && obj !== '') {
+                this.pageMargin = pageMargin;
+                this.initialScale = initialScale;
+                this.hasTextLayer = renderTextLayer;
+                var isFile = typeof obj != typeof "";
+
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function (){
+                        if(isFile){
+                            self.setFile(obj);
+                        }else {
+                            self.setUrl(obj);
+                        }
+                    });
+                } else {
+                    if(isFile){
+                        this.setFile(obj);
+                    }else {
+                        this.setUrl(obj);
+                    }
+                }
+            }
+        };
+        PDFViewer.prototype.setUrl = function (url) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+
+                    // Append all page containers to the $element...
+                    for (var iPage = 0; iPage < pageList.length; ++iPage) {
+                        self.element.append(pageList[iPage].container);
+                    }
+
+                    self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
+                    self.pdf = pdf;
+
+                    self.getAllPages(function (pageList, pagesRefMap) {
+                        self.pages = pageList;
+                        self.pagesRefMap = pagesRefMap;
+
+                        // Append all page containers to the $element...
+                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
+                            self.element.append(pageList[iPage].container);
+                        }
+
+                        self.setContainerSize(self.initialScale);
+                    });
+                }, function (message) {
+                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                });
+            };
+
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
+
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
+                    }
+
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+        PDFViewer.prototype.getAllPages = function (callback) {
+            var pageList = [],
+                pagesRefMap = {},
+                numPages = this.pdf.numPages,
+                remainingPages = numPages;
+
+            if(this.hasTextLayer) {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        // Page reference map. Required by the annotation layer.
+                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                        pagesRefMap[refStr] = page.pageIndex + 1;
+
+                        var pdfPage = new PDFPage(page);
+                        pageList[page.pageIndex] = pdfPage;
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+
+                        page.getTextContent().then(function (textContent) {
+                            pdfPage.textContent = textContent;
+                        });
+                    });
+                }
+            } else {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        pageList[page.pageIndex] = new PDFPage(page);
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+                    });
+                }
+            }
+        };
+        PDFViewer.prototype.onDestroy = function () {
+            if(this.getDocumentTask){
+                this.getDocumentTask.destroy();
+                this.getDocumentTask = null;
+            }
+        };
+
+        return (PDFViewer);
+    }])
+
+    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                file: "=",
+                api: "=",
+                initialScale: "@",
+                renderTextLayer: "@",
+                passwordCallback: "&"
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                $scope.getPassword = function (passwordFunc, reason) {
+                    if(this.passwordCallback) {
+                        var self = this;
+                        this.$apply(function () {
+                            var password = self.passwordCallback({reason: reason});
+
+                            if(password !== "" && password !== undefined && password !== null) {
+                                passwordFunc(password);
+                            } else {
+                                $log.log("A password is required to read this document.");
+                            }
+                        });
+                    } else {
+                        $log.log("A password is required to read this document.");
+                    }
+                };
+
+                var viewer = new PDFViewer($element);
+                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.shouldRenderTextLayer = function () {
+                    if(this.renderTextLayer === "" || this.renderTextLayer === undefined || this.renderTextLayer === null || this.renderTextLayer.toLowerCase() === "false") {
+                        return false;
+                    }
+
+                    return true;
+                };
+
+                $scope.onSrcChanged = function () {
+                    viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                };
+
+                $scope.onFileChanged = function () {
+                    viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                };
+
+                viewer.hookScope($scope);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', function (src) {
+                    scope.onSrcChanged();
+                });
+
+                scope.$watch("file", function (file) {
+                    scope.onFileChanged();
+                });
+            }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO TextLayerBuilder desc
+ */
+itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
+        var MAX_TEXT_DIVS_TO_RENDER = 100000;
+
+        var NonWhitespaceRegexp = /\S/;
+
+        function isAllWhitespace(str) {
+            return !NonWhitespaceRegexp.test(str);
+        }
+
+        function TextLayerBuilder(options) {
+            this.textLayerDiv = options.textLayerDiv;
+            this.renderingDone = false;
+            this.divContentDone = false;
+            this.pageIdx = options.pageIndex;
+            this.pageNumber = this.pageIdx + 1;
+            this.matches = [];
+            this.viewport = options.viewport;
+            this.textDivs = [];
+            this.findController = options.findController || null;
+        }
+
+        TextLayerBuilder.prototype = {
+            _finishRendering: function TextLayerBuilder_finishRendering() {
+                this.renderingDone = true;
+
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('textlayerrendered', true, true, {
+                    pageNumber: this.pageNumber
+                });
+                this.textLayerDiv.dispatchEvent(event);
+            },
+
+            renderLayer: function TextLayerBuilder_renderLayer() {
+                var textLayerFrag = document.createDocumentFragment();
+                var textDivs = this.textDivs;
+                var textDivsLength = textDivs.length;
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+
+                // No point in rendering many divs as it would make the browser
+                // unusable even after the divs are rendered.
+                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
+                    this._finishRendering();
+                    return;
+                }
+
+                var lastFontSize;
+                var lastFontFamily;
+                for (var i = 0; i < textDivsLength; i++) {
+                    var textDiv = textDivs[i];
+                    if (textDiv.dataset.isWhitespace !== undefined) {
+                        continue;
+                    }
+
+                    var fontSize = textDiv.style.fontSize;
+                    var fontFamily = textDiv.style.fontFamily;
+
+                    // Only build font string and set to context if different from last.
+                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
+                        ctx.font = fontSize + ' ' + fontFamily;
+                        lastFontSize = fontSize;
+                        lastFontFamily = fontFamily;
+                    }
+
+                    var width = ctx.measureText(textDiv.textContent).width;
+                    if (width > 0) {
+                        textLayerFrag.appendChild(textDiv);
+                        var transform;
+                        if (textDiv.dataset.canvasWidth !== undefined) {
+                            // Dataset values come of type string.
+                            var textScale = textDiv.dataset.canvasWidth / width;
+                            transform = 'scaleX(' + textScale + ')';
+                        } else {
+                            transform = '';
+                        }
+                        var rotation = textDiv.dataset.angle;
+                        if (rotation) {
+                            transform = 'rotate(' + rotation + 'deg) ' + transform;
+                        }
+                        if (transform) {
+                            CustomStyle.setProp('transform' , textDiv, transform);
+                        }
+                    }
+                }
+
+                this.textLayerDiv.appendChild(textLayerFrag);
+                this._finishRendering();
+                this.updateMatches();
+            },
+
+            /**
+             * Renders the text layer.
+             * @param {number} timeout (optional) if specified, the rendering waits
+             *   for specified amount of ms.
+             */
+            render: function TextLayerBuilder_render(timeout) {
+                if (!this.divContentDone || this.renderingDone) {
+                    return;
+                }
+
+                if (this.renderTimer) {
+                    clearTimeout(this.renderTimer);
+                    this.renderTimer = null;
+                }
+
+                if (!timeout) { // Render right away
+                    this.renderLayer();
+                } else { // Schedule
+                    var self = this;
+                    this.renderTimer = setTimeout(function() {
+                        self.renderLayer();
+                        self.renderTimer = null;
+                    }, timeout);
+                }
+            },
+
+            appendText: function TextLayerBuilder_appendText(geom, styles) {
+                var style = styles[geom.fontName];
+                var textDiv = document.createElement('div');
+                this.textDivs.push(textDiv);
+                if (isAllWhitespace(geom.str)) {
+                    textDiv.dataset.isWhitespace = true;
+                    return;
+                }
+                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
+                var angle = Math.atan2(tx[1], tx[0]);
+                if (style.vertical) {
+                    angle += Math.PI / 2;
+                }
+                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+                var fontAscent = fontHeight;
+                if (style.ascent) {
+                    fontAscent = style.ascent * fontAscent;
+                } else if (style.descent) {
+                    fontAscent = (1 + style.descent) * fontAscent;
+                }
+
+                var left;
+                var top;
+                if (angle === 0) {
+                    left = tx[4];
+                    top = tx[5] - fontAscent;
+                } else {
+                    left = tx[4] + (fontAscent * Math.sin(angle));
+                    top = tx[5] - (fontAscent * Math.cos(angle));
+                }
+                textDiv.style.left = left + 'px';
+                textDiv.style.top = top + 'px';
+                textDiv.style.fontSize = fontHeight + 'px';
+                textDiv.style.fontFamily = style.fontFamily;
+
+                textDiv.textContent = geom.str;
+                // |fontName| is only used by the Font Inspector. This test will succeed
+                // when e.g. the Font Inspector is off but the Stepper is on, but it's
+                // not worth the effort to do a more accurate test.
+                if (PDFJS.pdfBug) {
+                    textDiv.dataset.fontName = geom.fontName;
+                }
+                // Storing into dataset will convert number into string.
+                if (angle !== 0) {
+                    textDiv.dataset.angle = angle * (180 / Math.PI);
+                }
+                // We don't bother scaling single-char text divs, because it has very
+                // little effect on text highlighting. This makes scrolling on docs with
+                // lots of such divs a lot faster.
+                if (textDiv.textContent.length > 1) {
+                    if (style.vertical) {
+                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
+                    } else {
+                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
+                    }
+                }
+            },
+
+            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+                this.textContent = textContent;
+
+                var textItems = textContent.items;
+                for (var i = 0, len = textItems.length; i < len; i++) {
+                    this.appendText(textItems[i], textContent.styles);
+                }
+                this.divContentDone = true;
+            },
+
+            convertMatches: function TextLayerBuilder_convertMatches(matches) {
+                var i = 0;
+                var iIndex = 0;
+                var bidiTexts = this.textContent.items;
+                var end = bidiTexts.length - 1;
+                var queryLen = (this.findController === null ?
+                    0 : this.findController.state.query.length);
+                var ret = [];
+
+                for (var m = 0, len = matches.length; m < len; m++) {
+                    // Calculate the start position.
+                    var matchIdx = matches[m];
+
+                    // Loop over the divIdxs.
+                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    if (i === bidiTexts.length) {
+                        console.error('Could not find a matching mapping');
+                    }
+
+                    var match = {
+                        begin: {
+                            divIdx: i,
+                            offset: matchIdx - iIndex
+                        }
+                    };
+
+                    // Calculate the end position.
+                    matchIdx += queryLen;
+
+                    // Somewhat the same array as above, but use > instead of >= to get
+                    // the end position right.
+                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    match.end = {
+                        divIdx: i,
+                        offset: matchIdx - iIndex
+                    };
+                    ret.push(match);
+                }
+
+                return ret;
+            },
+
+            renderMatches: function TextLayerBuilder_renderMatches(matches) {
+                // Early exit if there is nothing to render.
+                if (matches.length === 0) {
+                    return;
+                }
+
+                var bidiTexts = this.textContent.items;
+                var textDivs = this.textDivs;
+                var prevEnd = null;
+                var pageIdx = this.pageIdx;
+                var isSelectedPage = (this.findController === null ?
+                    false : (pageIdx === this.findController.selected.pageIdx));
+                var selectedMatchIdx = (this.findController === null ?
+                    -1 : this.findController.selected.matchIdx);
+                var highlightAll = (this.findController === null ?
+                    false : this.findController.state.highlightAll);
+                var infinity = {
+                    divIdx: -1,
+                    offset: undefined
+                };
+
+                function beginText(begin, className) {
+                    var divIdx = begin.divIdx;
+                    textDivs[divIdx].textContent = '';
+                    appendTextToDiv(divIdx, 0, begin.offset, className);
+                }
+
+                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+                    var div = textDivs[divIdx];
+                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+                    var node = document.createTextNode(content);
+                    if (className) {
+                        var span = document.createElement('span');
+                        span.className = className;
+                        span.appendChild(node);
+                        div.appendChild(span);
+                        return;
+                    }
+                    div.appendChild(node);
+                }
+
+                var i0 = selectedMatchIdx, i1 = i0 + 1;
+                if (highlightAll) {
+                    i0 = 0;
+                    i1 = matches.length;
+                } else if (!isSelectedPage) {
+                    // Not highlighting all and this isn't the selected page, so do nothing.
+                    return;
+                }
+
+                for (var i = i0; i < i1; i++) {
+                    var match = matches[i];
+                    var begin = match.begin;
+                    var end = match.end;
+                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
+                    var highlightSuffix = (isSelected ? ' selected' : '');
+
+                    if (this.findController) {
+                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
+                            begin.divIdx, end.divIdx);
+                    }
+
+                    // Match inside new div.
+                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+                        // If there was a previous div, then add the text at the end.
+                        if (prevEnd !== null) {
+                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                        }
+                        // Clear the divs and set the content until the starting point.
+                        beginText(begin);
+                    } else {
+                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+                    }
+
+                    if (begin.divIdx === end.divIdx) {
+                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
+                            'highlight' + highlightSuffix);
+                    } else {
+                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
+                            'highlight begin' + highlightSuffix);
+                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+                        }
+                        beginText(end, 'highlight end' + highlightSuffix);
+                    }
+                    prevEnd = end;
+                }
+
+                if (prevEnd) {
+                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                }
+            },
+
+            updateMatches: function TextLayerBuilder_updateMatches() {
+                // Only show matches when all rendering is done.
+                if (!this.renderingDone) {
+                    return;
+                }
+
+                // Clear all matches.
+                var matches = this.matches;
+                var textDivs = this.textDivs;
+                var bidiTexts = this.textContent.items;
+                var clearedUntilDivIdx = -1;
+
+                // Clear all current matches.
+                for (var i = 0, len = matches.length; i < len; i++) {
+                    var match = matches[i];
+                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+                        var div = textDivs[n];
+                        div.textContent = bidiTexts[n].str;
+                        div.className = '';
+                    }
+                    clearedUntilDivIdx = match.end.divIdx + 1;
+                }
+
+                if (this.findController === null || !this.findController.active) {
+                    return;
+                }
+
+                // Convert the matches on the page controller into the match format
+                // used for the textLayer.
+                this.matches = this.convertMatches(this.findController === null ?
+                    [] : (this.findController.pageMatches[this.pageIdx] || []));
+                this.renderMatches(this.matches);
+            }
+        };
+
+        return (TextLayerBuilder);
+    }]);
 
 'use strict';
 /**
@@ -10310,1091 +11396,5 @@ itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
             self.monitor = $interval(self.update, rate);
             self.group = [function() { return self.dimensions[0]; }, function() { return self.dimensions[1]; }];
             self.cancel = function() { $interval.cancel(self.monitor); };
-        };
-    }]);
-
-'use strict';
-/**
- * TODO CustomStyle desc
- */
-itPdfViewer.factory('CustomStyle', [function () {
-        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
-        //              animate-css-transforms-firefox-webkit.html
-        // in some versions of IE9 it is critical that ms appear in this list
-        // before Moz
-        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
-        var _cache = {};
-
-        function CustomStyle() {}
-
-        CustomStyle.getProp = function get(propName, element) {
-            // check cache only when no element is given
-            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
-                return _cache[propName];
-            }
-
-            element = element || document.documentElement;
-            var style = element.style, prefixed, uPropName;
-
-            // test standard property first
-            if (typeof style[propName] === 'string') {
-                return (_cache[propName] = propName);
-            }
-
-            // capitalize
-            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-
-            // test vendor specific properties
-            for (var i = 0, l = prefixes.length; i < l; i++) {
-                prefixed = prefixes[i] + uPropName;
-                if (typeof style[prefixed] === 'string') {
-                    return (_cache[propName] = prefixed);
-                }
-            }
-
-            //if all fails then set to undefined
-            return (_cache[propName] = 'undefined');
-        };
-
-        CustomStyle.setProp = function set(propName, element, str) {
-            var prop = this.getProp(propName);
-            if (prop !== 'undefined') {
-                element.style[prop] = str;
-            }
-        };
-
-        return (CustomStyle);
-    }]);
-
-'use strict';
-/**
- * TODO itPdfViewer desc
- */
-itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
-    var linker = function (scope, element, attrs) {
-        scope.onPassword = function (reason) {
-            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
-        };
-
-        MultiPagesAddEventWatcher(scope);
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    //'<pdf-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></pdf-viewer>' +
-                    '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO Pdf implementation desc
- */
-itPdfViewer
-    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function PDFViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        PDFViewerAPI.prototype.findNext = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
-            if(nextHighlightID >= this.viewer.searchResults.length) {
-                nextHighlightID = 0;
-            }
-
-            this.viewer.highlightSearchResult(nextHighlightID);
-        };
-
-        PDFViewerAPI.prototype.findPrev = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
-            if(prevHighlightID < 0) {
-                prevHighlightID = this.viewer.searchResults.length - 1;
-            }
-
-            this.viewer.highlightSearchResult(prevHighlightID);
-        };
-
-        return (PDFViewerAPI);
-    }])
-
-    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
-
-        function PDFPage(pdfPage) {
-            this.base = MultiPagesPage;
-            this.base(pdfPage.pageIndex);
-
-            this.pdfPage = pdfPage;
-            this.textContent = null;
-            this.renderTask = null;
-        }
-
-        PDFPage.prototype = new MultiPagesPage;
-
-        PDFPage.prototype.clear = function () {
-            if(this.renderTask !== null) {
-                this.renderTask.cancel();
-            }
-            MultiPagesPage.prototype.clear.call(this);
-            this.renderTask = null;
-        };
-        PDFPage.prototype.getViewport = function (scale , rotation) {
-            return this.pdfPage.getViewport(scale, rotation, 0, 0);
-        };
-        PDFPage.prototype.transform = function () {
-            MultiPagesPage.prototype.transform.call(this);
-
-            this.textLayer = angular.element("<div class='text-layer'></div>");
-            this.textLayer.css("width", this.viewport.width + "px");
-            this.textLayer.css("height", this.viewport.height + "px");
-        };
-        PDFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(this.renderTask === null) {
-                    if(callback) {
-                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                    }
-                } else {
-                    this.renderTask.then(function () {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                        }
-                    }, function (reason) {
-                        $log.debug('stopped ' + reason);
-                    });
-                }
-
-                return;
-            }
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-                if(self.textContent) {
-                    self.container.append(self.textLayer);
-                }
-            }else{
-
-                self.container.append(self.canvas);
-
-                this.renderTask = this.pdfPage.render({
-                    canvasContext: this.canvas[0].getContext('2d'),
-                    viewport: this.viewport
-                });
-
-
-
-                this.renderTask.then(function () {
-
-                    self.rendered = true;
-                    self.renderTask = null;
-                    self.canvasRendered = true;
-                    //self.container.append(self.canvas);
-
-                    if(self.textContent) {
-                        // Render the text layer...
-                        var textLayerBuilder = new TextLayerBuilder({
-                            textLayerDiv: self.textLayer[0],
-                            pageIndex: self.id,
-                            viewport: self.viewport
-                        });
-
-                        textLayerBuilder.setTextContent(self.textContent);
-                        textLayerBuilder.renderLayer();
-                        self.container.append(self.textLayer);
-                    }
-
-                    if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                }, function (message) {
-                    self.rendered = false;
-                    self.renderTask = null;
-
-                    if(message === "cancelled") {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
-                        }
-                    } else {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
-                        }
-                    }
-                });
-            }
-        };
-
-        return (PDFPage);
-    }])
-
-    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
-        function PDFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new PDFViewerAPI(this), element);
-
-            this.pdf = null;
-            // Hooks for the client...
-            this.passwordCallback = null;
-        }
-
-        PDFViewer.prototype = new MultiPagesViewer;
-
-        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if (obj !== undefined && obj !== null && obj !== '') {
-                this.pageMargin = pageMargin;
-                this.initialScale = initialScale;
-                this.hasTextLayer = renderTextLayer;
-                var isFile = typeof obj != typeof "";
-
-                if(this.getDocumentTask != undefined){
-                    var self = this;
-                    this.getDocumentTask.destroy().then(function (){
-                        if(isFile){
-                            self.setFile(obj);
-                        }else {
-                            self.setUrl(obj);
-                        }
-                    });
-                } else {
-                    if(isFile){
-                        this.setFile(obj);
-                    }else {
-                        this.setUrl(obj);
-                    }
-                }
-            }
-        };
-        PDFViewer.prototype.setUrl = function (url) {
-            var self = this;
-            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-            this.getDocumentTask.then(function (pdf) {
-                self.pdf = pdf;
-
-                self.getAllPages( function (pageList, pagesRefMap) {
-                    self.pages = pageList;
-                    self.pagesRefMap = pagesRefMap;
-
-                    // Append all page containers to the $element...
-                    for (var iPage = 0; iPage < pageList.length; ++iPage) {
-                        self.element.append(pageList[iPage].container);
-                    }
-
-                    self.setContainerSize(self.initialScale);
-                });
-            }, function (message) {
-                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-            });
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
-                    self.pdf = pdf;
-
-                    self.getAllPages(function (pageList, pagesRefMap) {
-                        self.pages = pageList;
-                        self.pagesRefMap = pagesRefMap;
-
-                        // Append all page containers to the $element...
-                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                            self.element.append(pageList[iPage].container);
-                        }
-
-                        self.setContainerSize(self.initialScale);
-                    });
-                }, function (message) {
-                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                });
-            };
-
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
-
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
-                    }
-
-                    self.onDataDownloaded("failed", 0, 0, message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        };
-        PDFViewer.prototype.getAllPages = function (callback) {
-            var pageList = [],
-                pagesRefMap = {},
-                numPages = this.pdf.numPages,
-                remainingPages = numPages;
-
-            if(this.hasTextLayer) {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        // Page reference map. Required by the annotation layer.
-                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                        pagesRefMap[refStr] = page.pageIndex + 1;
-
-                        var pdfPage = new PDFPage(page);
-                        pageList[page.pageIndex] = pdfPage;
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-
-                        page.getTextContent().then(function (textContent) {
-                            pdfPage.textContent = textContent;
-                        });
-                    });
-                }
-            } else {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page);
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            }
-        };
-        PDFViewer.prototype.onDestroy = function () {
-            if(this.getDocumentTask){
-                this.getDocumentTask.destroy();
-                this.getDocumentTask = null;
-            }
-        };
-
-        return (PDFViewer);
-    }])
-
-    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope: {
-                src: "@",
-                file: "=",
-                api: "=",
-                initialScale: "@",
-                renderTextLayer: "@",
-                passwordCallback: "&"
-            },
-            controller: ['$scope', '$element', function ($scope, $element) {
-
-                $scope.getPassword = function (passwordFunc, reason) {
-                    if(this.passwordCallback) {
-                        var self = this;
-                        this.$apply(function () {
-                            var password = self.passwordCallback({reason: reason});
-
-                            if(password !== "" && password !== undefined && password !== null) {
-                                passwordFunc(password);
-                            } else {
-                                $log.log("A password is required to read this document.");
-                            }
-                        });
-                    } else {
-                        $log.log("A password is required to read this document.");
-                    }
-                };
-
-                var viewer = new PDFViewer($element);
-                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
-
-                $scope.api = viewer.getAPI();
-
-                $scope.shouldRenderTextLayer = function () {
-                    if(this.renderTextLayer === "" || this.renderTextLayer === undefined || this.renderTextLayer === null || this.renderTextLayer.toLowerCase() === "false") {
-                        return false;
-                    }
-
-                    return true;
-                };
-
-                $scope.onSrcChanged = function () {
-                    viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
-                };
-
-                viewer.hookScope($scope);
-            }],
-            link: function (scope, element, attrs) {
-                attrs.$observe('src', function (src) {
-                    scope.onSrcChanged();
-                });
-
-                scope.$watch("file", function (file) {
-                    scope.onFileChanged();
-                });
-            }
-        };
-    }]);
-
-'use strict';
-/**
- * TODO TextLayerBuilder desc
- */
-itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
-        var MAX_TEXT_DIVS_TO_RENDER = 100000;
-
-        var NonWhitespaceRegexp = /\S/;
-
-        function isAllWhitespace(str) {
-            return !NonWhitespaceRegexp.test(str);
-        }
-
-        function TextLayerBuilder(options) {
-            this.textLayerDiv = options.textLayerDiv;
-            this.renderingDone = false;
-            this.divContentDone = false;
-            this.pageIdx = options.pageIndex;
-            this.pageNumber = this.pageIdx + 1;
-            this.matches = [];
-            this.viewport = options.viewport;
-            this.textDivs = [];
-            this.findController = options.findController || null;
-        }
-
-        TextLayerBuilder.prototype = {
-            _finishRendering: function TextLayerBuilder_finishRendering() {
-                this.renderingDone = true;
-
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('textlayerrendered', true, true, {
-                    pageNumber: this.pageNumber
-                });
-                this.textLayerDiv.dispatchEvent(event);
-            },
-
-            renderLayer: function TextLayerBuilder_renderLayer() {
-                var textLayerFrag = document.createDocumentFragment();
-                var textDivs = this.textDivs;
-                var textDivsLength = textDivs.length;
-                var canvas = document.createElement('canvas');
-                var ctx = canvas.getContext('2d');
-
-                // No point in rendering many divs as it would make the browser
-                // unusable even after the divs are rendered.
-                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
-                    this._finishRendering();
-                    return;
-                }
-
-                var lastFontSize;
-                var lastFontFamily;
-                for (var i = 0; i < textDivsLength; i++) {
-                    var textDiv = textDivs[i];
-                    if (textDiv.dataset.isWhitespace !== undefined) {
-                        continue;
-                    }
-
-                    var fontSize = textDiv.style.fontSize;
-                    var fontFamily = textDiv.style.fontFamily;
-
-                    // Only build font string and set to context if different from last.
-                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
-                        ctx.font = fontSize + ' ' + fontFamily;
-                        lastFontSize = fontSize;
-                        lastFontFamily = fontFamily;
-                    }
-
-                    var width = ctx.measureText(textDiv.textContent).width;
-                    if (width > 0) {
-                        textLayerFrag.appendChild(textDiv);
-                        var transform;
-                        if (textDiv.dataset.canvasWidth !== undefined) {
-                            // Dataset values come of type string.
-                            var textScale = textDiv.dataset.canvasWidth / width;
-                            transform = 'scaleX(' + textScale + ')';
-                        } else {
-                            transform = '';
-                        }
-                        var rotation = textDiv.dataset.angle;
-                        if (rotation) {
-                            transform = 'rotate(' + rotation + 'deg) ' + transform;
-                        }
-                        if (transform) {
-                            CustomStyle.setProp('transform' , textDiv, transform);
-                        }
-                    }
-                }
-
-                this.textLayerDiv.appendChild(textLayerFrag);
-                this._finishRendering();
-                this.updateMatches();
-            },
-
-            /**
-             * Renders the text layer.
-             * @param {number} timeout (optional) if specified, the rendering waits
-             *   for specified amount of ms.
-             */
-            render: function TextLayerBuilder_render(timeout) {
-                if (!this.divContentDone || this.renderingDone) {
-                    return;
-                }
-
-                if (this.renderTimer) {
-                    clearTimeout(this.renderTimer);
-                    this.renderTimer = null;
-                }
-
-                if (!timeout) { // Render right away
-                    this.renderLayer();
-                } else { // Schedule
-                    var self = this;
-                    this.renderTimer = setTimeout(function() {
-                        self.renderLayer();
-                        self.renderTimer = null;
-                    }, timeout);
-                }
-            },
-
-            appendText: function TextLayerBuilder_appendText(geom, styles) {
-                var style = styles[geom.fontName];
-                var textDiv = document.createElement('div');
-                this.textDivs.push(textDiv);
-                if (isAllWhitespace(geom.str)) {
-                    textDiv.dataset.isWhitespace = true;
-                    return;
-                }
-                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
-                var angle = Math.atan2(tx[1], tx[0]);
-                if (style.vertical) {
-                    angle += Math.PI / 2;
-                }
-                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-                var fontAscent = fontHeight;
-                if (style.ascent) {
-                    fontAscent = style.ascent * fontAscent;
-                } else if (style.descent) {
-                    fontAscent = (1 + style.descent) * fontAscent;
-                }
-
-                var left;
-                var top;
-                if (angle === 0) {
-                    left = tx[4];
-                    top = tx[5] - fontAscent;
-                } else {
-                    left = tx[4] + (fontAscent * Math.sin(angle));
-                    top = tx[5] - (fontAscent * Math.cos(angle));
-                }
-                textDiv.style.left = left + 'px';
-                textDiv.style.top = top + 'px';
-                textDiv.style.fontSize = fontHeight + 'px';
-                textDiv.style.fontFamily = style.fontFamily;
-
-                textDiv.textContent = geom.str;
-                // |fontName| is only used by the Font Inspector. This test will succeed
-                // when e.g. the Font Inspector is off but the Stepper is on, but it's
-                // not worth the effort to do a more accurate test.
-                if (PDFJS.pdfBug) {
-                    textDiv.dataset.fontName = geom.fontName;
-                }
-                // Storing into dataset will convert number into string.
-                if (angle !== 0) {
-                    textDiv.dataset.angle = angle * (180 / Math.PI);
-                }
-                // We don't bother scaling single-char text divs, because it has very
-                // little effect on text highlighting. This makes scrolling on docs with
-                // lots of such divs a lot faster.
-                if (textDiv.textContent.length > 1) {
-                    if (style.vertical) {
-                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
-                    } else {
-                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
-                    }
-                }
-            },
-
-            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
-                this.textContent = textContent;
-
-                var textItems = textContent.items;
-                for (var i = 0, len = textItems.length; i < len; i++) {
-                    this.appendText(textItems[i], textContent.styles);
-                }
-                this.divContentDone = true;
-            },
-
-            convertMatches: function TextLayerBuilder_convertMatches(matches) {
-                var i = 0;
-                var iIndex = 0;
-                var bidiTexts = this.textContent.items;
-                var end = bidiTexts.length - 1;
-                var queryLen = (this.findController === null ?
-                    0 : this.findController.state.query.length);
-                var ret = [];
-
-                for (var m = 0, len = matches.length; m < len; m++) {
-                    // Calculate the start position.
-                    var matchIdx = matches[m];
-
-                    // Loop over the divIdxs.
-                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    if (i === bidiTexts.length) {
-                        console.error('Could not find a matching mapping');
-                    }
-
-                    var match = {
-                        begin: {
-                            divIdx: i,
-                            offset: matchIdx - iIndex
-                        }
-                    };
-
-                    // Calculate the end position.
-                    matchIdx += queryLen;
-
-                    // Somewhat the same array as above, but use > instead of >= to get
-                    // the end position right.
-                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    match.end = {
-                        divIdx: i,
-                        offset: matchIdx - iIndex
-                    };
-                    ret.push(match);
-                }
-
-                return ret;
-            },
-
-            renderMatches: function TextLayerBuilder_renderMatches(matches) {
-                // Early exit if there is nothing to render.
-                if (matches.length === 0) {
-                    return;
-                }
-
-                var bidiTexts = this.textContent.items;
-                var textDivs = this.textDivs;
-                var prevEnd = null;
-                var pageIdx = this.pageIdx;
-                var isSelectedPage = (this.findController === null ?
-                    false : (pageIdx === this.findController.selected.pageIdx));
-                var selectedMatchIdx = (this.findController === null ?
-                    -1 : this.findController.selected.matchIdx);
-                var highlightAll = (this.findController === null ?
-                    false : this.findController.state.highlightAll);
-                var infinity = {
-                    divIdx: -1,
-                    offset: undefined
-                };
-
-                function beginText(begin, className) {
-                    var divIdx = begin.divIdx;
-                    textDivs[divIdx].textContent = '';
-                    appendTextToDiv(divIdx, 0, begin.offset, className);
-                }
-
-                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
-                    var div = textDivs[divIdx];
-                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
-                    var node = document.createTextNode(content);
-                    if (className) {
-                        var span = document.createElement('span');
-                        span.className = className;
-                        span.appendChild(node);
-                        div.appendChild(span);
-                        return;
-                    }
-                    div.appendChild(node);
-                }
-
-                var i0 = selectedMatchIdx, i1 = i0 + 1;
-                if (highlightAll) {
-                    i0 = 0;
-                    i1 = matches.length;
-                } else if (!isSelectedPage) {
-                    // Not highlighting all and this isn't the selected page, so do nothing.
-                    return;
-                }
-
-                for (var i = i0; i < i1; i++) {
-                    var match = matches[i];
-                    var begin = match.begin;
-                    var end = match.end;
-                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
-                    var highlightSuffix = (isSelected ? ' selected' : '');
-
-                    if (this.findController) {
-                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                            begin.divIdx, end.divIdx);
-                    }
-
-                    // Match inside new div.
-                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
-                        // If there was a previous div, then add the text at the end.
-                        if (prevEnd !== null) {
-                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                        }
-                        // Clear the divs and set the content until the starting point.
-                        beginText(begin);
-                    } else {
-                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
-                    }
-
-                    if (begin.divIdx === end.divIdx) {
-                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
-                            'highlight' + highlightSuffix);
-                    } else {
-                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
-                            'highlight begin' + highlightSuffix);
-                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
-                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
-                        }
-                        beginText(end, 'highlight end' + highlightSuffix);
-                    }
-                    prevEnd = end;
-                }
-
-                if (prevEnd) {
-                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                }
-            },
-
-            updateMatches: function TextLayerBuilder_updateMatches() {
-                // Only show matches when all rendering is done.
-                if (!this.renderingDone) {
-                    return;
-                }
-
-                // Clear all matches.
-                var matches = this.matches;
-                var textDivs = this.textDivs;
-                var bidiTexts = this.textContent.items;
-                var clearedUntilDivIdx = -1;
-
-                // Clear all current matches.
-                for (var i = 0, len = matches.length; i < len; i++) {
-                    var match = matches[i];
-                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
-                        var div = textDivs[n];
-                        div.textContent = bidiTexts[n].str;
-                        div.className = '';
-                    }
-                    clearedUntilDivIdx = match.end.divIdx + 1;
-                }
-
-                if (this.findController === null || !this.findController.active) {
-                    return;
-                }
-
-                // Convert the matches on the page controller into the match format
-                // used for the textLayer.
-                this.matches = this.convertMatches(this.findController === null ?
-                    [] : (this.findController.pageMatches[this.pageIdx] || []));
-                this.renderMatches(this.matches);
-            }
-        };
-
-        return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itTiffViewer desc
- */
-itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
-    var linker = function(scope, element, attrs) {
-        MultiPagesAddEventWatcher(scope);
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    //'<tiff-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></tiff-viewer>' +
-                    '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
-        link: linker
-
-    };
-}]);
-'use strict';
-/**
- * TODO Tiff implementation desc
- */
-itTiffViewer
-    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
-
-        function TIFFPage(pageIndex, getSrc, view) {
-        			this.base = MultiPagesPage;
-        			this.base(pageIndex, view);
-
-        			this.getSrc = getSrc;
-        		}
-
-        TIFFPage.prototype = new MultiPagesPage;
-
-        TIFFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-            }else {
-                self.container.append(self.canvas);
-
-                var ctx = self.canvas[0].getContext('2d');
-                ctx.transform.apply(ctx, self.viewport.transform);
-                var img = new Image;
-                img.onload = function(){
-                    ctx.drawImage(img,0,0); // Or at whatever offset you like
-                    self.canvasRendered = true;
-                    if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                };
-
-                $timeout(function () {
-                    if(self.src == undefined){
-                        self.src =  self.getSrc(self.id - 1);
-                    }
-
-                    img.src = self.src;
-                }, 50);
-
-            }
-        };
-
-        return (TIFFPage);
-    }])
-
-    .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
-        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
-
-        function TIFFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new MultiPagesViewerAPI(this), element);
-
-            this.tiff = null;
-        }
-
-        TIFFViewer.prototype = new MultiPagesViewer;
-
-        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            this.pageMargin = pageMargin;
-            this.initialScale = initialScale;
-            var isFile = typeof obj != typeof "";
-
-            if(isFile){
-                this.setFile(obj);
-            }else {
-                this.setUrl(obj);
-            }
-        };
-        TIFFViewer.prototype.setUrl = function(url) {
-            if (url !== undefined && url !== null && url !== '') {
-                var self = this;
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', url);
-                xhr.responseType = 'arraybuffer';
-                xhr.onprogress =  angular.bind(this, self.downloadProgress);
-                xhr.onload = function (e) {
-                    self.loadTiff(xhr.response);
-                };
-                xhr.send();
-            }
-        };
-        TIFFViewer.prototype.setFile = function(file) {
-            if (file !== undefined && file !== null) {
-                var self = this;
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    self.loadTiff(e.target.result);
-                };
-
-                reader.onprogress = function (e) {
-                    self.downloadProgress(e);
-                };
-
-                reader.onloadend = function (e) {
-                    var error = e.target.error;
-                    if(error !== null) {
-                        var message = "File API error: ";
-                        switch(e.code) {
-                            case error.ENCODING_ERR:
-                                message += "Encoding error.";
-                                break;
-                            case error.NOT_FOUND_ERR:
-                                message += "File not found.";
-                                break;
-                            case error.NOT_READABLE_ERR:
-                                message += "File could not be read.";
-                                break;
-                            case error.SECURITY_ERR:
-                                message += "Security issue with file.";
-                                break;
-                            default:
-                                message += "Unknown error.";
-                                break;
-                        }
-
-                        self.onDataDownloaded("failed", 0, 0, message);
-                    }
-                };
-
-                reader.readAsArrayBuffer(file);
-            }
-        };
-        TIFFViewer.prototype.loadTiff = function(arrayBuffer){
-            var self = this;
-            self.onDestroy();
-            self.tiff = new Tiff({buffer: arrayBuffer});
-            self.getAllPages(function(pageList) {
-                self.pages = pageList;
-
-                self.setContainerSize(self.initialScale);
-            });
-        };
-        TIFFViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.tiff.countDirectory(),
-                remainingPages = numPages;
-            var self = this;
-            function _getUrl(index) {
-                self.tiff.setDirectory(index);
-                return self.tiff.toDataURL();
-            };
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                this.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
-                pageList[iPage] = page;
-
-                this.element.append(page.container);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        TIFFViewer.prototype.onDestroy = function () {
-            if(self.tiff != null){
-                self.tiff.close();
-                self.tiff = null;
-            }
-        };
-
-        return (TIFFViewer);
-    }])
-
-    .directive("tiffViewer", ['$log' , 'TIFFViewer', function($log, TIFFViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope:
-            {
-                src: "@",
-                file: "=",
-                api: "=",
-                initialScale: "@"
-
-            },
-            controller: ['$scope', '$element', function($scope, $element) {
-
-                var viewer = new TIFFViewer($element);
-
-                $scope.api = viewer.getAPI();
-
-                $scope.onSrcChanged = function() {
-                    viewer.open(this.src, this.initialScale, pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
-                };
-
-                viewer.hookScope($scope);
-            }],
-            link: function(scope, element, attrs) {
-                attrs.$observe('src', function(src) {
-                    scope.onSrcChanged();
-                });
-
-                scope.$watch("file", function (file) {
-                    scope.onFileChanged();
-                });
-            }
         };
     }]);
