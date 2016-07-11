@@ -27,12 +27,28 @@
  <td>Callback to be notify when the property api is available.</td>
 </tr>
 <tr>
+ <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
+ <td>Callback to be notify when template not found for the specify extension.</td>
+</tr>
+<tr>
+ <td><code>options.orientation = &#39;vertical&#39; | &#39;horizontal&#39;</code></td>
+ <td>Set orientation of the viewer.</td>
+</tr>
+<tr>
  <td><code>options.showProgressbar = true | false</code></td>
  <td>Hide | Show progress bar.</td>
 </tr>
 <tr>
  <td><code>options.showToolbar  = true | false</code></td>
  <td>Hide | Show tool bar.</td>
+</tr>
+<tr>
+ <td><code>options.showThumbnail  = true | false</code></td>
+ <td>Hide | Show thumbnail.</td>
+</tr>
+<tr>
+ <td><code>options.showSizeMenu  = true | false</code></td>
+ <td>Hide | Show size menu.</td>
 </tr>
 <tr>
  <td><code>options.initialScale  = &#39;20 - 500%&#39; | &#39;fit_height&#39; | &#39;fit_page&#39; | &#39;fit_width&#39;</code></td>
@@ -43,7 +59,7 @@
  <td>only used for pdf, Enable | Disable render of html text layer.</td>
 </tr>
 <tr>
- <td><code>options.api</code></td>
+ <td><code>options.getApi()</code></td>
  <td>Api of media viewer.</td>
 </tr>
 <tr>
@@ -107,16 +123,43 @@
  <td>Method to rotate to the left (per -90°) the current page.</td>
 </tr>
 <tr>
+ <td><code>options.api.onError = function (operation, message) { }</code></td>
+ <td>Callback to be notify on error.</td>
+</tr>
+<tr>
 <tr>
  <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
  <td>Callback to be notify when click on a page.</td>
+</tr>
+<tr>
+ <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + &quot; &quot; + args.rotation); }</code></td>
+ <td>Callback to be notify on page rotation.</td>
 </tr>
  <td><code>options.api.downloadProgress</code></td>
  <td>% of progress.</td>
 </tr>
 </table>
 
-<pre><code class="lang-html">   &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
+<pre><code class="lang-html">  &lt;style&gt;
+        //override style selection
+        .multipage-viewer .selected {
+           border-style: solid;
+           border-width: 1px;
+           border-color: red;
+        }
+
+        .thumbnail-viewer .selected {
+           border-style: solid;
+           border-width: 1px;
+           border-color: red;
+        }
+
+        //override thumbnail num-page
+        .thumbnail-viewer .num-page {
+            text-align: center;
+        }
+     &lt;/style&gt;
+  &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
 </code></pre>
 </div></div>
 <h2 id="usage">Usage</h2>
