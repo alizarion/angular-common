@@ -28,10 +28,13 @@ IteSoft
                 if(!sideMenuHeader[0]){
                     scope.showmenu = true;
                 }
+
+                scope.menuOpenStyle = { 'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px' };
+                scope.menuCloseStyle = { 'padding-left': '0px' };
             },
             template :
-                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+                '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
         }
     });
