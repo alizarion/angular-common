@@ -38,54 +38,6 @@ var IteSoft = angular.module('itesoft', [
     'ngWebSocket'
 ]);
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
 'use strict';
 
 /**
@@ -140,6 +92,189 @@ IteSoft.directive('itCircularBtn',
             }
         }]
 );
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
 
 'use strict';
 /**
@@ -1012,141 +1147,242 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
+"use strict";
+
 /**
  * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
+ * @name itesoft.directive:itBusyIndicator
  * @module itesoft
  * @restrict EA
  * @since 1.0
  * @description
- * print the encapsuled content into full screen modal popup. 42
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
  *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
  * @example
- <example module="itesoft">
-     <file name="index.html">
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
 
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
 
  </example>
- */
+ *
+ **/
+
 IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
 
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
 
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
                     }
-                }
-                return highest_index;
+                });
+
             }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
+        }
+    }]
+);
 "use strict";
 /**
  * @ngdoc directive
@@ -2329,6 +2565,398 @@ IteSoft
 
     });
 'use strict';
+/**
+ * TODO itInclude desc
+ */
+IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ *
+ * @description
+ * <table class="table">
+ *  <tr>
+ *   <td><code>src</code></td>
+ *   <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>file</code></td>
+ *   <td>stream passed to the media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>type</code></td>
+ *   <td>to force type of document if the media viewer can't guess the type.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options = {}</code></td>
+ *   <td>Object passed to the media viewer to apply options.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.onApiLoaded = function(api) { }</code></td>
+ *   <td>Callback to be notify when the property api is available.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
+ *   <td>Callback to be notify when template not found for the specify extension.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
+ *   <td>Set orientation of the viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showProgressbar = true | false</code></td>
+ *   <td>Hide | Show progress bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showToolbar  = true | false</code></td>
+ *   <td>Hide | Show tool bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showThumbnail  = true | false</code></td>
+ *   <td>Hide | Show thumbnail.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showSizeMenu  = true | false</code></td>
+ *   <td>Hide | Show size menu.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
+ *   <td>Set initial scale of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.renderTextLayer = true | false</code></td>
+ *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.getApi()</code></td>
+ *   <td>Api of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getZoomLevel()</code></td>
+ *   <td>Method to get the current zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomTo(zoomLevel)</code></td>
+ *   <td>Method to zoom to the zoom level parameter.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomIn()</code></td>
+ *   <td>Method to zoom to the next zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomOut()</code></td>
+ *   <td>Method to zoom to the prev zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getZoomLevels()</code></td>
+ *   <td>Method to get the list of zoom level items.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
+ *   <td>Callback to be notify when the property zoom levels change.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getCurrentPage()</code></td>
+ *   <td>Method to get the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPage(pageIndex)</code></td>
+ *   <td>Method to go to the page index if possible.</td>
+ *  </tr>
+ *   <tr>
+ *   <td><code>options.api.goToNextPage()</code></td>
+ *   <td>Method to go to the next page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPrevPage()</code></td>
+ *   <td>Method to go to the prev page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getNumPages()</code></td>
+ *   <td>Method to get the number of pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesRight()</code></td>
+ *   <td>Method to rotate to the right (90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesLeft()</code></td>
+ *   <td>Method to rotate to the left (-90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageRight()</code></td>
+ *   <td>Method to rotate to the right (per 90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageLeft()</code></td>
+ *   <td>Method to rotate to the left (per -90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onError = function (operation, message) { }</code></td>
+ *   <td>Callback to be notify on error.</td>
+ *  </tr>
+ *  <tr>
+ *  <tr>
+ *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
+ *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
+ *   <td>Callback to be notify on page rotation.</td>
+ *  </tr>
+ *   <td><code>options.api.downloadProgress</code></td>
+ *   <td>% of progress.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ *    <style>
+         //override style selection
+         .multipage-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         .thumbnail-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         //override thumbnail num-page
+         .thumbnail-viewer .num-page {
+         	text-align: center;
+         }
+      </style>
+ *    <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" class="row">
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js',
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
+                        //PDFJS.imageResourcesPath = pathJs + "/images";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                case 'jpg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    if(scope.options && scope.options.onTemplateNotFound) {
+                        scope.options.onTemplateNotFound(ext);
+                    }
+                    $log.debug('No template found for extension : ' + ext);
+                    scope.template = null;
+                    break;
+            }
+        };
+
+        var _setValue = function(newValue, oldValue) {
+            if(newValue){
+                if(typeof newValue === typeof ""){
+                    scope.ext = _splitLast(newValue, '.').toLowerCase();
+                    _setTemplate(scope.ext, newValue);
+                } else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type.toLowerCase(), newValue);
+                    }else if(newValue.name != undefined) {
+                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
+                        _setTemplate(scope.ext, newValue);
+                    } else {
+                        $log.debug('must specify type when using stream');
+                        scope.template = null;
+                    }
+                }
+            } else if(newValue != oldValue) {
+                scope.template = null;
+            }
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
+    };
+
+    return {
+        scope: {
+            src : '=',
+            file: '=',
+            type: '@',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
+'use strict';
 
 /**
  * @ngdoc directive
@@ -3431,12 +4059,12 @@ IteSoft
                      */
                     $scope.keys = [];
 
-                    const KEY_ENTER = 13;
-                    const KEY_DOWN = 38;
-                    const KEY_UP = 40;
-                    const KEY_BACK = 8;
-                    const KEY_DELETE = 8;
-                    const KEY_ESCAPE = 27;
+                    var KEY_ENTER = 13;
+                    var KEY_DOWN = 38;
+                    var KEY_UP = 40;
+                    var KEY_BACK = 8;
+                    var KEY_DELETE = 8;
+                    var KEY_ESCAPE = 27;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
@@ -4103,633 +4731,44 @@ IteSoft
         }
 }]);
 "use strict";
-
 /**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
+ * You do not talk about FIGHT CLUB!!
+ */
 IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
         return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
         };
     }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
-'use strict';
-/**
- * TODO itInclude desc
- */
-IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
-    var linker = function (scope, element, attrs) {
-        var currentScope;
-        scope.$watch(attrs.itInclude, function (template) {
-            $timeout(function () {
-                if(currentScope){
-                    currentScope.$destroy();
-                }
-                currentScope = scope.$new();
-                element.html( template || '');
-                $compile(element.contents())(currentScope);
-            }, 50);
-        });
-    };
-    return {
-        restrict: 'AE',
-        link: linker
-    };
-}]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMediaViewer
- * @module itesoft
- * @since 1.2
- * @restrict AEC
- *
- * @description
- * <table class="table">
- *  <tr>
- *   <td><code>src</code></td>
- *   <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
- *  </tr>
- *  <tr>
- *   <td><code>file</code></td>
- *   <td>stream passed to the media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>type</code></td>
- *   <td>to force type of document if the media viewer can't guess the type.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options = {}</code></td>
- *   <td>Object passed to the media viewer to apply options.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.onApiLoaded = function(api) { }</code></td>
- *   <td>Callback to be notify when the property api is available.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
- *   <td>Callback to be notify when template not found for the specify extension.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
- *   <td>Set orientation of the viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showProgressbar = true | false</code></td>
- *   <td>Hide | Show progress bar.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showToolbar  = true | false</code></td>
- *   <td>Hide | Show tool bar.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showThumbnail  = true | false</code></td>
- *   <td>Hide | Show thumbnail.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showSizeMenu  = true | false</code></td>
- *   <td>Hide | Show size menu.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
- *   <td>Set initial scale of media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.renderTextLayer = true | false</code></td>
- *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.getApi()</code></td>
- *   <td>Api of media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getZoomLevel()</code></td>
- *   <td>Method to get the current zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomTo(zoomLevel)</code></td>
- *   <td>Method to zoom to the zoom level parameter.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomIn()</code></td>
- *   <td>Method to zoom to the next zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomOut()</code></td>
- *   <td>Method to zoom to the prev zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getZoomLevels()</code></td>
- *   <td>Method to get the list of zoom level items.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
- *   <td>Callback to be notify when the property zoom levels change.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getCurrentPage()</code></td>
- *   <td>Method to get the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.goToPage(pageIndex)</code></td>
- *   <td>Method to go to the page index if possible.</td>
- *  </tr>
- *   <tr>
- *   <td><code>options.api.goToNextPage()</code></td>
- *   <td>Method to go to the next page if possible.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.goToPrevPage()</code></td>
- *   <td>Method to go to the prev page if possible.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getNumPages()</code></td>
- *   <td>Method to get the number of pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePagesRight()</code></td>
- *   <td>Method to rotate to the right (90°) all pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePagesLeft()</code></td>
- *   <td>Method to rotate to the left (-90°) all pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePageRight()</code></td>
- *   <td>Method to rotate to the right (per 90°) the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePageLeft()</code></td>
- *   <td>Method to rotate to the left (per -90°) the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onError = function (operation, message) { }</code></td>
- *   <td>Callback to be notify on error.</td>
- *  </tr>
- *  <tr>
- *  <tr>
- *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
- *   <td>Callback to be notify when click on a page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
- *   <td>Callback to be notify on page rotation.</td>
- *  </tr>
- *   <td><code>options.api.downloadProgress</code></td>
- *   <td>% of progress.</td>
- *  </tr>
- * </table>
- *
- * ```html
- *    <style>
-         //override style selection
-         .multipage-viewer .selected {
-            border-style: solid;
-            border-width: 1px;
-            border-color: red;
-         }
-
-         .thumbnail-viewer .selected {
-            border-style: solid;
-            border-width: 1px;
-            border-color: red;
-         }
-
-         //override thumbnail num-page
-         .thumbnail-viewer .num-page {
-         	text-align: center;
-         }
-      </style>
- *    <it-media-viewer></it-media-viewer>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
-
-    var _splitLast = function (word, character) {
-        if(word != undefined){
-            var words = word.split(character);
-            return words[words.length - 1];
-        }
-        return word;
-    };
-
-    var linker = function (scope, element, attrs) {
-
-        var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
-            switch (ext) {
-                case 'pdf':
-                    scope.pdfSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/pdf.js',
-                    ]).then(function() {
-                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
-                        //PDFJS.imageResourcesPath = pathJs + "/images";
-                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                    });
-                    break;
-                case 'png':
-                case 'jpeg':
-                case 'jpg':
-                    scope.imageSrc = value;
-                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                    break;
-                case 'tif':
-                case 'tiff':
-                    scope.tiffSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/tiff.min.js'
-                    ]).then(function() {
-                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                    });
-                    break;
-                default :
-                    if(scope.options && scope.options.onTemplateNotFound) {
-                        scope.options.onTemplateNotFound(ext);
-                    }
-                    $log.debug('No template found for extension : ' + ext);
-                    scope.template = null;
-                    break;
-            }
-        };
-
-        var _setValue = function(newValue, oldValue) {
-            if(newValue){
-                if(typeof newValue === typeof ""){
-                    scope.ext = _splitLast(newValue, '.').toLowerCase();
-                    _setTemplate(scope.ext, newValue);
-                } else {
-                    if(attrs.type) {
-                        _setTemplate(attrs.type.toLowerCase(), newValue);
-                    }else if(newValue.name != undefined) {
-                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
-                        _setTemplate(scope.ext, newValue);
-                    } else {
-                        $log.debug('must specify type when using stream');
-                        scope.template = null;
-                    }
-                }
-            } else if(newValue != oldValue) {
-                scope.template = null;
-            }
-        };
-
-        scope.$watch("src", _setValue);
-        scope.$watch("file", _setValue);
-    };
-
-    return {
-        scope: {
-            src : '=',
-            file: '=',
-            type: '@',
-            options : '=',
-        },
-        restrict: 'E',
-        template :  '<div it-include="template"></div>',
-        link: linker
-    };
-}]);
-
-
-'use strict';
-/**
- * TODO ScriptService desc
- */
-IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
-    var _scipts = {};
-    var _css = {};
-    var defaultScriptPromise = $q.defer();
-    var defaultScriptsPromise = $q.defer();
-
-    //JS
-    var _loadScripJs = function (js) {
-        if(js){
-            if(_scipts[js] != undefined){
-                return _scipts[js];
-            }else {
-                var deferred = $q.defer();
-                var script = document.createElement('script');
-                _scipts[js] = deferred.promise;
-                script.src = js;
-                script.type = 'text/javascript';
-                script.onload = function () {
-                    deferred.resolve(script);
-                };
-                document.head.appendChild(script);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsJs = function (scriptJs) {
-        if(typeof scriptJs == typeof ""){
-            return _loadScripJs(scriptJs);
-        }else if(typeof scriptJs == typeof []){
-            var promises = [];
-            angular.forEach(scriptJs, function(js){
-                promises.push(_loadScripJs(js));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //CSS
-    var _loadScriptCss = function (css) {
-        if(css){
-            if(_css[css] != undefined){
-                return _css[css];
-            }else {
-                var deferred = $q.defer();
-                var link = document.createElement('link');
-                _css[css] = deferred.promise;
-                link.href = css;
-                link.rel ='stylesheet';
-                link.type = 'text/css';
-                link.onload = function () {
-                    deferred.resolve(link);
-                };
-                document.head.appendChild(link);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsCss = function (scriptCss) {
-        if(typeof scriptCss == typeof ""){
-            return _loadScriptCss(scriptCss);
-        }else if(typeof scriptCss == typeof []){
-            var promises = [];
-            angular.forEach(scriptCss, function(css){
-                promises.push(_loadScriptCss(css));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //Scripts
-    var _loadScripts = function (js, css) {
-        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
-    };
-
-    return {
-        LoadScripts : _loadScripts
-    };
-}]);
-
 "use strict";
 /**
  * @ngdoc directive
@@ -4793,45 +4832,6 @@ IteSoft
                 };
             }
 
-        };
-    }]);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
         };
     }]);
 'use strict';
@@ -5189,8 +5189,6 @@ IteSoft
                     '</div>'+
                 '</div>'+
             '</div>'
-
-
         }
 });
 'use strict';
@@ -7493,6 +7491,55 @@ IteSoft
         }
     });
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 
 'use strict';
 /**
@@ -7720,6 +7767,432 @@ IteSoft.provider('itLanguageChangeHandler', function () {
     }];
 });
 
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itNotifier
+ * @module itesoft
+ * @since 1.1
+ * @requires ngToast
+ * @requires $rootScope
+ * @requires $log
+ *
+ * @description
+ * Simple notifier service, that display toasters.
+ *
+ * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>additionalClasses</code></td>
+ *     <td>''</td>
+ *     <td>Allows to add some classes to the current ngToast</td>
+ * </tr>
+ * <tr>
+ *     <td><code>animation</code></td>
+ *     <td>'fade'</td>
+ *     <td>Adds an openning/ending animation, for example 'fade'</td>
+ * </tr>
+ * <tr>
+ *     <td><code>className</code></td>
+ *     <td>"success"</td>
+ *     <td>The className of the toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>content</code></td>
+ *     <td>''</td>
+ *     <td>Content of the toast message as String (HTML compliant)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>combineDuplications</code></td>
+ *     <td>false</td>
+ *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
+ * </tr>
+ * <tr>
+ *     <td><code>compileContent</code></td>
+ *     <td>false</td>
+ *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnTimeout</code></td>
+ *     <td>true</td>
+ *     <td>Automatically remove toast message after specific time</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButton:</code></td>
+ *     <td>true</td>
+ *     <td>Adds close button on toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButtonHtml</code></td>
+ *     <td>"&#38;times;"</td>
+ *     <td>Html of close button</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnClick</code></td>
+ *     <td>false</td>
+ *     <td>Allows to remove toast message with a click</td>
+ * </tr>
+ * <tr>
+ *     <td><code>horizontalPosition</code></td>
+ *     <td>"right"</td>
+ *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
+ * </tr>
+ * <tr>
+ *     <td><code>maxNumber</code></td>
+ *     <td>0</td>
+ *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>timeout</code></td>
+ *     <td>4000</td>
+ *     <td>Timer for remove toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>verticalPosition</code></td>
+ *     <td>"bottom"</td>
+ *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
+ * </tr>
+ * </table>
+ * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
+ *
+ * Overload of defaults options value for each type of toasts are :
+ * <ul>
+ * <li>success:{dismissOnClick: true}</li>
+ * <li>info:{dismissOnClick: true}</li>
+ * <li>error:{dismissOnTimeout: false}</li>
+ * <li>warning:{dismissOnTimeout: false}</li>
+ * </ul>
+ * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
+ * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
+ *
+ *
+ * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Possible value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td>CODE</td>
+ *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
+ *     <td>The code bounds to the status of the action</td>
+ * </tr>
+ * <tr>
+ *     <td>TYPE</td>
+ *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
+ *     <td>The type message received</td>
+ * </tr>
+ * <tr>
+ *     <td>MESSAGE</td>
+ *     <td></td>
+ *     <td>The message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DETAIL</td>
+ *     <td></td>
+ *     <td>The detail of the message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DONE</td>
+ *     <td>TRUE("1"), FALSE("0");</td>
+ *     <td>A boolean that decribes the final result of the request</td>
+ * </tr>
+ * </table>
+ * <br/>
+ *
+ * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
+ *
+ * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
+ * @example
+     <example module="itesoft">
+
+         <file name="Controller.js">
+
+            angular.module('itesoft')
+                .config(['itNotifierProvider', function (itNotifierProvider) {
+                    //configuration of default values
+                    itNotifierProvider.defaultOptions = {
+                        dismissOnTimeout: true,
+                        timeout: 4000,
+                        dismissButton: true,
+                        animation: 'fade',
+                        horizontalPosition: 'right',
+                        verticalPosition: 'bottom',
+                        compileContent: true,
+                        dismissOnClick: false,
+                        success:{dismissOnClick: true},//optional overload behavior toast success
+                        info:{dismissOnClick: true},//optional overload behavior toast info
+                        error:{dismissOnTimeout: false},//optional overload behavior toast error
+                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+                    };
+
+                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
+                    $scope.showSuccess = function(){
+                        itNotifier.notifySuccess({
+                        content: "Success popup"
+                        });
+                    };
+                    $scope.showSuccessEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                            type: "SUCCESS",
+                            options: {
+                                content : "Success event popup"
+                            }}
+                         );
+                    };
+                    $scope.showError = function(){
+                        itNotifier.notifyError({
+                            content: "Error popup",
+                            dismissOnTimeout: false
+                        },
+                        {
+                            CODE:500,
+                            TYPE:'error',
+                            MESSAGE:'Something bad happened',
+                            DETAIL:'You don\'t wanna know',
+                            DONE:1
+                        });
+                    };
+                    $scope.showErrorOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "ERROR",
+                        options: {
+                                content : "error event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:500,
+                                TYPE:'error',
+                                MESSAGE:'Something bad happened',
+                                DETAIL:'You don\'t wanna know',
+                                DONE:1
+                            }
+                        });
+                    }
+                    $scope.showInfo = function(){
+                        itNotifier.notifyInfo({
+                        content: "Information popup"
+                        });
+                    };
+                    $scope.showWarningOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "WARNING",
+                        options: {
+                                content : "Warning event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:1000,
+                                TYPE:'warning',
+                                MESSAGE:'The request is empty',
+                                DETAIL:'Nothing',
+                                DONE:1
+                            }
+                        });
+                    };
+                    $scope.dismiss = function(){
+                        itNotifier.notifyDismiss();
+                        $scope.$emit('itNotifierEvent',{
+                            type:"DISMISS"
+                        });
+                    };
+                    $scope.dismissOnEvent = function(){
+                        $scope.$emit("$locationChangeSuccess");
+
+                    };
+                }]);
+         </file>
+         <file name="index.html">
+             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+             <div ng-controller="NotifierCtrl">
+                 <button class="btn btn-success" ng-click="showSuccess()">
+                    Success
+                 </button>
+                 <button class="btn btn-success" ng-click="showSuccessEvent()">
+                    Success on event
+                 </button>
+                 <button class="btn btn-danger" ng-click="showError()">
+                    Error
+                 </button>
+                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
+                    Error on event
+                 </button>
+                 <button class="btn btn-info" ng-click="showInfo()">
+                    Info
+                 </button>
+                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
+                    Warning
+                 </button>
+                 <button class="btn btn-success" ng-click="dismiss()">
+                    Dismiss all popups
+                 </button>
+                 <button class="btn btn-success" ng-click="dismissOnEvent()">
+                    Dismiss on Change location event
+                 </button>
+             </div>
+         </file>
+     </example>
+ **/
+IteSoft.provider('itNotifier', [ function () {
+
+    var self = this;
+
+    //default behaviors
+    self.defaultOptions = {
+        dismissOnTimeout: true,
+        timeout: 4000,
+        dismissButton: true,
+        animation: 'fade',
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom',
+        compileContent: true,
+        dismissOnClick: false,
+        success:{dismissOnClick: true},//optional overload behavior toast success
+        info:{dismissOnClick: true},//optional overload behavior toast info
+        error:{dismissOnTimeout: false},//optional overload behavior toast error
+        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+    };
+
+    //provide get method to build provider
+    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
+
+        // service declaration
+        var itNotifier = {};
+
+        //configuration of the ngToast
+        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
+
+        /**
+         * Private method that format error details message
+         * @param errorDetails
+         * @returns {string}
+         * @private
+         */
+        function _formatErrorDetails(errorDetails){
+            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
+        }
+
+        /** method declaration**/
+        /**
+         * Display a toast configure as success element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifySuccess= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
+            ngToast.success(localOptions);
+            if(errorDetails != undefined) {
+                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as error element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyError= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
+
+            ngToast.danger(localOptions);
+            if(errorDetails != undefined) {
+                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as info element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyInfo= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
+
+            ngToast.info(localOptions);
+            if(errorDetails != undefined) {
+                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as warning element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyWarning= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
+
+            ngToast.warning(localOptions);
+            if(errorDetails != undefined) {
+                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Dismiss all toaster
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyDismiss= function (options,errorDetails) {
+            ngToast.dismiss();
+        };
+        /**
+         * Log an error because this type is unknown
+         * @param options
+         */
+        itNotifier.notify= function (options) {
+            $log.error('Unknown type for itNotifier: '+options )
+        }
+
+        /** events declaration **/
+
+        /**
+         * Listen an event and dismiss all toaster
+         */
+        $rootScope.$on("$locationChangeSuccess", function () {
+            // Remove all currently display toaster messages.
+            itNotifier.notifyDismiss();
+        });
+
+        /**
+         * Listen an event and display associated toast depending on his type
+         */
+        $rootScope.$on("itNotifierEvent",function(event, args){
+            //Handle event and calls appropriate method depending on the type of request
+            if (args) {
+                switch (args.type) {
+                    case "SUCCESS":
+                        itNotifier.notifySuccess(args.options,args.errorDetails);
+                        break;
+                    case "ERROR":
+                        itNotifier.notifyError(args.options,args.errorDetails);
+                        break;
+                    case "INFO":
+                        itNotifier.notifyInfo(args.options,args.errorDetails);
+                        break;
+                    case "WARNING":
+                        itNotifier.notifyWarning(args.options,args.errorDetails);
+                        break;
+                    case "DISMISS":
+                        itNotifier.notifyDismiss(args.options,args.errorDetails);
+                        break;
+                    default:
+                        itNotifier.notify(args.type);
+                        break;
+                }
+            }
+            else{
+                $log.error('Bad usage of itNotifier. Check manual for details');
+            }
+        });
+        return itNotifier;
+    }];
+}]);
 'use strict';
 
 /**
@@ -8383,432 +8856,6 @@ IteSoft.provider('ItMessaging',[
 'use strict';
 /**
  * @ngdoc service
- * @name itesoft.service:itNotifier
- * @module itesoft
- * @since 1.1
- * @requires ngToast
- * @requires $rootScope
- * @requires $log
- *
- * @description
- * Simple notifier service, that display toasters.
- *
- * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>additionalClasses</code></td>
- *     <td>''</td>
- *     <td>Allows to add some classes to the current ngToast</td>
- * </tr>
- * <tr>
- *     <td><code>animation</code></td>
- *     <td>'fade'</td>
- *     <td>Adds an openning/ending animation, for example 'fade'</td>
- * </tr>
- * <tr>
- *     <td><code>className</code></td>
- *     <td>"success"</td>
- *     <td>The className of the toast message</td>
- * </tr>
- * <tr>
- *     <td><code>content</code></td>
- *     <td>''</td>
- *     <td>Content of the toast message as String (HTML compliant)</td>
- * </tr>
- * <tr>
- *     <td><code>combineDuplications</code></td>
- *     <td>false</td>
- *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
- * </tr>
- * <tr>
- *     <td><code>compileContent</code></td>
- *     <td>false</td>
- *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnTimeout</code></td>
- *     <td>true</td>
- *     <td>Automatically remove toast message after specific time</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButton:</code></td>
- *     <td>true</td>
- *     <td>Adds close button on toast message</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButtonHtml</code></td>
- *     <td>"&#38;times;"</td>
- *     <td>Html of close button</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnClick</code></td>
- *     <td>false</td>
- *     <td>Allows to remove toast message with a click</td>
- * </tr>
- * <tr>
- *     <td><code>horizontalPosition</code></td>
- *     <td>"right"</td>
- *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
- * </tr>
- * <tr>
- *     <td><code>maxNumber</code></td>
- *     <td>0</td>
- *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
- * </tr>
- * <tr>
- *     <td><code>timeout</code></td>
- *     <td>4000</td>
- *     <td>Timer for remove toast message</td>
- * </tr>
- * <tr>
- *     <td><code>verticalPosition</code></td>
- *     <td>"bottom"</td>
- *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
- * </tr>
- * </table>
- * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
- *
- * Overload of defaults options value for each type of toasts are :
- * <ul>
- * <li>success:{dismissOnClick: true}</li>
- * <li>info:{dismissOnClick: true}</li>
- * <li>error:{dismissOnTimeout: false}</li>
- * <li>warning:{dismissOnTimeout: false}</li>
- * </ul>
- * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
- * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
- *
- *
- * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Possible value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td>CODE</td>
- *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
- *     <td>The code bounds to the status of the action</td>
- * </tr>
- * <tr>
- *     <td>TYPE</td>
- *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
- *     <td>The type message received</td>
- * </tr>
- * <tr>
- *     <td>MESSAGE</td>
- *     <td></td>
- *     <td>The message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DETAIL</td>
- *     <td></td>
- *     <td>The detail of the message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DONE</td>
- *     <td>TRUE("1"), FALSE("0");</td>
- *     <td>A boolean that decribes the final result of the request</td>
- * </tr>
- * </table>
- * <br/>
- *
- * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
- *
- * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
- * @example
-     <example module="itesoft">
-
-         <file name="Controller.js">
-
-            angular.module('itesoft')
-                .config(['itNotifierProvider', function (itNotifierProvider) {
-                    //configuration of default values
-                    itNotifierProvider.defaultOptions = {
-                        dismissOnTimeout: true,
-                        timeout: 4000,
-                        dismissButton: true,
-                        animation: 'fade',
-                        horizontalPosition: 'right',
-                        verticalPosition: 'bottom',
-                        compileContent: true,
-                        dismissOnClick: false,
-                        success:{dismissOnClick: true},//optional overload behavior toast success
-                        info:{dismissOnClick: true},//optional overload behavior toast info
-                        error:{dismissOnTimeout: false},//optional overload behavior toast error
-                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-                    };
-
-                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
-                    $scope.showSuccess = function(){
-                        itNotifier.notifySuccess({
-                        content: "Success popup"
-                        });
-                    };
-                    $scope.showSuccessEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                            type: "SUCCESS",
-                            options: {
-                                content : "Success event popup"
-                            }}
-                         );
-                    };
-                    $scope.showError = function(){
-                        itNotifier.notifyError({
-                            content: "Error popup",
-                            dismissOnTimeout: false
-                        },
-                        {
-                            CODE:500,
-                            TYPE:'error',
-                            MESSAGE:'Something bad happened',
-                            DETAIL:'You don\'t wanna know',
-                            DONE:1
-                        });
-                    };
-                    $scope.showErrorOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "ERROR",
-                        options: {
-                                content : "error event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:500,
-                                TYPE:'error',
-                                MESSAGE:'Something bad happened',
-                                DETAIL:'You don\'t wanna know',
-                                DONE:1
-                            }
-                        });
-                    }
-                    $scope.showInfo = function(){
-                        itNotifier.notifyInfo({
-                        content: "Information popup"
-                        });
-                    };
-                    $scope.showWarningOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "WARNING",
-                        options: {
-                                content : "Warning event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:1000,
-                                TYPE:'warning',
-                                MESSAGE:'The request is empty',
-                                DETAIL:'Nothing',
-                                DONE:1
-                            }
-                        });
-                    };
-                    $scope.dismiss = function(){
-                        itNotifier.notifyDismiss();
-                        $scope.$emit('itNotifierEvent',{
-                            type:"DISMISS"
-                        });
-                    };
-                    $scope.dismissOnEvent = function(){
-                        $scope.$emit("$locationChangeSuccess");
-
-                    };
-                }]);
-         </file>
-         <file name="index.html">
-             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-             <div ng-controller="NotifierCtrl">
-                 <button class="btn btn-success" ng-click="showSuccess()">
-                    Success
-                 </button>
-                 <button class="btn btn-success" ng-click="showSuccessEvent()">
-                    Success on event
-                 </button>
-                 <button class="btn btn-danger" ng-click="showError()">
-                    Error
-                 </button>
-                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
-                    Error on event
-                 </button>
-                 <button class="btn btn-info" ng-click="showInfo()">
-                    Info
-                 </button>
-                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
-                    Warning
-                 </button>
-                 <button class="btn btn-success" ng-click="dismiss()">
-                    Dismiss all popups
-                 </button>
-                 <button class="btn btn-success" ng-click="dismissOnEvent()">
-                    Dismiss on Change location event
-                 </button>
-             </div>
-         </file>
-     </example>
- **/
-IteSoft.provider('itNotifier', [ function () {
-
-    var self = this;
-
-    //default behaviors
-    self.defaultOptions = {
-        dismissOnTimeout: true,
-        timeout: 4000,
-        dismissButton: true,
-        animation: 'fade',
-        horizontalPosition: 'right',
-        verticalPosition: 'bottom',
-        compileContent: true,
-        dismissOnClick: false,
-        success:{dismissOnClick: true},//optional overload behavior toast success
-        info:{dismissOnClick: true},//optional overload behavior toast info
-        error:{dismissOnTimeout: false},//optional overload behavior toast error
-        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-    };
-
-    //provide get method to build provider
-    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
-
-        // service declaration
-        var itNotifier = {};
-
-        //configuration of the ngToast
-        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
-
-        /**
-         * Private method that format error details message
-         * @param errorDetails
-         * @returns {string}
-         * @private
-         */
-        function _formatErrorDetails(errorDetails){
-            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
-        }
-
-        /** method declaration**/
-        /**
-         * Display a toast configure as success element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifySuccess= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
-            ngToast.success(localOptions);
-            if(errorDetails != undefined) {
-                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as error element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyError= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
-
-            ngToast.danger(localOptions);
-            if(errorDetails != undefined) {
-                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as info element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyInfo= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
-
-            ngToast.info(localOptions);
-            if(errorDetails != undefined) {
-                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as warning element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyWarning= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
-
-            ngToast.warning(localOptions);
-            if(errorDetails != undefined) {
-                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Dismiss all toaster
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyDismiss= function (options,errorDetails) {
-            ngToast.dismiss();
-        };
-        /**
-         * Log an error because this type is unknown
-         * @param options
-         */
-        itNotifier.notify= function (options) {
-            $log.error('Unknown type for itNotifier: '+options )
-        }
-
-        /** events declaration **/
-
-        /**
-         * Listen an event and dismiss all toaster
-         */
-        $rootScope.$on("$locationChangeSuccess", function () {
-            // Remove all currently display toaster messages.
-            itNotifier.notifyDismiss();
-        });
-
-        /**
-         * Listen an event and display associated toast depending on his type
-         */
-        $rootScope.$on("itNotifierEvent",function(event, args){
-            //Handle event and calls appropriate method depending on the type of request
-            if (args) {
-                switch (args.type) {
-                    case "SUCCESS":
-                        itNotifier.notifySuccess(args.options,args.errorDetails);
-                        break;
-                    case "ERROR":
-                        itNotifier.notifyError(args.options,args.errorDetails);
-                        break;
-                    case "INFO":
-                        itNotifier.notifyInfo(args.options,args.errorDetails);
-                        break;
-                    case "WARNING":
-                        itNotifier.notifyWarning(args.options,args.errorDetails);
-                        break;
-                    case "DISMISS":
-                        itNotifier.notifyDismiss(args.options,args.errorDetails);
-                        break;
-                    default:
-                        itNotifier.notify(args.type);
-                        break;
-                }
-            }
-            else{
-                $log.error('Bad usage of itNotifier. Check manual for details');
-            }
-        });
-        return itNotifier;
-    }];
-}]);
-'use strict';
-/**
- * @ngdoc service
  * @name itesoft.service:itPopup
  * @module itesoft
  * @since 1.0
@@ -9267,55 +9314,6 @@ IteSoft
 
 
     }])
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 /**
  * TODO Image implementation desc
