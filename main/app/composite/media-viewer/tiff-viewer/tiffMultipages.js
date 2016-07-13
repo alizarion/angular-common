@@ -3,47 +3,39 @@
  * TODO Tiff implementation desc
  */
 itTiffViewer
-    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
+    .factory('TIFFPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
         function TIFFPage(pageIndex, getSrc, view) {
-        			this.base = MultiPagesPage;
-        			this.base(pageIndex, view);
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
 
-        			this.getSrc = getSrc;
-        		}
+            this.getSrc = getSrc;
+        }
 
         TIFFPage.prototype = new MultiPagesPage;
 
-        TIFFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
+        TIFFPage.prototype.renderPage = function (page, callback) {
+            var self = this; 
 
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
             }else {
-                self.container.append(self.canvas);
+                page.wrapper.append(page.canvas);
 
-                var ctx = self.canvas[0].getContext('2d');
-                ctx.transform.apply(ctx, self.viewport.transform);
+                var ctx = page.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, page.viewport.transform);
                 var img = new Image;
                 img.onload = function(){
                     ctx.drawImage(img,0,0); // Or at whatever offset you like
-                    self.canvasRendered = true;
+                    //self.canvasRendered = true;
                     if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                        callback(page, MultiPagesConstants.PAGE_RENDERED);
                     }
                 };
 
                 $timeout(function () {
                     if(self.src == undefined){
-                        self.src =  self.getSrc(self.id - 1);
+                        self.src =  self.getSrc(page.pageIndex);
                     }
 
                     img.src = self.src;
@@ -56,7 +48,11 @@ itTiffViewer
     }])
 
     .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
-        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+        try {
+            Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+        } catch(ex) {
+            $log.debug("Lib tiff throw exception on set TOTAL_MEMORY : " + ex);
+        }
 
         function TIFFViewer(element) {
             this.base = MultiPagesViewer;
@@ -67,11 +63,12 @@ itTiffViewer
 
         TIFFViewer.prototype = new MultiPagesViewer;
 
-        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
+        TIFFViewer.prototype.open = function(obj, initialScale, orientation, pageMargin) {
             this.element.empty();
             this.pages = [];
             this.pageMargin = pageMargin;
             this.initialScale = initialScale;
+            this.orientation = orientation;
             var isFile = typeof obj != typeof "";
 
             if(isFile){
@@ -140,8 +137,8 @@ itTiffViewer
             self.tiff = new Tiff({buffer: arrayBuffer});
             self.getAllPages(function(pageList) {
                 self.pages = pageList;
-
-                self.setContainerSize(self.initialScale);
+                self.addPages();
+                //self.setContainerSize(self.initialScale);
             });
         };
         TIFFViewer.prototype.getAllPages = function(callback) {
@@ -156,10 +153,10 @@ itTiffViewer
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
                 this.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0, this.tiff.width(), this.tiff.height()]);
                 pageList[iPage] = page;
 
-                this.element.append(page.container);
+                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {
@@ -187,21 +184,28 @@ itTiffViewer
                 src: "@",
                 file: "=",
                 api: "=",
-                initialScale: "@"
+                options: "="
 
             },
             controller: ['$scope', '$element', function($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
 
                 var viewer = new TIFFViewer($element);
 
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function() {
-                    viewer.open(this.src, this.initialScale, pageMargin);
+                    viewer.open(this.src, getOption("initialScale"), getOption("orientation"), pageMargin);
                 };
 
                 $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
+                    viewer.open(this.file, getOption("initialScale"), getOption("orientation"), pageMargin);
                 };
 
                 viewer.hookScope($scope);

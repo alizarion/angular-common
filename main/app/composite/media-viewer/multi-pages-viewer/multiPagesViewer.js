@@ -2,7 +2,7 @@
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
     function getElementInnerSize(element, margin) {
         var tallTempElement = angular.element("<div></div>");
         tallTempElement.css("height", "10000px");
@@ -20,7 +20,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         }
 
         w -= 2 * margin;
-        h -= 2 * margin;
+        h -= 2 * margin + 10;
 
         return {
             width: w,
@@ -36,8 +36,10 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         this.fitPageScale = 1.0;
         this.element = element;
         this.pageMargin = 0;
+        this.orientation = MultiPagesConstants.ORIENTATION_VERTICAL;
         this.currentPage = 0;
         this.lastScrollDir = 0;
+        this.rotation = 0;
         this.scaleItems = {};
         this.zoomLevels = [];
         this.api = api;
@@ -51,6 +53,15 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
     MultiPagesViewer.prototype = {
         getAPI: function () {
             return this.api;
+        },
+        addPages : function () {
+            // Append all page containers to the $element...
+            var numPages = this.pages.length;
+            for(var iPage = 0;iPage < numPages; ++iPage) {
+                this.element.append(this.pages[iPage].container);
+            }
+            this.onPageRendered("loaded", 1, numPages, "");
+            this.setContainerSize(this.initialScale);
         },
         updateScaleItem : function(scaleItem) {
             var result = this.scaleItems[scaleItem.id];
@@ -67,83 +78,100 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         },
         setContainerSize: function (initialScale) {
             if(this.pages.length > 0) {
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.zoomLevels = [];
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    var scaleItem = null;
-                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
-                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                           value : this.fitWidthScale,
-                           label: "Fit width"
-                       });
-                   }
-
-                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                           value : this.fitHeightScale,
-                           label: "Fit height"
-                       });
-                   }
-
-                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                           value : this.fitPageScale,
-                           label: "Fit page"
-                       });
-                   }
-
-                   var label = (newScale * 100.0).toFixed(0) + "%";
-                   scaleItem = this.updateScaleItem({
-                       id: label,
-                       value : newScale,
-                       label: label
-                   });
-                }
-
-                if (this.scaleItem == undefined && initialScale) {
-                    if(this.scaleItems[initialScale] != undefined) {
-                        this.scaleItem = this.scaleItems[initialScale];
-                    }else{
-                        $log.debug("InitialScale not found : " + initialScale);
+                var containerSize = getElementInnerSize(this.element, this.pageMargin);
+                if(containerSize.width > 0 && containerSize.height > 0) {
+                    if(this.onContainerSizeChanged) {
+                       this.onContainerSizeChanged(containerSize);
                     }
-                }
+                    this.containerSize = containerSize;
 
-                if(this.api.onZoomLevelsChanged ) {
-                    this.api.onZoomLevelsChanged (this.zoomLevels);
-                }
+                    var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
 
-                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
-                    this.render();
-                    return;
-                }
+                    this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                    this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                    this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
 
-                this.setScale(this.scaleItem || this.scaleItems["100%"]);
+                    this.zoomLevels = [];
+                    var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                    for(var i = 0;i < numZoomLevels;++i) {
+                        var scaleItem = null;
+                        var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                        if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                               value : this.fitWidthScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
+                           });
+                       }
+
+                       if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                               value : this.fitHeightScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
+                           });
+                       }
+
+                       if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                               value : this.fitPageScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
+                           });
+                       }
+
+                       var label = (newScale * 100.0).toFixed(0) + "%";
+                       scaleItem = this.updateScaleItem({
+                           id: label,
+                           value : newScale,
+                           label: label
+                       });
+                    }
+
+                    if (this.scaleItem == undefined && initialScale) {
+                        if(this.scaleItems[initialScale] != undefined) {
+                            this.scaleItem = this.scaleItems[initialScale];
+                        }else{
+                            $log.debug("InitialScale not found : " + initialScale);
+                        }
+                    }
+
+                    if(this.api.onZoomLevelsChanged) {
+                        this.api.onZoomLevelsChanged(this.zoomLevels);
+                    }
+
+                    if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
+                        this.renderAllVisiblePages();
+                        return;
+                    }
+
+                    this.setScale(this.scaleItem);
+                }
+            }
+        },
+        hasMultiplePages: function() {
+            return this.pages.length > 1;
+        },
+        setOrientation : function (orientation) {
+            this.orientation = orientation;
+            if(this.hasMultiplePages()) {
+                this.setScale(this.scaleItem);
             }
         },
         setScale: function (scaleItem) {
             if(scaleItem != undefined){
                 this.scaleItem = scaleItem;
             }
-            var sci = scaleItem  || this.zoomLevels[0];
+            var sci = scaleItem  || this.scaleItems["100%"];
 
             var numPages = this.pages.length;
 
             for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+                page.setOrientation(this.orientation);
                 // Resize to current scaleItem...
-                this.pages[iPage].resize(sci.value);
+                page.resize(sci.value);
             }
 
             this.render();
@@ -221,11 +249,28 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 if(page.isVisible()) {
                     var parentContainer = page.container.parent()[0];
                     var pageContainer = page.container[0];
-                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                    var pageCenter = pageContainer.offsetHeight / 2;
-                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
+
+                    if(self.hasMultiplePages()) {
+                        if(currentPageID === -1) {
+                            if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                                var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
+                                var pageCenter = pageContainer.offsetWidth / 2;
+                                if((pageCenter + pageLeft) >= 0) {
+                                    currentPageID = iPage;
+                                }
+                            } else {
+                                var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                                var pageCenter = pageContainer.offsetHeight / 2;
+                                if((pageCenter + pageTop) >= 0) {
+                                    currentPageID = iPage;
+                                }
+                            }
+                        }
+                    } else {
                         currentPageID = iPage;
                     }
+
+
 
                     atLeastOnePageInViewport = true;
                     lastPageID = iPage;
@@ -243,24 +288,38 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 }
             }
 
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
+            if(currentPageID === -1) {
+                currentPageID = lastPageID;
             }
 
-            this.removeDistantPages(currentPageID, lastPageID, 1);
+            if(self.hasMultiplePages()) {
+                this.clearDistantSelectedPage(currentPageID + 1, lastPageID + 1);
+
+                if(this.lastScrollDir !== 0) {
+                    var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
+                    if(nextPageID >= 0 && nextPageID < numPages) {
+                        this.pages[nextPageID].render(function (page, status) {
+                            if(status === MultiPagesConstants.PAGE_RENDERED) {
+                                self.onPageRendered("success", page.id, self.pages.length, "");
+                            } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                                self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                            }
+                        });
+                    }
+                }
+
+                this.removeDistantPages(currentPageID, lastPageID, 1);
+            }
 
             this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
+            //this.currentPage = (this.lastScrollDir > 0 ? currentPageID : lastPageID) + 1;
+            if(this.onCurrentPageChanged) {
                 this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        clearDistantSelectedPage: function (currentPageID, lastPageID) {
+            if(this.selectedPage <= currentPageID || this.selectedPage > lastPageID) {
+                this.selectedPage = null;
             }
         },
         render: function () {
@@ -284,7 +343,28 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                         this.api.onPageRotation(args);
                     }
                     this.setContainerSize(this.initialScale);
+
+                    if(this.thumbnail) {
+                        this.thumbnail.rotate(args);
+                    }
                 }
+            }
+        },
+        rotatePages : function (rotation) {
+            var numPages = this.pages.length;
+            var currentRotation = this.rotation - rotation;
+            if(currentRotation === 360 || currentRotation === -360){
+                currentRotation = 0;
+            }
+            this.rotation = currentRotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.pages[iPage].rotate(currentRotation);
+            }
+
+            this.setContainerSize(this.initialScale);
+
+            if(this.thumbnail) {
+                this.thumbnail.rotatePages(rotation);
             }
         },
         downloadProgress: function(progressData) {
@@ -313,17 +393,31 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(self.initialScale);
+                  if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
+                  scope.sizeWatcherTimeout = $timeout(function() {
+                       $log.debug("SizeChanged");
+                       self.setContainerSize(self.initialScale);
+                  }, 450);
+            });
+
+            scope.$watch("options.orientation", function (value) {
+                self.setOrientation(value);
             });
 
             var onProgress = function(operation, state, value, total, message) {
                 if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                         $compile(self.element.contents())(scope);
+                    if (state === "loaded") {
+                        $compile(self.element.contents())(scope);
+                    }
+                    else if (state === "success") {
                         $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
                     }
                     else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
+                        if(self.api.onError) {
+                            self.api.onError(operation, message);
+                        } else {
+                            $log.debug("Failed to render 1st page!\n\n" + message);
+                        }
                     }
                 }
                 else if (operation === "download" && state === "loading") {
@@ -331,8 +425,22 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 }
                 else {
                     if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
+                        if(self.api.onError) {
+                            self.api.onError(operation, message);
+                        } else {
+                            $log.debug("Something went really bad!\n\n" + message);
+                        }
                     }
+                }
+            };
+
+            scope.onPageClicked = function(pageIndex) {
+                self.selectedPage = pageIndex;
+                if(self.onPageClicked) {
+                    self.onPageClicked(pageIndex);
+                }
+                if(self.api.onPageClicked) {
+                    self.api.onPageClicked(pageIndex);
                 }
             };
 
@@ -357,6 +465,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                     }
                     self.onDestroy();
                 }
+                self.thumbnail = null;
                 watcher.cancel();
                 self.element.empty();
                 $log.debug("viewer destroyed");

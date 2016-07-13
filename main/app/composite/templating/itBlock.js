@@ -32,57 +32,57 @@
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-    <div ng-controller="HomeCtrl">
-         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-         <it-block-control-panel></it-block-control-panel>
-         <it-block name="zone-coding-lines-actions3" style="margin:10px">
-         <it-block name="login_input" role="RD">
-         <div class="form-group">
-         <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
-         </div>
-         </it-block>
-         <it-block name="coding-lines-add3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
-         ng-click="codingController.addNewLine()">
-         <span class="fa fa-plus fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-remove3">
-         <button class="btn btn-danger col-xs-2"
-         title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
-         ng-click="codingController.removeNewLine()">
-         <span class="fa fa-trash fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-duplicate3">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
-         ng-click="codingController.duplicateLine()">
-         <span class="fa fa-copy fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-memorize3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
-         ng-click=""
-         disabled>
-         <span class="fa fa-folder fa-lg"/>
-         </button>
-         </it-block>
-         </it-block>
-         <br/>
-         <br/>
-         <br/>
-         <br/>
-         <it-block name="zone-grid-example">
-            <div id="grid1" ui-grid="gridOptions" class="grid"></div>
-         </it-block>
-    </div>
+ <div ng-controller="HomeCtrl">
+ <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+ <it-block-control-panel></it-block-control-panel>
+ <it-block name="zone-coding-lines-actions3" style="margin:10px">
+ <it-block name="login_input" role="RD">
+ <div class="form-group">
+ <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+ </div>
+ </it-block>
+ <it-block name="coding-lines-add3" removed="true">
+ <button class="btn btn-primary col-xs-2"
+ title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
+ ng-click="codingController.addNewLine()">
+ <span class="fa fa-plus fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-remove3">
+ <button class="btn btn-danger col-xs-2"
+ title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
+ ng-click="codingController.removeNewLine()">
+ <span class="fa fa-trash fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-duplicate3">
+ <button class="btn btn-primary col-xs-2" disabled="true"
+ title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
+ ng-click="codingController.duplicateLine()">
+ <span class="fa fa-copy fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-memorize3" removed="true">
+ <button class="btn btn-primary col-xs-2"
+ title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
+ ng-click=""
+ disabled>
+ <span class="fa fa-folder fa-lg"/>
+ </button>
+ </it-block>
+ </it-block>
+ <br/>
+ <br/>
+ <br/>
+ <br/>
+ <it-block name="zone-grid-example">
+ <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+ </it-block>
+ </div>
  </file>
  <file name="Module.js">
-     angular.module('itesoft-showcase',['itesoft','ngResource'])
-     .constant("CONFIG", {
+ angular.module('itesoft-showcase',['itesoft','ngResource'])
+ .constant("CONFIG", {
                 "REST_TEMPLATE_API_URL": "http://localhost:8082",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
                 "ENABLE_TEMPLATE_EDITOR": true,
@@ -93,9 +93,9 @@
                 });
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope','$rootScope','$http','uiGridGroupingConstants',
-     function($scope,$rootScope,$http,uiGridGroupingConstants) {
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope','$http','uiGridGroupingConstants',
+ function($scope,$rootScope,$http,uiGridGroupingConstants) {
                        $rootScope.editSite = true;
                        $scope.myData = [];
             // sample values
@@ -135,117 +135,13 @@
  </file>
  </example>
  */
-IteSoft.directive('itBlock',
-    [
-        function () {
-            return {
-                restrict: 'E',
-                scope: true,
-                transclude: true,
-                template:
-                '<ng-transclude  ' +
-                'class="{{itBlockController.hilightClass}}" ' +
-                'ng-mouseover="itBlockController.over()" ' +
-                'ng-mouseleave="itBlockController.leave()" ' +
-                'ng-if="!removed || $root.editSite"> ' +
-                '</ng-transclude>',
-                controllerAs: 'itBlockController',
-                link: function ($scope, element, attrs, ctrl, transclude) {
-                    transclude($scope, function (content) {
-                        var myContent = "";
-                        angular.forEach(content, function (contentLine) {
-                            if (contentLine.outerHTML) {
-                                myContent += contentLine.outerHTML;
-                            }
-                        });
-                        $scope.content = myContent;
-                    });
-                    /**
-                     * Get attributes values
-                     */
-                    $scope.ref = attrs["ref"];
-                    $scope.role = attrs["role"];
-                    $scope.position = attrs["position"];
-                    $scope.name = attrs["name"];
-                    $scope.removed = false;
-                    $scope.element = element;
-                    $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
-                        $scope.removed = attrs["removed"];
-                    }
-                    this.fields = {};
-                    /**
-                     * Call when attributes are read
-                     */
-                    ctrl.onRegisterApi();
-
-                },
-                controller: ['$scope','$rootScope', '$location', '$log', '$interval', '$timeout','$document', 'itPopup', 'BlockService', 'PilotSiteSideService',
-                    function ($scope,$rootScope, $location, $log, $interval,$timeout, $document, itPopup, BlockService, PilotSiteSideService) {
-
-                        var self = this;
-                        self.focusable = false;
-
-                        /**
-                         * Call when block is selected by control panel
-                         */
-                        $rootScope.$on("hilightBlock",function(event,block){
-                            if(angular.isDefined(block) && block.name == self.block.name) {
-                                self.hilightClass="block-hilight";
-                            }else{
-                                if($scope.removed){
-                                    self.hilightClass = "block-removed";
-                                }else {
-                                    self.hilightClass = "";
-                                }
-                            }
-                        });
-
-                        /**
-                         * Call when attributes are read
-                         */
-                        self.onRegisterApi = function(){
-                            self.block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role, $scope.version);
-                            self.block.removed= $scope.removed;
-                        };
-
-                        /**
-                         * Call when mouse leave block
-                         */
-                        self.leave = function () {
-                            $rootScope.$emit("unSelectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when mouse is over block
-                         */
-                        self.over = function () {
-                            $rootScope.$emit("selectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when edit site mode changed
-                         */
-                        $rootScope.$watch('editSite',function()
-                        {
-                            if ($rootScope.editSite) {
-                                /**
-                                 * Need to change transclude content if block is removed or disabled
-                                 */
-                                $timeout(function () {
-                                    if ($scope.removed) {
-                                        self.hilightClass = "block-removed";
-                                    }
-                                }, 500);
-                                $timeout(function () {
-                                    if (angular.isDefined($scope.element.find("ng-transclude")[0])) {
-                                        $scope.element.find("ng-transclude")[0].children[0].disabled = false;
-                                    }
-                                }, 500);
-                            }
-                        });
-                    }
-                ]
+IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, BlockService) {
+        return {
+            restrict: 'EAC',
+            link: function ($scope, element, attrs, ctrl) {
+                $scope.$root.$emit("registerBlock", BlockService.new(attrs["name"], attrs["ref"], attrs["position"], element.html(), attrs["role"], attrs["version"], attrs["removed"], element));
             }
-        }]
-)
+        }
+    }
+    ]
+);

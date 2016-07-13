@@ -6,10 +6,12 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
 
     function MultiPagesViewerAPI(viewer) {
         this.viewer = viewer;
-        this.rotation = 0;
     };
 
     MultiPagesViewerAPI.prototype = {
+        getViewer: function () {
+            return this.viewer;
+        },
         getZoomLevels: function () {
             return this.viewer.zoomLevels;
         },
@@ -36,61 +38,59 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         getCurrentPage: function () {
             return this.viewer.currentPage;
         },
+        getSelectedPage: function () {
+            return this.viewer.selectedPage || this.viewer.currentPage;
+        },
+        isPageSelected: function(pageIndex) {
+            return (this.getSelectedPage() === pageIndex) ? "selected" : null;
+        },
         goToPage: function (pageIndex) {
             if(pageIndex < 1 || pageIndex > this.getNumPages()) {
                 return;
             }
-
+            var pageContainer = this.viewer.pages[pageIndex - 1].container[0];
+            var element = this.viewer.element[0];
             //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-            var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
-                offsetTop -= 1;
+            if(this.viewer.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                var offsetLeft = pageContainer.offsetLeft - 10;
+                if(Math.round(element.scrollLeft) === offsetLeft){
+                    offsetLeft -= 1;
+                }
+                element.scrollLeft = offsetLeft;
+            } else {
+                var offsetTop = pageContainer.offsetTop - 10;
+                if(Math.round(element.scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                element.scrollTop = offsetTop;
             }
-            this.viewer.element[0].scrollTop = offsetTop;
         },
         goToNextPage: function () {
-            this.goToPage(this.viewer.currentPage + 1);
+            this.goToPage(this.getSelectedPage() + 1);
         },
         goToPrevPage: function () {
-            this.goToPage(this.viewer.currentPage - 1);
+            this.goToPage(this.getSelectedPage() - 1);
         },
         getNumPages: function () {
             return this.viewer.pages.length;
         },
         rotatePagesRight: function() {
-            var numPages = this.viewer.pages.length;
-            var rotation = this.rotation + 90;
-            if(rotation === 360 || rotation === -360) {
-                rotation = 0;
-            }
-            this.rotation = rotation;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                this.viewer.pages[iPage].rotate(rotation);
-            }
-
-            this.viewer.setContainerSize(this.viewer.initialScale);
+            this.viewer.rotatePages(90);
         },
         rotatePagesLeft: function() {
-            var numPages = this.viewer.pages.length;
-            var rotation = this.rotation - 90;
-            if(rotation === 360 || rotation === -360){
-                rotation = 0;
-            }
-            this.rotation = rotation;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                this.viewer.pages[iPage].rotate(rotation);
-            }
-
-            this.viewer.setContainerSize(this.viewer.initialScale);
+            this.viewer.rotatePages(-90);
         },
         rotatePageRight: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: 90 });
+            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: 90 });
         },
         rotatePageLeft: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: -90 });
+            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: -90 });
         },
         rotatePage: function(args) {
             this.viewer.rotate(args);
+            if(this.onPageRotation) {
+                this.onPageRotation(args);
+            }
         }
     };
 
