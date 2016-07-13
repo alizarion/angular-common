@@ -18,16 +18,17 @@ module.exports = {
 
     closureStart: '(function() {\n',
     closureEnd: '\n})();',
+    distFolder:'dist',
+    srcFolder: 'main',
+    testFolder: 'test',
+    docFolder : 'docs',
 
     /**
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.
      */
     appFiles: [
-        '!main/app/**/*Test.js', // Exclude test files
-
         'main/app/app.module.js',
         'main/app/**/*.js'
-
     ],
     /**
      * Liste des librairies minifié à utiliser en prod
@@ -177,6 +178,18 @@ module.exports = {
         'main/assets/lib/angular-websocket/dist/angular-websocket.js',
         'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
+
+    excludeFromAppDist: {
+
+        unitTest: [
+            'test/unit/**/*.js'
+        ],
+        e2e: [
+            'test/e2e/**/*.js'
+        ],
+        unminifiedDistFiles: [
+        ]
+    },
 
     fileToCopyAndRename:
     [

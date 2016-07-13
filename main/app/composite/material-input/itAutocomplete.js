@@ -1101,12 +1101,12 @@ IteSoft
                      */
                     $scope.keys = [];
 
-                    const KEY_ENTER = 13;
-                    const KEY_DOWN = 38;
-                    const KEY_UP = 40;
-                    const KEY_BACK = 8;
-                    const KEY_DELETE = 8;
-                    const KEY_ESCAPE = 27;
+                    var KEY_ENTER = 13;
+                    var KEY_DOWN = 38;
+                    var KEY_UP = 40;
+                    var KEY_BACK = 8;
+                    var KEY_DELETE = 8;
+                    var KEY_ESCAPE = 27;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
