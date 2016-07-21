@@ -1,0 +1,91 @@
+
+.template-block-name {
+  color: white;
+}
+
+.float-right {
+  float: right;
+}
+
+.block .floating-label {
+  top: 0px !important;
+}
+
+.offline-editor {
+}
+
+.block-control-panel-action-container {
+  display: inline-block;
+  margin-bottom: 0;
+}
+
+.block-control-panel .btn {
+  margin-top: 0px;
+}
+
+.block-control-panel {
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.block-control-panel-help{
+  color: #999;
+}
+
+.offline-editor > a {
+  color: white;
+  padding: 10px;
+}
+
+.offline-editor > a:hover {
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.block-lists {
+  z-index: 1050;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  background-color: #333;
+  color: rgba(255, 255, 255, .84);
+  cursor: pointer;
+  padding: 5px;
+  text-align: center;
+}
+
+.block-lists-name{
+  border-top: 1px solid white
+}
+
+.block-lists-action{
+
+}
+
+.block-lists-element-hilight{
+  background-color: $block-hilight !important;
+}
+
+.block-removed * {
+  background-color: $block-removed !important;
+}
+
+.block-hilight *,.block-removed.block-hilight *{
+  background-color: $block-hilight !important;
+  animation-name: clignote; //on affecte l'animation clignote à notre bouton
+  animation-duration: 2s; //on définit la durée de l'animation à 1s
+  animation-iteration-count:infinite; //on dit que l'animation se répétera à l'infini.
+}
+
+
+@keyframes clignote {
+  0%{box-shadow:0px 0px 10px $block-hilight}
+  50%{box-shadow:0px 0px 0px $block-hilight}
+  100%{box-shadow:0px 0px 10px $block-hilight}
+}
+
+
+.crosshair {
+  cursor:crosshair !important;
+}
