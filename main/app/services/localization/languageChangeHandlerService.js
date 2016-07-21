@@ -94,7 +94,8 @@
  </file>
  </example>
  */
-IteSoft.provider('itLanguageChangeHandler', function () {
+angular.module('itesoft.language',['itesoft.popup','LocalStorageModule'])
+    .provider('itLanguageChangeHandler', function () {
     var self = this;
     this.options = {
         storage: 'local', //local for localStorage or query for url query parameter

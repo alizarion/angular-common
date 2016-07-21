@@ -13,7 +13,7 @@ var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer'])
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.bootstrap.tabs',
-    'ui.bootstrap.modal',
+    'itesoft.popup',
     'ui.bootstrap.tpls',
     'ngAnimate',
     'matchMedia',
@@ -35,5 +35,6 @@ var IteSoft = angular.module('itesoft', [
     'it-pdf-viewer',
     'it-image-viewer',
     'it-tiff-viewer',
-    'itesoft.messaging'
+    'itesoft.messaging',
+    'itesoft.language'
 ]);
