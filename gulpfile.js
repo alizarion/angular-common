@@ -68,6 +68,7 @@ gulp.task('clean', function () {
  */
 gulp.task('sass', function(done) {
     gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
         .pipe(sass({
             errLogToConsole: true
         }))
@@ -252,7 +253,8 @@ gulp.task('assets', function() {
 
 
 
-gulp.task('deploy', function() {
+
+gulp.task('deploy',['test','e2e'], function() {
     return gulp.src(['!./node_modules/**/*','!' + buildConfig.srcFolder +'/**/*','!' +
         buildConfig.testFolder +'/**/*','!./*','./**/*'])
         .pipe(ghPages());
@@ -279,7 +281,7 @@ gulp.task('watch', function() {
 /**
  * Test unitaire jasmine
  */
-gulp.task('test', function () {
+gulp.task('test', function (done) {
 
     /**Ajout des fihcier de test **/
     var allVendorFiles = buildConfig.vendorJavascriptDistFiles.slice();
@@ -295,7 +297,7 @@ gulp.task('test', function () {
         }))
         .on('error', function (err) {
             console.log('toto');
-            this.emit('end');
+            this.emit('end',done);
         });
 });
 
@@ -365,6 +367,7 @@ gulp.task('e2e', ['webdriver_update'], function (callback) {
         throw (e);
     }).on('end', function () {
         stream.emit('kill');
+        callback();
     });
 });
 
