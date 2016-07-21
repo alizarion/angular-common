@@ -35,5 +35,5 @@ var IteSoft = angular.module('itesoft', [
     'it-pdf-viewer',
     'it-image-viewer',
     'it-tiff-viewer',
-    'ngWebSocket'
+    'itesoft.messaging'
 ]);
