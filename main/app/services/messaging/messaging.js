@@ -447,7 +447,8 @@
          </file>
  </example>
  **/
-IteSoft.provider('ItMessaging',[
+angular.module('itesoft.messaging',[])
+.provider('ItMessaging',[
     function(){
 
         var providerState = this;
