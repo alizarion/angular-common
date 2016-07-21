@@ -447,7 +447,7 @@
          </file>
  </example>
  **/
-angular.module('itesoft.messaging',[])
+angular.module('itesoft.messaging',['ngWebSocket'])
 .provider('ItMessaging',[
     function(){
 
