@@ -1,0 +1,53 @@
+<h1><code ng:non-bindable="">itPanelForm</code>
+<div><span class="hint">directive in module <code ng:non-bindable="">itesoft</code>
+<code ng:non-bindable=""><a target="_blank" href="https://github.com/alizarion/angular-common/releases/tag/v1.2"> since v1.2</a></code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itpanelform-page"><p>The itPanelForm provides dynamic content panel in a form embedded.</p>
+<pre><code class="lang-html">   &lt;it-panel-form option=&quot;option&quot; &gt;&lt;/it-panel-form&gt;
+</code></pre>
+</div></div>
+<h2 id="usage">Usage</h2>
+<div class="usage">as element:<pre class="prettyprint linenums">&lt;it-panel-form&gt;
+&lt;/it-panel-form&gt;</pre>
+</div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="itesoft-directive-page itesoft-directive-itpanelform-page"><h4 id="example_source">Source</h4>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-21" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-21" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-21">
+<style>
+</style>
+<div ng-controller="HomeCtrl" >
+<it-panel-form options="options" ></it-panel-form>
+</script>
+</div>
+<div class="tab-pane" title="controller.js">
+<pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
+<script type="text/ng-template" id="controller.js">
+angular.module('itesoft')
+.controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+       $scope.query = "";
+       // require to link directive with scope
+       $scope.options = [
+           {"title":"title", "value":"value", "type":"label"},
+          {"title":"title2", "value":"value2", "type":"input"},
+          {"title":"title2", "value":
+             [{"code": "code1", "value": "value1"},
+             {"code": "code2", "value": "value2"}],
+          "type":"select"},
+          {"title":"title3", "value":"'<p>{{option.value}}</p>'+", "type":"date"}
+       ];
+
+   }
+]
+);
+</script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-21" ng-eval-javascript="controller.js"></div>
+</div></div>
+</div>
