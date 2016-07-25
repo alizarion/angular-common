@@ -22,7 +22,7 @@
  <style>
  </style>
  <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
+ <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)"></it-panel-form>
  </div>
  </file>
  <file name="controller.js">
@@ -34,9 +34,9 @@
           {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
           {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-          {"title":"titleSelect1", "code": "codeSelect1", "value":
+          {"title":"titleSelect1", "code": "codeSelect1", "items":
              [{"code": "code1", "value": "value1"},
-             {"code": "code2", "value": "value2"}],
+             {"code": "code2", "value": "value2"}], value:"code1",
           "type":"select"},
           {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
           {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
