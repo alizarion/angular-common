@@ -22,8 +22,7 @@
  <style>
  </style>
  <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" ></it-panel-form>
- </div>
+ <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
  </div>
  </file>
  <file name="controller.js">
@@ -32,9 +31,18 @@
         $scope.query = "";
         // require to link directive with scope
         $scope.options = [
-            {"title":"title", "value":"value", "type":$templateCache.get('inputElement.html')},
-            {"title":"title2", "value":"value2", "type":"type2"},
-            {"title":"title3", "value":"value3", "type":"type3"}
+          {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
+          {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+          {"title":"titleSelect1", "code": "codeSelect1", "value":
+             [{"code": "code1", "value": "value1"},
+             {"code": "code2", "value": "value2"}],
+          "type":"select"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
+          {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
+          "type":"textArea"},
+          {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
         ];
 
     }
@@ -43,44 +51,60 @@
  </file>
  </example>
  */
-IteSoft.directive('itPanelForm',['$q','$templateCache',function($q,$templateCache){
-    return{
-        restrict:'E',
-        scope:{
-            options:'='
+IteSoft.component('itPanelForm',{
+
+        bindings:{
+            options:'=',
+            dateFormat:'@',
+            updateLabel:'@',
+            update: '&'
         },
         template:'<div class="it-ac-panel-form">' +
-        '<div ng-repeat="option in options">' +
+        '<form name="$ctrl.form" novalidate>'+
+        '<div ng-repeat="option in $ctrl.options">' +
         '<div class="row">' +
-        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}}</label></div>' +
-        '<div class="col-xs-3 col-md-4 col-lg-6">{{option.value}}</div> : <ng-include src="inputElement.html"></ng-include>' +
+        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+        '<div ng-switch on="option.type">'+
+        '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
         '</div>' +
         '</div>' +
         '</div>' +
-        '<!------------------------------------------------------------------------------------------------------------------------------- FILTER --------------------------------------------------------------------------------------------------------------------------------> ' +
-        '<script type="text/ng-template" id="dropDownFilter.html"> ' +
-        '<div class="ui-grid-filter-container" ng-repeat="colFilter in col.filters"> ' +
-        '<it-autocomplete name="autocomplete" items="colFilter.options.data" selected-option="colFilter.term" input-class="col.headerCellClass" option-container-class="colFilter.class"> ' +
-        '</div> ' +
-        '</script> ' +
-        '<script type="text/ng-template" id="dateRangeFilter.html"> ' +
-        '<div class="ui-grid-filter-container"> ' +
-        '<span class="{{col.headerCellClass}}"> ' +
-        '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[0].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-        'placeholder="{{col.filters[0].emptyOption | translate}}" ng-model="col.filters[0].term" data-min-date="{{col.filters[0].dateMin}}" data-max-date="{{col.filters[1].term}}" data-autoclose="1" ' +
-        'name="date" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
-        '<input type="text" class="form-control {{col.headerCellClass}}_{{col.filters[1].emptyOption}}" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-        'placeholder="{{col.filters[1].emptyOption | translate}}" ng-model="col.filters[1].term" data-min-date="{{col.filters[0].term}}" data-max-date="{{col.filters[1].dateMax}}" data-autoclose="1" ' +
-        'name="date2" data-date-format="{{\'GLOBAL.DATE.FORMAT\' | translate}}" bs-datepicker> ' +
-        '</span> ' +
-        '</div> ' +
-        '</script> ' +
-        '<script type="text/ng-template" id="inputElement.html"> ' +
-        '<input type="text" class="form-control" ng-model="value">' +
-        //'<input type="text" class="form-control" ng-model="colFilter.term" pattern="{{colFilter.pattern}}" placeholder="{{colFilter.emptyOption | translate}}" maxlength="{{colFilter.maxLength}}"> ' +
-        '</script> ',
-        controllerAs: 'panelFormController',
-        controller: ['$scope','$templateCache', function($scope,$templateCache){
+        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>'+
+        '</div>'+
+        '<!------------------- Template label ------------------->'+
+        '<script type="text/ng-template" id="labelTemplate.html">' +
+        '<p>{{option.value}}</p>'+
+        '</script>'+
+        '<!------------------- Template input ------------------->'+
+        '<script type="text/ng-template" id="inputTemplate.html">' +
+        '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>'+
+        '</script>'+
+        '<!------------------- Template select ------------------->'+
+        '<script type="text/ng-template" id="selectTemplate.html">' +
+        '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+        ' ng-options="value.value for value in option.items"/>' +
+        '</select></p> '+
+        '</script>'+
+        '<!------------------- Template checkbox ------------------->'+
+        '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+        '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
+        '</script>' +
+        '<!------------------- Template textArea ------------------->'+
+        '<script type="text/ng-template" id="textAreaTemplate.html">' +
+        '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>'+
+        '</script>'+
+        '<!------------------- Template date ------------------->'+
+        '<script type="text/ng-template" id="dateTemplate.html">' +
+        '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+        'ng-model="option[\'value\']" data-autoclose="1" ' +
+        'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>'+
+        '</script>',
+        controller: ['$scope', function($scope){
 
             //TODO gérer la locale pour l'affichage des dates
             //Get current locale
@@ -88,9 +112,20 @@ IteSoft.directive('itPanelForm',['$q','$templateCache',function($q,$templateCach
 
             var self = this;
 
-            self.options = $scope.options;
+            if(self.dateFormat == undefined){
+                self.dateFormat = "dd/MM/yyyy";
+            }
 
-            $templateCache.put('templateId.html', 'This is the content of the template');
+            if(self.updateLabel == undefined){
+                self.updateLabel = "Update";
+            }
+
+
         }]
-    }
-}]);
+
+}).config(function($datepickerProvider) {
+    angular.extend($datepickerProvider.defaults, {
+        dateFormat: 'dd/MM/yyyy',
+        startWeek: 1
+    });
+});
