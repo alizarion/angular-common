@@ -35,33 +35,42 @@
  * </tr>
  * </table>
  *
- * For example, to configure and user the itConfig provider :
  *
  *
  * @example
-     <example module="itesoft">
-
-         <file name="Controller.js">
-
-            angular.module('itesoft')
-                .config(['itConfigProvider', function (itConfigProvider) {
-                    //configuration of default values
-                    itConfigProvider.defaultNamespace('CaptureOmnicanal');
-        			itConfigProvider.allowOverride(true);
-        			itConfigProvider.configFile("app/config/config.json.dev");
-                }]).controller('Mycontroller',['$scope','itConfig', '$log', function($scope, itConfig, $log) {
-					$log.info(itConfig.get()); // retrieve the properties on default namespace CaptureOmnicanal
-
-					$log.info(itConfig.get('common')); // retrieve the properties on namespace common
-
-					$log.info(itConfig.get().baseUrl); // retrieve the propertie baseUrl on default namespace CaptureOmnicanal
-
-                }]);
+<example module="itesoft">
+<file name="Controller.js">
+angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CaptureOmnicanal');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).controller('Mycontroller',['$scope','itConfig', '$log', function($scope, itConfig, $log) {
+			$log.info(itConfig.get()); // retrieve the properties on default namespace CaptureOmnicanal
+			$log.info(itConfig.get('common')); // retrieve the properties on namespace common
+			$log.info(itConfig.get().baseUrl); // retrieve the propertie baseUrl on default namespace CaptureOmnicanal
+			$scope.config=itConfig;
+	}]);
+</file>
+<file name="index.html">
+	<!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+	<div ng-controller="Mycontroller">
+		<p>All properties : {{config.get() | json}}</p>
+		<p>Other namespace properties : {{config.get('common') | json}}</p>
+		<p>One propertie : {{config.get().baseUrl}}</p>
+	</div>
          </file>
-         <file name="index.html">
-             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-         </file>
-     </example>
+         <file name="config.json">
+	{
+		"CaptureOmnicanal" : {
+			"baseUrl":"http://test/base"
+		},
+		"common": {
+			"debug":true
+		}
+	}
+</file>
+</example>
  **/
 IteSoft.provider('itConfig', [ function itConfigProvider() {
     var allowOverride = false;
@@ -80,9 +89,10 @@ IteSoft.provider('itConfig', [ function itConfigProvider() {
         defaultNamespace = value;
     };
 
-    this.$get = ['$http', 'itNotifier', '$location', function ConfigServiceFactory($http, itNotifier, $location) {
+    this.$get = ['$http', 'itNotifier', '$location', function itConfigFactory($http, itNotifier, $location) {
         var overrideConfig = $location.search();
         var self = this;
+        var baseConfig = {};
         // Load menu
         $http.get(configFile).then(function (response) {
             if (!allowOverride) {
