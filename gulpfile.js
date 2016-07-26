@@ -76,7 +76,7 @@ gulp.task('copy-sass', function(done) {
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
 gulp.task('sass', function(done) {
-    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
+    gulp.src(buildConfig.srcFolder + '/assets/scss/*.scss')
         .pipe(sass({
             errLogToConsole: true
         }))
