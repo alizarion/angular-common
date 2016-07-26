@@ -34,7 +34,7 @@ var chmod = require('gulp-chmod');
  * Execute les actions de build dans l'ordre
  */
 gulp.task('build', function(callback) {
-    runSequence('clean','sass','less',
+    runSequence('clean','sass','copy-sass','less',
         'css',
         ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js', 'copy-rename-files'],
         callback);
@@ -64,11 +64,18 @@ gulp.task('clean', function () {
 });
 
 /**
+ * Dépose les fichiers SCSS dans le répertoire /main/assets/css
+ */
+gulp.task('copy-sass', function(done) {
+    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
+        .on('end', done);
+});
+
+/**
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
 gulp.task('sass', function(done) {
-    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
-        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
     gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
         .pipe(sass({
             errLogToConsole: true
