@@ -1,0 +1,61 @@
+@charset "UTF-8";
+
+.excel-style-header {
+  height: 30px;
+  padding-left: 10px;
+  padding-right: 10px;
+  line-height: 30px;
+  border: 1px solid $headerBackColor;
+}
+
+.excel-style th {
+  background-color: #E1E1E2;
+}
+
+.it-lines-row-num {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #E1E1E2;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.it-row-selected .it-lines-row-num {
+  background-color: #3A89EB !important;
+  color: white;
+}
+
+tr.it-task-line td {
+  height: 40px;
+  background-color: #f9f9f9 !important;
+  border-bottom: 1pt solid #EEE;
+  color: $inputTextColor;
+  font-size: 15px;
+}
+
+.excel-style-settings {
+  background-size: 100%;
+  position: absolute;
+  top: 0;
+  right: 0px;
+  background: url("../../assets/img/task/setting_20_gray.svg") no-repeat;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  float: right;
+  border: 0;
+  font-family: none;
+  text-indent: 20000px;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 0px !important;
+}
+
+.table-striped > tbody > tr.excel-style-row-selected > td {
+  background-color: #3A89EB !important;
+  box-shadow: inner x, y-0px, -1px;
+  color: white;
+}
+

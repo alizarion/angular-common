@@ -1,0 +1,44 @@
+.scpas-tab-container{
+  background-color: white;
+}
+button.btn.header-tab[disabled] {
+  background-color: white !important;
+  color: $selectedtabColor !important;
+  border-left: 3px solid $highlightColor;
+  opacity: 1;
+}
+
+button.btn.header-tab {
+  height: 35px;
+  color: $tabColor !important;
+  background-color: $tabBackColor !important;
+  font-size: 12px;
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+
+button.btn.header-tab:hover {
+  background-color: #8A8F9B !important;
+  color: #F5F5F7 !important;
+}
+
+.color-danger {
+  color: $danger;
+}
+
+.color-warning {
+  color: $warning;
+}
+
+.under-tabs-container {
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 54px;
+}
+
+scpas-tab .btn {
+  color: $tabBackColor !important;
+  font-size: 12px;
+}

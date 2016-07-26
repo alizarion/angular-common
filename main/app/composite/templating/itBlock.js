@@ -3,7 +3,7 @@
  * @ngdoc directive
  * @name itesoft.directive:itBlock
  * @module itesoft
- * @restrict E
+ * @restrict EAC
  *
  * @description
  * The Block widgets provides  way to customize UI.

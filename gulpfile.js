@@ -69,13 +69,12 @@ gulp.task('clean', function () {
 gulp.task('sass', function(done) {
     gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
         .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
+    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
         .pipe(sass({
             errLogToConsole: true
         }))
         .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css'))
         .on('end', done);
-
-
 });
 
 /**
