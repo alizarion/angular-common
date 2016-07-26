@@ -1,6 +1,70 @@
 'use strict';
-IteSoft.factory('CurrentErrors', [function () {
 
+/**
+ * @ngdoc service
+ * @name itesoft.service:CurrentErrorsService
+ * @module itesoft
+ * @since 1.2
+ *
+ * @description
+ * Service that keep reference to error inside tabs
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Function
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasFatal(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is a fatal inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasError(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is an error inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasWarning(tabId)
+ *      </td>
+ *      <td>
+ *           Return true if there is a warning inside tab
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
+
+IteSoft.factory('CurrentErrors', [function () {
 
         function _isEmpty(obj) {
             for (var prop in obj) {

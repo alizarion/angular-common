@@ -4,9 +4,10 @@
  * @ngdoc service
  * @name itesoft.service:TabService
  * @module itesoft
+ * @since 1.2
  *
  * @description
- * Service that manage tab
+ * Service that manage tab link to itTab
  *
  * <h1>Attribute</h1>
  *  <table class="table">
@@ -35,13 +36,25 @@
  *      </td>
  *  </tr>
  *  </table>
- *  <h1>Exemple</h1>
- *
- * TabService.onTabChanged(function (selectedTabId) {
- *               self.isActiveTab = (selectedTabId == self.id);
- *           });
- *
- **/
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
 
 IteSoft.factory('TabService', [function () {
         var self = this;

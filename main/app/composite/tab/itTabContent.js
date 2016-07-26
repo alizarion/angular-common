@@ -2,8 +2,9 @@
 
 /**
  * @ngdoc directive
- * @name scpas.directive:scpasTabContent
- * @module scpas
+ * @name itesoft.directive:itTabContent
+ * @module itesoft
+ * @since 1.2
  * @restrict E
  *
  * @description
@@ -21,36 +22,47 @@
  *  </tr>
  *  <tr>
  *      <td>
- *          label
- *      </td>
- *      <td>
- *          Button Label
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *          id
  *      </td>
  *      <td>
  *          tab identifier (must be the same that tab id)
  *      </td>
  *  </tr>
+ *  <tr>
+ *      <td>
+ *         content-url
+ *      </td>
+ *      <td>
+ *          Template html url
+ *      </td>
+ *  </tr>
  *  </table>
- *  <h1>Exemple</h1>
- *
- *        <scpas-tab
- *          label="'FEATURE.COMPANY.TITLE'"
- *          id="'validate-header-tab-company'">
- *        </scpas-tab>
- *
- **/
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
 
 IteSoft.component('itsTabContent', {
         restrict: 'E',
         bindings: {
             id: '=',
-            contentUrl: '=',
-            viewController: '='
+            contentUrl: '='
         },
         template: '<div ng-show="$ctrl.isActiveTab"' +
         '                class="row-height-10 under-tabs-container bloc-border-left">' +
