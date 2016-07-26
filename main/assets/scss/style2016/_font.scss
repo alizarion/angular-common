@@ -1,14 +1,14 @@
 @font-face {
   font-family: 'Source Sans Pro';
   font-style: normal;
-  src: local("Source Sans Pro"), url(#{$itesoft-font-path}/SourceSansPro-Regular.woff2) format('woff2');
+  src: local("Source Sans Pro"), url(../../assets/fonts/SourceSansPro-Regular.woff2) format('woff2');
 }
 
 @font-face {
   font-family: 'Source Sans Pro';
   font-style: normal;
   font-weight: 700;
-  src: local("Source Sans Pro Bold"), url(#{$itesoft-font-path}/SourceSansPro-Bold.woff2) format('woff2');
+  src: local("Source Sans Pro Bold"), url(../../assets/fonts/SourceSansPro-Bold.woff2) format('woff2');
 }
 
 * {
