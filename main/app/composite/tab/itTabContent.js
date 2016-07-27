@@ -58,7 +58,7 @@
  </example>
  */
 
-IteSoft.component('itsTabContent', {
+IteSoft.component('itTabContent', {
         restrict: 'E',
         bindings: {
             id: '=',
