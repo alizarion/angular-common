@@ -23,7 +23,7 @@
 }
 
 .it-row-selected .it-lines-row-num {
-  background-color: #3A89EB !important;
+  background-color: $btnSuccessBackColor !important;
   color: white;
 }
 
@@ -54,14 +54,14 @@ tr.it-line td {
 }
 
 .table-striped > tbody > tr.excel-style-row-selected > td {
-  background-color: #3A89EB !important;
+  background-color: $btnSuccessBackColor !important;
   box-shadow: inner x, y-0px, -1px;
   color: white;
 }
 
 .it-header-tab {
   height: 25px;
-  color: #8A8F9B !important;
+  color: $btnWarningBackColor !important;
   background-color: #E1E1E2 !important;
   font-size: 11px;
   margin-top: 0px;

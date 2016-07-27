@@ -1,6 +1,6 @@
 .style2016 .it-side-menu .navbar .navbar-nav > .active > a, .navbar .navbar-nav > .active > a:focus, .navbar .navbar-nav > .active {
 
-  background-color: #3A89EB;
+  background-color: $btnSuccessBackColor;
   color: #F5F5F7;
 
 }
@@ -47,7 +47,7 @@
 }
 
 .style2016 it-side-menu nav ul li.active a .bubule {
-  color: #3A89EB !important;
+  color: $btnSuccessBackColor !important;
   background-color: #F5F5F7;
 }
 

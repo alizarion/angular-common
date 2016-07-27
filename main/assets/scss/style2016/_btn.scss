@@ -5,68 +5,68 @@
 }
 
 .btn-success {
-  background-color: #3A89EB !important;
-  color: #E1E1E2 !important;
+  background-color: $btnSuccessBackColor !important;
+  color: $btnSuccessBackColor !important;
 }
 
 .btn-success:hover {
-  background-color: #2B66B0 !important;
-  color: #F5F5F7 !important;
+  background-color: $btnSuccessHoverBackColor !important;
+  color: $btnSuccessHoverColor !important;
 }
 
 .btn-success[disabled] {
-  background-color: #3A89EB !important;
+  background-color: $btnSuccessBackColor !important;
   opacity: 0.5 !important;
-  color: #E1E1E2 !important;
+  color: $btnSuccessBackColor !important;
 }
 
 .btn-warning {
-  background-color: #8A8F9B !important;
-  color: #E1E1E2 !important;
+  background-color: $btnWarningBackColor !important;
+  color: $btnColor !important;
 }
 
 .btn-warning:hover {
-  background-color: #676B74 !important;
-  color: #F5F5F7 !important;
+  background-color: $btnWarningHoverBackColor !important;
+  color: $btnWarningHoverColor !important;
 }
 
 .btn-warning[disabled] {
-  background-color: #8A8F9B !important;
+  background-color: $btnWarningBackColor !important;
   opacity: 0.5 !important;
-  color: #E1E1E2 !important;
+  color: $btnColor !important;
 }
 
 .btn-primary {
   background-color: $btnPrimaryBackColor !important;
-  color: #E1E1E2 !important;
+  color: $btnColor !important;
   border: none !important;
 }
 
 .btn-primary:hover {
-  background-color: #676B74 !important;
-  color: #F5F5F7 !important;
+  background-color: $btnPrimaryHoverBackColor !important;
+  color: $btnPrimaryHoverColor !important;
 }
 
 .btn-primary[disabled] {
-  background-color: #8A8F9B !important;
+  background-color: $btnPrimaryDisableBackColor !important;
   opacity: 0.5 !important;
-  color: #E1E1E2 !important;
+  color: $btnColor !important;
 }
 
 .btn-danger {
-  background-color: #8A8F9B !important;
-  color: #E1E1E2 !important;
+  background-color: $btnDangerBackColor !important;
+  color: $btnColor !important;
 }
 
 .btn-danger:hover {
-  background-color: #676B74 !important;
-  color: #F5F5F7 !important;
+  background-color: $btnDangerHoverBackColor !important;
+  color: $btnDangerHoverColor !important;
 }
 
 .btn-danger[disabled] {
-  background-color: #8A8F9B !important;
+  background-color: $btnDangerDisableBackColor !important;
   opacity: 0.5 !important;
-  color: #E1E1E2 !important;
+  color: $btnColor !important;
 }
 
 .btn {
