@@ -199,8 +199,8 @@ gulp.task('docs', function () {
         .pipe(gulp.dest(buildConfig.docFolder));
     gulp.src(buildConfig.srcFolder + '/assets/css/style2016/style2016.css')
         .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
-    return  gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
-        .pipe(gulp.dest(buildConfig.docFolder +'/css/' + buildConfig.distFolder +'/assets/fonts'));
+    gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/fonts/'));
     return  gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
         .pipe(gulp.dest(buildConfig.docFolder +'/css/' + buildConfig.distFolder +'/assets/fonts'));
 
