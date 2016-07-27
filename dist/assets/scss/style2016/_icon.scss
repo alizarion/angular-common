@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'itesoftIcons';
+  src: local("itesoftIcons"), url(../../assets/fonts/itesoftIcons.woff2) format('woff2');
+}
+
+.fa-16x{
+  font-size: 1.6em;
+}
+
+.fa-slim{
+  -webkit-text-stroke: 0.8px white;
+  color: #AAA;
+}
+
+.it-icon{
+  margin-top: 7px;
+  margin-left: -2px;
+  height: 55px;
+  display: block;
+  font-size: 55px;
+  font-weight: 100;
+  font-family: "itesoftIcons";
+  font-style: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.small-btn .error_validate{
+  font-weight: 100;
+  font-size: 40px;
+}
+
+.error_validate{
+  top: -17px;
+  left: 0px;
+  display: inline-block;
+  position: absolute;
+}
+
+.error_validate:before {
+  content: "\EA04";
+}
+
+.menu_admin:before {
+  content: "\EA1B";
+}
+
+.menu_home:before {
+  content: "\EA1C";
+}
+
+.menu_rapport:before {
+  content: "\EA1D";
+}
+
+.menu_search:before {
+  content: "\EA1E";
+}
+
+.menu_settings:before {
+  content: "\EA1F";
+}
+
+.menu_task:before {
+  content: "\EA20";
+}

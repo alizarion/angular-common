@@ -4,16 +4,18 @@
 
 var itMultiPagesViewer = angular.module('it-multi-pages-viewer', []);
 
-var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer']);
+var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer', 'ui.layout']);
 
-var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer']);
+var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'ui.layout']);
 
-var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']); 
+var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
+
+var itTab = angular.module("it-tab",[]);
 
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.bootstrap.tabs',
-    'ui.bootstrap.modal',
+    'itesoft.popup',
     'ui.bootstrap.tpls',
     'ngAnimate',
     'matchMedia',
@@ -35,57 +37,10 @@ var IteSoft = angular.module('itesoft', [
     'it-pdf-viewer',
     'it-image-viewer',
     'it-tiff-viewer',
-    'ngWebSocket'
+    'it-tab',
+    'itesoft.messaging',
+    'itesoft.language'
 ]);
-
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
 
 'use strict';
 
@@ -1618,6 +1573,10 @@ IteSoft
  *  <tr>
  *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
  *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
+ *  </tr>
+ * <tr>
+ *   <td><code>attribute it-lock-on-change="true|false"</code></td>
+ *   <td>lock navigation if the selected item has changed.</td>
  *  </tr>
  *  <tr>
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
@@ -3215,8 +3174,8 @@ IteSoft
 
             },
             controllerAs: 'itAutocompleteCtrl',
-            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log',
-                function ($scope, $rootScope, $translate, $document, $timeout, $log) {
+            controller: ['$scope', '$rootScope', '$translate', '$document', '$timeout', '$log', 'itStringUtilsService',
+                function ($scope, $rootScope, $translate, $document, $timeout, $log, itStringUtilsService ) {
 
                     var self = this;
 
@@ -3284,106 +3243,9 @@ IteSoft
                      */
                     self.fields.optionContainerId = _generateID();
 
-                    self.cleanDomRef = {
-                        _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-                        encode: function (e) {
-                            if (e) {
-                                var t = "";
-                                {
-                                }
-                                var n, r, i, s, o, u, a;
-                                var f = 0;
-                                e = self.cleanDomRef._utf8_encode(e);
-                                while (f < e.length) {
-                                    n = e.charCodeAt(f++);
-                                    r = e.charCodeAt(f++);
-                                    i = e.charCodeAt(f++);
-                                    s = n >> 2;
-                                    o = (n & 3) << 4 | r >> 4;
-                                    u = (r & 15) << 2 | i >> 6;
-                                    a = i & 63;
-                                    if (isNaN(r)) {
-                                        u = a = 64
-                                    } else if (isNaN(i)) {
-                                        a = 64
-                                    }
-                                    t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
-                                }
-                                return t
-                            }
-                        },
-                        decode: function (e) {
-                            var t = "";
-                            var n, r, i;
-                            var s, o, u, a;
-                            var f = 0;
-                            if (e.replace) {
-                                e = e.replace(/[^A-Za-z0-9+/=]/g, "");
-                                while (f < e.length) {
-                                    s = this._keyStr.indexOf(e.charAt(f++));
-                                    o = this._keyStr.indexOf(e.charAt(f++));
-                                    u = this._keyStr.indexOf(e.charAt(f++));
-                                    a = this._keyStr.indexOf(e.charAt(f++));
-                                    n = s << 2 | o >> 4;
-                                    r = (o & 15) << 4 | u >> 2;
-                                    i = (u & 3) << 6 | a;
-                                    t = t + String.fromCharCode(n);
-                                    if (u != 64) {
-                                        t = t + String.fromCharCode(r)
-                                    }
-                                    if (a != 64) {
-                                        t = t + String.fromCharCode(i)
-                                    }
-                                }
-                            }
-                            t = cleanDomRef._utf8_decode(t);
-                            return t
-                        },
-                        _utf8_encode: function (e) {
-                            var t = "";
-                            if (e.replace) {
-                                e = e.replace(/rn/g, "n");
-                                for (var n = 0; n < e.length; n++) {
-                                    var r = e.charCodeAt(n);
-                                    if (r < 128) {
-                                        t += String.fromCharCode(r)
-                                    } else if (r > 127 && r < 2048) {
-                                        t += String.fromCharCode(r >> 6 | 192);
-                                        t += String.fromCharCode(r & 63 | 128)
-                                    } else {
-                                        t += String.fromCharCode(r >> 12 | 224);
-                                        t += String.fromCharCode(r >> 6 & 63 | 128);
-                                        t += String.fromCharCode(r & 63 | 128)
-                                    }
-                                }
-                            }
-                            return t
-                        },
-                        _utf8_decode: function (e) {
-                            var t = "";
-                            var n = 0;
-                            var r = c1 = c2 = 0;
-                            while (n < e.length) {
-                                r = e.charCodeAt(n);
-                                if (r < 128) {
-                                    t += String.fromCharCode(r);
-                                    n++
-                                } else if (r > 191 && r < 224) {
-                                    c2 = e.charCodeAt(n + 1);
-                                    t += String.fromCharCode((r & 31) << 6 | c2 & 63);
-                                    n += 2
-                                } else {
-                                    c2 = e.charCodeAt(n + 1);
-                                    c3 = e.charCodeAt(n + 2);
-                                    t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
-                                    n += 3
-                                }
-                            }
-                            return t
-                        }
-                    };
 
-                    /**
+
+                     /**
                      * Create a random name to have an autogenerate id for log
                      */
                     if (angular.isUndefined(self.fields.name)) {
@@ -3635,7 +3497,7 @@ IteSoft
                             self.fields.selectedItem = _getObject(selectedItem);
                             //self.fields.selectedItem.class = self.fields.selectedSelectClass;
 
-                            var selectedDiv = $document[0].querySelector("#options_" + self.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
+                            var selectedDiv = $document[0].querySelector("#options_" + itStringUtilsService.cleanDomRef.encode(_getIdFromObject(self.fields.selectedItem) + ""));
                             scrollTo(selectedDiv,selectedItem);
                         } else {
                             self.fields.selectedItem = undefined;
@@ -3747,7 +3609,7 @@ IteSoft
                                  * StartsWith
                                  */
                                 if (self.fields.searchMode == "startsWith") {
-                                    if (_getLower(_getLabelFromObject(item)).startsWith(_getLower(self.fields.inputSearch))) {
+                                    if (itStringUtilsService.clear(_getLabelFromObject(item)).startsWith(itStringUtilsService.clear(self.fields.inputSearch))) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
                                         i++;
@@ -3767,7 +3629,7 @@ IteSoft
                                      * Contains
                                      */
                                 } else {
-                                    if (_getLower(_getLabelFromObject(item)).search(_getLower(self.fields.inputSearch)) != -1) {
+                                    if (itStringUtilsService.clear(_getLabelFromObject(item)).search(itStringUtilsService.clear(self.fields.inputSearch)) != -1) {
                                         self.fields.items.push(item);
                                         //self.fields.items[i].position = i;
                                         i++;
@@ -3809,12 +3671,12 @@ IteSoft
                      */
                     $scope.keys = [];
 
-                    const KEY_ENTER = 13;
-                    const KEY_DOWN = 38;
-                    const KEY_UP = 40;
-                    const KEY_BACK = 8;
-                    const KEY_DELETE = 8;
-                    const KEY_ESCAPE = 27;
+                    var KEY_ENTER = 13;
+                    var KEY_DOWN = 38;
+                    var KEY_UP = 40;
+                    var KEY_BACK = 8;
+                    var KEY_DELETE = 8;
+                    var KEY_ESCAPE = 27;
 
                     $scope.keys.push({
                         code: KEY_ENTER, action: function () {
@@ -3887,21 +3749,7 @@ IteSoft
                         return uuid;
                     };
 
-                    /**
-                     *
-                     * @param value
-                     * @returns {string}
-                     * @private
-                     */
-                    function _getLower(value) {
-                        var result = "";
-                        if (angular.isDefined(value) && value.toLowerCase) {
-                            result += value.toLowerCase();
-                        } else {
-                            result += value;
-                        }
-                        return result;
-                    }
+
 
                     /**
                      *  Return label from current object by using converter,
@@ -3982,7 +3830,7 @@ IteSoft
             '   <div  ng-class="itAutocompleteCtrl.fields.optionContainerClass" id="{{itAutocompleteCtrl.fields.optionContainerId}}" ng-show="itAutocompleteCtrl.fields.showItems" >' +
             '       <div class="it-autocomplete-content"  ng-repeat="item in itAutocompleteCtrl.fields.items"> ' +
             '          <div class=" {{item == itAutocompleteCtrl.fields.selectedItem?itAutocompleteCtrl.fields.selectedSelectClass: itAutocompleteCtrl.fields.defaultSelectClass}}"' +
-            '               id="{{\'options_\'+itAutocompleteCtrl.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
+            '               id="{{\'options_\'+itAutocompleteCtrl.itStringUtilsService.cleanDomRef.encode(itAutocompleteCtrl.fn.getIdFromObject(item))}}"  ' +
             '               ng-mousedown="itAutocompleteCtrl.fn.select(item)">' +
             '               {{itAutocompleteCtrl.fn.getLabelFromObject(item)}}' +
             '           </div>' +
@@ -4550,12 +4398,28 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Callback to be notify when the property api is available.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
+ *   <td>Callback to be notify when template not found for the specify extension.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
+ *   <td>Set orientation of the viewer.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
  *   <td>Hide | Show progress bar.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.showToolbar  = true | false</code></td>
  *   <td>Hide | Show tool bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showThumbnail  = true | false</code></td>
+ *   <td>Hide | Show thumbnail.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showSizeMenu  = true | false</code></td>
+ *   <td>Hide | Show size menu.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
@@ -4566,7 +4430,7 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
  *  </tr>
  *  <tr>
- *   <td><code>options.api</code></td>
+ *   <td><code>options.getApi()</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
  *  <tr>
@@ -4630,9 +4494,17 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  *   <td>Method to rotate to the left (per -90°) the current page.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.onError = function (operation, message) { }</code></td>
+ *   <td>Callback to be notify on error.</td>
+ *  </tr>
+ *  <tr>
  *  <tr>
  *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
  *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
+ *   <td>Callback to be notify on page rotation.</td>
  *  </tr>
  *   <td><code>options.api.downloadProgress</code></td>
  *   <td>% of progress.</td>
@@ -4640,7 +4512,26 @@ IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $comp
  * </table>
  *
  * ```html
- *     <it-media-viewer></it-media-viewer>
+ *    <style>
+         //override style selection
+         .multipage-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         .thumbnail-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         //override thumbnail num-page
+         .thumbnail-viewer .num-page {
+         	text-align: center;
+         }
+      </style>
+ *    <it-media-viewer></it-media-viewer>
  * ```
  *
  * @example
@@ -4670,16 +4561,19 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
     };
 
     var linker = function (scope, element, attrs) {
+
         var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "js/dist/assets/lib";
+            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
             switch (ext) {
                 case 'pdf':
                     scope.pdfSrc = value;
                     itScriptService.LoadScripts([
-                        pathJs + '/pdf.js'
+                        pathJs + '/pdf.js',
                     ]).then(function() {
                         //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
                         PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
+                        //PDFJS.imageResourcesPath = pathJs + "/images";
                         scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
                     });
                     break;
@@ -4699,26 +4593,33 @@ IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService)
                     });
                     break;
                 default :
-                    scope.template = 'No template found for extension : '  + ext;
+                    if(scope.options && scope.options.onTemplateNotFound) {
+                        scope.options.onTemplateNotFound(ext);
+                    }
+                    $log.debug('No template found for extension : ' + ext);
+                    scope.template = null;
                     break;
             }
         };
 
-        var _setValue = function(value) {
-            if(value){
-                if(typeof value === typeof ""){
-                    scope.ext = _splitLast(value, '.').toLowerCase();
-                    _setTemplate(scope.ext, value);
+        var _setValue = function(newValue, oldValue) {
+            if(newValue){
+                if(typeof newValue === typeof ""){
+                    scope.ext = _splitLast(newValue, '.').toLowerCase();
+                    _setTemplate(scope.ext, newValue);
                 } else {
                     if(attrs.type) {
-                        _setTemplate(attrs.type, value);
-                    }else if(value.name != undefined) {
-                        scope.ext = _splitLast(value.name, '.').toLowerCase();
-                        _setTemplate(scope.ext, value);
+                        _setTemplate(attrs.type.toLowerCase(), newValue);
+                    }else if(newValue.name != undefined) {
+                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
+                        _setTemplate(scope.ext, newValue);
                     } else {
-                        scope.template = 'must specify type when using stream';
+                        $log.debug('must specify type when using stream');
+                        scope.template = null;
                     }
                 }
+            } else if(newValue != oldValue) {
+                scope.template = null;
             }
         };
 
@@ -5268,11 +5169,11 @@ IteSoft
             transclude : true,
             scope:false,
             link:function(scope, element, attrs ){
-                scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
 
+                calculateWidth();
 
                 scope.$watch(function(){
-                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                    calculateWidth();
                 });
 
                 var sideMenuHeader = angular.element(document
@@ -5280,17 +5181,21 @@ IteSoft
                 if(!sideMenuHeader[0]){
                    scope.$noMenuHeader = true;
                 }
+
+                function calculateWidth(){
+                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                    scope.sideMenuCalc1 = { 'width': (scope.itSideMenuWidth * 1) + (50 * 1) + 'px' };
+                    scope.sideMenuCalc2 = { 'width': scope.$itSideMenuWidth + 'px' };
+                }
             },
             template :
-                '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div style="width:{{($itSideMenuWidth * 1 ) + (50 * 1)}}px;"  class="it-sidebar-inner">'+
-                        '<div style="width:{{$itSideMenuWidth}}px;" class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
+            '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                '<div ng-style="sideMenuCalc1"  class="it-sidebar-inner">' +
+                    '<div ng-style="sideMenuCalc2" class="nav navbar navbar-inverse">' +
+                    '<nav class="" ng-transclude ></nav>' +
                     '</div>'+
-                '</div>'
-
-
+                '</div>'+
+            '</div>'
         }
 });
 'use strict';
@@ -5323,11 +5228,21 @@ IteSoft
                 if(!sideMenuHeader[0]){
                     scope.showmenu = true;
                 }
+
+                calculatePadding();
+                scope.$watch('$itSideMenuWidth',function(){
+                    calculatePadding();
+                });
+
+                function calculatePadding(){
+                    scope.menuOpenStyle = {'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px'};
+                    scope.menuCloseStyle = {'padding-left': '0px'};
+                }
             },
             template :
-                '<div class="it-menu-content"  style="padding-left : {{showmenu ? $itSideMenuWidth : 0}}px">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+                '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
         }
     });
 'use strict';
@@ -6400,6 +6315,646 @@ IteSoft
     });
 
 
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name style2016.directive:style2016
+ * @module style2016
+ * @restrict C
+ * @since 1.1
+ * @description
+ * Itesoft style 2016 (like SCPAS)
+ *
+ * To enable it just add
+ * <pre class="prettyprint linenums">
+ * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
+ * </pre>
+ * add the begin of your principal scss file
+ *
+ * <h3>Icon</h3>
+ *
+ * Class that can be used to show itesoftIcons:
+ * <ul>
+ *     <li>
+ *         error_validate
+ *     </li>
+ *     <li>
+ *         menu_admin
+ *     </li>
+ *     <li>
+ *         menu_home
+ *     </li>
+ *     <li>
+ *         menu_rapport
+ *     </li>
+ *     <li>
+ *         menu_search
+ *     </li>
+ *     <li>
+ *         menu_settings
+ *     </li>
+ *     <li>
+ *         menu_task
+ *     </li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <link rel="stylesheet" href="css/style2016.css" type="text/css">
+     <div style="background-color:#EEEEEE">
+         <div style="height:200px">
+             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+                 <li class="logo">
+                 <a href="#" class="no-padding">
+
+                 </a>
+                 </li>
+                 <li it-collapsed-item>
+                 <a href="#/home"><i class="it-icon menu_home"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/search"><i class="it-icon menu_search"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/task"><i class="it-icon menu_task"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/settings"><i class="it-icon menu_settings"></i></a>
+                 </li>
+             </ul>
+         </div>
+         <div >
+             <div class="row-height-10 dashboard-with-footer" style="height:500px;padding-top:100px;position:relative">
+                 <div class="col-xs-12" style="height:185px;margin-top: -185px">
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">14
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Tasks
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">12
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Invoices
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">1
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Capture
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">15
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Scan
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">22
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Image
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+
+                 <div class="row-height-10 dashboard-container-with-footer">
+                 <div class="left-panel row-height-10 col-xs-4">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 LEFT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 <div class="dashboard-scrollable-content smooth">
+                 left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="middle-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 MIDDLE
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 <div class="right-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 RIGHT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="it-button-bar" style="text-align: right">
+                     <button class="btn btn-success it-button-do">
+                     <span class="ng-binding">
+                     Capturer
+                     </span>
+                     </button>
+                     <button class="btn btn-primary it-button-do">
+                     <span class="ng-binding">
+                     Envoyer
+                     </span>
+                     </button>
+                 </div>
+             </div>
+         </div>
+
+         <div style="height:500px;overflow: auto">
+             <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+             <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+             <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+             <table ng-controller="HomeCtrl as $ctrl" class="table-condensed-small table-striped col-md-12"> <thead> <tr class="it-header-tab"> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.TASK_NAME' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.DATE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CATEGORY' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CODE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.DOC_NUMBER' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.NET_AMOUNT' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.TOTAL_AMOUNT' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.SUPPLIER' | translate}} </th> <th class="nowrap text-left excel-style-header"></th> <th class="nowrap text-left excel-style-header"><span class="excel-style-settings"></span></th> </tr> </thead> <tbody class="row-height-10"> <tr ng-repeat="item in $ctrl.invoices" class="it-line" ng-class="{'excel-style-row-selected': $ctrl.selectedLine.id == item.id}" ng-dblclick="$emit('goToCodingForm',{event: $event, invoiceId: $ctrl.selectedLine.invoice.id, attachmentId: $ctrl.selectedLine.attachment.id, taskId: $ctrl.selectedLine.id, taskName: $ctrl.selectedLine.name})"> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-task-name nowrap text-left excel-style-header no-border"> <span class="it-task-invoice-type">{{'TASK.DOCUMENT.TYPE.'+item.invoice.type | translate}}</span>&nbsp;{{$ctrl.taskService.getTranslatedTaskName(item.name)}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-date nowrap text-left excel-style-header no-border"> {{item.invoice.date | date:'dd/MM/yyyy HH:mm'}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-category nowrap text-left excel-style-header no-border"> {{'TASK.DOCUMENT.CATEGORY.'+item.invoice.category | translate}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-itesoft-id nowrap text-left excel-style-header no-border"> {{item.invoice.code}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-doc-number nowrap text-left excel-style-header no-border"> {{item.docNumber}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-net-amount nowrap text-right excel-style-header no-border"> {{item.netAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-total-amount nowrap text-right excel-style-header no-border"> {{item.totalAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-supplier-name nowrap text-left excel-style-header no-border"> {{item.supplierName}} </div> </td> <td colspan="2" ng-click=""> <button class="small-btn btn-primary" title="{{'GLOBAL.BUTTON.FOLLOW_REMOVE' | translate}}"> <i class="fa fa-trash"></i> </button> </td> </tr> </tbody> </table>
+        </div>
+     </div>
+
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+  var self = this; self.selectedLine = {} ; self.invoices = [{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 } ]; self.updateSelectedLine = function (item) { self.selectedLine = item; };
+  }]) ;
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name itesoft.service:CurrentErrorsService
+ * @module itesoft
+ * @since 1.2
+ *
+ * @description
+ * Service that keep reference to error inside tabs
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Function
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasFatal(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is a fatal inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasError(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is an error inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasWarning(tabId)
+ *      </td>
+ *      <td>
+ *           Return true if there is a warning inside tab
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
+
+IteSoft.factory('CurrentErrors', [function () {
+
+        function _isEmpty(obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        function _isArrayEmpty(obj) {
+            if (!angular.isDefined(obj) || !angular.isArray(obj)) {
+                return false;
+            }
+
+            return obj.length == 0;
+        };
+
+        return {
+            //Technical errors
+            technicalErrors: [],
+
+            //Error levels
+            fatals: {},
+            errors: {},
+            warnings: {},
+
+            // Errors levels by tabs
+            fatalsByTabs: {},
+            errorsByTabs: {},
+            warningsByTabs: {},
+
+            init: function () {
+                this.fatals = {};
+                this.errors = {};
+                this.warnings = {};
+                this.fatalsByTabs = {};
+                this.errorsByTabs = {};
+                this.warningsByTabs = {};
+            },
+            hasFatalOrHigher: function () {
+                return this.hasFatal() || this.hasTechnical();
+            },
+            hasTechnical: function () {
+                return !_isArrayEmpty(this.technicalErrors);
+            },
+            hasFatal: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.fatalsByTabs[tab])) {
+                        return !_isEmpty(this.fatalsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+
+                } else {
+                    return !_isEmpty(this.fatals);
+                }
+                return false;
+            },
+            hasError: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.errorsByTabs[tab])) {
+                        return !_isEmpty(this.errorsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+
+                } else {
+                    return !_isEmpty(this.errors);
+                }
+                return false;
+            },
+            hasWarning: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.warningsByTabs[tab])) {
+                        return !_isEmpty(this.warningsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return !_isEmpty(this.warnings);
+                }
+                return false;
+            }
+        };
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name it-tab.directive:itTab
+ * @module it-tab
+ * @since 1.2
+ * @restrict E
+ *
+ *
+ * @description
+ * Button that represent tab header
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          label
+ *      </td>
+ *      <td>
+ *          Button Label
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          id
+ *      </td>
+ *      <td>
+ *          tab identifier (must be the same that tab content id)
+ *      </td>
+ *  </tr>
+ *  </table>
+ *  <h1>Exemple</h1>
+ *
+ *        <it-tab
+ *          label="'FEATURE.COMPANY.TITLE'"
+ *          id="'validate-header-tab-company'">
+ *        </it-tab>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+itTab.component('itTab', {
+        bindings: {
+            id: '=',
+            label: '='
+        },
+        template: '<button class="btn header-tab full-width " ng-click="$ctrl.changeTab()"' +
+        ' title="{{\'ACCOUNTING_CODING.PAYMENT.TITLE\' |translate }}" ng-disabled="$ctrl.isActiveTab"> <i class="fa' +
+        ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.hasError()"></i> ' +
+        '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
+    controller
+:
+['$rootScope',  'CurrentErrors', 'TabService', function ($rootScope, CurrentErrors, TabService) {
+
+    var self = this;
+    self.isActiveTab = false;
+
+    self.hasError = _hasError;
+    self.hasWarning = _hasWarning;
+    self.changeTab = _changeTab;
+
+    self.isActiveTab = (TabService.currentActiveTabId == self.id);
+    TabService.onTabChanged(function (selectedTabId) {
+        self.isActiveTab = (selectedTabId == self.id);
+    });
+
+    function _changeTab() {
+        TabService.changeTab(self.id);
+    }
+
+    function _hasError() {
+        return CurrentErrors.hasError(self.id);
+    }
+
+    function _hasWarning() {
+        return CurrentErrors.hasWarning(self.id);
+    }
+}]
+})
+;
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name it-tab.directive:itTabContent
+ * @module it-tab
+ * @since 1.2
+ * @restrict E
+ *
+ * @description
+ * Div that represent tab content
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          id
+ *      </td>
+ *      <td>
+ *          tab identifier (must be the same that tab id)
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *         content-url
+ *      </td>
+ *      <td>
+ *          Template html url
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+
+itTab.component('itTabContent', {
+        restrict: 'E',
+        bindings: {
+            id: '=',
+            contentUrl: '='
+        },
+        template: '<div ng-show="$ctrl.isActiveTab"' +
+        '                class="row-height-10 under-tabs-container bloc-border-left">' +
+        '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
+        '               ng-include="$ctrl.contentUrl"></div>' +
+        '           </div>',
+        controller: ['$rootScope', 'TabService',
+            function ($rootScope, TabService) {
+
+                var self = this;
+                self.isActiveTab = false;
+
+                self.isActiveTab = (TabService.currentActiveTabId == self.id);
+
+                TabService.onTabChanged(function (selectedTabId) {
+                    self.isActiveTab = (selectedTabId == self.id);
+                });
+
+            }]
+    });
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name it-tab.service:TabService
+ * @module it-tab
+ * @since 1.2
+ *
+ * @description
+ * Service that manage tab link to itTab
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Function
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          changeTab(newTabId)
+ *      </td>
+ *      <td>
+ *          Change current tab to newTabId
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          onTabChanged
+ *      </td>
+ *      <td>
+ *          CallBack method call when tab changed
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
+
+itTab.factory('TabService', [function () {
+        var self = this;
+        self.tabChangedCallBacks = [];
+        self.changeTab = _changeTab;
+        self.onTabChanged = _onTabChanged;
+        self.currentActiveTabId = "";
+
+        /**
+         * Change current active tab
+         * @param newTabId
+         * @private
+         */
+        function _changeTab(newTabId) {
+            self.currentActiveTabId = newTabId;
+            self.tabChangedCallBacks.forEach(function (callBack) {
+                if (angular.isDefined(callBack)) {
+                    callBack(newTabId);
+                }
+            })
+        }
+
+        /**
+         * Register listener changed
+         * @param callBack
+         * @private
+         */
+        function _onTabChanged(callBack) {
+            self.tabChangedCallBacks.push(callBack)
+        }
+
+        return self;
+    }]);
+
 /**
  * Created by sza on 22/04/2016.
  */
@@ -6422,8 +6977,8 @@ IteSoft
                     CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/build'),
                 preview: $resource(
                     CONFIG.REST_TEMPLATE_API_URL + '/api/rest/packages/preview'),
-                'new': function (name, ref, position, content, roleAllowed, version) {
-                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version};
+                'new': function (name, ref, position, content, roleAllowed, version, removed, element) {
+                    return {'name': name, 'position': position, 'ref': ref, 'content': content, 'role': roleAllowed, 'version': version, 'removed':removed=="true"?true:false, 'element':element};
                 },
             }
         }]);
@@ -6432,7 +6987,7 @@ IteSoft
  * @ngdoc directive
  * @name itesoft.directive:itBlock
  * @module itesoft
- * @restrict E
+ * @restrict EAC
  *
  * @description
  * The Block widgets provides  way to customize UI.
@@ -6461,57 +7016,57 @@ IteSoft
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-    <div ng-controller="HomeCtrl">
-         <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-         <it-block-control-panel></it-block-control-panel>
-         <it-block name="zone-coding-lines-actions3" style="margin:10px">
-         <it-block name="login_input" role="RD">
-         <div class="form-group">
-         <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
-         </div>
-         </it-block>
-         <it-block name="coding-lines-add3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
-         ng-click="codingController.addNewLine()">
-         <span class="fa fa-plus fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-remove3">
-         <button class="btn btn-danger col-xs-2"
-         title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
-         ng-click="codingController.removeNewLine()">
-         <span class="fa fa-trash fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-duplicate3">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
-         ng-click="codingController.duplicateLine()">
-         <span class="fa fa-copy fa-lg"/>
-         </button>
-         </it-block>
-         <it-block name="coding-lines-memorize3" removed="true">
-         <button class="btn btn-primary col-xs-2"
-         title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
-         ng-click=""
-         disabled>
-         <span class="fa fa-folder fa-lg"/>
-         </button>
-         </it-block>
-         </it-block>
-         <br/>
-         <br/>
-         <br/>
-         <br/>
-         <it-block name="zone-grid-example">
-            <div id="grid1" ui-grid="gridOptions" class="grid"></div>
-         </it-block>
-    </div>
+ <div ng-controller="HomeCtrl">
+ <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+ <it-block-control-panel></it-block-control-panel>
+ <it-block name="zone-coding-lines-actions3" style="margin:10px">
+ <it-block name="login_input" role="RD">
+ <div class="form-group">
+ <input it-input class="form-control floating-label" type="text" it-label="Email" ng-model="user.email"/>
+ </div>
+ </it-block>
+ <it-block name="coding-lines-add3" removed="true">
+ <button class="btn btn-primary col-xs-2"
+ title="{{'CODING.LINES.BUTTON.ADD' | translate}}"
+ ng-click="codingController.addNewLine()">
+ <span class="fa fa-plus fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-remove3">
+ <button class="btn btn-danger col-xs-2"
+ title="{{'CODING.LINES.BUTTON.REMOVE' | translate}}"
+ ng-click="codingController.removeNewLine()">
+ <span class="fa fa-trash fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-duplicate3">
+ <button class="btn btn-primary col-xs-2" disabled="true"
+ title="{{'CODING.LINES.BUTTON.DUPLICATE' | translate}}"
+ ng-click="codingController.duplicateLine()">
+ <span class="fa fa-copy fa-lg"/>
+ </button>
+ </it-block>
+ <it-block name="coding-lines-memorize3" removed="true">
+ <button class="btn btn-primary col-xs-2"
+ title="{{'CODING.LINES.BUTTON.MEMORIZE' | translate}}"
+ ng-click=""
+ disabled>
+ <span class="fa fa-folder fa-lg"/>
+ </button>
+ </it-block>
+ </it-block>
+ <br/>
+ <br/>
+ <br/>
+ <br/>
+ <it-block name="zone-grid-example">
+ <div id="grid1" ui-grid="gridOptions" class="grid"></div>
+ </it-block>
+ </div>
  </file>
  <file name="Module.js">
-     angular.module('itesoft-showcase',['itesoft','ngResource'])
-     .constant("CONFIG", {
+ angular.module('itesoft-showcase',['itesoft','ngResource'])
+ .constant("CONFIG", {
                 "REST_TEMPLATE_API_URL": "http://localhost:8082",
                 "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
                 "ENABLE_TEMPLATE_EDITOR": true,
@@ -6522,9 +7077,9 @@ IteSoft
                 });
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope','$rootScope','$http','uiGridGroupingConstants',
-     function($scope,$rootScope,$http,uiGridGroupingConstants) {
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ ['$scope','$rootScope','$http','uiGridGroupingConstants',
+ function($scope,$rootScope,$http,uiGridGroupingConstants) {
                        $rootScope.editSite = true;
                        $scope.myData = [];
             // sample values
@@ -6564,120 +7119,16 @@ IteSoft
  </file>
  </example>
  */
-IteSoft.directive('itBlock',
-    [
-        function () {
-            return {
-                restrict: 'E',
-                scope: true,
-                transclude: true,
-                template:
-                '<ng-transclude  ' +
-                'class="{{itBlockController.hilightClass}}" ' +
-                'ng-mouseover="itBlockController.over()" ' +
-                'ng-mouseleave="itBlockController.leave()" ' +
-                'ng-if="!removed || $root.editSite"> ' +
-                '</ng-transclude>',
-                controllerAs: 'itBlockController',
-                link: function ($scope, element, attrs, ctrl, transclude) {
-                    transclude($scope, function (content) {
-                        var myContent = "";
-                        angular.forEach(content, function (contentLine) {
-                            if (contentLine.outerHTML) {
-                                myContent += contentLine.outerHTML;
-                            }
-                        });
-                        $scope.content = myContent;
-                    });
-                    /**
-                     * Get attributes values
-                     */
-                    $scope.ref = attrs["ref"];
-                    $scope.role = attrs["role"];
-                    $scope.position = attrs["position"];
-                    $scope.name = attrs["name"];
-                    $scope.removed = false;
-                    $scope.element = element;
-                    $scope.version = attrs["version"];
-                    if (angular.isDefined(attrs["removed"]) && attrs["removed"] == "true" ) {
-                        $scope.removed = attrs["removed"];
-                    }
-                    this.fields = {};
-                    /**
-                     * Call when attributes are read
-                     */
-                    ctrl.onRegisterApi();
-
-                },
-                controller: ['$scope','$rootScope', '$location', '$log', '$interval', '$timeout','$document', 'itPopup', 'BlockService', 'PilotSiteSideService',
-                    function ($scope,$rootScope, $location, $log, $interval,$timeout, $document, itPopup, BlockService, PilotSiteSideService) {
-
-                        var self = this;
-                        self.focusable = false;
-
-                        /**
-                         * Call when block is selected by control panel
-                         */
-                        $rootScope.$on("hilightBlock",function(event,block){
-                            if(angular.isDefined(block) && block.name == self.block.name) {
-                                self.hilightClass="block-hilight";
-                            }else{
-                                if($scope.removed){
-                                    self.hilightClass = "block-removed";
-                                }else {
-                                    self.hilightClass = "";
-                                }
-                            }
-                        });
-
-                        /**
-                         * Call when attributes are read
-                         */
-                        self.onRegisterApi = function(){
-                            self.block = BlockService.new($scope.name, $scope.ref, $scope.position, $scope.content, $scope.role, $scope.version);
-                            self.block.removed= $scope.removed;
-                        };
-
-                        /**
-                         * Call when mouse leave block
-                         */
-                        self.leave = function () {
-                            $rootScope.$emit("unSelectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when mouse is over block
-                         */
-                        self.over = function () {
-                            $rootScope.$emit("selectBlock",self.block);
-                        };
-
-                        /**
-                         * Call when edit site mode changed
-                         */
-                        $rootScope.$watch('editSite',function()
-                        {
-                            if ($rootScope.editSite) {
-                                /**
-                                 * Need to change transclude content if block is removed or disabled
-                                 */
-                                $timeout(function () {
-                                    if ($scope.removed) {
-                                        self.hilightClass = "block-removed";
-                                    }
-                                }, 500);
-                                $timeout(function () {
-                                    if (angular.isDefined($scope.element.find("ng-transclude")[0])) {
-                                        $scope.element.find("ng-transclude")[0].children[0].disabled = false;
-                                    }
-                                }, 500);
-                            }
-                        });
-                    }
-                ]
+IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, BlockService) {
+        return {
+            restrict: 'EAC',
+            link: function ($scope, element, attrs, ctrl) {
+                $scope.$root.$emit("registerBlock", BlockService.new(attrs["name"], attrs["ref"], attrs["position"], element.html(), attrs["role"], attrs["version"], attrs["removed"], element));
             }
-        }]
-)
+        }
+    }
+    ]
+);
 
 'use strict';
 /**
@@ -6745,28 +7196,48 @@ IteSoft.directive('itBlockControlPanel',
                 scope: true,
                 //language=html
                 template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '\n    <div class="col-xs-12"/>' +
-                '\n    <div class="block-lists">\n        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"\n             aria-label="Left Align">\n            <span class="fa fa-exclamation" aria-hidden="true"></span>\n            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|\n                translate}}</a>\n        </div>' +
-                '<div class="row" style="margin-bottom: 10px;">'+
-                '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl\n                and move your mouse over a block)\n            </div>' +
-                '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release\n                Ctrl over an element to select it)\n            </div>' +
+                '    <div class="col-xs-12"/>' +
+                '    <div class="block-lists">        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"             aria-label="Left Align">            <span class="fa fa-exclamation" aria-hidden="true"></span>            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|                translate}}</a>        </div>' +
+                '<div class="row" style="margin-bottom: 10px;">' +
+                '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl                and move your mouse over a block)            </div>' +
+                '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release                Ctrl over an element to select it)            </div>' +
                 '    </div>' +
-                '<div>'+
-                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true"><i class="fa fa-pencil"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false"><i class="fa fa-eye"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i\n                    class="fa fa-stop"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i\n                    class="fa fa-play"></i></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank"><i\n                    class="fa fa-floppy-o"></i></a></it-circular-btn>' +
-                '</div>'+
-                '<div ng-if="$root.editSite" ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'"\n             ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
+                '<div>' +
+                '<it-circular-btn ng-if="!$root.editSite" ng-click="itBlockControlPanelController.editSite()">' +
+                '   <i class="fa fa-pencil"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.editSite" ng-click="itBlockControlPanelController.viewSite()">' +
+                '   <i class="fa fa-eye"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()">' +
+                '   <i class="fa fa-refresh"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false">' +
+                '   <i class="fa fa-stop"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true">' +
+                '   <i class="fa fa-play"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank">' +
+                '<i class="fa fa-floppy-o"></i>' +
+                '</a></it-circular-btn>' +
+                '</div>' +
+                '<div  ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)" ng-mouseleave="itBlockControlPanelController.unHilightBlock(block)"' +
                 ' class="{{itBlockControlPanelController.getClass(block)}}">' +
                 '<div class="block-lists-name">{{block.name}}</div>' +
                 '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i>\n                </it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i class="fa fa-pencil"></i>\n                </it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i\n                        class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i\n                        class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)">' +
+                '   <i class="fa fa-plus "></i> ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)">' +
+                '   <i class="fa fa-pencil"></i> ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)">' +
+                '   <i class="fa fa-eye"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)">' +
+                '   <i class="fa fa-eye-slash block-btn"></i>' +
+                '</it-circular-btn>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -6782,6 +7253,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.editorIsOpen = false;
                             self.CONFIG = CONFIG;
                             self.blocks = [];
+                            self.availableBlocks = [];
                             self.url = CONFIG.REST_TEMPLATE_API_URL + '/api/rest/export/' + CONFIG.CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
@@ -6839,36 +7311,6 @@ IteSoft.directive('itBlockControlPanel',
 
                             PilotSiteSideService.on.reload = this.refresh;
 
-                            /**
-                             *
-                             */
-                            self.editJS = function () {
-                                $log.debug("edit JS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "js.blocks.js",
-                                    fileType: "js",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.editCSS = function () {
-                                $log.debug("edit CSS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "css.blocks.css",
-                                    fileType: "css",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.addFile = function () {
-                                $log.debug("add File");
-                                PilotSiteSideService.fn.createPage()
-                            };
-
                             /*
                              We enable edit mode by default
                              */
@@ -6876,17 +7318,15 @@ IteSoft.directive('itBlockControlPanel',
                             $rootScope.autoRefreshTemplate = true;
 
                             /*
-                             Capture du CTRL
+                             * Capture du CTRL
                              */
                             $document.bind("keydown", function (event) {
-                                if (event.keyCode == 17 && !self.focusable) {
-                                    $document.find("*").addClass("crosshair");
-
-                                    $log.log("keydown");
-                                    self.focusable = true;
-                                    self.blocks = [];
-                                    self.hilightedBlock = undefined;
-                                    self.hilightBlock(undefined);
+                                if ($rootScope.editSite) {
+                                    if (event.keyCode == 17 && !self.focusable) {
+                                        $document.find("*").addClass("crosshair");
+                                        self.focusable = true;
+                                        self.init();
+                                    }
                                 }
                             });
 
@@ -6894,31 +7334,84 @@ IteSoft.directive('itBlockControlPanel',
                              *
                              */
                             $document.bind("keyup", function (event) {
-                                if (event.keyCode == 17 && self.focusable) {
-                                    $log.log("keyup");
-                                    $document.find("*").removeClass("crosshair");
-                                    self.focusable = false;
+                                if ($rootScope.editSite) {
+                                    if (event.keyCode == 17 && self.focusable) {
+                                        $document.find("*").removeClass("crosshair");
+                                        self.focusable = false;
+                                    }
                                 }
                             });
 
-                            /*
-                             Catch event send when over block
+
+                            /**
+                             * Call by block to register
                              */
-                            $rootScope.$on("selectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) == -1) {
-                                    self.blocks.push(block)
-                                }
+                            $rootScope.$on("registerBlock", function (event, block) {
+                                self.availableBlocks[block.name] = block;
+
+                                block.element.bind('mouseenter', function (e) {
+                                    $scope.$applyAsync(function () {
+                                        self.selectBlock(block.name);
+                                    });
+                                });
+
+                                block.element.bind('mouseleave', function (e) {
+                                    $scope.$applyAsync(function () {
+                                        self.unSelectBlock(block.name);
+                                    });
+                                });
+
+                                self.blocks = [];
+                                self.clearStyle();
+                                self.hilightedBlock = undefined;
                             });
 
                             /**
-                             Catch event send when leave block
+                             * Init
                              */
-                            $rootScope.$on("unSelectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) != -1) {
+                            self.init = function(){
+                                self.blocks = [];
+                                self.clearStyle();
+                                self.hilightedBlock = undefined;
+                            };
+
+                            /*
+                             * Catch event send when over block
+                             */
+                            self.selectBlock = function (blockName) {
+                                var block = self.availableBlocks[blockName];
+                                if (self.focusable && !self.exists(block)) {
+                                    self.blocks.push(block)
+                                }
+                            };
+
+                            /**
+                             * Catch event send when leave block
+                             */
+                            self.unSelectBlock = function (blockName) {
+                                var block = self.availableBlocks[blockName];
+                                if (self.focusable && self.exists(block)) {
                                     self.blocks.splice(self.blocks.indexOf(block), 1);
                                 }
-                            });
+                            };
                         }
+
+                        /**
+                         *
+                         */
+                        self.editSite = function () {
+                            $rootScope.editSite = true;
+                            self.clearStyle();
+                        };
+
+                        /**
+                         *
+                         */
+                        self.viewSite = function () {
+                            $rootScope.editSite = false;
+                            self.clearStyle();
+                            self.init();
+                        };
 
                         /*
                          Do block edit action
@@ -7033,8 +7526,58 @@ IteSoft.directive('itBlockControlPanel',
                          * @param block
                          */
                         self.hilightBlock = function (block) {
-                            self.hilightedBlock = block;
-                            $rootScope.$emit("hilightBlock", block);
+                            if (angular.isDefined(block)) {
+                                self.hilightedBlock = block;
+                                self.clearStyle();
+                                self.updateStyle(block.name);
+                            }
+                        };
+
+                        self.unHilightBlock = function (block) {
+                            if (angular.isDefined(block)) {
+                                self.hilightedBlock = undefined;
+                                self.clearStyle();
+                            }
+                        };
+
+                        /**
+                         * Update background selected style
+                         * @param blockName
+                         */
+                        self.updateStyle = function (blockName) {
+                            for (var name in self.availableBlocks) {
+                                if (name == blockName) {
+                                    self.availableBlocks[name].element.addClass("block-hilight");
+                                }
+                            }
+                        };
+
+                        /**
+                         * Init style
+                         */
+                        self.clearStyle = function () {
+                            for (var name in self.availableBlocks) {
+                                var element = self.availableBlocks[name].element;
+
+                                if(angular.isDefined(element)) {
+
+                                    element.removeClass("block-removed");
+                                    element.removeClass("block-hilight");
+                                    element.css('display', '');
+
+                                    if ($rootScope.editSite) {
+                                        element.children().attr("disabled",false);
+                                    }
+
+                                    if (self.availableBlocks[name].removed) {
+                                        if ($rootScope.editSite) {
+                                            element.addClass("block-removed");
+                                        } else {
+                                            element.css('display', 'none');
+                                        }
+                                    }
+                                }
+                            }
                         };
 
                         /**
@@ -7050,9 +7593,23 @@ IteSoft.directive('itBlockControlPanel',
                             }
                         };
 
+                        /**
+                         * Block already exists
+                         * @param block
+                         * @returns {boolean}
+                         */
+                        self.exists = function (block) {
+                            var find = false;
+                            self.blocks.forEach(function (existingBlock) {
+                                if (existingBlock.name == block.name) {
+                                    find = true;
+                                }
+                            });
+                            return find;
+                        };
 
                         /**
-                         * senf option to editor
+                         * Send option to editor
                          * @private
                          */
                         function _options() {
@@ -7537,128 +8094,6 @@ IteSoft
     }]);
 
 
-/**
- * Created by vco on 20/06/2016.
- */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPanelForm
- * @module itesoft
- * @restrict E
- * @since 1.2
- * @description
- * The itPanelForm provides dynamic content panel in a form embedded.
- *
- *
- * ```html
- *    <it-panel-form option="option" ></it-panel-form>
- * ```
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" ></it-panel-form>
- </file>
- <file name="controller.js">
- angular.module('itesoft')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = [
-            {"title":"title", "value":"value", "type":"label"},
-           {"title":"title2", "value":"value2", "type":"input"},
-           {"title":"title2", "value":
-              [{"code": "code1", "value": "value1"},
-              {"code": "code2", "value": "value2"}],
-           "type":"select"},
-           {"title":"title3", "value":"'<p>{{option.value}}</p>'+", "type":"date"}
-        ];
-
-    }
- ]
- );
- </file>
- </example>
- */
-IteSoft.directive('itPanelForm',['$q','$templateCache',function($q,$templateCache){
-    return{
-        restrict:'E',
-        scope:{
-            options:'='
-        },
-        template:'<div class="it-ac-panel-form">' +
-   '<form name="userForm" ng-submit="submitForm(userForm.$valid)" novalidate>'+
-    '<div ng-repeat="option in options">' +
-        '<div class="row">' +
-        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-        '<div ng-switch on="option.type">'+
-        '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '<button type="submit" class="btn btn-primary">Submit</button></form>'+
-        '</div>'+
-        '<!------------------- Template label ------------------->'+
-        '<script type="text/ng-template" id="labelTemplate.html">' +
-        '<p>{{option.value}}</p>'+
-        '</script>'+
-        '<!------------------- Template input ------------------->'+
-        '<script type="text/ng-template" id="inputTemplate.html">' +
-        '<p><input type="text" name="input" value="{{option.value}}"></p>'+
-        '</script>'+
-        '<!------------------- Template select ------------------->'+
-        '<script type="text/ng-template" id="selectTemplate.html">' +
-        '<p><select name="repeatSelect" id="repeatSelect" ng-model="valueSelect" data-ng-init="valueSelect=option.value[0]">' +
-        '<option ng-repeat="value in option.value" value="{{value.code}}">{{value.value}}</option>' +
-        '</select></p>'+
-        '</script>'+
-        '<!------------------- Template date ------------------->'+
-        '<script type="text/ng-template" id="dateTemplate.html">' +
-        '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-        'ng-model="selectedDate" data-autoclose="1" ' +
-        'name="date" data-date-format="dd/MM/yyyy" ng-init="selectedDate=option.value" bs-datepicker></p>'+
-        '</script>'+
-        '<!------------------- Template checkbox ------------------->'+
-        '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-        '<p>youpiiii</p>'+
-        '</script>',
-        controllerAs: 'panelFormController',
-        controller: ['$scope', function($scope){
-
-            //TODO gérer la locale pour l'affichage des dates
-            //Get current locale
-           // var locale = localStorageService.get('Locale');
-
-            var self = this;
-
-            self.options = $scope.options;
-
-            // function to submit the form after all validation has occurred
-            $scope.submitForm = function(isValid) {
-
-                // check to make sure the form is completely valid
-                if (isValid) {
-                    alert('our form is amazing');
-                }
-
-            };
-
-        }]
-    }
-}]).config(function($datepickerProvider) {
-    angular.extend($datepickerProvider.defaults, {
-        dateFormat: 'dd/MM/yyyy',
-        startWeek: 1
-    });
-});
 'use strict';
 
 IteSoft
@@ -7709,6 +8144,184 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itConfig
+ * @module itesoft
+ * @since 1.1
+ * @requires itNotifier
+ * @requires $http
+ * @requires $location
+ *
+ * @description
+ * This is a configuration provider. It load a json file and let you inject everywhere, you can also override
+ * each properties of the configuration through url parameters.
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>configFile</code></td>
+ *     <td>app/config/config.json</td>
+ *     <td>Allows to override the default url to get JSON configuration object</td>
+ * </tr>
+ * <tr>
+ *     <td><code>defaultNamespace</code></td>
+ *     <td>''</td>
+ *     <td>Set the default namespace of the configuration file when you use get() function</td>
+ * </tr>
+ * <tr>
+ *     <td><code>allowOverride</code></td>
+ *     <td>false</td>
+ *     <td>Allows to use URL parameters to override JSON configuration peroperties</td>
+ * </tr>
+ * </table>
+ *
+ *
+ *
+ * @example
+<example module="itesoft">
+<file name="Controller.js">
+angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CaptureOmnicanal');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).controller('Mycontroller',['$scope','itConfig', '$log', function($scope, itConfig, $log) {
+			$log.info(itConfig.get()); // retrieve the properties on default namespace CaptureOmnicanal
+			$log.info(itConfig.get('common')); // retrieve the properties on namespace common
+			$log.info(itConfig.get().baseUrl); // retrieve the propertie baseUrl on default namespace CaptureOmnicanal
+			$scope.config=itConfig;
+	}]);
+</file>
+<file name="index.html">
+	<!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+	<div ng-controller="Mycontroller">
+		<p>All properties : {{config.get() | json}}</p>
+		<p>Other namespace properties : {{config.get('common') | json}}</p>
+		<p>One propertie : {{config.get().baseUrl}}</p>
+	</div>
+         </file>
+         <file name="config.json">
+	{
+		"CaptureOmnicanal" : {
+			"baseUrl":"http://test/base"
+		},
+		"common": {
+			"debug":true
+		}
+	}
+</file>
+</example>
+ **/
+IteSoft.provider('itConfig', [ function itConfigProvider() {
+    var allowOverride = false;
+    var configFile = 'app/config/config.json';
+    var defaultNamespace = null;
+
+    this.allowOverride = function (value) {
+        allowOverride = value;
+    };
+
+    this.configFile = function (value) {
+        configFile = value;
+    };
+
+    this.defaultNamespace = function (value) {
+        defaultNamespace = value;
+    };
+
+    this.$get = ['$http', 'itNotifier', '$location', function itConfigFactory($http, itNotifier, $location) {
+        var overrideConfig = $location.search();
+        var self = this;
+        var baseConfig = {};
+        // Load menu
+        $http.get(configFile).then(function (response) {
+            if (!allowOverride) {
+                baseConfig = response.data;
+            } else {
+                baseConfig = response.data;
+                if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                    defaultConfig = baseConfig[defaultNamespace];
+                    for (var propertyName in defaultConfig) {
+                        defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
+                    }
+                }
+            }
+        }, function (err) {
+            itNotifier.notifyError({content: err.data.Message});
+        });
+
+
+        return {
+            get: function (namespace) {
+                if ((namespace != null) && (namespace != undefined)) {
+                    return baseConfig[namespace];
+                } else {
+                    if (defaultNamespace != null) {
+                        return baseConfig[defaultNamespace];
+                    } else {
+                        return baseConfig;
+                    }
+                }
+            }
+        };
+    }];
+}]);
 
 
 'use strict';
@@ -7806,7 +8419,8 @@ IteSoft
  </file>
  </example>
  */
-IteSoft.provider('itLanguageChangeHandler', function () {
+angular.module('itesoft.language',['itesoft.popup','LocalStorageModule'])
+    .provider('itLanguageChangeHandler', function () {
     var self = this;
     this.options = {
         storage: 'local', //local for localStorage or query for url query parameter
@@ -8386,7 +9000,8 @@ IteSoft.provider('itLanguageChangeHandler', function () {
          </file>
  </example>
  **/
-IteSoft.provider('ItMessaging',[
+angular.module('itesoft.messaging',['ngWebSocket'])
+.provider('ItMessaging',[
     function(){
 
         var providerState = this;
@@ -9153,8 +9768,7 @@ IteSoft.provider('itNotifier', [ function () {
          </file>
      </example>
  */
-
-IteSoft
+angular.module('itesoft.popup',['ui.bootstrap.modal'])
     .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
@@ -9313,6 +9927,240 @@ IteSoft
         return itPopup;
     }]);
 
+/**
+ * Created by SZA on 28/06/2016.
+ */
+
+IteSoft
+    .factory('itStringUtilsService', [function () {
+        return {
+            getLower: _getLower,
+            removeAccent: _removeAccent,
+            clear: _clear,
+            cleanDomRef: {
+                _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+                encode: function (e) {
+                    if (e) {
+                        var t = "";
+                        {
+                        }
+                        var n, r, i, s, o, u, a;
+                        var f = 0;
+                        e = this._utf8_encode(e);
+                        while (f < e.length) {
+                            n = e.charCodeAt(f++);
+                            r = e.charCodeAt(f++);
+                            i = e.charCodeAt(f++);
+                            s = n >> 2;
+                            o = (n & 3) << 4 | r >> 4;
+                            u = (r & 15) << 2 | i >> 6;
+                            a = i & 63;
+                            if (isNaN(r)) {
+                                u = a = 64
+                            } else if (isNaN(i)) {
+                                a = 64
+                            }
+                            t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                        }
+                        return t
+                    }
+                },
+                decode: function (e) {
+                    var t = "";
+                    var n, r, i;
+                    var s, o, u, a;
+                    var f = 0;
+                    if (e.replace) {
+                        e = e.replace(/[^A-Za-z0-9+/=]/g, "");
+                        while (f < e.length) {
+                            s = this._keyStr.indexOf(e.charAt(f++));
+                            o = this._keyStr.indexOf(e.charAt(f++));
+                            u = this._keyStr.indexOf(e.charAt(f++));
+                            a = this._keyStr.indexOf(e.charAt(f++));
+                            n = s << 2 | o >> 4;
+                            r = (o & 15) << 4 | u >> 2;
+                            i = (u & 3) << 6 | a;
+                            t = t + String.fromCharCode(n);
+                            if (u != 64) {
+                                t = t + String.fromCharCode(r)
+                            }
+                            if (a != 64) {
+                                t = t + String.fromCharCode(i)
+                            }
+                        }
+                    }
+                    t = this._utf8_decode(t);
+                    return t
+                },
+                _utf8_encode: function (e) {
+                    var t = "";
+                    if (e.replace) {
+                        e = e.replace(/rn/g, "n");
+                        for (var n = 0; n < e.length; n++) {
+                            var r = e.charCodeAt(n);
+                            if (r < 128) {
+                                t += String.fromCharCode(r)
+                            } else if (r > 127 && r < 2048) {
+                                t += String.fromCharCode(r >> 6 | 192);
+                                t += String.fromCharCode(r & 63 | 128)
+                            } else {
+                                t += String.fromCharCode(r >> 12 | 224);
+                                t += String.fromCharCode(r >> 6 & 63 | 128);
+                                t += String.fromCharCode(r & 63 | 128)
+                            }
+                        }
+                    }
+                    return t
+                },
+                _utf8_decode: function (e) {
+                    var t = "";
+                    var n = 0;
+                    var r = c1 = c2 = 0;
+                    while (n < e.length) {
+                        r = e.charCodeAt(n);
+                        if (r < 128) {
+                            t += String.fromCharCode(r);
+                            n++
+                        } else if (r > 191 && r < 224) {
+                            c2 = e.charCodeAt(n + 1);
+                            t += String.fromCharCode((r & 31) << 6 | c2 & 63);
+                            n += 2
+                        } else {
+                            c2 = e.charCodeAt(n + 1);
+                            c3 = e.charCodeAt(n + 2);
+                            t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+                            n += 3
+                        }
+                    }
+                    return t
+                }
+            }
+        };
+
+        /**
+         * Clear content by removing accent and case
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _clear(value) {
+            var result = "";
+            result = _getLower(value);
+            result = _removeAccent(result);
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _getLower(value) {
+            var result = "";
+            if (angular.isDefined(value) && value.toLowerCase) {
+                result += value.toLowerCase();
+            } else {
+                result += value;
+            }
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _removeAccent(value) {
+            var diacritics = [
+                {char: 'A', base: /[\300-\306]/g},
+                {char: 'a', base: /[\340-\346]/g},
+                {char: 'E', base: /[\310-\313]/g},
+                {char: 'e', base: /[\350-\353]/g},
+                {char: 'I', base: /[\314-\317]/g},
+                {char: 'i', base: /[\354-\357]/g},
+                {char: 'O', base: /[\322-\330]/g},
+                {char: 'o', base: /[\362-\370]/g},
+                {char: 'U', base: /[\331-\334]/g},
+                {char: 'u', base: /[\371-\374]/g},
+                {char: 'N', base: /[\321]/g},
+                {char: 'n', base: /[\361]/g},
+                {char: 'C', base: /[\307]/g},
+                {char: 'c', base: /[\347]/g}
+            ];
+            var result = value;
+            diacritics.forEach(function (letter) {
+                result = result.replace(letter.base, letter.char);
+            });
+            return result;
+        }
+
+
+    }])
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name dependencies.directive:ui-layout
+ * @module dependencies
+ * @restrict AE
+ * @since 1.0
+ * @description
+ * This directive allows you to split
+ * See more :  {@link https://github.com/angular-ui/ui-layout}
+ * @example
+ <example module="itesoft-showcase">
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ui.layout']);
+ </file>
+ <file name="index.html">
+    <div style="position: relative;height:500px">
+     <div ui-layout style="margin-left: 90px;margin-right: 10px" >
+     <div ui-layout-container  size="100px">
+     <h3>
+     NEW CAPTURE 2016JUN30-00001
+     </h3>
+     <div>
+     <span>Environment:</span>
+     </div>
+     <div>
+     <span>Profile:</span>
+     </div>
+     </div>
+     <div ui-layout-container>
+     <div ui-layout="{flow : 'column'}" >
+     <div ui-layout-container  >Settings</div>
+     <div ui-layout-container  >
+     <div>[ ]image 001</div>
+     <div>[ ]image 002</div>
+     <div>[ ]image 003</div>
+     <div>[ ]image 004</div>
+     </div>
+     <div ui-layout-container  >Viewer</div>
+     </div>
+     </div>
+
+     <div ui-layout-container size="60px" style="text-align: right" >
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-success it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Capturer
+     </span>
+     </button>
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-primary it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Envoyer
+     </span>
+     </button>
+     </div>
+     </div>
+    </div>
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * TODO Image implementation desc
@@ -9321,36 +10169,37 @@ itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
         function IMAGEPage(pageIndex, img, view) {
-                    this.base = MultiPagesPage;
-                    this.base(pageIndex, view);
-                    this.img = img;
-                }
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
+            this.img = img;
+        }
 
         IMAGEPage.prototype = new MultiPagesPage;
 
-        IMAGEPage.prototype.render = function (callback) {
+        IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
-            if(this.rendered) {
+            /*if(this.rendered) {
                 if(callback) {
                     callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                 }
                 return;
             };
 
-            this.rendered = true;
+            this.rendered = true;*/
 
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
             }else {
-                self.container.append(self.canvas);
+                //self.canvasRendered = true;
+                page.wrapper.append(page.canvas);
 
-                var ctx = self.canvas[0].getContext('2d');
-                ctx.transform.apply(ctx, self.viewport.transform);
-                ctx.drawImage(this.img , 0, 0); // Or at whatever offset you like
+                var ctx = page.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, page.viewport.transform);
+                ctx.drawImage(self.img , 0, 0); // Or at whatever offset you like
 
 
                 if(callback) {
-                    callback(self, MultiPagesConstants.PAGE_RENDERED);
+                    callback(page, MultiPagesConstants.PAGE_RENDERED);
                 }
             }
         };
@@ -9384,8 +10233,8 @@ itImageViewer
                 var self = this;
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
-
-                    self.setContainerSize(self.initialScale);
+                    self.addPages();
+                    //self.setContainerSize(self.initialScale);
                 });
             }
         };
@@ -9397,8 +10246,8 @@ itImageViewer
                     var url = e.target.result;
                     self.getAllPages(url, function(pageList) {
                         self.pages = pageList;
-
-                        self.setContainerSize(self.initialScale);
+                        self.addPages();
+                        //self.setContainerSize(self.initialScale);
                     });
                 };
 
@@ -9447,7 +10296,7 @@ itImageViewer
                 var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
 
-                self.element.append(page.container);
+                //self.addPage(page);
 
                 callback(pageList);
             };
@@ -9464,21 +10313,29 @@ itImageViewer
             restrict: "E",
             scope: {
                 src: "@",
+                file: "=",
                 api: "=",
-                initialScale: "@",
+                options: "=",
             },
             controller: ['$scope', '$element', function ($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
 
                 var viewer = new IMAGEViewer($element); ;
 
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function () {
-                    viewer.open(this.src, this.initialScale, pageMargin);
+                    viewer.open(this.src, getOption("initialScale"), pageMargin);
                 };
 
                 $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
+                    viewer.open(this.file, getOption("initialScale"), pageMargin);
                 };
 
                 viewer.hookScope($scope);
@@ -9511,9 +10368,11 @@ itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', f
              options: "="
          },
          restrict: 'E',
-         template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                     '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                     '<image-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}"  api="options.api" initial-scale="{{options.initialScale}}" ></image-viewer>',
+         template :  '<div class="multipage-container">' +
+                         '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
+                         '<it-toolbar-viewer api="options.$$api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
+                         '<image-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}"  api="options.$$api" options="options" ></image-viewer>' +
+                     '</div>',
          link: linker
      };
  }]);
@@ -9546,7 +10405,7 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
             scope.scale = value;
         });
 
-        scope.$watch("api.getCurrentPage()", function (value) {
+        scope.$watch("api.getSelectedPage()", function (value) {
             scope.currentPage = value;
         });
 
@@ -9581,9 +10440,9 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
                         '</div>' +
 
                         '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-                              '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
-                              '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
-                          '</div>' +
+                            '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                            '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                        '</div>' +
                     '</div>',
         link: linker
     };
@@ -9604,33 +10463,20 @@ itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce)
                 }
             });
 
-            scope.$watch("options.thumbnailApi", function (thumbnailApi) {
-                if(thumbnailApi) {
-                    thumbnailApi.onPageClicked = function (pageIndex) {
-                        if(scope.options.api) {
-                            scope.options.api.goToPage(pageIndex);
-                        }
-                    };
-                }
-            });
-
-            scope.$watch("options.api", function (api) {
+            scope.$watch("options.$$api", function (api) {
                 if(api) {
+                    scope.options.getApi = function() {
+                        return api;
+                    };
                     if(scope.options && scope.options.onApiLoaded) {
                         scope.options.onApiLoaded(api);
                     }
-
-                    api.onPageRotation = function (args) {
-                        if(scope.options.thumbnailApi) {
-                            scope.options.thumbnailApi.rotatePage(args);
-                        }
-                    };
                 }
             });
 
             scope.trustSrc = function(src) {
                 return $sce.trustAsResourceUrl(src)
-            };
+            }; 
         }
     };
 }]);
@@ -9653,7 +10499,9 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
         5.0],
     ZOOM_FIT_WIDTH : "fit_width",
     ZOOM_FIT_PAGE : "fit_page",
-    ZOOM_FIT_HEIGHT : "fit_height"
+    ZOOM_FIT_HEIGHT : "fit_height",
+    ORIENTATION_VERTICAL : "vertical",
+    ORIENTATION_HORIZONTAL : "horizontal"
 })
 
 'use strict';
@@ -9663,16 +10511,22 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
 itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport', function ($log, MultiPagesConstants, PageViewport) {
 
     function MultiPagesPage(pageIndex, view) {
+        this.pageIndex = pageIndex;
         this.id = pageIndex + 1;
-        this.container = angular.element("<div class='page' ng-click='api.onPageClicked(" + this.id + ")'></div>");
+
+
+        this.container = angular.element('<div></div>');
         this.container.attr("id", "page_" + pageIndex);
+
+        this.wrapper = angular.element('<div class="page {{api.isPageSelected(' + this.id + ')}}" ng-click="onPageClicked(' + this.id + ')"></div>');
+        this.container.append(this.wrapper);
 
         this.canvasRendered = false;
         this.rendered = false;
 
         //transform
-          this.rotation = 0;
-          this.scale = 1.0;
+        this.rotation = 0;
+        this.scale = 1.0;
         this.view = view;
 
     }
@@ -9680,66 +10534,82 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
     MultiPagesPage.prototype = {
         clear: function () {
             this.rendered = false;
-            this.container.empty();
+            this.wrapper.empty();
         },
         getViewport: function (scale, rotation) {
             return new PageViewport(this.view, scale, rotation, 0, 0, true);
         },
         transform : function() {
             this.clear();
-              this.viewport = this.getViewport(this.scale, this.rotation);
-              this.canvasRendered = false;
-              this.canvas = angular.element("<canvas></canvas>");
-              this.canvas.attr("width", this.viewport.width);
-              this.canvas.attr("height", this.viewport.height);
+            this.viewport = this.getViewport(this.scale, this.rotation);
+            this.canvasRendered = false;
+            this.canvas = angular.element("<canvas></canvas>");
+            this.canvas.attr("width", this.viewport.width);
+            this.canvas.attr("height", this.viewport.height);
 
-              this.container.css("width", this.viewport.width + "px");
-              this.container.css("height", this.viewport.height + "px");
+            this.wrapper.css("width", this.viewport.width + "px");
+            this.wrapper.css("height", this.viewport.height + "px");
         },
         resize: function (scale) {
             this.scale = scale;
             this.transform();
         },
+        setOrientation : function(orientation) {
+            this.orientation = orientation;
+            switch (orientation) {
+                case MultiPagesConstants.ORIENTATION_HORIZONTAL :
+                    this.container.addClass("horizontal");
+                    this.container.removeClass("vertical");
+                    break;
+                default:
+                    this.container.addClass("vertical");
+                    this.container.removeClass("horizontal");
+                    break;
+            };
+        },
         rotate: function (rotation) {
-              this.rotation = rotation;
-              this.transform();
-            /*// The canvas may have been originally rotated, rotate relative to that.
-            //var relativeRotation = rotation - this.canvas._viewport.rotation;
-            var relativeRotation = rotation;
-            var absRotation = Math.abs(relativeRotation);
-            var scaleX = 1, scaleY = 1;
-
-            if (absRotation === 90 || absRotation === 270) {
-                // Scale x and y because of the rotation.
-                *//*scaleX = this.viewport.height / this.viewport.width;
-                scaleY = this.viewport.width / this.viewport.height;*//*
-
-
-               if(this.viewport.width > this.viewport.height) {
-                    var margin = (this.viewport.width - this.viewport.height);
-                    this.container.css("margin", margin + "px auto");
-                }
-
-            }else {
-                this.container.css("margin", null);
-            }
-
-            this.viewport.rotation = relativeRotation;
-            var cssTransform = 'rotate(' + relativeRotation + 'deg) ' +
-                'scale(' + scaleX + ',' + scaleY + ')';
-            this.container.css('transform', cssTransform);*/
+            this.rotation = rotation;
+            this.transform();
         },
         isVisible: function () {
             var pageContainer = this.container[0];
             var parentContainer = this.container.parent()[0];
-
-            var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-            var pageBottom = pageTop + pageContainer.offsetHeight;
-
-            return pageBottom >= 0 && pageTop <= parentContainer.offsetHeight;
+            switch (this.orientation) {
+                case MultiPagesConstants.ORIENTATION_HORIZONTAL :
+                    var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
+                    var pageRight = pageLeft + pageContainer.offsetWidth;
+                    return (pageRight >= 0 && pageLeft <= parentContainer.offsetWidth);
+                    break;
+                default:
+                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                    var pageBottom = pageTop + pageContainer.offsetHeight;
+                    return (pageBottom >= 0 && pageTop <= parentContainer.offsetHeight);
+                    break;
+            };
         },
         render: function (callback) {
-            throw "NotImplementedError - render";
+            if(this.rendered) {
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
+
+            //$log.debug("render page " + this.id +" started");
+            //var start = new Date();
+            this.rendered = true;
+            this.renderPage(this, function (page, status) {
+                if(status === MultiPagesConstants.PAGE_RENDERED) {
+                    page.canvasRendered = true;
+                    //$log.debug("render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
+                }
+                if(callback) {
+                    callback(page, status);
+                }
+            });
+        },
+        renderPage: function (page, callback) {
+            throw "NotImplementedError - renderPage(page, callback)";
         }
     };
 
@@ -9750,7 +10620,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
     function getElementInnerSize(element, margin) {
         var tallTempElement = angular.element("<div></div>");
         tallTempElement.css("height", "10000px");
@@ -9768,7 +10638,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         }
 
         w -= 2 * margin;
-        h -= 2 * margin;
+        h -= 2 * margin + 10;
 
         return {
             width: w,
@@ -9784,8 +10654,10 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         this.fitPageScale = 1.0;
         this.element = element;
         this.pageMargin = 0;
+        this.orientation = MultiPagesConstants.ORIENTATION_VERTICAL;
         this.currentPage = 0;
         this.lastScrollDir = 0;
+        this.rotation = 0;
         this.scaleItems = {};
         this.zoomLevels = [];
         this.api = api;
@@ -9799,6 +10671,15 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
     MultiPagesViewer.prototype = {
         getAPI: function () {
             return this.api;
+        },
+        addPages : function () {
+            // Append all page containers to the $element...
+            var numPages = this.pages.length;
+            for(var iPage = 0;iPage < numPages; ++iPage) {
+                this.element.append(this.pages[iPage].container);
+            }
+            this.onPageRendered("loaded", 1, numPages, "");
+            this.setContainerSize(this.initialScale);
         },
         updateScaleItem : function(scaleItem) {
             var result = this.scaleItems[scaleItem.id];
@@ -9815,83 +10696,100 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         },
         setContainerSize: function (initialScale) {
             if(this.pages.length > 0) {
-                this.containerSize = getElementInnerSize(this.element, this.pageMargin);
-
-                var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
-
-                this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                this.zoomLevels = [];
-                var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
-                for(var i = 0;i < numZoomLevels;++i) {
-                    var scaleItem = null;
-                    var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                    var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
-                    if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                           value : this.fitWidthScale,
-                           label: "Fit width"
-                       });
-                   }
-
-                   if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                           value : this.fitHeightScale,
-                           label: "Fit height"
-                       });
-                   }
-
-                   if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                       scaleItem = this.updateScaleItem({
-                           id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                           value : this.fitPageScale,
-                           label: "Fit page"
-                       });
-                   }
-
-                   var label = (newScale * 100.0).toFixed(0) + "%";
-                   scaleItem = this.updateScaleItem({
-                       id: label,
-                       value : newScale,
-                       label: label
-                   });
-                }
-
-                if (this.scaleItem == undefined && initialScale) {
-                    if(this.scaleItems[initialScale] != undefined) {
-                        this.scaleItem = this.scaleItems[initialScale];
-                    }else{
-                        $log.debug("InitialScale not found : " + initialScale);
+                var containerSize = getElementInnerSize(this.element, this.pageMargin);
+                if(containerSize.width > 0 && containerSize.height > 0) {
+                    if(this.onContainerSizeChanged) {
+                       this.onContainerSizeChanged(containerSize);
                     }
-                }
+                    this.containerSize = containerSize;
 
-                if(this.api.onZoomLevelsChanged ) {
-                    this.api.onZoomLevelsChanged (this.zoomLevels);
-                }
+                    var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
 
-                if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
-                    this.render();
-                    return;
-                }
+                    this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                    this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                    this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
 
-                this.setScale(this.scaleItem || this.scaleItems["100%"]);
+                    this.zoomLevels = [];
+                    var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                    for(var i = 0;i < numZoomLevels;++i) {
+                        var scaleItem = null;
+                        var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                        var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                        if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                               value : this.fitWidthScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
+                           });
+                       }
+
+                       if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                               value : this.fitHeightScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
+                           });
+                       }
+
+                       if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                               value : this.fitPageScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
+                           });
+                       }
+
+                       var label = (newScale * 100.0).toFixed(0) + "%";
+                       scaleItem = this.updateScaleItem({
+                           id: label,
+                           value : newScale,
+                           label: label
+                       });
+                    }
+
+                    if (this.scaleItem == undefined && initialScale) {
+                        if(this.scaleItems[initialScale] != undefined) {
+                            this.scaleItem = this.scaleItems[initialScale];
+                        }else{
+                            $log.debug("InitialScale not found : " + initialScale);
+                        }
+                    }
+
+                    if(this.api.onZoomLevelsChanged) {
+                        this.api.onZoomLevelsChanged(this.zoomLevels);
+                    }
+
+                    if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
+                        this.renderAllVisiblePages();
+                        return;
+                    }
+
+                    this.setScale(this.scaleItem);
+                }
+            }
+        },
+        hasMultiplePages: function() {
+            return this.pages.length > 1;
+        },
+        setOrientation : function (orientation) {
+            this.orientation = orientation;
+            if(this.hasMultiplePages()) {
+                this.setScale(this.scaleItem);
             }
         },
         setScale: function (scaleItem) {
             if(scaleItem != undefined){
                 this.scaleItem = scaleItem;
             }
-            var sci = scaleItem  || this.zoomLevels[0];
+            var sci = scaleItem  || this.scaleItems["100%"];
 
             var numPages = this.pages.length;
 
             for(var iPage = 0;iPage < numPages;++iPage) {
+                var page = this.pages[iPage];
+                page.setOrientation(this.orientation);
                 // Resize to current scaleItem...
-                this.pages[iPage].resize(sci.value);
+                page.resize(sci.value);
             }
 
             this.render();
@@ -9969,11 +10867,28 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 if(page.isVisible()) {
                     var parentContainer = page.container.parent()[0];
                     var pageContainer = page.container[0];
-                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                    var pageCenter = pageContainer.offsetHeight / 2;
-                    if(currentPageID === -1 && (pageCenter + pageTop) >= 0) {
+
+                    if(self.hasMultiplePages()) {
+                        if(currentPageID === -1) {
+                            if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                                var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
+                                var pageCenter = pageContainer.offsetWidth / 2;
+                                if((pageCenter + pageLeft) >= 0) {
+                                    currentPageID = iPage;
+                                }
+                            } else {
+                                var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                                var pageCenter = pageContainer.offsetHeight / 2;
+                                if((pageCenter + pageTop) >= 0) {
+                                    currentPageID = iPage;
+                                }
+                            }
+                        }
+                    } else {
                         currentPageID = iPage;
                     }
+
+
 
                     atLeastOnePageInViewport = true;
                     lastPageID = iPage;
@@ -9991,24 +10906,38 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 }
             }
 
-            if(this.lastScrollDir !== 0) {
-                var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
-                if(nextPageID >= 0 && nextPageID < numPages) {
-                    this.pages[nextPageID].render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
-                        }
-                    });
-                }
+            if(currentPageID === -1) {
+                currentPageID = lastPageID;
             }
 
-            this.removeDistantPages(currentPageID, lastPageID, 1);
+            if(self.hasMultiplePages()) {
+                this.clearDistantSelectedPage(currentPageID + 1, lastPageID + 1);
+
+                if(this.lastScrollDir !== 0) {
+                    var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
+                    if(nextPageID >= 0 && nextPageID < numPages) {
+                        this.pages[nextPageID].render(function (page, status) {
+                            if(status === MultiPagesConstants.PAGE_RENDERED) {
+                                self.onPageRendered("success", page.id, self.pages.length, "");
+                            } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                                self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                            }
+                        });
+                    }
+                }
+
+                this.removeDistantPages(currentPageID, lastPageID, 1);
+            }
 
             this.currentPage = currentPageID + 1;
-            if(this.onCurrentPageChanged){
+            //this.currentPage = (this.lastScrollDir > 0 ? currentPageID : lastPageID) + 1;
+            if(this.onCurrentPageChanged) {
                 this.onCurrentPageChanged( currentPageID + 1);
+            }
+        },
+        clearDistantSelectedPage: function (currentPageID, lastPageID) {
+            if(this.selectedPage <= currentPageID || this.selectedPage > lastPageID) {
+                this.selectedPage = null;
             }
         },
         render: function () {
@@ -10032,7 +10961,28 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                         this.api.onPageRotation(args);
                     }
                     this.setContainerSize(this.initialScale);
+
+                    if(this.thumbnail) {
+                        this.thumbnail.rotate(args);
+                    }
                 }
+            }
+        },
+        rotatePages : function (rotation) {
+            var numPages = this.pages.length;
+            var currentRotation = this.rotation - rotation;
+            if(currentRotation === 360 || currentRotation === -360){
+                currentRotation = 0;
+            }
+            this.rotation = currentRotation;
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                this.pages[iPage].rotate(currentRotation);
+            }
+
+            this.setContainerSize(this.initialScale);
+
+            if(this.thumbnail) {
+                this.thumbnail.rotatePages(rotation);
             }
         },
         downloadProgress: function(progressData) {
@@ -10061,17 +11011,31 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                self.setContainerSize(self.initialScale);
+                  if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
+                  scope.sizeWatcherTimeout = $timeout(function() {
+                       $log.debug("SizeChanged");
+                       self.setContainerSize(self.initialScale);
+                  }, 450);
+            });
+
+            scope.$watch("options.orientation", function (value) {
+                self.setOrientation(value);
             });
 
             var onProgress = function(operation, state, value, total, message) {
                 if (operation === "render" && value === 1) {
-                    if (state === "success") {
-                         $compile(self.element.contents())(scope);
+                    if (state === "loaded") {
+                        $compile(self.element.contents())(scope);
+                    }
+                    else if (state === "success") {
                         $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
                     }
                     else {
-                        $log.debug("Failed to render 1st page!\n\n" + message);
+                        if(self.api.onError) {
+                            self.api.onError(operation, message);
+                        } else {
+                            $log.debug("Failed to render 1st page!\n\n" + message);
+                        }
                     }
                 }
                 else if (operation === "download" && state === "loading") {
@@ -10079,8 +11043,22 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 }
                 else {
                     if (state === "failed") {
-                        $log.debug("Something went really bad!\n\n" + message);
+                        if(self.api.onError) {
+                            self.api.onError(operation, message);
+                        } else {
+                            $log.debug("Something went really bad!\n\n" + message);
+                        }
                     }
+                }
+            };
+
+            scope.onPageClicked = function(pageIndex) {
+                self.selectedPage = pageIndex;
+                if(self.onPageClicked) {
+                    self.onPageClicked(pageIndex);
+                }
+                if(self.api.onPageClicked) {
+                    self.api.onPageClicked(pageIndex);
                 }
             };
 
@@ -10105,6 +11083,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                     }
                     self.onDestroy();
                 }
+                self.thumbnail = null;
                 watcher.cancel();
                 self.element.empty();
                 $log.debug("viewer destroyed");
@@ -10136,10 +11115,12 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
 
     function MultiPagesViewerAPI(viewer) {
         this.viewer = viewer;
-        this.rotation = 0;
     };
 
     MultiPagesViewerAPI.prototype = {
+        getViewer: function () {
+            return this.viewer;
+        },
         getZoomLevels: function () {
             return this.viewer.zoomLevels;
         },
@@ -10166,61 +11147,59 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         getCurrentPage: function () {
             return this.viewer.currentPage;
         },
+        getSelectedPage: function () {
+            return this.viewer.selectedPage || this.viewer.currentPage;
+        },
+        isPageSelected: function(pageIndex) {
+            return (this.getSelectedPage() === pageIndex) ? "selected" : null;
+        },
         goToPage: function (pageIndex) {
             if(pageIndex < 1 || pageIndex > this.getNumPages()) {
                 return;
             }
-
+            var pageContainer = this.viewer.pages[pageIndex - 1].container[0];
+            var element = this.viewer.element[0];
             //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-            var offsetTop = this.viewer.pages[pageIndex - 1].container[0].offsetTop;
-            if(Math.round(this.viewer.element[0].scrollTop) === offsetTop){
-                offsetTop -= 1;
+            if(this.viewer.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                var offsetLeft = pageContainer.offsetLeft - 10;
+                if(Math.round(element.scrollLeft) === offsetLeft){
+                    offsetLeft -= 1;
+                }
+                element.scrollLeft = offsetLeft;
+            } else {
+                var offsetTop = pageContainer.offsetTop - 10;
+                if(Math.round(element.scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                element.scrollTop = offsetTop;
             }
-            this.viewer.element[0].scrollTop = offsetTop;
         },
         goToNextPage: function () {
-            this.goToPage(this.viewer.currentPage + 1);
+            this.goToPage(this.getSelectedPage() + 1);
         },
         goToPrevPage: function () {
-            this.goToPage(this.viewer.currentPage - 1);
+            this.goToPage(this.getSelectedPage() - 1);
         },
         getNumPages: function () {
             return this.viewer.pages.length;
         },
         rotatePagesRight: function() {
-            var numPages = this.viewer.pages.length;
-            var rotation = this.rotation + 90;
-            if(rotation === 360 || rotation === -360) {
-                rotation = 0;
-            }
-            this.rotation = rotation;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                this.viewer.pages[iPage].rotate(rotation);
-            }
-
-            this.viewer.setContainerSize(this.viewer.initialScale);
+            this.viewer.rotatePages(90);
         },
         rotatePagesLeft: function() {
-            var numPages = this.viewer.pages.length;
-            var rotation = this.rotation - 90;
-            if(rotation === 360 || rotation === -360){
-                rotation = 0;
-            }
-            this.rotation = rotation;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                this.viewer.pages[iPage].rotate(rotation);
-            }
-
-            this.viewer.setContainerSize(this.viewer.initialScale);
+            this.viewer.rotatePages(-90);
         },
         rotatePageRight: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: 90 });
+            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: 90 });
         },
         rotatePageLeft: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getCurrentPage() -1), rotation: -90 });
+            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: -90 });
         },
         rotatePage: function(args) {
             this.viewer.rotate(args);
+            if(this.onPageRotation) {
+                this.onPageRotation(args);
+            }
         }
     };
 
@@ -10233,127 +11212,126 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
  * TODO PageViewport desc
  */
 itMultiPagesViewer.factory('PageViewport', [function() {
+    function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
+        this.viewBox = viewBox;
+        this.scale = scale;
+        this.rotation = rotation;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
 
-        function PageViewport(viewBox, scale, rotation, offsetX, offsetY, dontFlip) {
-            this.viewBox = viewBox;
-            this.scale = scale;
-            this.rotation = rotation;
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-
-            // creating transform to convert pdf coordinate system to the normal
-            // canvas like coordinates taking in account scale and rotation
-            var centerX = (viewBox[2] + viewBox[0]) / 2;
-            var centerY = (viewBox[3] + viewBox[1]) / 2;
-            var rotateA, rotateB, rotateC, rotateD;
-            rotation = rotation % 360;
-            rotation = rotation < 0 ? rotation + 360 : rotation;
-            switch (rotation) {
-                case 180:
-                    rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
-                    break;
-                case 90:
-                    rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
-                    break;
-                case 270:
-                    rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
-                    break;
-                //case 0:
-                default:
-                    rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
-                    break;
-            }
-
-            if (dontFlip) {
-                rotateC = -rotateC; rotateD = -rotateD;
-            }
-
-            var offsetCanvasX, offsetCanvasY;
-            var width, height;
-            if (rotateA === 0) {
-                offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
-                width = Math.abs(viewBox[3] - viewBox[1]) * scale;
-                height = Math.abs(viewBox[2] - viewBox[0]) * scale;
-            } else {
-                offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
-                offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
-                width = Math.abs(viewBox[2] - viewBox[0]) * scale;
-                height = Math.abs(viewBox[3] - viewBox[1]) * scale;
-            }
-            // creating transform for the following operations:
-            // translate(-centerX, -centerY), rotate and flip vertically,
-            // scale, and translate(offsetCanvasX, offsetCanvasY)
-            this.transform = [
-                rotateA * scale,
-                rotateB * scale,
-                rotateC * scale,
-                rotateD * scale,
-                offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
-                offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
-            ];
-
-            this.width = width;
-            this.height = height;
-            this.fontScale = scale;
+        // creating transform to convert pdf coordinate system to the normal
+        // canvas like coordinates taking in account scale and rotation
+        var centerX = (viewBox[2] + viewBox[0]) / 2;
+        var centerY = (viewBox[3] + viewBox[1]) / 2;
+        var rotateA, rotateB, rotateC, rotateD;
+        rotation = rotation % 360;
+        rotation = rotation < 0 ? rotation + 360 : rotation;
+        switch (rotation) {
+            case 180:
+                rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+                break;
+            case 90:
+                rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+                break;
+            case 270:
+                rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+                break;
+            //case 0:
+            default:
+                rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+                break;
         }
-        PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
-            /**
-             * Clones viewport with additional properties.
-             * @param args {Object} (optional) If specified, may contain the 'scale' or
-             * 'rotation' properties to override the corresponding properties in
-             * the cloned viewport.
-             * @returns {PDFJS.PageViewport} Cloned viewport.
-             */
-            clone: function PageViewPort_clone(args) {
-                args = args || {};
-                var scale = 'scale' in args ? args.scale : this.scale;
-                var rotation = 'rotation' in args ? args.rotation : this.rotation;
-                return new PageViewport(this.viewBox.slice(), scale, rotation,
-                    this.offsetX, this.offsetY, args.dontFlip);
-            },
-            /**
-             * Converts PDF point to the viewport coordinates. For examples, useful for
-             * converting PDF location into canvas pixel coordinates.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the viewport coordinate space.
-             * @see {@link convertToPdfPoint}
-             * @see {@link convertToViewportRectangle}
-             */
-            convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
-                return Util.applyTransform([x, y], this.transform);
-            },
-            /**
-             * Converts PDF rectangle to the viewport coordinates.
-             * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
-             * @returns {Array} Contains corresponding coordinates of the rectangle
-             * in the viewport coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToViewportRectangle:
-                function PageViewport_convertToViewportRectangle(rect) {
-                    var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
-                    var br = Util.applyTransform([rect[2], rect[3]], this.transform);
-                    return [tl[0], tl[1], br[0], br[1]];
-                },
-            /**
-             * Converts viewport coordinates to the PDF location. For examples, useful
-             * for converting canvas pixel location into PDF one.
-             * @param x {number} X coordinate.
-             * @param y {number} Y coordinate.
-             * @returns {Object} Object that contains 'x' and 'y' properties of the
-             * point in the PDF coordinate space.
-             * @see {@link convertToViewportPoint}
-             */
-            convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
-                return Util.applyInverseTransform([x, y], this.transform);
-            }
-        };
 
-        return (PageViewport);
-    }]);
+        if (dontFlip) {
+            rotateC = -rotateC; rotateD = -rotateD;
+        }
+
+        var offsetCanvasX, offsetCanvasY;
+        var width, height;
+        if (rotateA === 0) {
+            offsetCanvasX = Math.abs(centerY - viewBox[1]) * scale + offsetX;
+            offsetCanvasY = Math.abs(centerX - viewBox[0]) * scale + offsetY;
+            width = Math.abs(viewBox[3] - viewBox[1]) * scale;
+            height = Math.abs(viewBox[2] - viewBox[0]) * scale;
+        } else {
+            offsetCanvasX = Math.abs(centerX - viewBox[0]) * scale + offsetX;
+            offsetCanvasY = Math.abs(centerY - viewBox[1]) * scale + offsetY;
+            width = Math.abs(viewBox[2] - viewBox[0]) * scale;
+            height = Math.abs(viewBox[3] - viewBox[1]) * scale;
+        }
+        // creating transform for the following operations:
+        // translate(-centerX, -centerY), rotate and flip vertically,
+        // scale, and translate(offsetCanvasX, offsetCanvasY)
+        this.transform = [
+            rotateA * scale,
+            rotateB * scale,
+            rotateC * scale,
+            rotateD * scale,
+            offsetCanvasX - rotateA * scale * centerX - rotateC * scale * centerY,
+            offsetCanvasY - rotateB * scale * centerX - rotateD * scale * centerY
+        ];
+
+        this.width = width;
+        this.height = height;
+        this.fontScale = scale;
+    }
+    PageViewport.prototype = /** @lends PDFJS.PageViewport.prototype */ {
+        /**
+         * Clones viewport with additional properties.
+         * @param args {Object} (optional) If specified, may contain the 'scale' or
+         * 'rotation' properties to override the corresponding properties in
+         * the cloned viewport.
+         * @returns {PDFJS.PageViewport} Cloned viewport.
+         */
+        clone: function PageViewPort_clone(args) {
+            args = args || {};
+            var scale = 'scale' in args ? args.scale : this.scale;
+            var rotation = 'rotation' in args ? args.rotation : this.rotation;
+            return new PageViewport(this.viewBox.slice(), scale, rotation,
+                this.offsetX, this.offsetY, args.dontFlip);
+        },
+        /**
+         * Converts PDF point to the viewport coordinates. For examples, useful for
+         * converting PDF location into canvas pixel coordinates.
+         * @param x {number} X coordinate.
+         * @param y {number} Y coordinate.
+         * @returns {Object} Object that contains 'x' and 'y' properties of the
+         * point in the viewport coordinate space.
+         * @see {@link convertToPdfPoint}
+         * @see {@link convertToViewportRectangle}
+         */
+        convertToViewportPoint: function PageViewport_convertToViewportPoint(x, y) {
+            return Util.applyTransform([x, y], this.transform);
+        },
+        /**
+         * Converts PDF rectangle to the viewport coordinates.
+         * @param rect {Array} xMin, yMin, xMax and yMax coordinates.
+         * @returns {Array} Contains corresponding coordinates of the rectangle
+         * in the viewport coordinate space.
+         * @see {@link convertToViewportPoint}
+         */
+        convertToViewportRectangle:
+            function PageViewport_convertToViewportRectangle(rect) {
+                var tl = Util.applyTransform([rect[0], rect[1]], this.transform);
+                var br = Util.applyTransform([rect[2], rect[3]], this.transform);
+                return [tl[0], tl[1], br[0], br[1]];
+            },
+        /**
+         * Converts viewport coordinates to the PDF location. For examples, useful
+         * for converting canvas pixel location into PDF one.
+         * @param x {number} X coordinate.
+         * @param y {number} Y coordinate.
+         * @returns {Object} Object that contains 'x' and 'y' properties of the
+         * point in the PDF coordinate space.
+         * @see {@link convertToViewportPoint}
+         */
+        convertToPdfPoint: function PageViewport_convertToPdfPoint(x, y) {
+            return Util.applyInverseTransform([x, y], this.transform);
+        }
+    };
+
+    return (PageViewport);
+}]);
 
 'use strict';
 /**
@@ -10368,6 +11346,20 @@ itMultiPagesViewer.factory('SizeWatcher', ['$interval', function($interval) {
             self.cancel = function() { $interval.cancel(self.monitor); };
         };
     }]);
+
+'use strict';
+/**
+ * TODO TranslateViewer desc
+ */
+itMultiPagesViewer.factory('TranslateViewer', ['$translate', function($translate) {
+   return {
+        translate : function(key, defaultValue) {
+            var result = $translate.instant(key);
+
+            return result != key ? result : defaultValue;
+        }
+   };
+}]);
 
 'use strict';
 /**
@@ -10428,8 +11420,14 @@ itPdfViewer.factory('CustomStyle', [function () {
  */
 itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
     var linker = function (scope, element, attrs) {
+
+        scope.thumbnailCollapsed = false;
         scope.onPassword = function (reason) {
             return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
+
+        scope.toggleThumbnail = function () {
+            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
         };
 
         MultiPagesAddEventWatcher(scope);
@@ -10441,10 +11439,23 @@ itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', func
             options: "="
         },
         restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    //'<pdf-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></pdf-viewer>' +
-                    '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" render-text-layer="{{options.renderTextLayer}}" password-callback="onPassword(reason)"></pdf-viewer>',
+        template :
+        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
+            '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
+            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+                '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
+                    '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
+                        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
+                    '</div>' +
+                '</it-thumbnail-menu-viewer>' +
+            '</div>' +
+            '<div ui-layout-container>' +
+                '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options" password-callback="onPassword(reason)"></pdf-viewer>' +
+            '</div>' +
+            '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
+                '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
+            '</div>' +
+        '</div>',
         link: linker
     };
 }]);
@@ -10493,13 +11504,13 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage) {
+        function PDFPage(pdfPage, hasTextLayer) {
             this.base = MultiPagesPage;
             this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
-            this.textContent = null;
             this.renderTask = null;
+            this.hasTextLayer = hasTextLayer;
         }
 
         PDFPage.prototype = new MultiPagesPage;
@@ -10521,78 +11532,56 @@ itPdfViewer
             this.textLayer.css("width", this.viewport.width + "px");
             this.textLayer.css("height", this.viewport.height + "px");
         };
-        PDFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(this.renderTask === null) {
-                    if(callback) {
-                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                    }
-                } else {
-                    this.renderTask.then(function () {
-                        if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                        }
-                    }, function (reason) {
-                        $log.debug('stopped ' + reason);
-                    });
-                }
+        PDFPage.prototype.renderPage = function (page, callback) {
 
-                return;
-            }
-
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
-                if(self.textContent) {
-                    self.container.append(self.textLayer);
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
+                if(page.hasTextLayer) {
+                    page.wrapper.append(page.textLayer);
                 }
             }else{
 
-                self.container.append(self.canvas);
+                page.wrapper.append(page.canvas);
 
-                this.renderTask = this.pdfPage.render({
-                    canvasContext: this.canvas[0].getContext('2d'),
-                    viewport: this.viewport
+                page.renderTask = this.pdfPage.render({
+                    canvasContext: page.canvas[0].getContext('2d'),
+                    viewport: page.viewport
                 });
 
+                page.renderTask.then(function () {
 
-
-                this.renderTask.then(function () {
-
-                    self.rendered = true;
-                    self.renderTask = null;
-                    self.canvasRendered = true;
-                    //self.container.append(self.canvas);
-
-                    if(self.textContent) {
-                        // Render the text layer...
-                        var textLayerBuilder = new TextLayerBuilder({
-                            textLayerDiv: self.textLayer[0],
-                            pageIndex: self.id,
-                            viewport: self.viewport
-                        });
-
-                        textLayerBuilder.setTextContent(self.textContent);
-                        textLayerBuilder.renderLayer();
-                        self.container.append(self.textLayer);
-                    }
-
+                    //self.rendered = true;
+                    page.renderTask = null;
                     if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                        callback(page, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                    //wrapper.append(self.canvas);
+
+                    if(page.hasTextLayer) {
+                        page.pdfPage.getTextContent().then(function (textContent) {
+                            // Render the text layer...
+                            var textLayerBuilder = new TextLayerBuilder({
+                                textLayerDiv: page.textLayer[0],
+                                pageIndex: page.id,
+                                viewport: page.viewport
+                            });
+
+                            textLayerBuilder.setTextContent(textContent);
+                            textLayerBuilder.renderLayer();
+                            page.wrapper.append(page.textLayer);
+                        });
                     }
                 }, function (message) {
-                    self.rendered = false;
-                    self.renderTask = null;
+                    page.rendered = false;
+                    page.renderTask = null;
 
                     if(message === "cancelled") {
                         if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                            callback(page, MultiPagesConstants.PAGE_RENDER_CANCELLED);
                         }
                     } else {
                         if(callback) {
-                            callback(self, MultiPagesConstants.PAGE_RENDER_FAILED);
+                            callback(page, MultiPagesConstants.PAGE_RENDER_FAILED);
                         }
                     }
                 });
@@ -10604,175 +11593,166 @@ itPdfViewer
 
     .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
         function PDFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new PDFViewerAPI(this), element);
+                this.base = MultiPagesViewer;
+                this.base(new PDFViewerAPI(this), element);
 
-            this.pdf = null;
-            // Hooks for the client...
-            this.passwordCallback = null;
-        }
+                this.pdf = null;
+                // Hooks for the client...
+                this.passwordCallback = null;
+           }
 
-        PDFViewer.prototype = new MultiPagesViewer;
+            PDFViewer.prototype = new MultiPagesViewer;
 
-        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if (obj !== undefined && obj !== null && obj !== '') {
-                this.pageMargin = pageMargin;
-                this.initialScale = initialScale;
-                this.hasTextLayer = renderTextLayer;
-                var isFile = typeof obj != typeof "";
+            PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
+                this.element.empty();
+                this.pages = [];
+                if (obj !== undefined && obj !== null && obj !== '') {
+                    this.pageMargin = pageMargin;
+                    this.initialScale = initialScale;
+                    this.hasTextLayer = renderTextLayer;
+                    this.orientation = orientation;
+                    var isFile = typeof obj != typeof "";
 
-                if(this.getDocumentTask != undefined){
-                    var self = this;
-                    this.getDocumentTask.destroy().then(function (){
+                    if(this.getDocumentTask != undefined){
+                        var self = this;
+                        this.getDocumentTask.destroy().then(function () {
+                            if(isFile){
+                                self.setFile(obj);
+                            }else {
+                                self.setUrl(obj);
+                            }
+                        });
+                    } else {
                         if(isFile){
-                            self.setFile(obj);
+                            this.setFile(obj);
                         }else {
-                            self.setUrl(obj);
+                            this.setUrl(obj);
                         }
-                    });
-                } else {
-                    if(isFile){
-                        this.setFile(obj);
-                    }else {
-                        this.setUrl(obj);
                     }
                 }
-            }
-        };
-        PDFViewer.prototype.setUrl = function (url) {
-            var self = this;
-            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-            this.getDocumentTask.then(function (pdf) {
-                self.pdf = pdf;
-
-                self.getAllPages( function (pageList, pagesRefMap) {
-                    self.pages = pageList;
-                    self.pagesRefMap = pagesRefMap;
-
-                    // Append all page containers to the $element...
-                    for (var iPage = 0; iPage < pageList.length; ++iPage) {
-                        self.element.append(pageList[iPage].container);
-                    }
-
-                    self.setContainerSize(self.initialScale);
-                });
-            }, function (message) {
-                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-            });
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
+            };
+            PDFViewer.prototype.setUrl = function (url) {
+                var self = this;
+                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+                this.getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
 
-                    self.getAllPages(function (pageList, pagesRefMap) {
+                    self.getAllPages( function (pageList, pagesRefMap) {
                         self.pages = pageList;
                         self.pagesRefMap = pagesRefMap;
-
-                        // Append all page containers to the $element...
-                        for(var iPage = 0;iPage < pageList.length; ++iPage) {
-                            self.element.append(pageList[iPage].container);
-                        }
-
-                        self.setContainerSize(self.initialScale);
+                        self.addPages();
+                        //self.setContainerSize(self.initialScale);
                     });
                 }, function (message) {
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
             };
+            PDFViewer.prototype.setFile = function (file) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var arrayBuffer = e.target.result;
+                    var uint8Array = new Uint8Array(arrayBuffer);
+                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                    getDocumentTask.then(function (pdf) {
+                        self.pdf = pdf;
 
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
-
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
-                    }
-
-                    self.onDataDownloaded("failed", 0, 0, message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        };
-        PDFViewer.prototype.getAllPages = function (callback) {
-            var pageList = [],
-                pagesRefMap = {},
-                numPages = this.pdf.numPages,
-                remainingPages = numPages;
-
-            if(this.hasTextLayer) {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        // Page reference map. Required by the annotation layer.
-                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                        pagesRefMap[refStr] = page.pageIndex + 1;
-
-                        var pdfPage = new PDFPage(page);
-                        pageList[page.pageIndex] = pdfPage;
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-
-                        page.getTextContent().then(function (textContent) {
-                            pdfPage.textContent = textContent;
+                        self.getAllPages(function (pageList, pagesRefMap) {
+                            self.pages = pageList;
+                            self.pagesRefMap = pagesRefMap;
+                            self.addPages();
+                            //self.setContainerSize(self.initialScale);
                         });
+                    }, function (message) {
+                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                     });
-                }
-            } else {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
+                };
 
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(page);
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
 
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
                         }
-                    });
-                }
-            }
-        };
-        PDFViewer.prototype.onDestroy = function () {
-            if(this.getDocumentTask){
-                this.getDocumentTask.destroy();
-                this.getDocumentTask = null;
-            }
-        };
 
-        return (PDFViewer);
+                        self.onDataDownloaded("failed", 0, 0, message);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            };
+            PDFViewer.prototype.getAllPages = function (callback) {
+                var pageList = [],
+                    pagesRefMap = {},
+                    numPages = this.pdf.numPages,
+                    remainingPages = numPages;
+
+                if(this.hasTextLayer) {
+                    for(var iPage = 0;iPage < numPages;++iPage) {
+                        pageList.push({});
+
+                        var getPageTask = this.pdf.getPage(iPage + 1);
+                        getPageTask.then(function (page) {
+                            // Page reference map. Required by the annotation layer.
+                            var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                            pagesRefMap[refStr] = page.pageIndex + 1;
+
+                            var pdfPage = new PDFPage(page, true);
+                            pageList[page.pageIndex] = pdfPage;
+
+                            --remainingPages;
+                            if(remainingPages === 0) {
+                                callback(pageList, pagesRefMap);
+                            }
+
+                            /*page.getTextContent().then(function (textContent) {
+                                pdfPage.textContent = textContent;
+                            });*/
+                        });
+                    }
+                } else {
+                    for(var iPage = 0;iPage < numPages;++iPage) {
+                        pageList.push({});
+
+                        var getPageTask = this.pdf.getPage(iPage + 1);
+                        getPageTask.then(function (page) {
+                            pageList[page.pageIndex] = new PDFPage(page, false);
+
+                            --remainingPages;
+                            if(remainingPages === 0) {
+                                callback(pageList, pagesRefMap);
+                            }
+                        });
+                    }
+                }
+            };
+            PDFViewer.prototype.onDestroy = function () {
+                if(this.getDocumentTask){
+                    this.getDocumentTask.destroy();
+                    this.getDocumentTask = null;
+                }
+            };
+
+            return (PDFViewer);
     }])
 
     .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
@@ -10784,11 +11764,17 @@ itPdfViewer
                 src: "@",
                 file: "=",
                 api: "=",
-                initialScale: "@",
-                renderTextLayer: "@",
+                options: "=",
                 passwordCallback: "&"
             },
             controller: ['$scope', '$element', function ($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
 
                 $scope.getPassword = function (passwordFunc, reason) {
                     if(this.passwordCallback) {
@@ -10812,32 +11798,29 @@ itPdfViewer
 
                 $scope.api = viewer.getAPI();
 
-                $scope.shouldRenderTextLayer = function () {
-                    if(this.renderTextLayer === "" || this.renderTextLayer === undefined || this.renderTextLayer === null || this.renderTextLayer.toLowerCase() === "false") {
-                        return false;
+                var shouldRenderTextLayer = function () {
+                    var renderTextLayer = getOption("renderTextLayer");
+                    if(typeof renderTextLayer === typeof true) {
+                        return renderTextLayer;
                     }
 
-                    return true;
+                    return false;
                 };
 
                 $scope.onSrcChanged = function () {
-                    viewer.open(this.src, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                    viewer.open($scope.src, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
                 };
 
                 $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, this.shouldRenderTextLayer(), pageMargin);
+                    viewer.open($scope.file, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
                 };
 
                 viewer.hookScope($scope);
             }],
             link: function (scope, element, attrs) {
-                attrs.$observe('src', function (src) {
-                    scope.onSrcChanged();
-                });
+                attrs.$observe('src', scope.onSrcChanged);
 
-                scope.$watch("file", function (file) {
-                    scope.onFileChanged();
-                });
+                scope.$watch("file", scope.onFileChanged);
             }
         };
     }]);
@@ -11218,6 +12201,12 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
  */
 itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
     var linker = function(scope, element, attrs) {
+        scope.thumbnailCollapsed = false;
+
+        scope.toggleThumbnail = function () {
+            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
+        };
+
         MultiPagesAddEventWatcher(scope);
     };
 
@@ -11227,12 +12216,24 @@ itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', fun
             options: "="
         },
         restrict: 'E',
-        template :  '<it-progressbar-viewer api="options.api" ng-if="options.showProgressbar"></it-progressbar-viewer>' +
-                    '<it-toolbar-viewer api="options.api" ng-if="options.showToolbar"></it-toolbar-viewer>' +
-                    //'<tiff-viewer ng-if="options.api.getNumPages() > 1" api="options.thumbnailApi" class="thumbnail-viewer" file="file" src="{{trustSrc(url)}}" initial-scale="fit_width" ></tiff-viewer>' +
-                    '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.api" initial-scale="{{options.initialScale}}" ></tiff-viewer>',
-        link: linker
-
+        template :
+        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
+        '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
+        '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+        '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
+        '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
+        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
+        '</div>' +
+        '</it-thumbnail-menu-viewer>' +
+        '</div>' +
+        '<div ui-layout-container>' +
+        '<tiff-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options"></tiff-viewer>' +
+        '</div>' +
+        '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
+        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
+        '</div>' +
+        '</div>',
+        link: linker 
     };
 }]);
 'use strict';
@@ -11240,47 +12241,39 @@ itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', fun
  * TODO Tiff implementation desc
  */
 itTiffViewer
-    .factory('TIFFPage', ['$log' , 'MultiPagesPage', 'MultiPagesConstants', function($log, MultiPagesPage, MultiPagesConstants) {
+    .factory('TIFFPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
         function TIFFPage(pageIndex, getSrc, view) {
-        			this.base = MultiPagesPage;
-        			this.base(pageIndex, view);
+            this.base = MultiPagesPage;
+            this.base(pageIndex, view);
 
-        			this.getSrc = getSrc;
-        		}
+            this.getSrc = getSrc;
+        }
 
         TIFFPage.prototype = new MultiPagesPage;
 
-        TIFFPage.prototype.render = function (callback) {
-            var self = this;
-            if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
+        TIFFPage.prototype.renderPage = function (page, callback) {
+            var self = this; 
 
-            this.rendered = true;
-
-            if(this.canvasRendered){
-                self.container.append(self.canvas);
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
             }else {
-                self.container.append(self.canvas);
+                page.wrapper.append(page.canvas);
 
-                var ctx = self.canvas[0].getContext('2d');
-                ctx.transform.apply(ctx, self.viewport.transform);
+                var ctx = page.canvas[0].getContext('2d');
+                ctx.transform.apply(ctx, page.viewport.transform);
                 var img = new Image;
                 img.onload = function(){
                     ctx.drawImage(img,0,0); // Or at whatever offset you like
-                    self.canvasRendered = true;
+                    //self.canvasRendered = true;
                     if(callback) {
-                        callback(self, MultiPagesConstants.PAGE_RENDERED);
+                        callback(page, MultiPagesConstants.PAGE_RENDERED);
                     }
                 };
 
                 $timeout(function () {
                     if(self.src == undefined){
-                        self.src =  self.getSrc(self.id - 1);
+                        self.src =  self.getSrc(page.pageIndex);
                     }
 
                     img.src = self.src;
@@ -11293,7 +12286,11 @@ itTiffViewer
     }])
 
     .factory('TIFFViewer', ['$log', 'MultiPagesViewerAPI' , 'TIFFPage' , 'MultiPagesViewer', function($log, MultiPagesViewerAPI, TIFFPage, MultiPagesViewer) {
-        Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+        try {
+            Tiff.initialize({TOTAL_MEMORY: 16777216 * 10});
+        } catch(ex) {
+            $log.debug("Lib tiff throw exception on set TOTAL_MEMORY : " + ex);
+        }
 
         function TIFFViewer(element) {
             this.base = MultiPagesViewer;
@@ -11304,11 +12301,12 @@ itTiffViewer
 
         TIFFViewer.prototype = new MultiPagesViewer;
 
-        TIFFViewer.prototype.open = function(obj, initialScale, pageMargin) {
+        TIFFViewer.prototype.open = function(obj, initialScale, orientation, pageMargin) {
             this.element.empty();
             this.pages = [];
             this.pageMargin = pageMargin;
             this.initialScale = initialScale;
+            this.orientation = orientation;
             var isFile = typeof obj != typeof "";
 
             if(isFile){
@@ -11377,8 +12375,8 @@ itTiffViewer
             self.tiff = new Tiff({buffer: arrayBuffer});
             self.getAllPages(function(pageList) {
                 self.pages = pageList;
-
-                self.setContainerSize(self.initialScale);
+                self.addPages();
+                //self.setContainerSize(self.initialScale);
             });
         };
         TIFFViewer.prototype.getAllPages = function(callback) {
@@ -11393,10 +12391,10 @@ itTiffViewer
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
                 this.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(iPage, _getUrl, [0,0,this.tiff.width(),this.tiff.height()]);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0, this.tiff.width(), this.tiff.height()]);
                 pageList[iPage] = page;
 
-                this.element.append(page.container);
+                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {
@@ -11424,21 +12422,28 @@ itTiffViewer
                 src: "@",
                 file: "=",
                 api: "=",
-                initialScale: "@"
+                options: "="
 
             },
             controller: ['$scope', '$element', function($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
 
                 var viewer = new TIFFViewer($element);
 
                 $scope.api = viewer.getAPI();
 
                 $scope.onSrcChanged = function() {
-                    viewer.open(this.src, this.initialScale, pageMargin);
+                    viewer.open(this.src, getOption("initialScale"), getOption("orientation"), pageMargin);
                 };
 
                 $scope.onFileChanged = function () {
-                    viewer.open(this.file, this.initialScale, pageMargin);
+                    viewer.open(this.file, getOption("initialScale"), getOption("orientation"), pageMargin);
                 };
 
                 viewer.hookScope($scope);
@@ -11453,4 +12458,194 @@ itTiffViewer
                 });
             }
         };
+    }]);
+
+'use strict';
+/**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages;
+            var self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                pageList[iPage] = page;
+
+                //this.addPage(page);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        return (ThumbnailViewer);
     }]);

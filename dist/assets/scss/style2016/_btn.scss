@@ -1,0 +1,78 @@
+.btn {
+  border-radius: 3px !important;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.btn-success {
+  background-color: $btnSuccessBackColor !important;
+  color: $btnSuccessBackColor !important;
+}
+
+.btn-success:hover {
+  background-color: $btnSuccessHoverBackColor !important;
+  color: $btnSuccessHoverColor !important;
+}
+
+.btn-success[disabled] {
+  background-color: $btnSuccessBackColor !important;
+  opacity: 0.5 !important;
+  color: $btnSuccessBackColor !important;
+}
+
+.btn-warning {
+  background-color: $btnWarningBackColor !important;
+  color: $btnColor !important;
+}
+
+.btn-warning:hover {
+  background-color: $btnWarningHoverBackColor !important;
+  color: $btnWarningHoverColor !important;
+}
+
+.btn-warning[disabled] {
+  background-color: $btnWarningBackColor !important;
+  opacity: 0.5 !important;
+  color: $btnColor !important;
+}
+
+.btn-primary {
+  background-color: $btnPrimaryBackColor !important;
+  color: $btnColor !important;
+  border: none !important;
+}
+
+.btn-primary:hover {
+  background-color: $btnPrimaryHoverBackColor !important;
+  color: $btnPrimaryHoverColor !important;
+}
+
+.btn-primary[disabled] {
+  background-color: $btnPrimaryDisableBackColor !important;
+  opacity: 0.5 !important;
+  color: $btnColor !important;
+}
+
+.btn-danger {
+  background-color: $btnDangerBackColor !important;
+  color: $btnColor !important;
+}
+
+.btn-danger:hover {
+  background-color: $btnDangerHoverBackColor !important;
+  color: $btnDangerHoverColor !important;
+}
+
+.btn-danger[disabled] {
+  background-color: $btnDangerDisableBackColor !important;
+  opacity: 0.5 !important;
+  color: $btnColor !important;
+}
+
+.btn {
+  text-transform: none !important;
+}
+
+.btn:hover:not(.btn-link):not(.btn-flat):not(.btn-fab) {
+  box-shadow: none;
+}

@@ -59,6 +59,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "dependencies.directive:ui-layout",
+      "shortName": "ui-layout",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "This directive allows you to split",
+      "keywords": "ae allows angular api btn btn-primary btn-success capture capturer class column dependencies directive disabled envoyer html https it-block it-button-do itesoft-showcase js layout lines-table-invoice-coding-btn margin-left module ng-binding nowrap position relative size split style text-align ui ui-layout ui-layout-container"
+    },
+    {
+      "section": "api",
       "id": "dependencies.service:localStorage",
       "shortName": "localStorage",
       "type": "service",
@@ -77,6 +86,33 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "it-tab.directive:itTab",
+      "shortName": "itTab",
+      "type": "directive",
+      "moduleName": "it-tab",
+      "shortDescription": "Button that represent tab header",
+      "keywords": "$scope analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app button class company console content content-url controller description directive feature fit_height function github header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param rendertextlayer represent row showtoolbar supplier tab table title true validate-header-tab-company"
+    },
+    {
+      "section": "api",
+      "id": "it-tab.directive:itTabContent",
+      "shortName": "itTabContent",
+      "type": "directive",
+      "moduleName": "it-tab",
+      "shortDescription": "Div that represent tab content",
+      "keywords": "$scope analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app class company console content content-url controller description directive div fit_height function github homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param rendertextlayer represent row showtoolbar supplier tab table template true url"
+    },
+    {
+      "section": "api",
+      "id": "it-tab.service:TabService",
+      "shortName": "TabService",
+      "type": "service",
+      "moduleName": "it-tab",
+      "shortDescription": "Service that manage tab link to itTab",
+      "keywords": "$scope angular api call callback change changed changetab class controller current description function homectrl html isactivetab it-tab itesoft itesoft-showcase ittab js link manage method module newtabid ng-controller ontabchanged row service tab table tabservice"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itAutocomplete",
       "shortName": "itAutocomplete",
       "type": "directive",
@@ -91,7 +127,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The Block widgets provides  way to customize UI.",
-      "keywords": "$http $rootscope $scope add addnewline admin angular api autologin block bottom btn btn-danger btn-primary button carney cellclass celltemplate class coding coding-lines-add3 coding-lines-duplicate3 coding-lines-memorize3 coding-lines-remove3 codingcontroller col-xs-2 columndefs company comveyer config constant controller copy core cox current_package current_role customize data directive dirty disabled duplicate duplicateline editmode editor editsite email employed enable enable_template_editor enablefiltering enormo example fa fa-copy fa-folder fa-lg fa-plus fa-trash false filter filterchanged filteruse firstname floating-label foreach form-control form-group fuelton function grid grid1 gridapi gridoptions homectrl html http it-autocomplete it-input it-label itesoft itesoft-showcase js key lastname left length lines login login_input lorraine managed margin memorize modification module mydata mydatainit nancy ng-click ng-controller ng-model ngresource onregisterapi package password ps remove removed removenewline rest rest_template_api_url role sample saved selectedoption skip skip_login style template template_editor_url template_user_auto_login text title toaster totalitems translate true type ui ui-grid ui-grid-cell-contents uigridgroupingconstants url useexternalfiltering user usrole v1 values var version waters web widgets wise zone-coding-lines-actions3 zone-firstname zone-grid-example"
+      "keywords": "$http $rootscope $scope add addnewline admin angular api autologin block bottom btn btn-danger btn-primary button carney cellclass celltemplate class coding coding-lines-add3 coding-lines-duplicate3 coding-lines-memorize3 coding-lines-remove3 codingcontroller col-xs-2 columndefs company comveyer config constant controller copy core cox current_package current_role customize data directive dirty disabled duplicate duplicateline eac editmode editor editsite email employed enable enable_template_editor enablefiltering enormo example fa fa-copy fa-folder fa-lg fa-plus fa-trash false filter filterchanged filteruse firstname floating-label foreach form-control form-group fuelton function grid grid1 gridapi gridoptions homectrl html http it-autocomplete it-input it-label itesoft itesoft-showcase js key lastname left length lines login login_input lorraine managed margin memorize modification module mydata mydatainit nancy ng-click ng-controller ng-model ngresource onregisterapi package password ps remove removed removenewline rest rest_template_api_url role sample saved selectedoption skip skip_login style template template_editor_url template_user_auto_login text title toaster totalitems translate true type ui ui-grid ui-grid-cell-contents uigridgroupingconstants url useexternalfiltering user usrole v1 values var version waters web widgets wise zone-coding-lines-actions3 zone-firstname zone-grid-example"
     },
     {
       "section": "api",
@@ -217,7 +253,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "Most important part of master-detail component, that",
-      "keywords": "$broadcast $scope add api application appscope attributes auto binding changed changes child class component content context currentitem data default define detail details directive display displayed ea editing element elements encompass entity equals event false fillheight filter getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html itappscope item items itesoft list lockcurrentitem master master-detail master_row_changed menu mode original parent promise refresh return revert row scope scroll scrolltoitem selectable selected set setcurrentitem table template trigged true undochangecurrentitem unlock unlockcurrentitem unlockonequals wrapper"
+      "keywords": "$broadcast $scope add api application appscope attributes auto binding changed changes child class component content context currentitem data default define detail details directive display displayed ea editing element elements encompass entity equals event false fillheight filter getcurrentitemwrapper getfiltereditems getselecteditems grid haschanged height html it-lock-on-change itappscope item items itesoft list lockcurrentitem master master-detail master_row_changed menu mode navigation original parent promise refresh return revert row scope scroll scrolltoitem selectable selected set setcurrentitem table template trigged true undochangecurrentitem unlock unlockcurrentitem unlockonequals wrapper"
     },
     {
       "section": "api",
@@ -244,7 +280,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "",
-      "keywords": "$scope aec allow angular api apply bar case change class click col-md-12 console controller cross current directive disable document domain downloadprogress enable false fit_height fit_page fit_width force function getcurrentpage getnumpages getzoomlevel getzoomlevels github gotonextpage gotopage gotoprevpage guess height homectrl html http implement initial initialscale io items itesoft itesoft-showcase js layer left level levels libpath list log media module ng-controller notify number onapiloaded onpageclicked onzoomlevelschanged options origin parameter passed pdf prev progress property render rendertextlayer rotate rotatepageleft rotatepageright rotatepagesleft rotatepagesright row scale server showprogressbar showtoolbar src style table text tool tracemonkey-pldi-09 true type url viewer zoom zoomin zoomout zoomto"
+      "keywords": "$scope aec alert allow angular api apply args bar border-color border-style border-width case center change class click col-md-12 console controller cross current directive disable document domain downloadprogress enable error extension false fit_height fit_page fit_width force function getapi getcurrentpage getnumpages getzoomlevel getzoomlevels github gotonextpage gotopage gotoprevpage guess height homectrl horizontal html http implement initial initialscale io items itesoft itesoft-showcase js layer left level levels libpath list log media menu message module multipage-viewer ng-controller notify num-page number onapiloaded onerror onpageclicked onpagerotation ontemplatenotfound onzoomlevelschanged options orientation origin pageindex parameter passed pdf prev progress property red render rendertextlayer rotate rotatepageleft rotatepageright rotatepagesleft rotatepagesright rotation row scale selected selection server showprogressbar showsizemenu showthumbnail showtoolbar size solid src style table template text text-align thumbnail thumbnail-viewer tool tracemonkey-pldi-09 true type url vertical viewer zoom zoomin zoomout zoomto"
     },
     {
       "section": "api",
@@ -263,15 +299,6 @@ NG_DOCS={
       "moduleName": "itesoft",
       "shortDescription": "Directive to set active view css class on side menu item &lt;it-side-menus&gt;.",
       "keywords": "active alt api class content css directive fa fa-book fa-fw fa-home gif href html it-nav-active item itesoft jumborton list-group menu nav nav-pills nav-stacked navbar-nav ng-scope set side src tables typography view"
-    },
-    {
-      "section": "api",
-      "id": "itesoft.directive:itPanelForm",
-      "shortName": "itPanelForm",
-      "type": "directive",
-      "moduleName": "itesoft",
-      "shortDescription": "The itPanelForm provides dynamic content panel in a form embedded.",
-      "keywords": "$scope $templatecache angular api code code1 code2 content controller directive dynamic embedded form function homectrl html input itesoft itpanelform js label link module ng-controller option options panel query require scope select title title2 title3 type value1 value2"
     },
     {
       "section": "api",
@@ -401,6 +428,24 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.service:CurrentErrorsService",
+      "shortName": "CurrentErrorsService",
+      "type": "service",
+      "moduleName": "itesoft",
+      "shortDescription": "Service that keep reference to error inside tabs",
+      "keywords": "$scope angular api class controller description error fatal function haserror hasfatal haswarning homectrl html inside isactivetab itesoft itesoft-showcase js module ng-controller ontabchanged reference return row service tab table tabs tabservice true warning"
+    },
+    {
+      "section": "api",
+      "id": "itesoft.service:itConfig",
+      "shortName": "itConfig",
+      "type": "service",
+      "moduleName": "itesoft",
+      "shortDescription": "This is a configuration provider. It load a json file and let you inject everywhere, you can also override",
+      "keywords": "$http $location $log $scope adaptation allowoverride angular api baseurl captureomnicanal class common config configfile configuration controller css debug default defaultnamespace example file function html http info inject itconfig itconfigprovider itesoft itnotifier js json load module mycontroller namespace ng-controller ngtoast object override parameters peroperties production-- propertie properties provider purposes retrieve service table url values"
+    },
+    {
+      "section": "api",
       "id": "itesoft.service:itLanguageChangeHandler",
       "shortName": "itLanguageChangeHandler",
       "type": "service",
@@ -434,6 +479,15 @@ NG_DOCS={
       "moduleName": "itesoft",
       "shortDescription": "The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.",
       "keywords": "$q $rootscope $scope $uibmodal $uibmodalstack action addition alert alertpopup allowing allows angular api backdrop btn btn-danger btn-info btn-warning built button buttons callback cancel canceled class completely confirm confirmpopup console content continue controller creating custom custompopup data email event example_my-custom-html-content false flexible floating-label form-control function functions html inputlabel inputtype it-input it-label itesoft itpopup js log module ng-click ng-controller ng-model ontap order password popup popup_content popup_label popup_title popupctrl popups preventdefault programmatically prompt promptpopup require required respond response return scope service showalert showconfirm showcustomconfirm showing showprompt support system text title translate true type undefined user users validate var versions windows"
+    },
+    {
+      "section": "api",
+      "id": "style2016.directive:style2016",
+      "shortName": "style2016",
+      "type": "directive",
+      "moduleName": "style2016",
+      "shortDescription": "Itesoft style 2016 (like SCPAS)",
+      "keywords": "$ctrl $emit $event $scope accounting active add analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api attachment attachmentid auto background-color btn btn-primary btn-success button capturer category class code col-md-12 col-xs-12 col-xs-4 colspan company controller css currency dashboard-container-with-footer dashboard-indicator-count dashboard-indicator-title dashboard-panel-container dashboard-panel-container-indicator dashboard-panel-content dashboard-panel-header dashboard-row-indicator dashboard-scrollable-content dashboard-with-footer dd directive doc_number docnumber document edf eeeeee enable envoyer error_validate excel-style-header excel-style-row-selected excel-style-settings fa fa-trash fac1000006 file follow_remove function gettranslatedtaskname global gotocodingform height hh homectrl href html http import inv invoice invoiceid invoices it-button-bar it-button-do it-collapsed-item it-header-tab it-icon it-line it-nav-active it-task-invoice-type it-task-lines-table-doc-number it-task-lines-table-invoice-category it-task-lines-table-invoice-date it-task-lines-table-itesoft-id it-task-lines-table-net-amount it-task-lines-table-supplier-name it-task-lines-table-task-name it-task-lines-table-total-amount item itesoft itesoft-showcase itesofticons js label left left-panel linenums lines list-group logo menu_admin menu_home menu_rapport menu_search menu_settings menu_task messages-title middle middle-panel module nav nav-pills nav-stacked navbar-nav net_amount netamount ng-binding ng-class ng-click ng-controller ng-dblclick ng-repeat no-border no-padding nowrap null owner pmu prettyprint principal rel right-panel row-height-10 row-height-2 row-height-8 scpas scss selectedline small-btn smooth style style2016 stylesheet supplier suppliername table table-condensed-small table-striped task task_name taskid taskname taskservice text text-align text-left text-right title total_amount totalamount translate type updateselectedline var wopo"
     }
   ],
   "apis": {
