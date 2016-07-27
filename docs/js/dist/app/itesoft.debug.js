@@ -12197,6 +12197,196 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 
 'use strict';
 /**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages;
+            var self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                pageList[iPage] = page;
+
+                //this.addPage(page);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        return (ThumbnailViewer);
+    }]);
+
+'use strict';
+/**
  * TODO itTiffViewer desc
  */
 itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
@@ -12458,194 +12648,4 @@ itTiffViewer
                 });
             }
         };
-    }]);
-
-'use strict';
-/**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
-
-        function ThumbnailPage(page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages;
-            var self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
-                pageList[iPage] = page;
-
-                //this.addPage(page);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        return (ThumbnailViewer);
     }]);
