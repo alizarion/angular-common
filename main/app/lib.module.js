@@ -8,7 +8,9 @@ var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer', 'ui.
 
 var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'ui.layout']);
 
-var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']); 
+var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
+
+var itTab = angular.module("it-tab",[]);
 
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
@@ -35,6 +37,7 @@ var IteSoft = angular.module('itesoft', [
     'it-pdf-viewer',
     'it-image-viewer',
     'it-tiff-viewer',
+    'it-tab',
     'itesoft.messaging',
     'itesoft.language'
 ]);

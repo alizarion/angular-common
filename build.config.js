@@ -194,7 +194,7 @@ module.exports = {
     fileToCopyAndRename:
     [
         { src:"main/assets/lib/pdfjs-dist/build/pdf.worker.js", dest:"assets/lib/pdf.worker.js" },
-        { src:"main/assets/lib/pdfjs-dist/build/pdf.js", dest:"assets/lib/pdf.js" }, 
+        { src:"main/assets/lib/pdfjs-dist/build/pdf.js", dest:"assets/lib/pdf.js" },
         { src:"main/assets/lib/libtiff/tiff.min.js", dest:"assets/lib/tiff.min.js" }
     ]
 };

@@ -29,8 +29,15 @@ IteSoft
                     scope.showmenu = true;
                 }
 
-                scope.menuOpenStyle = { 'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px' };
-                scope.menuCloseStyle = { 'padding-left': '0px' };
+                calculatePadding();
+                scope.$watch('$itSideMenuWidth',function(){
+                    calculatePadding();
+                });
+
+                function calculatePadding(){
+                    scope.menuOpenStyle = {'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px'};
+                    scope.menuCloseStyle = {'padding-left': '0px'};
+                }
             },
             template :
             '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +

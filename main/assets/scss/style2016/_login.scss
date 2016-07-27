@@ -1,0 +1,64 @@
+@charset "UTF-8";
+html {
+  overflow: hidden
+}
+
+.login-block {
+  display: table;
+}
+
+.it-login-background {
+  background-size: 100%;
+  background: url('../../assets/img/login/login_background.jpg') no-repeat;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+@media (min-width: 1366px) {
+  .form-control:not(textarea)::-webkit-input-placeholder {
+    color: white;
+  }
+  .form-control:not(textarea)::-moz-placeholder {
+    color: white;
+  }
+  .form-control:not(textarea):-ms-input-placeholder {
+    color: white;
+  }
+  .form-control:not(textarea) {
+    height: 40px;
+  }
+  .form-control:not(textarea):focus {
+    height: 40px;
+  }
+}
+
+@media (min-width: 468px) {
+  .it-login-input {
+    border: 1px solid white;
+    background-image: none;
+  }
+}
+
+@media (max-height: 600px) {
+  .it-login-logo {
+    background: none;
+    height: auto;
+    width: auto;
+  }
+}
+
+.it-login-button {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.white {
+  color: white;
+}
+
+.login-block {
+  float: none;
+  margin-top: 50px;
+  width: 300px;
+}
