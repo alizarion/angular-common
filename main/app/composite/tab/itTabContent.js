@@ -2,8 +2,8 @@
 
 /**
  * @ngdoc directive
- * @name itesoft.directive:itTabContent
- * @module itesoft
+ * @name it-tab.directive:itTabContent
+ * @module it-tab
  * @since 1.2
  * @restrict E
  *
@@ -58,7 +58,7 @@
  </example>
  */
 
-IteSoft.component('itTabContent', {
+itTab.component('itTabContent', {
         restrict: 'E',
         bindings: {
             id: '=',

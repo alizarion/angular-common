@@ -1,8 +1,8 @@
 'use strict';
 /**
  * @ngdoc directive
- * @name itesoft.directive:itTab
- * @module itesoft
+ * @name it-tab.directive:itTab
+ * @module it-tab
  * @since 1.2
  * @restrict E
  *
@@ -64,7 +64,7 @@
  </file>
  </example>
  */
-IteSoft.component('itTab', {
+itTab.component('itTab', {
         bindings: {
             id: '=',
             label: '='

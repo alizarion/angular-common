@@ -2,8 +2,8 @@
 
 /**
  * @ngdoc service
- * @name itesoft.service:TabService
- * @module itesoft
+ * @name it-tab.service:TabService
+ * @module it-tab
  * @since 1.2
  *
  * @description
@@ -56,7 +56,7 @@
  </example>
  */
 
-IteSoft.factory('TabService', [function () {
+itTab.factory('TabService', [function () {
         var self = this;
         self.tabChangedCallBacks = [];
         self.changeTab = _changeTab;
