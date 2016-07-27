@@ -9,6 +9,7 @@ button.btn.header-tab[disabled] {
 }
 
 button.btn.header-tab {
+  width:100%;
   height: 35px;
   color: $tabColor !important;
   background-color: $tabBackColor !important;
