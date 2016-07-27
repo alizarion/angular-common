@@ -51,9 +51,9 @@
  <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
  <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
  <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
- <it-tab-content id="'analyticalCoding-header-tab-company'" view-controller="$ctrl"  content-url="'app/features/settings/view/company.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-supplier'" view-controller="$ctrl"   content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-invoice'" view-controller="$ctrl"  content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
  </div>
  </file>
  <file name="Module.js">
