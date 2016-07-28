@@ -100,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Div that represent tab content",
-      "keywords": "$scope analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app class company console content content-url controller description directive div fit_height function github homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param rendertextlayer represent row showtoolbar supplier tab table template true url"
+      "keywords": "$ctrl $scope allow analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app class company console content content-url controller description directive div fit_height function github homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param reference rendertextlayer represent row showtoolbar supplier tab table template true url view view-controller"
     },
     {
       "section": "api",

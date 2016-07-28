@@ -6318,440 +6318,6 @@ IteSoft
 'use strict';
 
 /**
- * @ngdoc service
- * @name itesoft.service:CurrentErrorsService
- * @module itesoft
- * @since 1.2
- *
- * @description
- * Service that keep reference to error inside tabs
- *
- * <h1>Attribute</h1>
- *  <table class="table">
- *  <tr>
- *      <th>
- *          Function
- *      </th>
- *      <th>
- *          Description
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          hasFatal(tabId)
- *      </td>
- *      <td>
- *          Return true if there is a fatal inside tab
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          hasError(tabId)
- *      </td>
- *      <td>
- *          Return true if there is an error inside tab
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          hasWarning(tabId)
- *      </td>
- *      <td>
- *           Return true if there is a warning inside tab
- *      </td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="HomeCtrl" class="row">
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-    TabService.onTabChanged(function (selectedTabId) {
-              self.isActiveTab = (selectedTabId == self.id);
-          });
- }]
- );
- </file>
- </example>
- */
-
-IteSoft.factory('CurrentErrors', [function () {
-
-        function _isEmpty(obj) {
-            for (var prop in obj) {
-                if (obj.hasOwnProperty(prop)) {
-                    return false;
-                }
-            }
-            return true;
-        };
-
-        function _isArrayEmpty(obj) {
-            if (!angular.isDefined(obj) || !angular.isArray(obj)) {
-                return false;
-            }
-
-            return obj.length == 0;
-        };
-
-        return {
-            //Technical errors
-            technicalErrors: [],
-
-            //Error levels
-            fatals: {},
-            errors: {},
-            warnings: {},
-
-            // Errors levels by tabs
-            fatalsByTabs: {},
-            errorsByTabs: {},
-            warningsByTabs: {},
-
-            init: function () {
-                this.fatals = {};
-                this.errors = {};
-                this.warnings = {};
-                this.fatalsByTabs = {};
-                this.errorsByTabs = {};
-                this.warningsByTabs = {};
-            },
-            hasFatalOrHigher: function () {
-                return this.hasFatal() || this.hasTechnical();
-            },
-            hasTechnical: function () {
-                return !_isArrayEmpty(this.technicalErrors);
-            },
-            hasFatal: function (tab) {
-                if (angular.isDefined(tab)) {
-                    if (angular.isDefined(this.fatalsByTabs[tab])) {
-                        return !_isEmpty(this.fatalsByTabs[tab]);
-                    } else {
-                        return false;
-                    }
-
-                } else {
-                    return !_isEmpty(this.fatals);
-                }
-                return false;
-            },
-            hasError: function (tab) {
-                if (angular.isDefined(tab)) {
-                    if (angular.isDefined(this.errorsByTabs[tab])) {
-                        return !_isEmpty(this.errorsByTabs[tab]);
-                    } else {
-                        return false;
-                    }
-
-                } else {
-                    return !_isEmpty(this.errors);
-                }
-                return false;
-            },
-            hasWarning: function (tab) {
-                if (angular.isDefined(tab)) {
-                    if (angular.isDefined(this.warningsByTabs[tab])) {
-                        return !_isEmpty(this.warningsByTabs[tab]);
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return !_isEmpty(this.warnings);
-                }
-                return false;
-            }
-        };
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name it-tab.directive:itTab
- * @module it-tab
- * @since 1.2
- * @restrict E
- *
- *
- * @description
- * Button that represent tab header
- *
- * <h1>Attribute</h1>
- *  <table class="table">
- *  <tr>
- *      <th>
- *          Param
- *      </th>
- *      <th>
- *          Description
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          label
- *      </td>
- *      <td>
- *          Button Label
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          id
- *      </td>
- *      <td>
- *          tab identifier (must be the same that tab content id)
- *      </td>
- *  </tr>
- *  </table>
- *  <h1>Exemple</h1>
- *
- *        <it-tab
- *          label="'FEATURE.COMPANY.TITLE'"
- *          id="'validate-header-tab-company'">
- *        </it-tab>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
- <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
- <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
- </file>
- </example>
- */
-itTab.component('itTab', {
-        bindings: {
-            id: '=',
-            label: '='
-        },
-        template: '<button class="btn header-tab full-width " ng-click="$ctrl.changeTab()"' +
-        ' title="{{\'ACCOUNTING_CODING.PAYMENT.TITLE\' |translate }}" ng-disabled="$ctrl.isActiveTab"> <i class="fa' +
-        ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.hasError()"></i> ' +
-        '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
-    controller
-:
-['$rootScope',  'CurrentErrors', 'TabService', function ($rootScope, CurrentErrors, TabService) {
-
-    var self = this;
-    self.isActiveTab = false;
-
-    self.hasError = _hasError;
-    self.hasWarning = _hasWarning;
-    self.changeTab = _changeTab;
-
-    self.isActiveTab = (TabService.currentActiveTabId == self.id);
-    TabService.onTabChanged(function (selectedTabId) {
-        self.isActiveTab = (selectedTabId == self.id);
-    });
-
-    function _changeTab() {
-        TabService.changeTab(self.id);
-    }
-
-    function _hasError() {
-        return CurrentErrors.hasError(self.id);
-    }
-
-    function _hasWarning() {
-        return CurrentErrors.hasWarning(self.id);
-    }
-}]
-})
-;
-'use strict';
-
-/**
- * @ngdoc directive
- * @name it-tab.directive:itTabContent
- * @module it-tab
- * @since 1.2
- * @restrict E
- *
- * @description
- * Div that represent tab content
- *
- * <h1>Attribute</h1>
- *  <table class="table">
- *  <tr>
- *      <th>
- *          Param
- *      </th>
- *      <th>
- *          Description
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          id
- *      </td>
- *      <td>
- *          tab identifier (must be the same that tab id)
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *         content-url
- *      </td>
- *      <td>
- *          Template html url
- *      </td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
- <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
- <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
- </file>
- </example>
- */
-
-itTab.component('itTabContent', {
-        restrict: 'E',
-        bindings: {
-            id: '=',
-            contentUrl: '='
-        },
-        template: '<div ng-show="$ctrl.isActiveTab"' +
-        '                class="row-height-10 under-tabs-container bloc-border-left">' +
-        '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
-        '               ng-include="$ctrl.contentUrl"></div>' +
-        '           </div>',
-        controller: ['$rootScope', 'TabService',
-            function ($rootScope, TabService) {
-
-                var self = this;
-                self.isActiveTab = false;
-
-                self.isActiveTab = (TabService.currentActiveTabId == self.id);
-
-                TabService.onTabChanged(function (selectedTabId) {
-                    self.isActiveTab = (selectedTabId == self.id);
-                });
-
-            }]
-    });
-'use strict';
-
-/**
- * @ngdoc service
- * @name it-tab.service:TabService
- * @module it-tab
- * @since 1.2
- *
- * @description
- * Service that manage tab link to itTab
- *
- * <h1>Attribute</h1>
- *  <table class="table">
- *  <tr>
- *      <th>
- *          Function
- *      </th>
- *      <th>
- *          Description
- *      </th>
- *  </tr>
- *  <tr>
- *      <td>
- *          changeTab(newTabId)
- *      </td>
- *      <td>
- *          Change current tab to newTabId
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          onTabChanged
- *      </td>
- *      <td>
- *          CallBack method call when tab changed
- *      </td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="HomeCtrl" class="row">
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-    TabService.onTabChanged(function (selectedTabId) {
-              self.isActiveTab = (selectedTabId == self.id);
-          });
- }]
- );
- </file>
- </example>
- */
-
-itTab.factory('TabService', [function () {
-        var self = this;
-        self.tabChangedCallBacks = [];
-        self.changeTab = _changeTab;
-        self.onTabChanged = _onTabChanged;
-        self.currentActiveTabId = "";
-
-        /**
-         * Change current active tab
-         * @param newTabId
-         * @private
-         */
-        function _changeTab(newTabId) {
-            self.currentActiveTabId = newTabId;
-            self.tabChangedCallBacks.forEach(function (callBack) {
-                if (angular.isDefined(callBack)) {
-                    callBack(newTabId);
-                }
-            })
-        }
-
-        /**
-         * Register listener changed
-         * @param callBack
-         * @private
-         */
-        function _onTabChanged(callBack) {
-            self.tabChangedCallBacks.push(callBack)
-        }
-
-        return self;
-    }]);
-
-'use strict';
-
-/**
  * @ngdoc directive
  * @name style2016.directive:loginForm
  * @module style2016
@@ -7062,6 +6628,449 @@ itTab.factory('TabService', [function () {
  </file>
  </example>
  */
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name itesoft.service:CurrentErrorsService
+ * @module itesoft
+ * @since 1.2
+ *
+ * @description
+ * Service that keep reference to error inside tabs
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Function
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasFatal(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is a fatal inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasError(tabId)
+ *      </td>
+ *      <td>
+ *          Return true if there is an error inside tab
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          hasWarning(tabId)
+ *      </td>
+ *      <td>
+ *           Return true if there is a warning inside tab
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
+
+IteSoft.factory('CurrentErrors', [function () {
+
+        function _isEmpty(obj) {
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        function _isArrayEmpty(obj) {
+            if (!angular.isDefined(obj) || !angular.isArray(obj)) {
+                return false;
+            }
+
+            return obj.length == 0;
+        };
+
+        return {
+            //Technical errors
+            technicalErrors: [],
+
+            //Error levels
+            fatals: {},
+            errors: {},
+            warnings: {},
+
+            // Errors levels by tabs
+            fatalsByTabs: {},
+            errorsByTabs: {},
+            warningsByTabs: {},
+
+            init: function () {
+                this.fatals = {};
+                this.errors = {};
+                this.warnings = {};
+                this.fatalsByTabs = {};
+                this.errorsByTabs = {};
+                this.warningsByTabs = {};
+            },
+            hasFatalOrHigher: function () {
+                return this.hasFatal() || this.hasTechnical();
+            },
+            hasTechnical: function () {
+                return !_isArrayEmpty(this.technicalErrors);
+            },
+            hasFatal: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.fatalsByTabs[tab])) {
+                        return !_isEmpty(this.fatalsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+
+                } else {
+                    return !_isEmpty(this.fatals);
+                }
+                return false;
+            },
+            hasError: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.errorsByTabs[tab])) {
+                        return !_isEmpty(this.errorsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+
+                } else {
+                    return !_isEmpty(this.errors);
+                }
+                return false;
+            },
+            hasWarning: function (tab) {
+                if (angular.isDefined(tab)) {
+                    if (angular.isDefined(this.warningsByTabs[tab])) {
+                        return !_isEmpty(this.warningsByTabs[tab]);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return !_isEmpty(this.warnings);
+                }
+                return false;
+            }
+        };
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name it-tab.directive:itTab
+ * @module it-tab
+ * @since 1.2
+ * @restrict E
+ *
+ *
+ * @description
+ * Button that represent tab header
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          label
+ *      </td>
+ *      <td>
+ *          Button Label
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          id
+ *      </td>
+ *      <td>
+ *          tab identifier (must be the same that tab content id)
+ *      </td>
+ *  </tr>
+ *  </table>
+ *  <h1>Exemple</h1>
+ *
+ *        <it-tab
+ *          label="'FEATURE.COMPANY.TITLE'"
+ *          id="'validate-header-tab-company'">
+ *        </it-tab>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+itTab.component('itTab', {
+        bindings: {
+            id: '=',
+            label: '='
+        },
+        template: '<button class="btn header-tab full-width " ng-click="$ctrl.changeTab()"' +
+        ' title="{{\'ACCOUNTING_CODING.PAYMENT.TITLE\' |translate }}" ng-disabled="$ctrl.isActiveTab"> <i class="fa' +
+        ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.hasError()"></i> ' +
+        '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
+    controller
+:
+['$rootScope',  'CurrentErrors', 'TabService', function ($rootScope, CurrentErrors, TabService) {
+
+    var self = this;
+    self.isActiveTab = false;
+
+    self.hasError = _hasError;
+    self.hasWarning = _hasWarning;
+    self.changeTab = _changeTab;
+
+    self.isActiveTab = (TabService.currentActiveTabId == self.id);
+    TabService.onTabChanged(function (selectedTabId) {
+        self.isActiveTab = (selectedTabId == self.id);
+    });
+
+    function _changeTab() {
+        TabService.changeTab(self.id);
+    }
+
+    function _hasError() {
+        return CurrentErrors.hasError(self.id);
+    }
+
+    function _hasWarning() {
+        return CurrentErrors.hasWarning(self.id);
+    }
+}]
+})
+;
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name it-tab.directive:itTabContent
+ * @module it-tab
+ * @since 1.2
+ * @restrict E
+ *
+ * @description
+ * Div that represent tab content
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Param
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          view-controller
+ *      </td>
+ *      <td>
+ *          allow to keep a reference to controller view
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          id
+ *      </td>
+ *      <td>
+ *          tab identifier (must be the same that tab id)
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *         content-url
+ *      </td>
+ *      <td>
+ *          Template html url
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" view-controller="$ctrl"  content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" view-controller="$ctrl"  content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" view-controller="$ctrl"  content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+
+itTab.component('itTabContent', {
+        restrict: 'E',
+        bindings: {
+            id: '=',
+            contentUrl: '=',
+            viewController: '='
+        },
+        template: '<div ng-show="$ctrl.isActiveTab"' +
+        '                class="row-height-10 under-tabs-container bloc-border-left">' +
+        '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
+        '               ng-include="$ctrl.contentUrl"></div>' +
+        '           </div>',
+        controller: ['$rootScope', 'TabService',
+            function ($rootScope, TabService) {
+
+                var self = this;
+                self.isActiveTab = false;
+
+                self.isActiveTab = (TabService.currentActiveTabId == self.id);
+
+                TabService.onTabChanged(function (selectedTabId) {
+                    self.isActiveTab = (selectedTabId == self.id);
+                });
+
+            }]
+    });
+'use strict';
+
+/**
+ * @ngdoc service
+ * @name it-tab.service:TabService
+ * @module it-tab
+ * @since 1.2
+ *
+ * @description
+ * Service that manage tab link to itTab
+ *
+ * <h1>Attribute</h1>
+ *  <table class="table">
+ *  <tr>
+ *      <th>
+ *          Function
+ *      </th>
+ *      <th>
+ *          Description
+ *      </th>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          changeTab(newTabId)
+ *      </td>
+ *      <td>
+ *          Change current tab to newTabId
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
+ *          onTabChanged
+ *      </td>
+ *      <td>
+ *          CallBack method call when tab changed
+ *      </td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="HomeCtrl" class="row">
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
+          });
+ }]
+ );
+ </file>
+ </example>
+ */
+
+itTab.factory('TabService', [function () {
+        var self = this;
+        self.tabChangedCallBacks = [];
+        self.changeTab = _changeTab;
+        self.onTabChanged = _onTabChanged;
+        self.currentActiveTabId = "";
+
+        /**
+         * Change current active tab
+         * @param newTabId
+         * @private
+         */
+        function _changeTab(newTabId) {
+            self.currentActiveTabId = newTabId;
+            self.tabChangedCallBacks.forEach(function (callBack) {
+                if (angular.isDefined(callBack)) {
+                    callBack(newTabId);
+                }
+            })
+        }
+
+        /**
+         * Register listener changed
+         * @param callBack
+         * @private
+         */
+        function _onTabChanged(callBack) {
+            self.tabChangedCallBacks.push(callBack)
+        }
+
+        return self;
+    }]);
+
 /**
  * Created by sza on 22/04/2016.
  */
