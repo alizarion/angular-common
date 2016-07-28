@@ -482,6 +482,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "style2016.directive:loginForm",
+      "shortName": "loginForm",
+      "type": "directive",
+      "moduleName": "style2016",
+      "shortDescription": "Itesoft style 2016 (like SCPAS)",
+      "keywords": "$ctrl $scope $viewvalue add angular api authservice autocomplete autofocus btn btn-block btn-lg btn-success center-block class col-md-4 col-xs-6 container controller css directive enable error_validate file floating-label form form-control form-group form-login formlogin function global homectrl href html http import it-error it-login-background it-login-button it-login-input it-login-logo itesoft itesoft-showcase itesofticons js linenums login login-block logindata menu_admin menu_home menu_rapport menu_search menu_settings menu_task message module ng-model ng-submit password password_label placeholder prettyprint principal rel required role row row-height-10 scpas scss style style2016 stylesheet submit submit_button_label text translate type user_label username width-300"
+    },
+    {
+      "section": "api",
       "id": "style2016.directive:style2016",
       "shortName": "style2016",
       "type": "directive",
