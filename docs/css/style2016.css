@@ -6,7 +6,7 @@ html {
 
 .it-login-background {
   background-size: 100%;
-  background: url("../../assets/img/login/login_background.jpg") no-repeat;
+  background: url("../img/login/login_background.jpg") no-repeat;
   height: 100%;
   width: 100%;
   position: absolute; }
@@ -176,13 +176,13 @@ it-tab .btn {
 @font-face {
   font-family: 'Source Sans Pro';
   font-style: normal;
-  src: local("Source Sans Pro"), url(../../assets/fonts/SourceSansPro-Regular.woff2) format("woff2"); }
+  src: local("Source Sans Pro"), url(../fonts/SourceSansPro-Regular.woff2) format("woff2"); }
 
 @font-face {
   font-family: 'Source Sans Pro';
   font-style: normal;
   font-weight: 700;
-  src: local("Source Sans Pro Bold"), url(../../assets/fonts/SourceSansPro-Bold.woff2) format("woff2"); }
+  src: local("Source Sans Pro Bold"), url(../fonts/SourceSansPro-Bold.woff2) format("woff2"); }
 
 * {
   font-size: 100%;
@@ -312,7 +312,7 @@ table input, table select, table it-autocomplete {
 
 @font-face {
   font-family: 'itesoftIcons';
-  src: local("itesoftIcons"), url(../../assets/fonts/itesoftIcons.woff2) format("woff2"); }
+  src: local("itesoftIcons"), url(../fonts/itesoftIcons.woff2) format("woff2"); }
 
 .fa-16x {
   font-size: 1.6em; }
