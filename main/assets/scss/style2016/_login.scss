@@ -62,3 +62,20 @@ html {
   margin-top: 50px;
   width: 300px;
 }
+
+.it-login-input,.it-login-input:focus{
+  color:white !important;
+  padding:5px !important;
+}
+.it-login-input::-webkit-input-placeholder {
+  color: white !important;
+}
+.it-login-input:-moz-placeholder {
+  color: white !important;
+}
+.it-login-input::-moz-placeholder {
+  color: white !important;
+}
+.it-login-input:-ms-input-placeholder {
+  color: white !important;
+}
