@@ -201,6 +201,8 @@ gulp.task('docs', function () {
         .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
     gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
         .pipe(gulp.dest(buildConfig.docFolder +'/fonts/'));
+    gulp.src(buildConfig.srcFolder + '/assets/img/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/img/'));
     return  gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
         .pipe(gulp.dest(buildConfig.docFolder +'/css/' + buildConfig.distFolder +'/assets/fonts'));
 
