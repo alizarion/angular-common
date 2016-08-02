@@ -16,13 +16,14 @@
  *    <it-panel-form option="option" ></it-panel-form>
  * ```
  *
+ *
  * @example
  <example module="itesoft">
  <file name="index.html">
  <style>
  </style>
  <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)"></it-panel-form>
+ <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
  </div>
  </file>
  <file name="controller.js">
@@ -44,7 +45,6 @@
           {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
         ];
-
     }
  ]
  );
@@ -57,7 +57,9 @@ IteSoft.component('itPanelForm',{
             options:'=',
             dateFormat:'@',
             updateLabel:'@',
-            update: '&'
+            update: '&',
+            cancel: '&',
+            cancelLabel:'@'
         },
         template:'<div class="it-ac-panel-form">' +
         '<form name="$ctrl.form" novalidate>'+
@@ -74,7 +76,9 @@ IteSoft.component('itPanelForm',{
         '</div>' +
         '</div>' +
         '</div>' +
-        '<div class="col-xs-3 col-md-4 col-lg-6"></div><div class="col-xs-3 col-md-4 col-lg-6"><button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></div></form>'+
+        '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-7">' +
+        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
+        '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
         '</div>'+
         '<!------------------- Template label ------------------->'+
         '<script type="text/ng-template" id="labelTemplate.html">' +
@@ -98,7 +102,7 @@ IteSoft.component('itPanelForm',{
         '<script type="text/ng-template" id="textAreaTemplate.html">' +
         '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>'+
         '</script>'+
-        '<!------------------- Template date ------------------->'+
+        '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
         '<script type="text/ng-template" id="dateTemplate.html">' +
         '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
         'ng-model="option[\'value\']" data-autoclose="1" ' +
@@ -118,6 +122,10 @@ IteSoft.component('itPanelForm',{
 
             if(self.updateLabel == undefined){
                 self.updateLabel = "Update";
+            }
+
+            if(self.cancelLabel == undefined){
+                self.cancelLabel = "Cancel";
             }
 
 
