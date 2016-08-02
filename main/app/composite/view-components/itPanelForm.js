@@ -38,9 +38,9 @@
              [{"code": "code1", "value": "value1"},
              {"code": "code2", "value": "value2"}], value:"code1",
           "type":"select"},
-          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkbox"},
           {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
-          "type":"textArea"},
+          "type":"textarea"},
           {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
         ];
@@ -74,7 +74,7 @@ IteSoft.component('itPanelForm',{
         '</div>' +
         '</div>' +
         '</div>' +
-        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>'+
+        '<div class="col-xs-3 col-md-4 col-lg-6"></div><div class="col-xs-3 col-md-4 col-lg-6"><button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></div></form>'+
         '</div>'+
         '<!------------------- Template label ------------------->'+
         '<script type="text/ng-template" id="labelTemplate.html">' +
