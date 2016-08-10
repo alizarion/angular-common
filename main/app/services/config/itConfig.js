@@ -45,10 +45,7 @@ angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider
 			itConfigProvider.defaultNamespace('CaptureOmnicanal');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).controller('Mycontroller',['$scope','itConfig', '$log', function($scope, itConfig, $log) {
-			$log.info(itConfig.get()); // retrieve the properties on default namespace CaptureOmnicanal
-			$log.info(itConfig.get('common')); // retrieve the properties on namespace common
-			$log.info(itConfig.get().baseUrl); // retrieve the propertie baseUrl on default namespace CaptureOmnicanal
+	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
 			$scope.config=itConfig;
 	}]);
 </file>
