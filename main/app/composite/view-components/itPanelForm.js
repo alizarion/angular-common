@@ -110,10 +110,6 @@ IteSoft.component('itPanelForm',{
         '</script>',
         controller: ['$scope', function($scope){
 
-            //TODO gérer la locale pour l'affichage des dates
-            //Get current locale
-           // var locale = localStorageService.get('Locale');
-
             var self = this;
 
             if(self.dateFormat == undefined){
