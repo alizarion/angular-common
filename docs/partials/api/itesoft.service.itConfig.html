@@ -44,41 +44,41 @@ each properties of the configuration through url parameters.</p>
 <div class="tabbable"><div class="tab-pane" title="index.html">
 <pre class="prettyprint linenums" ng-set-text="index.html-28" ng-html-wrap-loaded="itesoft angular.js Controller.js"></pre>
 <script type="text/ng-template" id="index.html-28">
-	<!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-	<div ng-controller="Mycontroller">
-		<p>All properties : {{config.get() | json}}</p>
-		<p>Other namespace properties : {{config.get('common') | json}}</p>
-		<p>One propertie : {{config.get().baseUrl}}</p>
-	</div>
-         </script>
+<!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+<div ng-controller="Mycontroller">
+<p>All properties : {{config.get() | json}}</p>
+<p>Other namespace properties : {{config.get('common') | json}}</p>
+<p>One propertie : {{config.get().baseUrl}}</p>
+</div>
+</script>
 </div>
 <div class="tab-pane" title="Controller.js">
 <pre class="prettyprint linenums" ng-set-text="Controller.js"></pre>
 <script type="text/ng-template" id="Controller.js">
 angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
-			//configuration of default values
-			itConfigProvider.defaultNamespace('CaptureOmnicanal');
-			itConfigProvider.allowOverride(true);
-			itConfigProvider.configFile("config.json");
-	}]).controller('Mycontroller',['$scope','itConfig', '$log', function($scope, itConfig, $log) {
-			$log.info(itConfig.get()); // retrieve the properties on default namespace CaptureOmnicanal
-			$log.info(itConfig.get('common')); // retrieve the properties on namespace common
-			$log.info(itConfig.get().baseUrl); // retrieve the propertie baseUrl on default namespace CaptureOmnicanal
-			$scope.config=itConfig;
-	}]);
+		//configuration of default values
+		itConfigProvider.defaultNamespace('CaptureOmnicanal');
+		itConfigProvider.allowOverride(true);
+		itConfigProvider.configFile("config.json");
+}]).run(['itConfig', function (itConfig) {
+    //initialize itConfig
+       itConfig.initialize();
+   }]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+		$scope.config=itConfig;
+}]);
 </script>
 </div>
 <div class="tab-pane" title="config.json">
 <pre class="prettyprint linenums" ng-set-text="config.json"></pre>
 <script type="text/ng-template" id="config.json">
-	{
-		"CaptureOmnicanal" : {
-			"baseUrl":"http://test/base"
-		},
-		"common": {
-			"debug":true
-		}
-	}
+{
+    "CaptureOmnicanal" : {
+        "baseUrl":"http://test/base"
+    },
+    "common": {
+        "debug":true
+    }
+}
 </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
