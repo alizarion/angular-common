@@ -38,38 +38,41 @@
  *
  *
  * @example
-<example module="itesoft">
-<file name="Controller.js">
-angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
+ <example module="itesoft">
+ <file name="Controller.js">
+ angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
 			//configuration of default values
 			itConfigProvider.defaultNamespace('CaptureOmnicanal');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+	}]).run(['itConfig', function (itConfig) {
+	    //initialize itConfig
+        itConfig.initialize();
+    }]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
 			$scope.config=itConfig;
 	}]);
-</file>
-<file name="index.html">
-	<!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-	<div ng-controller="Mycontroller">
-		<p>All properties : {{config.get() | json}}</p>
-		<p>Other namespace properties : {{config.get('common') | json}}</p>
-		<p>One propertie : {{config.get().baseUrl}}</p>
-	</div>
-         </file>
-         <file name="config.json">
-	{
-		"CaptureOmnicanal" : {
-			"baseUrl":"http://test/base"
-		},
-		"common": {
-			"debug":true
-		}
-	}
-</file>
-</example>
+ </file>
+ <file name="index.html">
+ <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+ <div ng-controller="Mycontroller">
+ <p>All properties : {{config.get() | json}}</p>
+ <p>Other namespace properties : {{config.get('common') | json}}</p>
+ <p>One propertie : {{config.get().baseUrl}}</p>
+ </div>
+ </file>
+ <file name="config.json">
+ {
+     "CaptureOmnicanal" : {
+         "baseUrl":"http://test/base"
+     },
+     "common": {
+         "debug":true
+     }
+ }
+ </file>
+ </example>
  **/
-IteSoft.provider('itConfig', [ function itConfigProvider() {
+IteSoft.provider('itConfig', [function itConfigProvider() {
     var allowOverride = false;
     var configFile = 'app/config/config.json';
     var defaultNamespace = null;
@@ -85,31 +88,33 @@ IteSoft.provider('itConfig', [ function itConfigProvider() {
     this.defaultNamespace = function (value) {
         defaultNamespace = value;
     };
-
+    
     this.$get = ['$http', 'itNotifier', '$location', function itConfigFactory($http, itNotifier, $location) {
         var overrideConfig = $location.search();
         var self = this;
         var baseConfig = {};
-        // Load menu
-        $http.get(configFile).then(function (response) {
-            if (!allowOverride) {
-                baseConfig = response.data;
-            } else {
-                baseConfig = response.data;
-                if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                    defaultConfig = baseConfig[defaultNamespace];
-                    for (var propertyName in defaultConfig) {
-                        defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
-                    }
-                }
-            }
-        }, function (err) {
-            itNotifier.notifyError({content: err.data.Message});
-        });
-
+        var defaultConfig = {};
 
         return {
+            initialize: function () {
+                return $http.get(configFile).then(function (response) {
+                    if (!allowOverride) {
+                        baseConfig = response.data;
+                    } else {
+                        baseConfig = response.data;
+                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                            defaultConfig = baseConfig[defaultNamespace];
+                            for (var propertyName in defaultConfig) {
+                                defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
+                            }
+                        }
+                    }
+                }, function (err) {
+                    itNotifier.notifyError({content: err.data.Message});
+                });
+            },
             get: function (namespace) {
+
                 if ((namespace != null) && (namespace != undefined)) {
                     return baseConfig[namespace];
                 } else {
