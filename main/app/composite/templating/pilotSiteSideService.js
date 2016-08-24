@@ -5,8 +5,8 @@
 
 'use strict';
 
-IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotService',
-    function ($resource, $log, CONFIG, PilotService) {
+IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'itConfig', 'PilotService',
+    function ($resource, $log, itConfig, PilotService) {
 
         var self = this;
 
@@ -35,7 +35,7 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'CONFIG', 'PilotSe
         };
 
 
-        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+        if (itConfig.get().ENABLE_TEMPLATE_EDITOR) {
             PilotService.fields.dest = PilotService.DEST_EDITOR;
 
             // test connection with editor when websocket is open
