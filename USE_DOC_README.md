@@ -7,31 +7,31 @@
 	
 ## Dans gulpfile.js:
 ```Java
-	var gulpDocs = require('gulp-ngdocs');
-	...
-    gulp.task('docs', function () {
-        var scripts = ['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'];
-        var options = {
-            html5Mode: false,
-            styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
-            scripts:scripts,
-            loadDefaults: {
-                angular:false,
-                angularAnimate: false
-            },
-            startPage: '/api',
-            title: "Itesoft Awesome Docs",
-            titleLink: "#/api"
-        };
-        var docFiles = buildConfig.appFiles.slice();
-        docFiles.push('main/app/**/*.ngdoc');
-        console.log(docFiles);
-        gulp.src(docFiles)
-            .pipe(gulpDocs.process(options))
-            .pipe(gulp.dest('./docs'));
-        return  gulp.src('./main/assets/fonts/**/*')
-            .pipe(gulp.dest('./docs/css/dist/assets/fonts'));
-        });
+
+gulp.task('docs', function () {
+    var gulpDocs = require('gulp-ngdocs');
+    var scripts = ['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'];
+    var options = {
+        html5Mode: false,
+        styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
+        scripts:scripts,
+        loadDefaults: {
+            angular:false,
+            angularAnimate: false
+        },
+        startPage: '/api',
+        title: "Itesoft Awesome Docs",
+        titleLink: "#/api"
+    };
+    var docFiles = buildConfig.appFiles.slice();
+    docFiles.push('/src/app/**/*.ngdoc');
+    console.log(docFiles);
+    gulp.src(docFiles)
+        .pipe(gulpDocs.process(options))
+        .pipe(gulp.dest('./docs'));
+    return  gulp.src('./main/assets/fonts/**/*')
+        .pipe(gulp.dest('./docs/css/dist/assets/fonts'));
+});
 
 ```
 
