@@ -45,10 +45,7 @@
 			itConfigProvider.defaultNamespace('CaptureOmnicanal');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
 			$scope.config=itConfig;
 	}]);
  </file>
