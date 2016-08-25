@@ -5,7 +5,6 @@
  * @module itesoft
  * @since 1.1
  * @requires itNotifier
- * @requires $http
  * @requires $location
  *
  * @description
@@ -122,7 +121,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
         return defaultConfig;
     };
 
-    this.$get = ['itNotifier', '$location', 'itConfigLoader', function itConfigFactory(itNotifier, $location, itConfigLoader) {
+    this.$get = ['$location', function itConfigFactory($location) {
         overrideConfig = $location.search();
         var self = this;
 
