@@ -302,6 +302,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itPanelForm",
+      "shortName": "itPanelForm",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "The itPanelForm provides dynamic content panel in a form embedded.",
+      "keywords": "$scope $templatecache angular api bonjour checkbox code code1 code2 codecheckbox codedate codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller directive dynamic eirufh embedded eriufb form function homectrl html ieru ieur ieurhf input itesoft itpanelform js label link module ng-controller option options panel query require scope select textarea title titlecheckbox titledate titleinput1 titleinput2 titleselect1 titletextarea true type update updatevalue value1 value2 valueinput1 valueinput2 valuelabel ziouee"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itPrettyprint",
       "shortName": "itPrettyprint",
       "type": "directive",
@@ -442,7 +451,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "itesoft",
       "shortDescription": "This is a configuration provider. It load a json file and let you inject everywhere, you can also override",
-      "keywords": "$http $location $scope adaptation allowoverride angular api baseurl captureomnicanal class common config configfile configuration controller css debug default defaultnamespace example file function html http initialize inject itconfig itconfigprovider itesoft itnotifier js json load module mycontroller namespace ng-controller ngtoast object override parameters peroperties production-- propertie properties provider purposes service table url values"
+      "keywords": "$location $scope adaptation allowoverride angular api baseurl captureomnicanal class common config configfile configuration controller css debug default defaultnamespace example file function html http inject itconfig itconfigprovider itesoft js json load module mycontroller namespace ng-controller ngtoast object override parameters peroperties production-- propertie properties provider purposes service table url values"
     },
     {
       "section": "api",
