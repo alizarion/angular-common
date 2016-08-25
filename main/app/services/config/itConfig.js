@@ -73,8 +73,9 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     var allowOverride = false;
     var configFile = 'app/config/config.json';
     var defaultNamespace = null;
-    var overrideConfig = {};
+    var overrideConfig = undefined;
     var isLoaded = false;
+    var baseConfig = {};
 
     this.allowOverride = function (value) {
         allowOverride = value;
@@ -88,8 +89,12 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
         defaultNamespace = value;
     };
 
-    this.load = function (overrideConfig) {
-        var baseConfig = {};
+    this.get = function () {
+        return _load(overrideConfig);
+    };
+
+    function _load(overrideConfig) {
+
         var defaultConfig = {};
 
         var xhttp = new XMLHttpRequest();
@@ -97,36 +102,35 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
 
                 if (!allowOverride) {
-                    baseConfig = xhttp.responseText;
+                    baseConfig = JSON.parse(xhttp.responseText);
                 } else {
-                    baseConfig = xhttp.responseText;
+                    baseConfig = JSON.parse(xhttp.responseText);
                     if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
                         defaultConfig = baseConfig[defaultNamespace];
                         for (var propertyName in defaultConfig) {
-                            defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
+                            if (typeof overrideConfig !== 'undefined') {
+                                defaultConfig[propertyName] = overrideConfig[propertyName];
+                            }
                         }
                     }
                 }
             }
         };
-
-
-        xhttp.open("GET", configFile, true);
+        xhttp.open("GET", configFile, false);
         xhttp.send();
         isLoaded = true;
         return defaultConfig;
     };
 
-    this.$get = ['itNotifier', '$location', function itConfigFactory(itNotifier, $location) {
+    this.$get = ['itNotifier', '$location', 'itConfigLoader', function itConfigFactory(itNotifier, $location, itConfigLoader) {
         overrideConfig = $location.search();
         var self = this;
-        var baseConfig = {};
 
         return {
             get: function (namespace) {
 
                 if (!isLoaded) {
-                    baseConfig = load(overrideConfig);
+                    baseConfig = _load(overrideConfig);
                 }
 
                 if ((namespace != null) && (namespace != undefined)) {
