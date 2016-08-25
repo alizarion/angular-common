@@ -45,10 +45,7 @@
 			itConfigProvider.defaultNamespace('CaptureOmnicanal');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
 			$scope.config=itConfig;
 	}]);
  </file>
@@ -76,6 +73,8 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     var allowOverride = false;
     var configFile = 'app/config/config.json';
     var defaultNamespace = null;
+    var overrideConfig = {};
+    var isLoaded = false;
 
     this.allowOverride = function (value) {
         allowOverride = value;
@@ -88,32 +87,47 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     this.defaultNamespace = function (value) {
         defaultNamespace = value;
     };
-    
-    this.$get = ['$http', 'itNotifier', '$location', function itConfigFactory($http, itNotifier, $location) {
-        var overrideConfig = $location.search();
-        var self = this;
+
+    this.load = function (overrideConfig) {
         var baseConfig = {};
         var defaultConfig = {};
 
-        return {
-            initialize: function () {
-                return $http.get(configFile).then(function (response) {
-                    if (!allowOverride) {
-                        baseConfig = response.data;
-                    } else {
-                        baseConfig = response.data;
-                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                            defaultConfig = baseConfig[defaultNamespace];
-                            for (var propertyName in defaultConfig) {
-                                defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
-                            }
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+
+                if (!allowOverride) {
+                    baseConfig = xhttp.responseText;
+                } else {
+                    baseConfig = xhttp.responseText;
+                    if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                        defaultConfig = baseConfig[defaultNamespace];
+                        for (var propertyName in defaultConfig) {
+                            defaultConfig[propertyName] = overrideConfig[propertyName] || defaultConfig[propertyName];
                         }
                     }
-                }, function (err) {
-                    itNotifier.notifyError({content: err.data.Message});
-                });
-            },
+                }
+            }
+        };
+
+
+        xhttp.open("GET", configFile, true);
+        xhttp.send();
+        isLoaded = true;
+        return defaultConfig;
+    };
+
+    this.$get = ['itNotifier', '$location', 'itConfigLoader', function itConfigFactory(itNotifier, $location, itConfigLoader) {
+        overrideConfig = $location.search();
+        var self = this;
+        var baseConfig = {};
+
+        return {
             get: function (namespace) {
+
+                if (!isLoaded) {
+                    baseConfig = load(overrideConfig);
+                }
 
                 if ((namespace != null) && (namespace != undefined)) {
                     return baseConfig[namespace];
