@@ -117,7 +117,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
         return defaultConfig;
     };
 
-    this.$get = ['itNotifier', '$location', 'itConfigLoader', function itConfigFactory(itNotifier, $location, itConfigLoader) {
+    this.$get = ['itNotifier', '$location', function itConfigFactory(itNotifier, $location) {
         overrideConfig = $location.search();
         var self = this;
         var baseConfig = {};
