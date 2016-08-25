@@ -4,7 +4,6 @@
  * @name itesoft.service:itConfig
  * @module itesoft
  * @since 1.1
- * @requires itNotifier
  * @requires $location
  *
  * @description
