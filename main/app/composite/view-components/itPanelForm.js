@@ -51,81 +51,76 @@
  </file>
  </example>
  */
-IteSoft.component('itPanelForm',{
+IteSoft.component('itPanelForm', {
 
-        bindings:{
-            options:'=',
-            dateFormat:'@',
-            updateLabel:'@',
-            update: '&'
-        },
-        template:'<div class="it-ac-panel-form">' +
-        '<form name="$ctrl.form" novalidate>'+
-        '<div ng-repeat="option in $ctrl.options">' +
-        '<div class="row">' +
-        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-        '<div ng-switch on="option.type">'+
-        '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>'+
-        '</div>'+
-        '<!------------------- Template label ------------------->'+
-        '<script type="text/ng-template" id="labelTemplate.html">' +
-        '<p>{{option.value}}</p>'+
-        '</script>'+
-        '<!------------------- Template input ------------------->'+
-        '<script type="text/ng-template" id="inputTemplate.html">' +
-        '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>'+
-        '</script>'+
-        '<!------------------- Template select ------------------->'+
-        '<script type="text/ng-template" id="selectTemplate.html">' +
-        '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
-        ' ng-options="value.value for value in option.items"/>' +
-        '</select></p> '+
-        '</script>'+
-        '<!------------------- Template checkbox ------------------->'+
-        '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-        '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
-        '</script>' +
-        '<!------------------- Template textArea ------------------->'+
-        '<script type="text/ng-template" id="textAreaTemplate.html">' +
-        '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>'+
-        '</script>'+
-        '<!------------------- Template date ------------------->'+
-        '<script type="text/ng-template" id="dateTemplate.html">' +
-        '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-        'ng-model="option[\'value\']" data-autoclose="1" ' +
-        'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>'+
-        '</script>',
-        controller: ['$scope', function($scope){
+    bindings: {
+        options: '=',
+        dateFormat: '@',
+        updateLabel: '@',
+        update: '&'
+    },
+    template: '<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>' +
+    '<div ng-repeat="option in $ctrl.options">' +
+    '<div class="row">' +
+    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+    '<div ng-switch on="option.type">' +
+    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
+    '</div>' +
+    '<!------------------- Template label ------------------->' +
+    '<script type="text/ng-template" id="labelTemplate.html">' +
+    '<p>{{option.value}}</p>' +
+    '</script>' +
+    '<!------------------- Template input ------------------->' +
+    '<script type="text/ng-template" id="inputTemplate.html">' +
+    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
+    '</script>' +
+    '<!------------------- Template select ------------------->' +
+    '<script type="text/ng-template" id="selectTemplate.html">' +
+    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+    ' ng-options="value.value for value in option.items"/>' +
+    '</select></p> ' +
+    '</script>' +
+    '<!------------------- Template checkbox ------------------->' +
+    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
+    '</script>' +
+    '<!------------------- Template textArea ------------------->' +
+    '<script type="text/ng-template" id="textAreaTemplate.html">' +
+    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
+    '</script>' +
+    '<!------------------- Template date ------------------->' +
+    '<script type="text/ng-template" id="dateTemplate.html">' +
+    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+    'ng-model="option[\'value\']" data-autoclose="1" ' +
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
+    '</script>',
+    controller: ['$scope', function ($scope) {
 
-            //TODO gérer la locale pour l'affichage des dates
-            //Get current locale
-           // var locale = localStorageService.get('Locale');
+        //TODO gérer la locale pour l'affichage des dates
+        //Get current locale
+        // var locale = localStorageService.get('Locale');
 
-            var self = this;
+        var self = this;
 
-            if(self.dateFormat == undefined){
-                self.dateFormat = "dd/MM/yyyy";
-            }
+        if (self.dateFormat == undefined) {
+            self.dateFormat = "dd/MM/yyyy";
+        }
 
-            if(self.updateLabel == undefined){
-                self.updateLabel = "Update";
-            }
+        if (self.updateLabel == undefined) {
+            self.updateLabel = "Update";
+        }
 
 
-        }]
+    }]
 
-}).config(function($datepickerProvider) {
-    angular.extend($datepickerProvider.defaults, {
-        dateFormat: 'dd/MM/yyyy',
-        startWeek: 1
-    });
 });
