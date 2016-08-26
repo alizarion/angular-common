@@ -106,7 +106,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
                     if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
                         defaultConfig = baseConfig[defaultNamespace];
                         for (var propertyName in defaultConfig) {
-                            if (typeof overrideConfig !== 'undefined') {
+                            if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
                                 defaultConfig[propertyName] = overrideConfig[propertyName];
                             }
                         }
@@ -128,7 +128,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
             get: function (namespace) {
 
                 if (!isLoaded) {
-                    baseConfig = _load(overrideConfig);
+                    _load(overrideConfig);
                 }
 
                 if ((namespace != null) && (namespace != undefined)) {
