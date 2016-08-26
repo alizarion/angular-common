@@ -145,6 +145,141 @@ IteSoft
         }]);
     }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1016,141 +1151,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 
 /**
@@ -4342,6 +4342,45 @@ IteSoft
             }
         }
 }]);
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4734,45 +4773,6 @@ IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $w
     };
 }]);
 
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 "use strict";
 /**
  * @ngdoc directive
@@ -8317,55 +8317,6 @@ IteSoft
         }
     });
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 /**
  * @ngdoc service
@@ -8474,7 +8425,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
                     if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
                         defaultConfig = baseConfig[defaultNamespace];
                         for (var propertyName in defaultConfig) {
-                            if (typeof overrideConfig !== 'undefined') {
+                            if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
                                 defaultConfig[propertyName] = overrideConfig[propertyName];
                             }
                         }
@@ -8496,7 +8447,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
             get: function (namespace) {
 
                 if (!isLoaded) {
-                    baseConfig = _load(overrideConfig);
+                    _load(overrideConfig);
                 }
 
                 if ((namespace != null) && (namespace != undefined)) {
@@ -10288,6 +10239,55 @@ IteSoft
 
 
     }])
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 
 'use strict';
 
@@ -12387,6 +12387,196 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 
 'use strict';
 /**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages;
+            var self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                pageList[iPage] = page;
+
+                //this.addPage(page);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        return (ThumbnailViewer);
+    }]);
+
+'use strict';
+/**
  * TODO itTiffViewer desc
  */
 itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
@@ -12648,194 +12838,4 @@ itTiffViewer
                 });
             }
         };
-    }]);
-
-'use strict';
-/**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
-
-        function ThumbnailPage(page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages;
-            var self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
-                pageList[iPage] = page;
-
-                //this.addPage(page);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        return (ThumbnailViewer);
     }]);
