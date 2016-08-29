@@ -162,6 +162,14 @@
   &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
 </code></pre>
 </div></div>
+<h2 id="dependencies">Dependencies</h2>
+<ul class="dependencies"><li><code ng:non-bindable=""><a href="#/api/ng.$translate">$translate</a></code>
+<div class="itesoft-directive-page itesoft-directive-itmediaviewer-page"><p>(pascalprecht.translate)</p>
+</div></li>
+<li><code ng:non-bindable=""><a href="#/api/angular-ui-layout">angular-ui-layout</a></code>
+<div class="itesoft-directive-page itesoft-directive-itmediaviewer-page"><p>(ui.layout)</p>
+</div></li>
+</ul>
 <h2 id="usage">Usage</h2>
 <div class="usage">as element:<pre class="prettyprint linenums">&lt;it-media-viewer&gt;
 &lt;/it-media-viewer&gt;</pre>
@@ -186,7 +194,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-media-viewer"&gt;
 <div class="tab-pane" title="Module.js">
 <pre class="prettyprint linenums" ng-set-text="Module.js"></pre>
 <script type="text/ng-template" id="Module.js">
-   angular.module('itesoft-showcase',['itesoft'])
+   angular.module('itesoft-showcase',['itesoft.viewer'])
 </script>
 </div>
 <div class="tab-pane" title="controller.js">
