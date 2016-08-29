@@ -44,55 +44,6 @@ var IteSoft = angular.module('itesoft', [
     'itesoft.viewer'
 ]);
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 
 /**
@@ -331,6 +282,242 @@ IteSoft
         }]);
 
 
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1201,242 +1388,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
-);
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
 );
 "use strict";
 /**
@@ -7127,6 +7078,246 @@ itTab.factory('TabService', [function () {
         return self;
     }]);
 
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+/**
+ * Created by vco on 20/06/2016.
+ */
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPanelForm
+ * @module itesoft
+ * @restrict E
+ * @since 1.2
+ * @description
+ * The itPanelForm provides dynamic content panel in a form embedded.
+ *
+ *
+ * ```html
+ *    <it-panel-form option="option" ></it-panel-form>
+ * ```
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
+ </div>
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = [
+          {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
+          {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+          {"title":"titleSelect1", "code": "codeSelect1", "value":
+             [{"code": "code1", "value": "value1"},
+             {"code": "code2", "value": "value2"}],
+          "type":"select"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
+          {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
+          "type":"textArea"},
+          {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+        ];
+
+    }
+ ]
+ );
+ </file>
+ </example>
+ */
+IteSoft.component('itPanelForm', {
+
+    bindings: {
+        options: '=',
+        dateFormat: '@',
+        updateLabel: '@',
+        update: '&'
+    },
+    template: '<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>' +
+    '<div ng-repeat="option in $ctrl.options">' +
+    '<div class="row">' +
+    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+    '<div ng-switch on="option.type">' +
+    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
+    '</div>' +
+    '<!------------------- Template label ------------------->' +
+    '<script type="text/ng-template" id="labelTemplate.html">' +
+    '<p>{{option.value}}</p>' +
+    '</script>' +
+    '<!------------------- Template input ------------------->' +
+    '<script type="text/ng-template" id="inputTemplate.html">' +
+    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
+    '</script>' +
+    '<!------------------- Template select ------------------->' +
+    '<script type="text/ng-template" id="selectTemplate.html">' +
+    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+    ' ng-options="value.value for value in option.items"/>' +
+    '</select></p> ' +
+    '</script>' +
+    '<!------------------- Template checkbox ------------------->' +
+    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
+    '</script>' +
+    '<!------------------- Template textArea ------------------->' +
+    '<script type="text/ng-template" id="textAreaTemplate.html">' +
+    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
+    '</script>' +
+    '<!------------------- Template date ------------------->' +
+    '<script type="text/ng-template" id="dateTemplate.html">' +
+    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+    'ng-model="option[\'value\']" data-autoclose="1" ' +
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
+    '</script>',
+    controller: ['$scope', function ($scope) {
+
+        //TODO gérer la locale pour l'affichage des dates
+        //Get current locale
+        // var locale = localStorageService.get('Locale');
+
+        var self = this;
+
+        if (self.dateFormat == undefined) {
+            self.dateFormat = "dd/MM/yyyy";
+        }
+
+        if (self.updateLabel == undefined) {
+            self.updateLabel = "Update";
+        }
+
+
+    }]
+
+});
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
 /**
  * Created by sza on 22/04/2016.
  */
@@ -8256,245 +8447,54 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'itConfig', 'Pilot
     }
 ]);
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
 /**
- * Created by vco on 20/06/2016.
- */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPanelForm
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
  * @module itesoft
- * @restrict E
- * @since 1.2
+ * @restrict EA
+ * @since 1.0
  * @description
- * The itPanelForm provides dynamic content panel in a form embedded.
+ * Simple filter that escape string to unicode.
  *
- *
- * ```html
- *    <it-panel-form option="option" ></it-panel-form>
- * ```
  *
  * @example
- <example module="itesoft">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
- </div>
- </file>
- <file name="controller.js">
- angular.module('itesoft')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = [
-          {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
-          {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
-          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-          {"title":"titleSelect1", "code": "codeSelect1", "value":
-             [{"code": "code1", "value": "value1"},
-             {"code": "code2", "value": "value2"}],
-          "type":"select"},
-          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
-          {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
-          "type":"textArea"},
-          {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
-          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-        ];
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
 
-    }
- ]
- );
- </file>
- </example>
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
  */
-IteSoft.component('itPanelForm', {
-
-    bindings: {
-        options: '=',
-        dateFormat: '@',
-        updateLabel: '@',
-        update: '&'
-    },
-    template: '<div class="it-ac-panel-form">' +
-    '<form name="$ctrl.form" novalidate>' +
-    '<div ng-repeat="option in $ctrl.options">' +
-    '<div class="row">' +
-    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-    '<div ng-switch on="option.type">' +
-    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
-    '</div>' +
-    '<!------------------- Template label ------------------->' +
-    '<script type="text/ng-template" id="labelTemplate.html">' +
-    '<p>{{option.value}}</p>' +
-    '</script>' +
-    '<!------------------- Template input ------------------->' +
-    '<script type="text/ng-template" id="inputTemplate.html">' +
-    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
-    '</script>' +
-    '<!------------------- Template select ------------------->' +
-    '<script type="text/ng-template" id="selectTemplate.html">' +
-    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
-    ' ng-options="value.value for value in option.items"/>' +
-    '</select></p> ' +
-    '</script>' +
-    '<!------------------- Template checkbox ------------------->' +
-    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
-    '</script>' +
-    '<!------------------- Template textArea ------------------->' +
-    '<script type="text/ng-template" id="textAreaTemplate.html">' +
-    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
-    '</script>' +
-    '<!------------------- Template date ------------------->' +
-    '<script type="text/ng-template" id="dateTemplate.html">' +
-    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-    'ng-model="option[\'value\']" data-autoclose="1" ' +
-    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
-    '</script>',
-    controller: ['$scope', function ($scope) {
-
-        //TODO gérer la locale pour l'affichage des dates
-        //Get current locale
-        // var locale = localStorageService.get('Locale');
-
-        var self = this;
-
-        if (self.dateFormat == undefined) {
-            self.dateFormat = "dd/MM/yyyy";
-        }
-
-        if (self.updateLabel == undefined) {
-            self.updateLabel = "Update";
-        }
-
-
-    }]
-
-});
-'use strict';
-
 IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
 
-'use strict';
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
 
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
 
 'use strict';
 /**
@@ -11683,6 +11683,196 @@ itMultiPagesViewer.factory('TranslateViewer', ['$translate', function($translate
 
 'use strict';
 /**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages;
+            var self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                pageList[iPage] = page;
+
+                //this.addPage(page);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        return (ThumbnailViewer);
+    }]);
+
+'use strict';
+/**
  * TODO CustomStyle desc
  */
 itPdfViewer.factory('CustomStyle', [function () {
@@ -12513,196 +12703,6 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
         };
 
         return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
-
-        function ThumbnailPage(page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages;
-            var self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
-                pageList[iPage] = page;
-
-                //this.addPage(page);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        return (ThumbnailViewer);
     }]);
 
 'use strict';
