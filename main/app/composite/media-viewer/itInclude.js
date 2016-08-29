@@ -2,7 +2,7 @@
 /**
  * TODO itInclude desc
  */
-IteSoft.directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
     var linker = function (scope, element, attrs) {
         var currentScope;
         scope.$watch(attrs.itInclude, function (template) {

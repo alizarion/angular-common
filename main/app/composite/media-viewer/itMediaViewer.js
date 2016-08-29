@@ -6,6 +6,8 @@
  * @module itesoft
  * @since 1.2
  * @restrict AEC
+ * @requires $translate (pascalprecht.translate)
+ * @requires angular-ui-layout (ui.layout)
  *
  * @description
  * <table class="table">
@@ -174,7 +176,7 @@
      </div>
  </file>
  <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
+    angular.module('itesoft-showcase',['itesoft.viewer'])
  </file>
  <file name="controller.js">
      angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
@@ -182,7 +184,7 @@
  </example>
  */
 
-IteSoft.directive('itMediaViewer', ['itScriptService', function(itScriptService){
+angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', function(itScriptService){
 
     var _splitLast = function (word, character) {
         if(word != undefined){

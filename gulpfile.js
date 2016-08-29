@@ -267,7 +267,7 @@ gulp.task('assets', function() {
 
 
 
-gulp.task('deploy',['test','e2e'], function() {
+gulp.task('deploy',['test'], function() {
     return gulp.src(['!./node_modules/**/*','!' + buildConfig.srcFolder +'/**/*','!' +
         buildConfig.testFolder +'/**/*','!./*','./**/*'])
         .pipe(ghPages());
