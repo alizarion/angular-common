@@ -3,7 +3,7 @@
  * @ngdoc service
  * @name itesoft.service:itConfig
  * @module itesoft
- * @since 1.1
+ * @since 1.2
  * @requires $location
  *
  * @description
