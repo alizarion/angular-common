@@ -1,0 +1,72 @@
+.it-messaging-tag {
+  margin : 5px;
+  border-radius : 3px;
+}
+
+.it-messaging-tag a {
+  color :white;
+  text-decoration :none;
+}
+
+.it-messaging-chat {
+  padding: 5px;
+  border-radius: 0px 10px 10px 10px;
+}
+
+.it-messaging-chat.mine{
+  border-radius: 0px 10px 10px 10px;
+  background-color : #DFDAE0;
+}
+
+.it-messaging-chat.others{
+  border-radius: 10px 10px 0px 10px;
+  background-color : #C5B7C9;
+
+}
+
+.it-messaging-message {
+  margin : 10px;
+  font-size:11px;
+}
+
+.it-messaging-message .small {
+  font-size:8px;
+  margin : 5px;
+}
+
+.it-messaging-message .sender {
+  font-weight:bold;
+}
+
+.it-messaging-message .message-text {
+  font-size:11px;
+}
+
+.it-messaging-message .it-messaging-notification .sender {
+  font-weight: 700;
+  background-color: black;
+  color: white;
+  padding: 2px;
+}
+
+.it-messaging-message .it-messaging-notification {
+  padding: 5px;
+  border: solid 1px #FFF3C2;
+}
+
+.it-messaging-message .it-messaging-notification.warning {
+  background-color : #FFF3C2;
+}
+
+
+.it-messaging-message .it-messaging-notification.success {
+  background-color : #E1F4FA;
+}
+
+.it-messaging-message .it-messaging-notification.error {
+  background-color : #FCD4D8;
+}
+
+.it-messaging-message .it-messaging-notification.info {
+  background-color : #EDF2F1;
+}

@@ -1,6 +1,7 @@
 /**
  * Les dépendences du builder
  */
+
 var pkg = require('./package.json');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -20,18 +21,22 @@ var gulpDocs = require('gulp-ngdocs');
 var less = require('gulp-less');
 var flatten = require('gulp-flatten');
 var sh = require('shelljs');
+var webserver = require('gulp-webserver');
 var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
 var karma = require('gulp-karma');
-var serve = require('gulp-serve');
+var protractor = require('gulp-protractor').protractor;
+var webdriver_standalone = require('gulp-protractor').webdriver_standalone;
+var webdriver_update = require('gulp-protractor').webdriver_update;
+var chmod = require('gulp-chmod');
 
 /**
  * Execute les actions de build dans l'ordre
  */
 gulp.task('build', function(callback) {
-    runSequence('clean','sass','less',
+    runSequence('clean','sass','copy-sass','less',
         'css',
-        ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js'],
+        ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js', 'copy-rename-files'],
         callback);
 });
 
@@ -42,9 +47,9 @@ gulp.task('build', function(callback) {
  *
  */
 gulp.task('less', function () {
-    return gulp.src('./main/assets/less/material/material.less')
+    return gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
         .pipe(less())
-        .pipe(gulp.dest('./main/assets/css'));
+        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css'));
 });
 
 /**
@@ -53,23 +58,30 @@ gulp.task('less', function () {
  *
  */
 gulp.task('clean', function () {
-    return gulp.src(['dist/assets','dist/app','docs'],
+    return gulp.src([buildConfig.distFolder + '/assets',buildConfig.distFolder + '/app','docs'],
         {force: true})
         .pipe(clean());
+});
+
+/**
+ * Dépose les fichiers SCSS dans le répertoire /main/assets/css
+ */
+gulp.task('copy-sass', function(done) {
+    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
+        .on('end', done);
 });
 
 /**
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
 gulp.task('sass', function(done) {
-    gulp.src('./main/assets/scss/**/*.scss')
+    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
         .pipe(sass({
             errLogToConsole: true
         }))
-        .pipe(gulp.dest('./main/assets/css'))
+        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css'))
         .on('end', done);
-
-
 });
 
 /**
@@ -90,7 +102,7 @@ gulp.task('vendor-css',function(done){
             keepSpecialComments: 0
         }))
         .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest('./dist/assets/fonts'))
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'))
         .on('end', done);
 });
 
@@ -98,13 +110,13 @@ gulp.task('vendor-css',function(done){
  * build css minified css file.
  */
 gulp.task('itesoft-css',function(done){
-    gulp.src(['./main/assets/css/*.css'])
+    gulp.src([buildConfig.srcFolder + '/assets/css/*.css'])
         .pipe(concat('itesoft.css'))
         .pipe(minifyCss({
             keepSpecialComments: 0
         }))
         .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest('./dist/assets/css'))
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/css'))
         .on('end', done);
 });
 
@@ -112,10 +124,10 @@ gulp.task('itesoft-css',function(done){
  * build bundle css file.
  */
 gulp.task('css-bundle',function(done){
-    gulp.src(['dist/assets/fonts/vendor.min.css','dist/assets/css/*.css'])
+    gulp.src([buildConfig.distFolder + '/assets/fonts/vendor.min.css',buildConfig.distFolder + '/assets/css/*.css'])
         .pipe(concat('itesoft-bundle.css'))
         .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest('dist/assets/fonts'))
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'))
         .on('end', done);
 });
 
@@ -127,10 +139,10 @@ gulp.task('css-bundle',function(done){
 gulp.task('fonts', function() {
     gulp.src(buildConfig.fontFiles)
         .pipe(flatten())
-        .pipe(gulp.dest('./main/assets/fonts'));
+        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/fonts'));
 
-    gulp.src('./main/assets/fonts/**/*')
-        .pipe(gulp.dest('./dist/assets/fonts'));
+    gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'));
 });
 
 
@@ -146,7 +158,7 @@ gulp.task('uglify', function() {
         .pipe(footer(buildConfig.closureEnd))
         .pipe(uglify())
         .pipe(header(buildConfig.banner,{pkg:pkg}))
-        .pipe(gulp.dest('dist/app'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/app'));
 });
 
 
@@ -155,17 +167,23 @@ gulp.task('uglify', function() {
  * Concat et Minifie le Javascript applicatif
  */
 gulp.task('uglify-debug', function() {
-    buildConfig.appFiles.push('!main/app/**/*.demo.js');
+    buildConfig.appFiles.push('!'+buildConfig.srcFolder +'/app/**/*.demo.js');
     return gulp.src(buildConfig.appFiles)
         .pipe(concat('itesoft.debug.js'))
-        .pipe(gulp.dest('dist/app'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/app'));
 });
 
 gulp.task('docs', function () {
+    var scripts = [buildConfig.distFolder + '/assets/lib/vendor.min.js',buildConfig.distFolder + '/app/itesoft.debug.js'];
+    for (var i = 0; i < buildConfig.fileToCopyAndRename.length; i++) {
+        var fileToCopy = buildConfig.fileToCopyAndRename[i];
+        scripts.push(buildConfig.distFolder + '/' + fileToCopy.dest);
+    }
+
     var options = {
         html5Mode: false,
-        styles:['./dist/assets/fonts/itesoft-bundle.min.css'],
-        scripts:['./dist/assets/lib/vendor.min.js','./dist/app/itesoft.debug.js'],
+        styles:[buildConfig.distFolder + '/assets/fonts/itesoft-bundle.min.css'],
+        scripts:scripts,
         loadDefaults: {
             angular:false,
             angularAnimate: false
@@ -175,23 +193,29 @@ gulp.task('docs', function () {
         titleLink: "#/api"
     };
     var docFiles = buildConfig.appFiles.slice();
-    docFiles.push('main/app/**/*.ngdoc');
-    console.log(docFiles);
+    docFiles.push(buildConfig.srcFolder +'/app/**/*.ngdoc');
     gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
-        .pipe(gulp.dest('./docs'));
-    return  gulp.src('./main/assets/fonts/**/*')
-        .pipe(gulp.dest('./docs/css/dist/assets/fonts'));
+        .pipe(gulp.dest(buildConfig.docFolder));
+    gulp.src(buildConfig.srcFolder + '/assets/css/style2016/style2016.css')
+        .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
+    gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/fonts/'));
+    gulp.src(buildConfig.srcFolder + '/assets/img/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/img/'));
+    return  gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/css/' + buildConfig.distFolder +'/assets/fonts'));
+
 });
 
 /**
  * Concat et Minifie les fichiers de demo
  */
 gulp.task('demo-js', function() {
-    return gulp.src('main/app/**/*.demo.js')
+    return gulp.src(buildConfig.srcFolder +'/app/**/*.demo.js')
         .pipe(concat('demo.min.js'))
         .pipe(uglify({outSourceMap:'lib.min.map'}))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest(buildConfig.distFolder));
 });
 
 /**
@@ -211,11 +235,11 @@ gulp.task('vendor', function() {
     gulp.src(buildConfig.vendorJavascriptDistFiles)
         .pipe(concat('vendor.min.js'))
 
-        .pipe(gulp.dest('dist/assets/lib'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/lib'));
     gulp.src(buildConfig.vendorJavascriptDebugFiles)
         .pipe(concat('vendor.debug.js'))
 
-        .pipe(gulp.dest('dist/assets/lib'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/lib'));
 });
 
 
@@ -224,9 +248,9 @@ gulp.task('vendor', function() {
  *
  */
 gulp.task('html', function() {
-    gulp.src('./main/app/**/*.html')
+    gulp.src(buildConfig.srcFolder + '/app/**/*.html')
         // And put it in the dist folder
-        .pipe(gulp.dest('dist/app'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/app'));
 });
 
 /**
@@ -237,27 +261,23 @@ gulp.task('assets', function() {
     globalAssetsType = globalAssetsType.concat(buildConfig.fontFiles.slice());
     gulp.src(globalAssetsType)
         // And put it in the dist folder
-        .pipe(gulp.dest('dist/assets'));
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets'));
 });
 
 
 
-gulp.task('deploy-on-github', function() {
-    return gulp.src(['!./node_modules/**/*','!./main/**/*','!./*','./**/*'])
+
+gulp.task('deploy',['test'], function() {
+    return gulp.src(['!./node_modules/**/*','!' + buildConfig.srcFolder +'/**/*','!' +
+        buildConfig.testFolder +'/**/*','!./*','./**/*'])
         .pipe(ghPages());
-});
-
-
-gulp.task('deploy', function(callback) {
-   runSequence('build','docs','deploy-on-github',
-        callback);
 });
 
 /**
  * Obsérve les modification des scss et compile en css
  */
 gulp.task('watch', function() {
-    gulp.watch('./main/assets/scss/**/*.scss', ['sass']);
+    gulp.watch(buildConfig.srcFolder + '/assets/scss/**/*.scss', ['sass']);
 });
 
 /**
@@ -265,33 +285,57 @@ gulp.task('watch', function() {
  *
  */
 gulp.task('watch', function() {
-    gulp.watch('./main/assets/scss/**/*.scss', ['css-debug']);
-    gulp.watch(['./main/app/**/*.ngdoc'], ['docs']);
-    gulp.watch(['./main/app/**/*.js'], ['debug']);
+    gulp.watch(buildConfig.srcFolder + '/assets/scss/**/*.scss', ['css-debug']);
+    gulp.watch([buildConfig.srcFolder + '/app/**/*.ngdoc'], ['docs']);
+    gulp.watch([buildConfig.srcFolder + '/app/**/*.js'], ['debug']);
 });
+
 
 /**
  * Test unitaire jasmine
  */
-gulp.task('test', function() {
+gulp.task('test', function (done) {
 
     /**Ajout des fihcier de test **/
     var allVendorFiles = buildConfig.vendorJavascriptDistFiles.slice();
-    allVendorFiles.push('./main/assets/lib/angular-mocks/angular-mocks.js');
+    allVendorFiles.push(buildConfig.srcFolder + '/assets/lib/angular-mocks/angular-mocks.js');
     var allAppFiles = buildConfig.appFiles.slice();
-    allAppFiles = _removeValueFromArray(allAppFiles,'!main/app/**/*Test.js');
+    allAppFiles = allAppFiles.concat(buildConfig.excludeFromAppDist.unitTest);
+    allAppFiles = allAppFiles.concat(buildConfig.excludeFromAppDist.unminifiedDistFiles);
     var testFiles = allVendorFiles.concat(allAppFiles);
-
     return gulp.src(testFiles)
         .pipe(karma({
             configFile: 'karma.conf.js',
             action: 'run'
         }))
-        .on('error', function(err) {
-            console.log(err);
-            this.emit('end');
+        .on('error', function (err) {
+            console.log('toto');
+            this.emit('end',done);
         });
 });
+
+/**
+ * Test unitaire jasmine
+ */
+//gulp.task('test', function() {
+//
+//    /**Ajout des fihcier de test **/
+//    var allVendorFiles = buildConfig.vendorJavascriptDistFiles.slice();
+//    allVendorFiles.push(buildConfig.srcFolder + '/assets/lib/angular-mocks/angular-mocks.js');
+//    var allAppFiles = buildConfig.appFiles.slice();
+//    allAppFiles = _removeValueFromArray(allAppFiles,'!'+buildConfig.srcFolder +'/app/**/*Test.js');
+//    var testFiles = allVendorFiles.concat(allAppFiles);
+//
+//    return gulp.src(testFiles)
+//        .pipe(karma({
+//            configFile: 'karma.conf.js',
+//            action: 'run'
+//        }))
+//        .on('error', function(err) {
+//            console.log(err);
+//            this.emit('end');
+//        });
+//});
 
 
 /**
@@ -307,7 +351,38 @@ gulp.task('css-debug', function(callback) {
         callback);
 });
 
-gulp.task('serve', serve('docs'));
+
+gulp.task('serve', function () {
+    gulp.src(buildConfig.docFolder)
+        .pipe(webserver({
+            port: 3000
+        }));
+});
+
+gulp.task('webdriver_update', webdriver_update);
+
+gulp.task('webdriver_standalone', webdriver_standalone);
+
+/**
+ * Execute l'action de test e2e
+ */
+gulp.task('e2e', ['webdriver_update'], function (callback) {
+    var stream = gulp.src(buildConfig.docFolder)
+        .pipe(webserver({
+            port: 4000
+        }));
+    var fileStream = gulp.src(buildConfig.excludeFromAppDist.e2e);
+    fileStream.pipe(protractor({
+        configFile: "protractor.conf.js",
+        args: ['--baseUrl', 'http://127.0.0.1:4000']
+    })).on('error', function (e) {
+        stream.emit('kill');
+        throw (e);
+    }).on('end', function () {
+        stream.emit('kill');
+        callback();
+    });
+});
 
 /**
  * Lance l'installation des dépendences GIT
@@ -336,6 +411,21 @@ gulp.task('git-check', function(done) {
     }
     done();
 });
+
+/**
+ * File to copy an d rename to dist
+ */
+gulp.task('copy-rename-files', function () {
+        for (var i = 0; i < buildConfig.fileToCopyAndRename.length; i++) {
+            var fileToCopy = buildConfig.fileToCopyAndRename[i];
+            gulp.src(fileToCopy.src)
+                .pipe(chmod(755))
+                .pipe(rename(fileToCopy.dest))
+                .pipe(gulp.dest(buildConfig.dist));
+            //return true;
+        }
+    }
+);
 
 /**
  * Simple function to remove item from array by value.

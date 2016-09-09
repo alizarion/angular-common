@@ -20,16 +20,34 @@ IteSoft
             restrict: 'E',
             require : '^itSideMenus',
             transclude : true,
-            scope:true,
+            scope:false,
+            link:function(scope, element, attrs ){
+
+                calculateWidth();
+
+                scope.$watch(function(){
+                    calculateWidth();
+                });
+
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                   scope.$noMenuHeader = true;
+                }
+
+                function calculateWidth(){
+                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                    scope.sideMenuCalc1 = { 'width': (scope.itSideMenuWidth * 1) + (50 * 1) + 'px' };
+                    scope.sideMenuCalc2 = { 'width': scope.$itSideMenuWidth + 'px' };
+                }
+            },
             template :
-                '<div class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                   '<div class="it-sidebar-inner">'+
-                        '<div class="nav navbar navbar-inverse">'+
-                        '<nav class="" ng-transclude ></nav>' +
-                        '</div>'+
+            '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                '<div ng-style="sideMenuCalc1"  class="it-sidebar-inner">' +
+                    '<div ng-style="sideMenuCalc2" class="nav navbar navbar-inverse">' +
+                    '<nav class="" ng-transclude ></nav>' +
                     '</div>'+
-                '</div>'
-
-
+                '</div>'+
+            '</div>'
         }
 });

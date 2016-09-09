@@ -1,8 +1,6 @@
 @charset "UTF-8";
 
 @import
-
-  //Side menu
 "colors",
 "variables",
 "modal-full-screen",
@@ -13,10 +11,14 @@
 "busy-indicator",
 "autocomplete",
 "side-panel",
-"date-picker";
+"date-picker",
+"circular-btn",
+"template",
+"multipages-viewer",
+"it-lazy-grid",
+"messaging";
 
 html {
-  padding-top : 60px;
   height: 100%;
 }
 

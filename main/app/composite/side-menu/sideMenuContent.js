@@ -21,10 +21,27 @@ IteSoft
             restrict : 'ECA',
             require : '^itSideMenus',
             transclude : true,
-            scope : true,
+            scope : false,
+            link : function(scope){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                    scope.showmenu = true;
+                }
+
+                calculatePadding();
+                scope.$watch('$itSideMenuWidth',function(){
+                    calculatePadding();
+                });
+
+                function calculatePadding(){
+                    scope.menuOpenStyle = {'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px'};
+                    scope.menuCloseStyle = {'padding-left': '0px'};
+                }
+            },
             template :
-                '<div class="it-menu-content" ng-class="{\'it-side-menu-overlay\':showmenu}">' +
-                    '<div class="it-container it-fill" ng-transclude></div>'+
-                '</div>'
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+                '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
         }
     });
