@@ -3,6 +3,7 @@
  * @name itesoft.directive:itBlock
  * @module itesoft
  * @restrict EAC
+ * @since 1.2
  *
  * @description
  * The Block widgets provides  way to customize UI.

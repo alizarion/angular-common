@@ -4,6 +4,7 @@
  * @name itesoft.directive:itBlockControlPanel
  * @module itesoft
  * @restrict E
+ * @since 1.2
  *
  * @description
  * The Control Panel Block widgets provides a way to activate it-block edition

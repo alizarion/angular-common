@@ -6,7 +6,7 @@
  * @name dependencies.directive:ui-layout
  * @module dependencies
  * @restrict AE
- * @since 1.0
+ * @since 1.2
  * @description
  * This directive allows you to split
  * See more :  {@link https://github.com/angular-ui/ui-layout}
