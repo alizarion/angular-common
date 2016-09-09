@@ -44,6 +44,103 @@ var IteSoft = angular.module('itesoft', [
     'itesoft.viewer'
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
+
 'use strict';
 
 /**
@@ -99,425 +196,6 @@ IteSoft.directive('itCircularBtn',
         }]
 );
 
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1388,6 +1066,377 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
+);
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
 );
 "use strict";
 /**
@@ -2570,6 +2619,403 @@ IteSoft
         }
 
     });
+'use strict';
+/**
+ * TODO itInclude desc
+ */
+angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
+    var linker = function (scope, element, attrs) {
+        var currentScope;
+        scope.$watch(attrs.itInclude, function (template) {
+            $timeout(function () {
+                if(currentScope){
+                    currentScope.$destroy();
+                }
+                currentScope = scope.$new();
+                element.html( template || '');
+                $compile(element.contents())(currentScope);
+            }, 50);
+        });
+    };
+    return {
+        restrict: 'AE',
+        link: linker
+    };
+}]);
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itMediaViewer
+ * @module itesoft
+ * @since 1.2
+ * @restrict AEC
+ * @requires $translate (pascalprecht.translate)
+ * @requires angular-ui-layout (ui.layout)
+ *
+ * @description
+ * <table class="table">
+ *  <tr>
+ *   <td><code>src</code></td>
+ *   <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>file</code></td>
+ *   <td>stream passed to the media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>type</code></td>
+ *   <td>to force type of document if the media viewer can't guess the type.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options = {}</code></td>
+ *   <td>Object passed to the media viewer to apply options.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.onApiLoaded = function(api) { }</code></td>
+ *   <td>Callback to be notify when the property api is available.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
+ *   <td>Callback to be notify when template not found for the specify extension.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
+ *   <td>Set orientation of the viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showProgressbar = true | false</code></td>
+ *   <td>Hide | Show progress bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showToolbar  = true | false</code></td>
+ *   <td>Hide | Show tool bar.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showThumbnail  = true | false</code></td>
+ *   <td>Hide | Show thumbnail.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.showSizeMenu  = true | false</code></td>
+ *   <td>Hide | Show size menu.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
+ *   <td>Set initial scale of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.renderTextLayer = true | false</code></td>
+ *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.getApi()</code></td>
+ *   <td>Api of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getZoomLevel()</code></td>
+ *   <td>Method to get the current zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomTo(zoomLevel)</code></td>
+ *   <td>Method to zoom to the zoom level parameter.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomIn()</code></td>
+ *   <td>Method to zoom to the next zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.zoomOut()</code></td>
+ *   <td>Method to zoom to the prev zoom level.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getZoomLevels()</code></td>
+ *   <td>Method to get the list of zoom level items.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
+ *   <td>Callback to be notify when the property zoom levels change.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getCurrentPage()</code></td>
+ *   <td>Method to get the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPage(pageIndex)</code></td>
+ *   <td>Method to go to the page index if possible.</td>
+ *  </tr>
+ *   <tr>
+ *   <td><code>options.api.goToNextPage()</code></td>
+ *   <td>Method to go to the next page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.goToPrevPage()</code></td>
+ *   <td>Method to go to the prev page if possible.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.getNumPages()</code></td>
+ *   <td>Method to get the number of pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesRight()</code></td>
+ *   <td>Method to rotate to the right (90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePagesLeft()</code></td>
+ *   <td>Method to rotate to the left (-90°) all pages.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageRight()</code></td>
+ *   <td>Method to rotate to the right (per 90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.rotatePageLeft()</code></td>
+ *   <td>Method to rotate to the left (per -90°) the current page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onError = function (operation, message) { }</code></td>
+ *   <td>Callback to be notify on error.</td>
+ *  </tr>
+ *  <tr>
+ *  <tr>
+ *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
+ *   <td>Callback to be notify when click on a page.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
+ *   <td>Callback to be notify on page rotation.</td>
+ *  </tr>
+ *   <td><code>options.api.downloadProgress</code></td>
+ *   <td>% of progress.</td>
+ *  </tr>
+ * </table>
+ *
+ * ```html
+ *    <style>
+         //override style selection
+         .multipage-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         .thumbnail-viewer .selected {
+            border-style: solid;
+            border-width: 1px;
+            border-color: red;
+         }
+
+         //override thumbnail num-page
+         .thumbnail-viewer .num-page {
+         	text-align: center;
+         }
+      </style>
+ *    <it-media-viewer></it-media-viewer>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl" class="row">
+        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft.viewer'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ </file>
+ </example>
+ */
+
+angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+    var _splitLast = function (word, character) {
+        if(word != undefined){
+            var words = word.split(character);
+            return words[words.length - 1];
+        }
+        return word;
+    };
+
+    var linker = function (scope, element, attrs) {
+
+        var _setTemplate = function (ext, value) {
+            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
+            switch (ext) {
+                case 'pdf':
+                    scope.pdfSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/pdf.js',
+                    ]).then(function() {
+                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
+                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
+                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
+                        //PDFJS.imageResourcesPath = pathJs + "/images";
+                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
+                    });
+                    break;
+                case 'png':
+                case 'jpeg':
+                case 'jpg':
+                    scope.imageSrc = value;
+                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
+                    break;
+                case 'tif':
+                case 'tiff':
+                    scope.tiffSrc = value;
+                    itScriptService.LoadScripts([
+                        pathJs + '/tiff.min.js'
+                    ]).then(function() {
+                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
+                    });
+                    break;
+                default :
+                    if(scope.options && scope.options.onTemplateNotFound) {
+                        scope.options.onTemplateNotFound(ext);
+                    }
+                    $log.debug('No template found for extension : ' + ext);
+                    scope.template = null;
+                    break;
+            }
+        };
+
+        var _setValue = function(newValue, oldValue) {
+            if(newValue){
+                if(typeof newValue === typeof ""){
+                    scope.ext = _splitLast(newValue, '.').toLowerCase();
+                    _setTemplate(scope.ext, newValue);
+                } else {
+                    if(attrs.type) {
+                        _setTemplate(attrs.type.toLowerCase(), newValue);
+                    }else if(newValue.name != undefined) {
+                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
+                        _setTemplate(scope.ext, newValue);
+                    } else {
+                        $log.debug('must specify type when using stream');
+                        scope.template = null;
+                    }
+                }
+            } else if(newValue != oldValue) {
+                scope.template = null;
+            }
+        };
+
+        scope.$watch("src", _setValue);
+        scope.$watch("file", _setValue);
+    };
+
+    return {
+        scope: {
+            src : '=',
+            file: '=',
+            type: '@',
+            options : '=',
+        },
+        restrict: 'E',
+        template :  '<div it-include="template"></div>',
+        link: linker
+    };
+}]);
+
+
+'use strict';
+/**
+ * TODO ScriptService desc
+ */
+
+
+angular.module('itesoft.viewer')
+    .factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+    var _scipts = {};
+    var _css = {};
+    var defaultScriptPromise = $q.defer();
+    var defaultScriptsPromise = $q.defer();
+
+    //JS
+    var _loadScripJs = function (js) {
+        if(js){
+            if(_scipts[js] != undefined){
+                return _scipts[js];
+            }else {
+                var deferred = $q.defer();
+                var script = document.createElement('script');
+                _scipts[js] = deferred.promise;
+                script.src = js;
+                script.type = 'text/javascript';
+                script.onload = function () {
+                    deferred.resolve(script);
+                };
+                document.head.appendChild(script);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsJs = function (scriptJs) {
+        if(typeof scriptJs == typeof ""){
+            return _loadScripJs(scriptJs);
+        }else if(typeof scriptJs == typeof []){
+            var promises = [];
+            angular.forEach(scriptJs, function(js){
+                promises.push(_loadScripJs(js));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //CSS
+    var _loadScriptCss = function (css) {
+        if(css){
+            if(_css[css] != undefined){
+                return _css[css];
+            }else {
+                var deferred = $q.defer();
+                var link = document.createElement('link');
+                _css[css] = deferred.promise;
+                link.href = css;
+                link.rel ='stylesheet';
+                link.type = 'text/css';
+                link.onload = function () {
+                    deferred.resolve(link);
+                };
+                document.head.appendChild(link);
+                return deferred.promise;
+            }
+        }
+        defaultScriptPromise.resolve();
+        return defaultScriptPromise.promise;
+    };
+
+    var _loadScriptsCss = function (scriptCss) {
+        if(typeof scriptCss == typeof ""){
+            return _loadScriptCss(scriptCss);
+        }else if(typeof scriptCss == typeof []){
+            var promises = [];
+            angular.forEach(scriptCss, function(css){
+                promises.push(_loadScriptCss(css));
+            });
+            return $q.all(promises);
+        }
+        defaultScriptsPromise.resolve();
+        return defaultScriptsPromise.promise;
+    };
+
+    //Scripts
+    var _loadScripts = function (js, css) {
+        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
+    };
+
+    return {
+        LoadScripts : _loadScripts
+    };
+}]);
+
 'use strict';
 
 /**
@@ -4344,403 +4790,6 @@ IteSoft
             }
         }
 }]);
-'use strict';
-/**
- * TODO itInclude desc
- */
-angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
-    var linker = function (scope, element, attrs) {
-        var currentScope;
-        scope.$watch(attrs.itInclude, function (template) {
-            $timeout(function () {
-                if(currentScope){
-                    currentScope.$destroy();
-                }
-                currentScope = scope.$new();
-                element.html( template || '');
-                $compile(element.contents())(currentScope);
-            }, 50);
-        });
-    };
-    return {
-        restrict: 'AE',
-        link: linker
-    };
-}]);
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itMediaViewer
- * @module itesoft
- * @since 1.2
- * @restrict AEC
- * @requires $translate (pascalprecht.translate)
- * @requires angular-ui-layout (ui.layout)
- *
- * @description
- * <table class="table">
- *  <tr>
- *   <td><code>src</code></td>
- *   <td>string url passed to the media viewer (the server must implement Allow cross origin in case of cross domain url).</td>
- *  </tr>
- *  <tr>
- *   <td><code>file</code></td>
- *   <td>stream passed to the media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>type</code></td>
- *   <td>to force type of document if the media viewer can't guess the type.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options = {}</code></td>
- *   <td>Object passed to the media viewer to apply options.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.onApiLoaded = function(api) { }</code></td>
- *   <td>Callback to be notify when the property api is available.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.onTemplateNotFound = function(extension) { }</code></td>
- *   <td>Callback to be notify when template not found for the specify extension.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
- *   <td>Set orientation of the viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showProgressbar = true | false</code></td>
- *   <td>Hide | Show progress bar.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showToolbar  = true | false</code></td>
- *   <td>Hide | Show tool bar.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showThumbnail  = true | false</code></td>
- *   <td>Hide | Show thumbnail.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.showSizeMenu  = true | false</code></td>
- *   <td>Hide | Show size menu.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
- *   <td>Set initial scale of media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.renderTextLayer = true | false</code></td>
- *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.getApi()</code></td>
- *   <td>Api of media viewer.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getZoomLevel()</code></td>
- *   <td>Method to get the current zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomTo(zoomLevel)</code></td>
- *   <td>Method to zoom to the zoom level parameter.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomIn()</code></td>
- *   <td>Method to zoom to the next zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.zoomOut()</code></td>
- *   <td>Method to zoom to the prev zoom level.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getZoomLevels()</code></td>
- *   <td>Method to get the list of zoom level items.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onZoomLevelsChanged = function (zoomLevels) { }</code></td>
- *   <td>Callback to be notify when the property zoom levels change.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getCurrentPage()</code></td>
- *   <td>Method to get the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.goToPage(pageIndex)</code></td>
- *   <td>Method to go to the page index if possible.</td>
- *  </tr>
- *   <tr>
- *   <td><code>options.api.goToNextPage()</code></td>
- *   <td>Method to go to the next page if possible.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.goToPrevPage()</code></td>
- *   <td>Method to go to the prev page if possible.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.getNumPages()</code></td>
- *   <td>Method to get the number of pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePagesRight()</code></td>
- *   <td>Method to rotate to the right (90°) all pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePagesLeft()</code></td>
- *   <td>Method to rotate to the left (-90°) all pages.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePageRight()</code></td>
- *   <td>Method to rotate to the right (per 90°) the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.rotatePageLeft()</code></td>
- *   <td>Method to rotate to the left (per -90°) the current page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onError = function (operation, message) { }</code></td>
- *   <td>Callback to be notify on error.</td>
- *  </tr>
- *  <tr>
- *  <tr>
- *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
- *   <td>Callback to be notify when click on a page.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onPageRotation = function (args) { alert(args.pageIndex + " " + args.rotation); }</code></td>
- *   <td>Callback to be notify on page rotation.</td>
- *  </tr>
- *   <td><code>options.api.downloadProgress</code></td>
- *   <td>% of progress.</td>
- *  </tr>
- * </table>
- *
- * ```html
- *    <style>
-         //override style selection
-         .multipage-viewer .selected {
-            border-style: solid;
-            border-width: 1px;
-            border-color: red;
-         }
-
-         .thumbnail-viewer .selected {
-            border-style: solid;
-            border-width: 1px;
-            border-color: red;
-         }
-
-         //override thumbnail num-page
-         .thumbnail-viewer .num-page {
-         	text-align: center;
-         }
-      </style>
- *    <it-media-viewer></it-media-viewer>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft.viewer'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
- </file>
- </example>
- */
-
-angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', function(itScriptService){
-
-    var _splitLast = function (word, character) {
-        if(word != undefined){
-            var words = word.split(character);
-            return words[words.length - 1];
-        }
-        return word;
-    };
-
-    var linker = function (scope, element, attrs) {
-
-        var _setTemplate = function (ext, value) {
-            var pathJs = (scope.options ? scope.options.libPath : null) || "assets/Scripts/vendor";
-            switch (ext) {
-                case 'pdf':
-                    scope.pdfSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/pdf.js',
-                    ]).then(function() {
-                        //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
-                        PDFJS.workerSrc = pathJs + "/pdf.worker.js";
-                        //PDFJS.cMapUrl = pathJs + "/cmaps/";
-                        //PDFJS.imageResourcesPath = pathJs + "/images";
-                        scope.template = '<it-pdf-viewer src="pdfSrc" options="options"></it-pdf-viewer>';
-                    });
-                    break;
-                case 'png':
-                case 'jpeg':
-                case 'jpg':
-                    scope.imageSrc = value;
-                    scope.template = '<it-image-viewer src="imageSrc" options="options"></it-image-viewer>';
-                    break;
-                case 'tif':
-                case 'tiff':
-                    scope.tiffSrc = value;
-                    itScriptService.LoadScripts([
-                        pathJs + '/tiff.min.js'
-                    ]).then(function() {
-                        scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
-                    });
-                    break;
-                default :
-                    if(scope.options && scope.options.onTemplateNotFound) {
-                        scope.options.onTemplateNotFound(ext);
-                    }
-                    $log.debug('No template found for extension : ' + ext);
-                    scope.template = null;
-                    break;
-            }
-        };
-
-        var _setValue = function(newValue, oldValue) {
-            if(newValue){
-                if(typeof newValue === typeof ""){
-                    scope.ext = _splitLast(newValue, '.').toLowerCase();
-                    _setTemplate(scope.ext, newValue);
-                } else {
-                    if(attrs.type) {
-                        _setTemplate(attrs.type.toLowerCase(), newValue);
-                    }else if(newValue.name != undefined) {
-                        scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
-                        _setTemplate(scope.ext, newValue);
-                    } else {
-                        $log.debug('must specify type when using stream');
-                        scope.template = null;
-                    }
-                }
-            } else if(newValue != oldValue) {
-                scope.template = null;
-            }
-        };
-
-        scope.$watch("src", _setValue);
-        scope.$watch("file", _setValue);
-    };
-
-    return {
-        scope: {
-            src : '=',
-            file: '=',
-            type: '@',
-            options : '=',
-        },
-        restrict: 'E',
-        template :  '<div it-include="template"></div>',
-        link: linker
-    };
-}]);
-
-
-'use strict';
-/**
- * TODO ScriptService desc
- */
-
-
-angular.module('itesoft.viewer')
-    .factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
-    var _scipts = {};
-    var _css = {};
-    var defaultScriptPromise = $q.defer();
-    var defaultScriptsPromise = $q.defer();
-
-    //JS
-    var _loadScripJs = function (js) {
-        if(js){
-            if(_scipts[js] != undefined){
-                return _scipts[js];
-            }else {
-                var deferred = $q.defer();
-                var script = document.createElement('script');
-                _scipts[js] = deferred.promise;
-                script.src = js;
-                script.type = 'text/javascript';
-                script.onload = function () {
-                    deferred.resolve(script);
-                };
-                document.head.appendChild(script);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsJs = function (scriptJs) {
-        if(typeof scriptJs == typeof ""){
-            return _loadScripJs(scriptJs);
-        }else if(typeof scriptJs == typeof []){
-            var promises = [];
-            angular.forEach(scriptJs, function(js){
-                promises.push(_loadScripJs(js));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //CSS
-    var _loadScriptCss = function (css) {
-        if(css){
-            if(_css[css] != undefined){
-                return _css[css];
-            }else {
-                var deferred = $q.defer();
-                var link = document.createElement('link');
-                _css[css] = deferred.promise;
-                link.href = css;
-                link.rel ='stylesheet';
-                link.type = 'text/css';
-                link.onload = function () {
-                    deferred.resolve(link);
-                };
-                document.head.appendChild(link);
-                return deferred.promise;
-            }
-        }
-        defaultScriptPromise.resolve();
-        return defaultScriptPromise.promise;
-    };
-
-    var _loadScriptsCss = function (scriptCss) {
-        if(typeof scriptCss == typeof ""){
-            return _loadScriptCss(scriptCss);
-        }else if(typeof scriptCss == typeof []){
-            var promises = [];
-            angular.forEach(scriptCss, function(css){
-                promises.push(_loadScriptCss(css));
-            });
-            return $q.all(promises);
-        }
-        defaultScriptsPromise.resolve();
-        return defaultScriptsPromise.promise;
-    };
-
-    //Scripts
-    var _loadScripts = function (js, css) {
-        return $q.all([_loadScriptsJs(js), _loadScriptsCss(css)]);
-    };
-
-    return {
-        LoadScripts : _loadScripts
-    };
-}]);
-
 "use strict";
 /**
  * You do not talk about FIGHT CLUB!!
@@ -5520,6 +5569,319 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name style2016.directive:loginForm
+ * @module style2016
+ * @restrict C
+ * @since 1.1
+ * @description
+ * Itesoft style 2016 (like SCPAS)
+ *
+ * To enable it just add
+ * <pre class="prettyprint linenums">
+ * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
+ * </pre>
+ * add the begin of your principal scss file
+ *
+ * <h3>Icon</h3>
+ *
+ * Class that can be used to show itesoftIcons:
+ * <ul>
+ *     <li>
+ *         error_validate
+ *     </li>
+ *     <li>
+ *         menu_admin
+ *     </li>
+ *     <li>
+ *         menu_home
+ *     </li>
+ *     <li>
+ *         menu_rapport
+ *     </li>
+ *     <li>
+ *         menu_search
+ *     </li>
+ *     <li>
+ *         menu_settings
+ *     </li>
+ *     <li>
+ *         menu_task
+ *     </li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
+ *
+ * @example
+ <example module="itesoft-showcase">
+     <file name="index.html">
+         <link rel="stylesheet" href="css/style2016.css" type="text/css">
+            <div class="container it-login-background ">
+             <it-busy-indicator class="row-height-10">
+                     <div class="row">
+                         <div class="center-block col-xs-6 col-md-4 login-block">
+                         <div class="it-login-logo">
+                         <br>
+                         </div>
+                         </div>
+                     </div>
+                     <div class="row">
+                         <div class="center-block col-xs-6 col-md-4 login-block">
+                         <form class="form-login width-300" role="form" name="formLogin"
+                         ng-submit="$ctrl.authService.login(formLogin.username.$viewValue)">
+                                 <div class="form-group">
+                                 <input class="form-control floating-label it-login-input"
+                                 type="text"
+                                 name="username"
+                                 placeholder="{{'GLOBAL.LOGIN.USER_LABEL' | translate}}"
+                                 ng-model="loginData.login"
+                                 it-error="message"
+                                 autocomplete
+                                 required
+                                 autofocus>
+                                 </div>
+                                 <div class="form-group">
+                                 <input class="form-control floating-label it-login-input"
+                                 type="password"
+                                 name="password"
+                                 placeholder="{{'GLOBAL.LOGIN.PASSWORD_LABEL' | translate}}"
+                                 ng-model="loginData.password"
+                                 autocomplete>
+                                 </div>
+                                 <div class="form-group">
+                                 <button class="btn btn-lg btn-success btn-block it-login-button"
+                                 type="submit"
+                                 name="submit"
+                                 translate>GLOBAL.LOGIN.SUBMIT_BUTTON_LABEL
+                                 </button>
+                                 </div>
+                         </form>
+                         </div>
+                     </div>
+                </it-block>
+             </it-busy-indicator>
+             </div>
+     </file>
+     <file name="Module.js">
+        angular.module('itesoft-showcase',['itesoft'])
+     </file>
+     <file name="controller.js">
+        angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) { }]);
+     </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name style2016.directive:style2016
+ * @module style2016
+ * @restrict C
+ * @since 1.1
+ * @description
+ * Itesoft style 2016 (like SCPAS)
+ *
+ * To enable it just add
+ * <pre class="prettyprint linenums">
+ * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
+ * </pre>
+ * add the begin of your principal scss file
+ *
+ * <h3>Icon</h3>
+ *
+ * Class that can be used to show itesoftIcons:
+ * <ul>
+ *     <li>
+ *         error_validate
+ *     </li>
+ *     <li>
+ *         menu_admin
+ *     </li>
+ *     <li>
+ *         menu_home
+ *     </li>
+ *     <li>
+ *         menu_rapport
+ *     </li>
+ *     <li>
+ *         menu_search
+ *     </li>
+ *     <li>
+ *         menu_settings
+ *     </li>
+ *     <li>
+ *         menu_task
+ *     </li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <link rel="stylesheet" href="css/style2016.css" type="text/css">
+     <div style="background-color:#EEEEEE">
+         <div style="height:200px">
+             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+                 <li class="logo">
+                 <a href="#" class="no-padding">
+
+                 </a>
+                 </li>
+                 <li it-collapsed-item>
+                 <a href="#/home"><i class="it-icon menu_home"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/search"><i class="it-icon menu_search"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/task"><i class="it-icon menu_task"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/settings"><i class="it-icon menu_settings"></i></a>
+                 </li>
+             </ul>
+         </div>
+         <div >
+             <div class="row-height-10 dashboard-with-footer" style="height:500px;padding-top:100px;position:relative">
+                 <div class="col-xs-12" style="height:185px;margin-top: -185px">
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">14
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Tasks
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">12
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Invoices
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">1
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Capture
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">15
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Scan
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">22
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Image
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+
+                 <div class="row-height-10 dashboard-container-with-footer">
+                 <div class="left-panel row-height-10 col-xs-4">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 LEFT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 <div class="dashboard-scrollable-content smooth">
+                 left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="middle-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 MIDDLE
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 <div class="right-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 RIGHT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="it-button-bar" style="text-align: right">
+                     <button class="btn btn-success it-button-do">
+                     <span class="ng-binding">
+                     Capturer
+                     </span>
+                     </button>
+                     <button class="btn btn-primary it-button-do">
+                     <span class="ng-binding">
+                     Envoyer
+                     </span>
+                     </button>
+                 </div>
+             </div>
+         </div>
+
+         <div style="height:500px;overflow: auto">
+             <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+             <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+             <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+             <table ng-controller="HomeCtrl as $ctrl" class="table-condensed-small table-striped col-md-12"> <thead> <tr class="it-header-tab"> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.TASK_NAME' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.DATE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CATEGORY' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CODE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.DOC_NUMBER' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.NET_AMOUNT' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.TOTAL_AMOUNT' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.SUPPLIER' | translate}} </th> <th class="nowrap text-left excel-style-header"></th> <th class="nowrap text-left excel-style-header"><span class="excel-style-settings"></span></th> </tr> </thead> <tbody class="row-height-10"> <tr ng-repeat="item in $ctrl.invoices" class="it-line" ng-class="{'excel-style-row-selected': $ctrl.selectedLine.id == item.id}" ng-dblclick="$emit('goToCodingForm',{event: $event, invoiceId: $ctrl.selectedLine.invoice.id, attachmentId: $ctrl.selectedLine.attachment.id, taskId: $ctrl.selectedLine.id, taskName: $ctrl.selectedLine.name})"> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-task-name nowrap text-left excel-style-header no-border"> <span class="it-task-invoice-type">{{'TASK.DOCUMENT.TYPE.'+item.invoice.type | translate}}</span>&nbsp;{{$ctrl.taskService.getTranslatedTaskName(item.name)}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-date nowrap text-left excel-style-header no-border"> {{item.invoice.date | date:'dd/MM/yyyy HH:mm'}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-category nowrap text-left excel-style-header no-border"> {{'TASK.DOCUMENT.CATEGORY.'+item.invoice.category | translate}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-itesoft-id nowrap text-left excel-style-header no-border"> {{item.invoice.code}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-doc-number nowrap text-left excel-style-header no-border"> {{item.docNumber}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-net-amount nowrap text-right excel-style-header no-border"> {{item.netAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-total-amount nowrap text-right excel-style-header no-border"> {{item.totalAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-supplier-name nowrap text-left excel-style-header no-border"> {{item.supplierName}} </div> </td> <td colspan="2" ng-click=""> <button class="small-btn btn-primary" title="{{'GLOBAL.BUTTON.FOLLOW_REMOVE' | translate}}"> <i class="fa fa-trash"></i> </button> </td> </tr> </tbody> </table>
+        </div>
+     </div>
+
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+  var self = this; self.selectedLine = {} ; self.invoices = [{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 } ]; self.updateSelectedLine = function (item) { self.selectedLine = item; };
+  }]) ;
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * @ngdoc directive
@@ -6325,319 +6687,6 @@ IteSoft
 'use strict';
 
 /**
- * @ngdoc directive
- * @name style2016.directive:loginForm
- * @module style2016
- * @restrict C
- * @since 1.1
- * @description
- * Itesoft style 2016 (like SCPAS)
- *
- * To enable it just add
- * <pre class="prettyprint linenums">
- * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
- * </pre>
- * add the begin of your principal scss file
- *
- * <h3>Icon</h3>
- *
- * Class that can be used to show itesoftIcons:
- * <ul>
- *     <li>
- *         error_validate
- *     </li>
- *     <li>
- *         menu_admin
- *     </li>
- *     <li>
- *         menu_home
- *     </li>
- *     <li>
- *         menu_rapport
- *     </li>
- *     <li>
- *         menu_search
- *     </li>
- *     <li>
- *         menu_settings
- *     </li>
- *     <li>
- *         menu_task
- *     </li>
- * </ul>
- *
- *
- *
- *
- * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
- *
- * @example
- <example module="itesoft-showcase">
-     <file name="index.html">
-         <link rel="stylesheet" href="css/style2016.css" type="text/css">
-            <div class="container it-login-background ">
-             <it-busy-indicator class="row-height-10">
-                     <div class="row">
-                         <div class="center-block col-xs-6 col-md-4 login-block">
-                         <div class="it-login-logo">
-                         <br>
-                         </div>
-                         </div>
-                     </div>
-                     <div class="row">
-                         <div class="center-block col-xs-6 col-md-4 login-block">
-                         <form class="form-login width-300" role="form" name="formLogin"
-                         ng-submit="$ctrl.authService.login(formLogin.username.$viewValue)">
-                                 <div class="form-group">
-                                 <input class="form-control floating-label it-login-input"
-                                 type="text"
-                                 name="username"
-                                 placeholder="{{'GLOBAL.LOGIN.USER_LABEL' | translate}}"
-                                 ng-model="loginData.login"
-                                 it-error="message"
-                                 autocomplete
-                                 required
-                                 autofocus>
-                                 </div>
-                                 <div class="form-group">
-                                 <input class="form-control floating-label it-login-input"
-                                 type="password"
-                                 name="password"
-                                 placeholder="{{'GLOBAL.LOGIN.PASSWORD_LABEL' | translate}}"
-                                 ng-model="loginData.password"
-                                 autocomplete>
-                                 </div>
-                                 <div class="form-group">
-                                 <button class="btn btn-lg btn-success btn-block it-login-button"
-                                 type="submit"
-                                 name="submit"
-                                 translate>GLOBAL.LOGIN.SUBMIT_BUTTON_LABEL
-                                 </button>
-                                 </div>
-                         </form>
-                         </div>
-                     </div>
-                </it-block>
-             </it-busy-indicator>
-             </div>
-     </file>
-     <file name="Module.js">
-        angular.module('itesoft-showcase',['itesoft'])
-     </file>
-     <file name="controller.js">
-        angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) { }]);
-     </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name style2016.directive:style2016
- * @module style2016
- * @restrict C
- * @since 1.1
- * @description
- * Itesoft style 2016 (like SCPAS)
- *
- * To enable it just add
- * <pre class="prettyprint linenums">
- * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
- * </pre>
- * add the begin of your principal scss file
- *
- * <h3>Icon</h3>
- *
- * Class that can be used to show itesoftIcons:
- * <ul>
- *     <li>
- *         error_validate
- *     </li>
- *     <li>
- *         menu_admin
- *     </li>
- *     <li>
- *         menu_home
- *     </li>
- *     <li>
- *         menu_rapport
- *     </li>
- *     <li>
- *         menu_search
- *     </li>
- *     <li>
- *         menu_settings
- *     </li>
- *     <li>
- *         menu_task
- *     </li>
- * </ul>
- *
- *
- *
- *
- * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <link rel="stylesheet" href="css/style2016.css" type="text/css">
-     <div style="background-color:#EEEEEE">
-         <div style="height:200px">
-             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-                 <li class="logo">
-                 <a href="#" class="no-padding">
-
-                 </a>
-                 </li>
-                 <li it-collapsed-item>
-                 <a href="#/home"><i class="it-icon menu_home"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/search"><i class="it-icon menu_search"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/task"><i class="it-icon menu_task"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/settings"><i class="it-icon menu_settings"></i></a>
-                 </li>
-             </ul>
-         </div>
-         <div >
-             <div class="row-height-10 dashboard-with-footer" style="height:500px;padding-top:100px;position:relative">
-                 <div class="col-xs-12" style="height:185px;margin-top: -185px">
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">14
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Tasks
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">12
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Invoices
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">1
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Capture
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">15
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Scan
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">22
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Image
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-
-                 <div class="row-height-10 dashboard-container-with-footer">
-                 <div class="left-panel row-height-10 col-xs-4">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 LEFT
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 <div class="dashboard-scrollable-content smooth">
-                 left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="middle-panel row-height-10 col-xs-4 ">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 MIDDLE
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 </div>
-                 </div>
-                 </div>
-                 <div class="right-panel row-height-10 col-xs-4 ">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 RIGHT
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="it-button-bar" style="text-align: right">
-                     <button class="btn btn-success it-button-do">
-                     <span class="ng-binding">
-                     Capturer
-                     </span>
-                     </button>
-                     <button class="btn btn-primary it-button-do">
-                     <span class="ng-binding">
-                     Envoyer
-                     </span>
-                     </button>
-                 </div>
-             </div>
-         </div>
-
-         <div style="height:500px;overflow: auto">
-             <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
-             <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
-             <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
-             <table ng-controller="HomeCtrl as $ctrl" class="table-condensed-small table-striped col-md-12"> <thead> <tr class="it-header-tab"> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.TASK_NAME' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.DATE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CATEGORY' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CODE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.DOC_NUMBER' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.NET_AMOUNT' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.TOTAL_AMOUNT' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.SUPPLIER' | translate}} </th> <th class="nowrap text-left excel-style-header"></th> <th class="nowrap text-left excel-style-header"><span class="excel-style-settings"></span></th> </tr> </thead> <tbody class="row-height-10"> <tr ng-repeat="item in $ctrl.invoices" class="it-line" ng-class="{'excel-style-row-selected': $ctrl.selectedLine.id == item.id}" ng-dblclick="$emit('goToCodingForm',{event: $event, invoiceId: $ctrl.selectedLine.invoice.id, attachmentId: $ctrl.selectedLine.attachment.id, taskId: $ctrl.selectedLine.id, taskName: $ctrl.selectedLine.name})"> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-task-name nowrap text-left excel-style-header no-border"> <span class="it-task-invoice-type">{{'TASK.DOCUMENT.TYPE.'+item.invoice.type | translate}}</span>&nbsp;{{$ctrl.taskService.getTranslatedTaskName(item.name)}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-date nowrap text-left excel-style-header no-border"> {{item.invoice.date | date:'dd/MM/yyyy HH:mm'}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-category nowrap text-left excel-style-header no-border"> {{'TASK.DOCUMENT.CATEGORY.'+item.invoice.category | translate}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-itesoft-id nowrap text-left excel-style-header no-border"> {{item.invoice.code}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-doc-number nowrap text-left excel-style-header no-border"> {{item.docNumber}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-net-amount nowrap text-right excel-style-header no-border"> {{item.netAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-total-amount nowrap text-right excel-style-header no-border"> {{item.totalAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-supplier-name nowrap text-left excel-style-header no-border"> {{item.supplierName}} </div> </td> <td colspan="2" ng-click=""> <button class="small-btn btn-primary" title="{{'GLOBAL.BUTTON.FOLLOW_REMOVE' | translate}}"> <i class="fa fa-trash"></i> </button> </td> </tr> </tbody> </table>
-        </div>
-     </div>
-
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-  var self = this; self.selectedLine = {} ; self.invoices = [{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 } ]; self.updateSelectedLine = function (item) { self.selectedLine = item; };
-  }]) ;
- </file>
- </example>
- */
-'use strict';
-
-/**
  * @ngdoc service
  * @name itesoft.service:CurrentErrorsService
  * @module itesoft
@@ -7078,246 +7127,6 @@ itTab.factory('TabService', [function () {
         return self;
     }]);
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-/**
- * Created by vco on 20/06/2016.
- */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPanelForm
- * @module itesoft
- * @restrict E
- * @since 1.2
- * @description
- * The itPanelForm provides dynamic content panel in a form embedded.
- *
- *
- * ```html
- *    <it-panel-form option="option" ></it-panel-form>
- * ```
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
- </div>
- </file>
- <file name="controller.js">
- angular.module('itesoft')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-        $scope.query = "";
-        // require to link directive with scope
-        $scope.options = [
-          {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
-          {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
-          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-          {"title":"titleSelect1", "code": "codeSelect1", "value":
-             [{"code": "code1", "value": "value1"},
-             {"code": "code2", "value": "value2"}],
-          "type":"select"},
-          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
-          {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
-          "type":"textArea"},
-          {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
-          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-        ];
-
-    }
- ]
- );
- </file>
- </example>
- */
-IteSoft.component('itPanelForm', {
-
-    bindings: {
-        options: '=',
-        dateFormat: '@',
-        updateLabel: '@',
-        update: '&'
-    },
-    template: '<div class="it-ac-panel-form">' +
-    '<form name="$ctrl.form" novalidate>' +
-    '<div ng-repeat="option in $ctrl.options">' +
-    '<div class="row">' +
-    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-    '<div ng-switch on="option.type">' +
-    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
-    '</div>' +
-    '<!------------------- Template label ------------------->' +
-    '<script type="text/ng-template" id="labelTemplate.html">' +
-    '<p>{{option.value}}</p>' +
-    '</script>' +
-    '<!------------------- Template input ------------------->' +
-    '<script type="text/ng-template" id="inputTemplate.html">' +
-    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
-    '</script>' +
-    '<!------------------- Template select ------------------->' +
-    '<script type="text/ng-template" id="selectTemplate.html">' +
-    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
-    ' ng-options="value.value for value in option.items"/>' +
-    '</select></p> ' +
-    '</script>' +
-    '<!------------------- Template checkbox ------------------->' +
-    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
-    '</script>' +
-    '<!------------------- Template textArea ------------------->' +
-    '<script type="text/ng-template" id="textAreaTemplate.html">' +
-    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
-    '</script>' +
-    '<!------------------- Template date ------------------->' +
-    '<script type="text/ng-template" id="dateTemplate.html">' +
-    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-    'ng-model="option[\'value\']" data-autoclose="1" ' +
-    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
-    '</script>',
-    controller: ['$scope', function ($scope) {
-
-        //TODO gérer la locale pour l'affichage des dates
-        //Get current locale
-        // var locale = localStorageService.get('Locale');
-
-        var self = this;
-
-        if (self.dateFormat == undefined) {
-            self.dateFormat = "dd/MM/yyyy";
-        }
-
-        if (self.updateLabel == undefined) {
-            self.updateLabel = "Update";
-        }
-
-
-    }]
-
-});
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
 /**
  * Created by sza on 22/04/2016.
  */
@@ -7359,6 +7168,7 @@ IteSoft
  * @name itesoft.directive:itBlock
  * @module itesoft
  * @restrict EAC
+ * @since 1.2
  *
  * @description
  * The Block widgets provides  way to customize UI.
@@ -7518,6 +7328,7 @@ IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, Bl
  * @name itesoft.directive:itBlockControlPanel
  * @module itesoft
  * @restrict E
+ * @since 1.2
  *
  * @description
  * The Control Panel Block widgets provides a way to activate it-block edition
@@ -8447,61 +8258,252 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'itConfig', 'Pilot
     }
 ]);
 
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
+ * Created by vco on 20/06/2016.
+ */
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPanelForm
  * @module itesoft
- * @restrict EA
- * @since 1.0
+ * @restrict E
+ * @since 1.2
  * @description
- * Simple filter that escape string to unicode.
+ * The itPanelForm provides dynamic content panel in a form embedded.
  *
+ *
+ * ```html
+ *    <it-panel-form option="option" ></it-panel-form>
+ * ```
  *
  * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
+ <example module="itesoft">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl" >
+ <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
+ </div>
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+        $scope.query = "";
+        // require to link directive with scope
+        $scope.options = [
+          {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
+          {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+          {"title":"titleSelect1", "code": "codeSelect1", "value":
+             [{"code": "code1", "value": "value1"},
+             {"code": "code2", "value": "value2"}],
+          "type":"select"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
+          {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
+          "type":"textArea"},
+          {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
+          {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+        ];
 
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
+    }
+ ]
+ );
+ </file>
+ </example>
  */
+IteSoft.component('itPanelForm', {
+
+    bindings: {
+        options: '=',
+        dateFormat: '@',
+        updateLabel: '@',
+        update: '&'
+    },
+    template: '<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>' +
+    '<div ng-repeat="option in $ctrl.options">' +
+    '<div class="row">' +
+    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+    '<div ng-switch on="option.type">' +
+    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
+    '</div>' +
+    '<!------------------- Template label ------------------->' +
+    '<script type="text/ng-template" id="labelTemplate.html">' +
+    '<p>{{option.value}}</p>' +
+    '</script>' +
+    '<!------------------- Template input ------------------->' +
+    '<script type="text/ng-template" id="inputTemplate.html">' +
+    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
+    '</script>' +
+    '<!------------------- Template select ------------------->' +
+    '<script type="text/ng-template" id="selectTemplate.html">' +
+    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+    ' ng-options="value.value for value in option.items"/>' +
+    '</select></p> ' +
+    '</script>' +
+    '<!------------------- Template checkbox ------------------->' +
+    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
+    '</script>' +
+    '<!------------------- Template textArea ------------------->' +
+    '<script type="text/ng-template" id="textAreaTemplate.html">' +
+    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
+    '</script>' +
+    '<!------------------- Template date ------------------->' +
+    '<script type="text/ng-template" id="dateTemplate.html">' +
+    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+    'ng-model="option[\'value\']" data-autoclose="1" ' +
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
+    '</script>',
+    controller: ['$scope', function ($scope) {
+
+        //TODO gérer la locale pour l'affichage des dates
+        //Get current locale
+        // var locale = localStorageService.get('Locale');
+
+        var self = this;
+
+        if (self.dateFormat == undefined) {
+            self.dateFormat = "dd/MM/yyyy";
+        }
+
+        if (self.updateLabel == undefined) {
+            self.updateLabel = "Update";
+        }
+
+
+    }]
+
+});
+'use strict';
+
 IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
 
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
+'use strict';
 
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
 
 'use strict';
 /**
  * @ngdoc service
  * @name itesoft.service:itConfig
  * @module itesoft
- * @since 1.1
+ * @since 1.2
  * @requires $location
  *
  * @description
@@ -9958,6 +9960,177 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+/**
+ * Created by SZA on 28/06/2016.
+ */
+
+IteSoft
+    .factory('itStringUtilsService', [function () {
+        return {
+            getLower: _getLower,
+            removeAccent: _removeAccent,
+            clear: _clear,
+            cleanDomRef: {
+                _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+                encode: function (e) {
+                    if (e) {
+                        var t = "";
+                        {
+                        }
+                        var n, r, i, s, o, u, a;
+                        var f = 0;
+                        e = this._utf8_encode(e);
+                        while (f < e.length) {
+                            n = e.charCodeAt(f++);
+                            r = e.charCodeAt(f++);
+                            i = e.charCodeAt(f++);
+                            s = n >> 2;
+                            o = (n & 3) << 4 | r >> 4;
+                            u = (r & 15) << 2 | i >> 6;
+                            a = i & 63;
+                            if (isNaN(r)) {
+                                u = a = 64
+                            } else if (isNaN(i)) {
+                                a = 64
+                            }
+                            t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
+                        }
+                        return t
+                    }
+                },
+                decode: function (e) {
+                    var t = "";
+                    var n, r, i;
+                    var s, o, u, a;
+                    var f = 0;
+                    if (e.replace) {
+                        e = e.replace(/[^A-Za-z0-9+/=]/g, "");
+                        while (f < e.length) {
+                            s = this._keyStr.indexOf(e.charAt(f++));
+                            o = this._keyStr.indexOf(e.charAt(f++));
+                            u = this._keyStr.indexOf(e.charAt(f++));
+                            a = this._keyStr.indexOf(e.charAt(f++));
+                            n = s << 2 | o >> 4;
+                            r = (o & 15) << 4 | u >> 2;
+                            i = (u & 3) << 6 | a;
+                            t = t + String.fromCharCode(n);
+                            if (u != 64) {
+                                t = t + String.fromCharCode(r)
+                            }
+                            if (a != 64) {
+                                t = t + String.fromCharCode(i)
+                            }
+                        }
+                    }
+                    t = this._utf8_decode(t);
+                    return t
+                },
+                _utf8_encode: function (e) {
+                    var t = "";
+                    if (e.replace) {
+                        e = e.replace(/rn/g, "n");
+                        for (var n = 0; n < e.length; n++) {
+                            var r = e.charCodeAt(n);
+                            if (r < 128) {
+                                t += String.fromCharCode(r)
+                            } else if (r > 127 && r < 2048) {
+                                t += String.fromCharCode(r >> 6 | 192);
+                                t += String.fromCharCode(r & 63 | 128)
+                            } else {
+                                t += String.fromCharCode(r >> 12 | 224);
+                                t += String.fromCharCode(r >> 6 & 63 | 128);
+                                t += String.fromCharCode(r & 63 | 128)
+                            }
+                        }
+                    }
+                    return t
+                },
+                _utf8_decode: function (e) {
+                    var t = "";
+                    var n = 0;
+                    var r = c1 = c2 = 0;
+                    while (n < e.length) {
+                        r = e.charCodeAt(n);
+                        if (r < 128) {
+                            t += String.fromCharCode(r);
+                            n++
+                        } else if (r > 191 && r < 224) {
+                            c2 = e.charCodeAt(n + 1);
+                            t += String.fromCharCode((r & 31) << 6 | c2 & 63);
+                            n += 2
+                        } else {
+                            c2 = e.charCodeAt(n + 1);
+                            c3 = e.charCodeAt(n + 2);
+                            t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+                            n += 3
+                        }
+                    }
+                    return t
+                }
+            }
+        };
+
+        /**
+         * Clear content by removing accent and case
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _clear(value) {
+            var result = "";
+            result = _getLower(value);
+            result = _removeAccent(result);
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _getLower(value) {
+            var result = "";
+            if (angular.isDefined(value) && value.toLowerCase) {
+                result += value.toLowerCase();
+            } else {
+                result += value;
+            }
+            return result;
+        }
+
+        /**
+         *
+         * @param value
+         * @returns {string}
+         * @private
+         */
+        function _removeAccent(value) {
+            var diacritics = [
+                {char: 'A', base: /[\300-\306]/g},
+                {char: 'a', base: /[\340-\346]/g},
+                {char: 'E', base: /[\310-\313]/g},
+                {char: 'e', base: /[\350-\353]/g},
+                {char: 'I', base: /[\314-\317]/g},
+                {char: 'i', base: /[\354-\357]/g},
+                {char: 'O', base: /[\322-\330]/g},
+                {char: 'o', base: /[\362-\370]/g},
+                {char: 'U', base: /[\331-\334]/g},
+                {char: 'u', base: /[\371-\374]/g},
+                {char: 'N', base: /[\321]/g},
+                {char: 'n', base: /[\361]/g},
+                {char: 'C', base: /[\307]/g},
+                {char: 'c', base: /[\347]/g}
+            ];
+            var result = value;
+            diacritics.forEach(function (letter) {
+                result = result.replace(letter.base, letter.char);
+            });
+            return result;
+        }
+
+
+    }])
 'use strict';
 /**
  * @ngdoc service
@@ -10247,177 +10420,6 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
         return itPopup;
     }]);
 
-/**
- * Created by SZA on 28/06/2016.
- */
-
-IteSoft
-    .factory('itStringUtilsService', [function () {
-        return {
-            getLower: _getLower,
-            removeAccent: _removeAccent,
-            clear: _clear,
-            cleanDomRef: {
-                _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-                encode: function (e) {
-                    if (e) {
-                        var t = "";
-                        {
-                        }
-                        var n, r, i, s, o, u, a;
-                        var f = 0;
-                        e = this._utf8_encode(e);
-                        while (f < e.length) {
-                            n = e.charCodeAt(f++);
-                            r = e.charCodeAt(f++);
-                            i = e.charCodeAt(f++);
-                            s = n >> 2;
-                            o = (n & 3) << 4 | r >> 4;
-                            u = (r & 15) << 2 | i >> 6;
-                            a = i & 63;
-                            if (isNaN(r)) {
-                                u = a = 64
-                            } else if (isNaN(i)) {
-                                a = 64
-                            }
-                            t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a)
-                        }
-                        return t
-                    }
-                },
-                decode: function (e) {
-                    var t = "";
-                    var n, r, i;
-                    var s, o, u, a;
-                    var f = 0;
-                    if (e.replace) {
-                        e = e.replace(/[^A-Za-z0-9+/=]/g, "");
-                        while (f < e.length) {
-                            s = this._keyStr.indexOf(e.charAt(f++));
-                            o = this._keyStr.indexOf(e.charAt(f++));
-                            u = this._keyStr.indexOf(e.charAt(f++));
-                            a = this._keyStr.indexOf(e.charAt(f++));
-                            n = s << 2 | o >> 4;
-                            r = (o & 15) << 4 | u >> 2;
-                            i = (u & 3) << 6 | a;
-                            t = t + String.fromCharCode(n);
-                            if (u != 64) {
-                                t = t + String.fromCharCode(r)
-                            }
-                            if (a != 64) {
-                                t = t + String.fromCharCode(i)
-                            }
-                        }
-                    }
-                    t = this._utf8_decode(t);
-                    return t
-                },
-                _utf8_encode: function (e) {
-                    var t = "";
-                    if (e.replace) {
-                        e = e.replace(/rn/g, "n");
-                        for (var n = 0; n < e.length; n++) {
-                            var r = e.charCodeAt(n);
-                            if (r < 128) {
-                                t += String.fromCharCode(r)
-                            } else if (r > 127 && r < 2048) {
-                                t += String.fromCharCode(r >> 6 | 192);
-                                t += String.fromCharCode(r & 63 | 128)
-                            } else {
-                                t += String.fromCharCode(r >> 12 | 224);
-                                t += String.fromCharCode(r >> 6 & 63 | 128);
-                                t += String.fromCharCode(r & 63 | 128)
-                            }
-                        }
-                    }
-                    return t
-                },
-                _utf8_decode: function (e) {
-                    var t = "";
-                    var n = 0;
-                    var r = c1 = c2 = 0;
-                    while (n < e.length) {
-                        r = e.charCodeAt(n);
-                        if (r < 128) {
-                            t += String.fromCharCode(r);
-                            n++
-                        } else if (r > 191 && r < 224) {
-                            c2 = e.charCodeAt(n + 1);
-                            t += String.fromCharCode((r & 31) << 6 | c2 & 63);
-                            n += 2
-                        } else {
-                            c2 = e.charCodeAt(n + 1);
-                            c3 = e.charCodeAt(n + 2);
-                            t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
-                            n += 3
-                        }
-                    }
-                    return t
-                }
-            }
-        };
-
-        /**
-         * Clear content by removing accent and case
-         * @param value
-         * @returns {string}
-         * @private
-         */
-        function _clear(value) {
-            var result = "";
-            result = _getLower(value);
-            result = _removeAccent(result);
-            return result;
-        }
-
-        /**
-         *
-         * @param value
-         * @returns {string}
-         * @private
-         */
-        function _getLower(value) {
-            var result = "";
-            if (angular.isDefined(value) && value.toLowerCase) {
-                result += value.toLowerCase();
-            } else {
-                result += value;
-            }
-            return result;
-        }
-
-        /**
-         *
-         * @param value
-         * @returns {string}
-         * @private
-         */
-        function _removeAccent(value) {
-            var diacritics = [
-                {char: 'A', base: /[\300-\306]/g},
-                {char: 'a', base: /[\340-\346]/g},
-                {char: 'E', base: /[\310-\313]/g},
-                {char: 'e', base: /[\350-\353]/g},
-                {char: 'I', base: /[\314-\317]/g},
-                {char: 'i', base: /[\354-\357]/g},
-                {char: 'O', base: /[\322-\330]/g},
-                {char: 'o', base: /[\362-\370]/g},
-                {char: 'U', base: /[\331-\334]/g},
-                {char: 'u', base: /[\371-\374]/g},
-                {char: 'N', base: /[\321]/g},
-                {char: 'n', base: /[\361]/g},
-                {char: 'C', base: /[\307]/g},
-                {char: 'c', base: /[\347]/g}
-            ];
-            var result = value;
-            diacritics.forEach(function (letter) {
-                result = result.replace(letter.base, letter.char);
-            });
-            return result;
-        }
-
-
-    }])
 
 'use strict';
 
@@ -10426,7 +10428,7 @@ IteSoft
  * @name dependencies.directive:ui-layout
  * @module dependencies
  * @restrict AE
- * @since 1.0
+ * @since 1.2
  * @description
  * This directive allows you to split
  * See more :  {@link https://github.com/angular-ui/ui-layout}
@@ -11683,196 +11685,6 @@ itMultiPagesViewer.factory('TranslateViewer', ['$translate', function($translate
 
 'use strict';
 /**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
-
-        function ThumbnailPage(page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages;
-            var self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
-                pageList[iPage] = page;
-
-                //this.addPage(page);
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        return (ThumbnailViewer);
-    }]);
-
-'use strict';
-/**
  * TODO CustomStyle desc
  */
 itPdfViewer.factory('CustomStyle', [function () {
@@ -12703,6 +12515,196 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
         };
 
         return (TextLayerBuilder);
+    }]);
+
+'use strict';
+/**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages;
+            var self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                pageList[iPage] = page;
+
+                //this.addPage(page);
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        return (ThumbnailViewer);
     }]);
 
 'use strict';
