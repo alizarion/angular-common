@@ -5,9 +5,9 @@
 itTiffViewer
     .factory('TIFFPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
-        function TIFFPage(pageIndex, getSrc, view) {
+        function TIFFPage(viewer, pageIndex, getSrc, view) {
             this.base = MultiPagesPage;
-            this.base(pageIndex, view);
+            this.base(viewer, pageIndex, view);
 
             this.getSrc = getSrc;
         }
@@ -15,7 +15,15 @@ itTiffViewer
         TIFFPage.prototype = new MultiPagesPage;
 
         TIFFPage.prototype.renderPage = function (page, callback) {
-            var self = this; 
+            var self = this;
+            /*if(this.rendered) {
+             if(callback) {
+             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+             }
+             return;
+             };
+
+             this.rendered = true;*/
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
@@ -144,19 +152,18 @@ itTiffViewer
         TIFFViewer.prototype.getAllPages = function(callback) {
             var pageList = [],
                 numPages = this.tiff.countDirectory(),
-                remainingPages = numPages;
-            var self = this;
+                remainingPages = numPages,
+                self = this;
+
             function _getUrl(index) {
                 self.tiff.setDirectory(index);
                 return self.tiff.toDataURL();
             };
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
-                this.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(iPage, _getUrl, [0,0, this.tiff.width(), this.tiff.height()]);
+                self.tiff.setDirectory(iPage);
+                var page =  new TIFFPage(self, iPage, _getUrl, [0,0, self.tiff.width(), self.tiff.height()]);
                 pageList[iPage] = page;
-
-                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {

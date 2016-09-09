@@ -5,9 +5,9 @@
 itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
-        function IMAGEPage(pageIndex, img, view) {
+        function IMAGEPage(viewer, pageIndex, img, view) {
             this.base = MultiPagesPage;
-            this.base(pageIndex, view);
+            this.base(viewer, pageIndex, view);
             this.img = img;
         }
 
@@ -16,13 +16,13 @@ itImageViewer
         IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
             /*if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
+             if(callback) {
+             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+             }
+             return;
+             };
 
-            this.rendered = true;*/
+             this.rendered = true;*/
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
@@ -71,7 +71,6 @@ itImageViewer
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
                     self.addPages();
-                    //self.setContainerSize(self.initialScale);
                 });
             }
         };
@@ -84,7 +83,6 @@ itImageViewer
                     self.getAllPages(url, function(pageList) {
                         self.pages = pageList;
                         self.addPages();
-                        //self.setContainerSize(self.initialScale);
                     });
                 };
 
@@ -130,7 +128,7 @@ itImageViewer
             var img = new Image;
             img.onprogress = angular.bind(this, self.downloadProgress);
             img.onload = function() {
-                var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
+                var page =  new IMAGEPage(self, 0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
 
                 //self.addPage(page);

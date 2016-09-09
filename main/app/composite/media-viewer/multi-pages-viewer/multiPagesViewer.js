@@ -2,7 +2,7 @@
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', '$document' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, $document, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
     function getElementInnerSize(element, margin) {
         var tallTempElement = angular.element("<div></div>");
         tallTempElement.css("height", "10000px");
@@ -26,7 +26,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
             width: w,
             height: h
         };
-    }
+    };
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
@@ -48,11 +48,121 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         this.onPageRendered = null;
         this.onDataDownloaded = null;
         this.onCurrentPageChanged = null;
+
+        if(element != null) {
+            this.toggleMouseDrag();
+        }
     }
 
     MultiPagesViewer.prototype = {
+        toggleMouseDrag : function() {
+            var element = this.element;
+            var container = element[0];
+            var data = {
+                acceptPropagatedEvent : true,
+                preventDefault : true
+            };
+            var onMouseDown = function (event) {
+                    if(event.ctrlKey != true) {
+                        element.css("cursor", "-webkit-grabbing");
+                        element.css("cursor", "grabbing");
+                        // mousedown, left click, check propagation
+                        if (event.which!=1 ||
+                            (!data.acceptPropagatedEvent && event.target != this)){
+                            return false;
+                        }
+
+                        // Initial coordinates will be the last when dragging
+                        data.lastCoord = {left: event.clientX, top: event.clientY};
+
+                        $document.on('mouseup', onMouseUp);
+                        $document.on('mousemove', onMouseMove);
+                        if (data.preventDefault) {
+                            event.preventDefault();
+                            return false;
+                        }
+                    }
+                },
+                onMouseMove = function (event) {
+                    // How much did the mouse move?
+                    var delta = {left: (event.clientX - data.lastCoord.left),
+                        top: (event.clientY - data.lastCoord.top)};
+
+                    // Set the scroll position relative to what ever the scroll is now
+                    container.scrollLeft = container.scrollLeft - delta.left;
+                    container.scrollTop = container.scrollTop - delta.top;
+
+                    // Save where the cursor is
+                    data.lastCoord={left: event.clientX, top: event.clientY};
+                    if (data.preventDefault) {
+                        event.preventDefault();
+                        return false;
+                    }
+                },
+                onMouseUp = function (event) {
+                    $document.off('mouseup', onMouseUp);
+                    $document.off('mousemove', onMouseMove);
+                    element.css("cursor", "-webkit-grab");
+                    element.css("cursor", "grab");
+                    if (data.preventDefault) {
+                        event.preventDefault();
+                        return false;
+                    }
+                };
+
+            element.on('mousedown', onMouseDown);
+            element.css("cursor", "-webkit-grab");
+            element.css("cursor", "grab");
+
+            this.cleanUp = function () {
+                element.off('mousedown', onMouseDown);
+            };
+        },
         getAPI: function () {
             return this.api;
+        },
+        zoomTo : function(zoomSelection) {
+            var page = this.pages[zoomSelection.pageIndex];
+            if(page != undefined) {
+                var rect = {
+                    width : (page.viewport.width * zoomSelection.percentWidth) / 100,
+                    height : (page.viewport.height * zoomSelection.percentHeight) / 100
+                };
+                var containerSize = {
+                    width: this.containerSize.width * this.scaleItem.value,
+                    height: this.containerSize.height * this.scaleItem.value
+                };
+
+                var mainProperty = rect.width > rect.height ? "width" : "height";
+                var numZoomLevels = this.zoomLevels.length;
+                for (var i = 0; i < numZoomLevels; ++i) {
+                    var zoomLevel = this.zoomLevels[i];
+                    var nextZoomLevel = this.zoomLevels[i + 1];
+
+                    var rectValue = rect[mainProperty];
+
+                    if ((nextZoomLevel == null || (zoomLevel.value * rectValue) <= containerSize[mainProperty] && (nextZoomLevel.value * rectValue) >= containerSize[mainProperty])) {
+                        if(this.scaleItem.value != zoomLevel.value) {
+                            this.setScale(zoomLevel);
+                        }
+
+                        var scrollTop = ((page.viewport.height * zoomSelection.percentTop) / 100) + page.container[0].offsetTop;
+                        var scrollLeft = ((page.viewport.width * zoomSelection.percentLeft) / 100) + page.container[0].offsetLeft;
+
+                        this.element[0].scrollTop = scrollTop;
+                        this.element[0].scrollLeft = scrollLeft;
+
+                        if(zoomSelection.pageIndex === 0) {
+                            this.renderAllVisiblePages();
+                        }
+
+                        if(this.api.onZoomToSelection) {
+                            this.api.onZoomToSelection(zoomSelection);
+                        }
+                        break;
+                    }
+                }
+            }
         },
         addPages : function () {
             // Append all page containers to the $element...
@@ -81,7 +191,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                 var containerSize = getElementInnerSize(this.element, this.pageMargin);
                 if(containerSize.width > 0 && containerSize.height > 0) {
                     if(this.onContainerSizeChanged) {
-                       this.onContainerSizeChanged(containerSize);
+                        this.onContainerSizeChanged(containerSize);
                     }
                     this.containerSize = containerSize;
 
@@ -98,35 +208,35 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                         var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
                         var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
                         if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                           scaleItem = this.updateScaleItem({
-                               id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                               value : this.fitWidthScale,
-                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
-                           });
-                       }
+                            scaleItem = this.updateScaleItem({
+                                id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                                value : this.fitWidthScale,
+                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
+                            });
+                        }
 
-                       if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                           scaleItem = this.updateScaleItem({
-                               id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                               value : this.fitHeightScale,
-                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
-                           });
-                       }
+                        if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                            scaleItem = this.updateScaleItem({
+                                id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                                value : this.fitHeightScale,
+                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
+                            });
+                        }
 
-                       if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                           scaleItem = this.updateScaleItem({
-                               id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                               value : this.fitPageScale,
-                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
-                           });
-                       }
+                        if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                            scaleItem = this.updateScaleItem({
+                                id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                                value : this.fitPageScale,
+                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
+                            });
+                        }
 
-                       var label = (newScale * 100.0).toFixed(0) + "%";
-                       scaleItem = this.updateScaleItem({
-                           id: label,
-                           value : newScale,
-                           label: label
-                       });
+                        var label = (newScale * 100.0).toFixed(0) + "%";
+                        scaleItem = this.updateScaleItem({
+                            id: label,
+                            value : newScale,
+                            label: label
+                        });
                     }
 
                     if (this.scaleItem == undefined && initialScale) {
@@ -147,6 +257,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                     }
 
                     this.setScale(this.scaleItem);
+                    this.render();
                 }
             }
         },
@@ -157,6 +268,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
             this.orientation = orientation;
             if(this.hasMultiplePages()) {
                 this.setScale(this.scaleItem);
+                this.render();
             }
         },
         setScale: function (scaleItem) {
@@ -169,12 +281,9 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
 
             for(var iPage = 0;iPage < numPages;++iPage) {
                 var page = this.pages[iPage];
-                page.setOrientation(this.orientation);
                 // Resize to current scaleItem...
                 page.resize(sci.value);
             }
-
-            this.render();
         },
         calcScale: function (desiredScale) {
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
@@ -254,13 +363,13 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                         if(currentPageID === -1) {
                             if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
                                 var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
-                                var pageCenter = pageContainer.offsetWidth / 2;
+                                var pageCenter = pageContainer.offsetWidth / 1.5;
                                 if((pageCenter + pageLeft) >= 0) {
                                     currentPageID = iPage;
                                 }
                             } else {
                                 var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                                var pageCenter = pageContainer.offsetHeight / 2;
+                                var pageCenter = pageContainer.offsetHeight / 1.5;
                                 if((pageCenter + pageTop) >= 0) {
                                     currentPageID = iPage;
                                 }
@@ -324,7 +433,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
         },
         render: function () {
             if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.currentPage);
+                this.api.goToPage(this.api.getSelectedPage());
             }else{
                 this.renderAllVisiblePages();
             }
@@ -393,11 +502,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                  if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
-                  scope.sizeWatcherTimeout = $timeout(function() {
-                       $log.debug("SizeChanged");
-                       self.setContainerSize(self.initialScale);
-                  }, 450);
+                if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
+                scope.sizeWatcherTimeout = $timeout(function() {
+                    $log.debug("SizeChanged");
+                    self.setContainerSize(self.initialScale);
+                }, 450);
             });
 
             scope.$watch("options.orientation", function (value) {
@@ -431,16 +540,6 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' ,
                             $log.debug("Something went really bad!\n\n" + message);
                         }
                     }
-                }
-            };
-
-            scope.onPageClicked = function(pageIndex) {
-                self.selectedPage = pageIndex;
-                if(self.onPageClicked) {
-                    self.onPageClicked(pageIndex);
-                }
-                if(self.api.onPageClicked) {
-                    self.api.onPageClicked(pageIndex);
                 }
             };
 

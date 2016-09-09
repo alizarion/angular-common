@@ -21,9 +21,9 @@ itMultiPagesViewer
 
     .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
-        function ThumbnailPage(page, showNumPages) {
+        function ThumbnailPage(viewer, page, showNumPages) {
             this.base = MultiPagesPage;
-            this.base(page.pageIndex, page.view);
+            this.base(viewer, page.pageIndex, page.view);
 
             if(showNumPages) {
                 this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
@@ -72,7 +72,7 @@ itMultiPagesViewer
                 if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
                     this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
                 } else {
-                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
                 }
 
                 this.getAllPages(function(pageList) {
@@ -85,14 +85,12 @@ itMultiPagesViewer
         ThumbnailViewer.prototype.getAllPages = function(callback) {
             var pageList = [],
                 numPages = this.viewer.pages.length,
-                remainingPages = numPages;
-            var self = this;
+                remainingPages = numPages,
+                self = this;
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
-                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
+                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
                 pageList[iPage] = page;
-
-                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {
@@ -119,6 +117,10 @@ itMultiPagesViewer
                 this.viewer.thumbnail = null;
                 self.viewer = null;
             }
+        };
+
+        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
+            this.viewer.zoomTo(zoomSelection);
         };
 
         return (ThumbnailViewer);

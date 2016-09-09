@@ -18,10 +18,14 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         zoomTo: function (scaleItem) {
             if(scaleItem != undefined) {
                 this.viewer.setScale(scaleItem);
+                this.viewer.render();
             }
         },
         getZoomLevel: function () {
             return this.viewer.scaleItem;
+        },
+        zoomToSelection: function (zoomSelection) {
+            this.viewer.zoomTo(zoomSelection);
         },
         zoomIn: function() {
             var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
@@ -57,12 +61,14 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                     offsetLeft -= 1;
                 }
                 element.scrollLeft = offsetLeft;
+                element.scrollTop = 0;
             } else {
                 var offsetTop = pageContainer.offsetTop - 10;
                 if(Math.round(element.scrollTop) === offsetTop){
                     offsetTop -= 1;
                 }
                 element.scrollTop = offsetTop;
+                element.scrollLeft = 0;
             }
         },
         goToNextPage: function () {
@@ -88,9 +94,6 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         },
         rotatePage: function(args) {
             this.viewer.rotate(args);
-            if(this.onPageRotation) {
-                this.onPageRotation(args);
-            }
         }
     };
 
