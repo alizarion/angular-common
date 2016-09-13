@@ -80,7 +80,7 @@ IteSoft.component('itPanelForm',{
         '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
         '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
         '</div>'+
-        '<!------------------- Template label ------------------->'+
+        '<!------------------- Template label  ------------------->'+
         '<script type="text/ng-template" id="labelTemplate.html">' +
         '<p>{{option.value}}</p>'+
         '</script>'+
