@@ -51,8 +51,7 @@
  </file>
  </example>
  */
-IteSoft.component('itPanelForm',{
-
+IteSoft.component('itPanelForm', {
         bindings:{
             options:'=',
             dateFormat:'@',
@@ -112,19 +111,20 @@ IteSoft.component('itPanelForm',{
 
             var self = this;
 
-            if(self.dateFormat == undefined){
-                self.dateFormat = "dd/MM/yyyy";
-            }
 
-            if(self.updateLabel == undefined){
-                self.updateLabel = "Update";
-            }
+        if (self.dateFormat == undefined) {
+            self.dateFormat = "dd/MM/yyyy";
+        }
+
+        if (self.updateLabel == undefined) {
+            self.updateLabel = "Update";
+        }
 
             if(self.cancelLabel == undefined){
                 self.cancelLabel = "Cancel";
             }
 
 
-        }]
+    }]
 
 });

@@ -4,6 +4,7 @@
  * @name itesoft.directive:itBlockControlPanel
  * @module itesoft
  * @restrict E
+ * @since 1.2
  *
  * @description
  * The Control Panel Block widgets provides a way to activate it-block edition
@@ -36,21 +37,30 @@
  <it-block-control-panel></it-block-control-panel>
  </div>
  </file>
- <file name="Module.js">
+ <file name="config.json">
 
- angular.module('itesoft-showcase',['ngResource','itesoft'])
- .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8082",
-                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": false,
-                "SKIP_LOGIN" : true,
-                "CURRENT_PACKAGE" : "10-PS",
-                "VERSION": "v1",
-            })
+ {
+       "CONFIG":{
+       "REST_TEMPLATE_API_URL": "http://localhost:8082",
+       "TEMPLATE_USER_AUTO_LOGIN": {"login": "admin", "password": "admin"},
+       "ENABLE_TEMPLATE_EDITOR": true,
+       "SKIP_LOGIN" : true,
+       "CURRENT_PACKAGE" : "10-PS",
+       "CURRENT_ROLE" : "PS",
+       "VERSION": "v1"
+       }
+ }
  </file>
-
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
+ angular.module('itesoft-showcase',['itesoft','ngResource']).config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CONFIG');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).run(['itConfig', function (itConfig) {
+	    //initialize itConfig
+        itConfig.initialize();
+    }]).controller('HomeCtrl',
  ['$scope','$rootScope',
  function($scope,$rootScope) {$rootScope.editSite=true;}]);
  </file>
@@ -63,9 +73,9 @@ IteSoft.directive('itBlockControlPanel',
                 restrict: 'EA',
                 scope: true,
                 //language=html
-                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
+                template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.itConfig.get().ENABLE_TEMPLATE_EDITOR">' +
                 '    <div class="col-xs-12"/>' +
-                '    <div class="block-lists">        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"             aria-label="Left Align">            <span class="fa fa-exclamation" aria-hidden="true"></span>            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|                translate}}</a>        </div>' +
+                '    <div class="block-lists">        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"             aria-label="Left Align">            <span class="fa fa-exclamation" aria-hidden="true"></span>            <a target="_blank" ng-href="{{itConfig.get().TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|                translate}}</a>        </div>' +
                 '<div class="row" style="margin-bottom: 10px;">' +
                 '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl                and move your mouse over a block)            </div>' +
                 '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release                Ctrl over an element to select it)            </div>' +
@@ -113,16 +123,16 @@ IteSoft.directive('itBlockControlPanel',
 
                 controllerAs: 'itBlockControlPanelController',
                 controller: ['$scope', '$rootScope', '$location', '$log', '$document', '$filter',
-                    'BlockService', 'PilotSiteSideService', 'PilotService', 'CONFIG', 'itPopup', 'itNotifier',
+                    'BlockService', 'PilotSiteSideService', 'PilotService', 'itConfig', 'itPopup', 'itNotifier',
                     function ($scope, $rootScope, $location, $log, $document, $filter,
-                              BlockService, PilotSiteSideService, PilotService, CONFIG, itPopup, itNotifier) {
+                              BlockService, PilotSiteSideService, PilotService, itConfig, itPopup, itNotifier) {
                         var self = this;
-                        if (CONFIG.ENABLE_TEMPLATE_EDITOR) {
+                        if (itConfig.get().ENABLE_TEMPLATE_EDITOR) {
                             self.editorIsOpen = false;
-                            self.CONFIG = CONFIG;
+                            self.itConfig = itConfig;
                             self.blocks = [];
                             self.availableBlocks = [];
-                            self.url = CONFIG.REST_TEMPLATE_API_URL + '/api/rest/export/' + CONFIG.CURRENT_PACKAGE;
+                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/export/' + itConfig.get().CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
@@ -237,7 +247,7 @@ IteSoft.directive('itBlockControlPanel',
                             /**
                              * Init
                              */
-                            self.init = function(){
+                            self.init = function () {
                                 self.blocks = [];
                                 self.clearStyle();
                                 self.hilightedBlock = undefined;
@@ -290,7 +300,7 @@ IteSoft.directive('itBlockControlPanel',
                                 PilotSiteSideService.fn.editBlock(block, $location.path());
 
                             } else {
-                                var replaceBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, CONFIG.CURRENT_ROLE, 1);
+                                var replaceBlock = BlockService.new(itConfig.get().CURRENT_PACKAGE + '_replace' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'replace', block.content, itConfig.get().CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(replaceBlock, $location.path());
                             }
                         };
@@ -302,7 +312,7 @@ IteSoft.directive('itBlockControlPanel',
                         self.addBlock = function (block) {
                             if (angular.isDefined(block.name) && block.name != '') {
                                 $log.debug("add block");
-                                var addBlock = BlockService.new(CONFIG.CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', CONFIG.CURRENT_ROLE, 1);
+                                var addBlock = BlockService.new(itConfig.get().CURRENT_PACKAGE + '_new_' + block.name + "_" + $filter('date')(new Date(), "yyyyMMddHHmmss"), block.name, 'before', '', itConfig.get().CURRENT_ROLE, 1);
                                 PilotSiteSideService.fn.createBlock(addBlock, $location.path());
                             }
                         };
@@ -427,14 +437,14 @@ IteSoft.directive('itBlockControlPanel',
                             for (var name in self.availableBlocks) {
                                 var element = self.availableBlocks[name].element;
 
-                                if(angular.isDefined(element)) {
+                                if (angular.isDefined(element)) {
 
                                     element.removeClass("block-removed");
                                     element.removeClass("block-hilight");
                                     element.css('display', '');
 
                                     if ($rootScope.editSite) {
-                                        element.children().attr("disabled",false);
+                                        element.children().attr("disabled", false);
                                     }
 
                                     if (self.availableBlocks[name].removed) {
@@ -481,7 +491,7 @@ IteSoft.directive('itBlockControlPanel',
                          * @private
                          */
                         function _options() {
-                            PilotSiteSideService.fn.options({currentPackage: CONFIG.CURRENT_PACKAGE});
+                            PilotSiteSideService.fn.options({currentPackage: itConfig.get().CURRENT_PACKAGE});
                         }
 
                     }

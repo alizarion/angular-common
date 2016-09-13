@@ -2,7 +2,10 @@
 /**
  * TODO ScriptService desc
  */
-IteSoft.factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
+
+
+angular.module('itesoft.viewer')
+    .factory('itScriptService', ['$log' , '$window' , '$q', function($log, $window, $q){
     var _scipts = {};
     var _css = {};
     var defaultScriptPromise = $q.defer();

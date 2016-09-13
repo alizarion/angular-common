@@ -34,7 +34,7 @@ var chmod = require('gulp-chmod');
  * Execute les actions de build dans l'ordre
  */
 gulp.task('build', function(callback) {
-    runSequence('clean','sass','less',
+    runSequence('clean','sass','copy-sass','less',
         'css',
         ['uglify','uglify-debug','vendor','html','assets','fonts','demo-js', 'copy-rename-files'],
         callback);
@@ -64,18 +64,24 @@ gulp.task('clean', function () {
 });
 
 /**
+ * Dépose les fichiers SCSS dans le répertoire /main/assets/css
+ */
+gulp.task('copy-sass', function(done) {
+    gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
+        .on('end', done);
+});
+
+/**
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
 gulp.task('sass', function(done) {
     gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
-        .pipe(gulp.dest(buildConfig.distFolder + '/assets/scss'))
         .pipe(sass({
             errLogToConsole: true
         }))
         .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css'))
         .on('end', done);
-
-
 });
 
 /**
@@ -191,8 +197,15 @@ gulp.task('docs', function () {
     gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest(buildConfig.docFolder));
+    gulp.src(buildConfig.srcFolder + '/assets/css/style2016/style2016.css')
+        .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
+    gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/fonts/'));
+    gulp.src(buildConfig.srcFolder + '/assets/img/**/*')
+        .pipe(gulp.dest(buildConfig.docFolder +'/img/'));
     return  gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
         .pipe(gulp.dest(buildConfig.docFolder +'/css/' + buildConfig.distFolder +'/assets/fonts'));
+
 });
 
 /**
@@ -254,7 +267,7 @@ gulp.task('assets', function() {
 
 
 
-gulp.task('deploy',['test','e2e'], function() {
+gulp.task('deploy',['test'], function() {
     return gulp.src(['!./node_modules/**/*','!' + buildConfig.srcFolder +'/**/*','!' +
         buildConfig.testFolder +'/**/*','!./*','./**/*'])
         .pipe(ghPages());

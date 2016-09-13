@@ -1,9 +1,9 @@
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itBlock
  * @module itesoft
- * @restrict E
+ * @restrict EAC
+ * @since 1.2
  *
  * @description
  * The Block widgets provides  way to customize UI.
@@ -80,20 +80,30 @@
  </it-block>
  </div>
  </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft','ngResource'])
- .constant("CONFIG", {
-                "REST_TEMPLATE_API_URL": "http://localhost:8082",
-                "TEMPLATE_USER_AUTO_LOGIN": {login: "admin", password: "admin"},
-                "ENABLE_TEMPLATE_EDITOR": true,
-                "SKIP_LOGIN" : true,
-                "CURRENT_PACKAGE" : "10-PS",
-                "CURRENT_ROLE" : "PS",
-                "VERSION": "v1",
-                });
+ <file name="config.json">
+
+ {
+       "CONFIG":{
+       "REST_TEMPLATE_API_URL": "http://localhost:8082",
+       "TEMPLATE_USER_AUTO_LOGIN": {"login": "admin", "password": "admin"},
+       "ENABLE_TEMPLATE_EDITOR": true,
+       "SKIP_LOGIN" : true,
+       "CURRENT_PACKAGE" : "10-PS",
+       "CURRENT_ROLE" : "PS",
+       "VERSION": "v1"
+       }
+ }
  </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl',
+ angular.module('itesoft-showcase',['itesoft','ngResource']).config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CONFIG');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).run(['itConfig', function (itConfig) {
+	    //initialize itConfig
+        itConfig.initialize();
+    }]).controller('HomeCtrl',
  ['$scope','$rootScope','$http','uiGridGroupingConstants',
  function($scope,$rootScope,$http,uiGridGroupingConstants) {
                        $rootScope.editSite = true;
@@ -135,6 +145,7 @@
  </file>
  </example>
  */
+'use strict';
 IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, BlockService) {
         return {
             restrict: 'EAC',
