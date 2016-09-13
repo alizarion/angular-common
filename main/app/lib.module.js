@@ -4,16 +4,16 @@
 
 var itMultiPagesViewer = angular.module('it-multi-pages-viewer', []);
 
-var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer']);
+var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer', 'ui.layout']);
 
-var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer']);
+var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'ui.layout']);
 
 var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']); 
 
 var IteSoft = angular.module('itesoft', [
     'ngSanitize',
     'ui.bootstrap.tabs',
-    'ui.bootstrap.modal',
+    'itesoft.popup',
     'ui.bootstrap.tpls',
     'ngAnimate',
     'matchMedia',
@@ -35,5 +35,6 @@ var IteSoft = angular.module('itesoft', [
     'it-pdf-viewer',
     'it-image-viewer',
     'it-tiff-viewer',
-    'ngWebSocket'
+    'itesoft.messaging',
+    'itesoft.language'
 ]);

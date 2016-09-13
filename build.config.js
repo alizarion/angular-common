@@ -18,16 +18,17 @@ module.exports = {
 
     closureStart: '(function() {\n',
     closureEnd: '\n})();',
+    distFolder:'dist',
+    srcFolder: 'main',
+    testFolder: 'test',
+    docFolder : 'docs',
 
     /**
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.
      */
     appFiles: [
-        '!main/app/**/*Test.js', // Exclude test files
-
         'main/app/app.module.js',
         'main/app/**/*.js'
-
     ],
     /**
      * Liste des librairies minifié à utiliser en prod
@@ -47,7 +48,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/display/fullscreen.css',
         'main/assets/lib/codemirror/addon/fold/foldgutter.css',
         'main/assets/lib/codemirror/addon/lint/lint.css',
-        'main/assets/lib/codemirror/addon/hint/show-hint.css'
+        'main/assets/lib/codemirror/addon/hint/show-hint.css',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.css'
 
     ],
 
@@ -119,7 +121,8 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
-        'main/assets/lib/angular-websocket/dist/angular-websocket.min.js'
+        'main/assets/lib/angular-websocket/dist/angular-websocket.min.js',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -172,8 +175,21 @@ module.exports = {
         'main/assets/lib/codemirror/addon/hint/html-hint.js',
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
-        'main/assets/lib/angular-websocket/dist/angular-websocket.js'
+        'main/assets/lib/angular-websocket/dist/angular-websocket.js',
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
+
+    excludeFromAppDist: {
+
+        unitTest: [
+            'test/unit/**/*.js'
+        ],
+        e2e: [
+            'test/e2e/**/*.js'
+        ],
+        unminifiedDistFiles: [
+        ]
+    },
 
     fileToCopyAndRename:
     [

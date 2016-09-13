@@ -64,28 +64,48 @@ IteSoft.directive('itBlockControlPanel',
                 scope: true,
                 //language=html
                 template: '<div class="block-control-panel col-xs-12" ng-if="itBlockControlPanelController.CONFIG.ENABLE_TEMPLATE_EDITOR">' +
-                '\n    <div class="col-xs-12"/>' +
-                '\n    <div class="block-lists">\n        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"\n             aria-label="Left Align">\n            <span class="fa fa-exclamation" aria-hidden="true"></span>\n            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|\n                translate}}</a>\n        </div>' +
-                '<div class="row" style="margin-bottom: 10px;">'+
-                '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl\n                and move your mouse over a block)\n            </div>' +
-                '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release\n                Ctrl over an element to select it)\n            </div>' +
+                '    <div class="col-xs-12"/>' +
+                '    <div class="block-lists">        <div class=" btn btn-danger offline-editor" ng-if="!itBlockControlPanelController.editorIsOpen"             aria-label="Left Align">            <span class="fa fa-exclamation" aria-hidden="true"></span>            <a target="_blank" ng-href="{{CONFIG.TEMPLATE_EDITOR_URL}}">{{\'GLOBAL.TEMPLATE.BLOCK.OPEN_EDITOR\'|                translate}}</a>        </div>' +
+                '<div class="row" style="margin-bottom: 10px;">' +
+                '        <div ng-if="!itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Press Ctrl                and move your mouse over a block)            </div>' +
+                '        <div ng-if="itBlockControlPanelController.focusable" class="col-xs-12 block-control-panel-help">(Release                Ctrl over an element to select it)            </div>' +
                 '    </div>' +
-                '<div>'+
-                '<it-circular-btn ng-if="!$root.editSite" ng-click="$root.editSite=true"><i class="fa fa-pencil"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.editSite" ng-click="$root.editSite=false"><i class="fa fa-eye"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()"><i class="fa fa-refresh"></i>\n            </it-circular-btn>' +
-                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false"><i\n                    class="fa fa-stop"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true"><i\n                    class="fa fa-play"></i></it-circular-btn>' +
-                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank"><i\n                    class="fa fa-floppy-o"></i></a></it-circular-btn>' +
-                '</div>'+
-                '<div ng-if="$root.editSite" ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'"\n             ng-mouseover="itBlockControlPanelController.hilightBlock(block)"' +
+                '<div>' +
+                '<it-circular-btn ng-if="!$root.editSite" ng-click="itBlockControlPanelController.editSite()">' +
+                '   <i class="fa fa-pencil"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.editSite" ng-click="itBlockControlPanelController.viewSite()">' +
+                '   <i class="fa fa-eye"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.refresh()">' +
+                '   <i class="fa fa-refresh"></i>            ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=false">' +
+                '   <i class="fa fa-stop"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="!$root.autoRefreshTemplate" ng-click="$root.autoRefreshTemplate=true">' +
+                '   <i class="fa fa-play"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn><a ng-href="{{itBlockControlPanelController.url}}" target="_blank">' +
+                '<i class="fa fa-floppy-o"></i>' +
+                '</a></it-circular-btn>' +
+                '</div>' +
+                '<div  ng-repeat="block in itBlockControlPanelController.blocks | orderBy:\'-name\'" ng-mouseover="itBlockControlPanelController.hilightBlock(block)" ng-mouseleave="itBlockControlPanelController.unHilightBlock(block)"' +
                 ' class="{{itBlockControlPanelController.getClass(block)}}">' +
                 '<div class="block-lists-name">{{block.name}}</div>' +
                 '<div class="block-lists-action">' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)"><i class="fa fa-plus "></i>\n                </it-circular-btn>' +
-                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)"><i class="fa fa-pencil"></i>\n                </it-circular-btn>' +
-                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)"><i\n                        class="fa fa-eye"></i></it-circular-btn>' +
-                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)"><i\n                        class="fa fa-eye-slash block-btn"></i></it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.addBlock(block)">' +
+                '   <i class="fa fa-plus "></i> ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-click="itBlockControlPanelController.editBlock(block)">' +
+                '   <i class="fa fa-pencil"></i> ' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="block.removed" ng-click="itBlockControlPanelController.restoreBlock(block)">' +
+                '   <i class="fa fa-eye"></i>' +
+                '</it-circular-btn>' +
+                '<it-circular-btn ng-if="!block.removed" ng-click="itBlockControlPanelController.deleteBlock(block)">' +
+                '   <i class="fa fa-eye-slash block-btn"></i>' +
+                '</it-circular-btn>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -101,6 +121,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.editorIsOpen = false;
                             self.CONFIG = CONFIG;
                             self.blocks = [];
+                            self.availableBlocks = [];
                             self.url = CONFIG.REST_TEMPLATE_API_URL + '/api/rest/export/' + CONFIG.CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
@@ -158,36 +179,6 @@ IteSoft.directive('itBlockControlPanel',
 
                             PilotSiteSideService.on.reload = this.refresh;
 
-                            /**
-                             *
-                             */
-                            self.editJS = function () {
-                                $log.debug("edit JS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "js.blocks.js",
-                                    fileType: "js",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.editCSS = function () {
-                                $log.debug("edit CSS");
-                                PilotSiteSideService.fn.editPage({
-                                    fileName: "css.blocks.css",
-                                    fileType: "css",
-                                    filePackage: CONFIG.CURRENT_PACKAGE
-                                })
-                            };
-                            /**
-                             *
-                             */
-                            self.addFile = function () {
-                                $log.debug("add File");
-                                PilotSiteSideService.fn.createPage()
-                            };
-
                             /*
                              We enable edit mode by default
                              */
@@ -195,17 +186,15 @@ IteSoft.directive('itBlockControlPanel',
                             $rootScope.autoRefreshTemplate = true;
 
                             /*
-                             Capture du CTRL
+                             * Capture du CTRL
                              */
                             $document.bind("keydown", function (event) {
-                                if (event.keyCode == 17 && !self.focusable) {
-                                    $document.find("*").addClass("crosshair");
-
-                                    $log.log("keydown");
-                                    self.focusable = true;
-                                    self.blocks = [];
-                                    self.hilightedBlock = undefined;
-                                    self.hilightBlock(undefined);
+                                if ($rootScope.editSite) {
+                                    if (event.keyCode == 17 && !self.focusable) {
+                                        $document.find("*").addClass("crosshair");
+                                        self.focusable = true;
+                                        self.init();
+                                    }
                                 }
                             });
 
@@ -213,31 +202,84 @@ IteSoft.directive('itBlockControlPanel',
                              *
                              */
                             $document.bind("keyup", function (event) {
-                                if (event.keyCode == 17 && self.focusable) {
-                                    $log.log("keyup");
-                                    $document.find("*").removeClass("crosshair");
-                                    self.focusable = false;
+                                if ($rootScope.editSite) {
+                                    if (event.keyCode == 17 && self.focusable) {
+                                        $document.find("*").removeClass("crosshair");
+                                        self.focusable = false;
+                                    }
                                 }
                             });
 
-                            /*
-                             Catch event send when over block
+
+                            /**
+                             * Call by block to register
                              */
-                            $rootScope.$on("selectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) == -1) {
-                                    self.blocks.push(block)
-                                }
+                            $rootScope.$on("registerBlock", function (event, block) {
+                                self.availableBlocks[block.name] = block;
+
+                                block.element.bind('mouseenter', function (e) {
+                                    $scope.$applyAsync(function () {
+                                        self.selectBlock(block.name);
+                                    });
+                                });
+
+                                block.element.bind('mouseleave', function (e) {
+                                    $scope.$applyAsync(function () {
+                                        self.unSelectBlock(block.name);
+                                    });
+                                });
+
+                                self.blocks = [];
+                                self.clearStyle();
+                                self.hilightedBlock = undefined;
                             });
 
                             /**
-                             Catch event send when leave block
+                             * Init
                              */
-                            $rootScope.$on("unSelectBlock", function (event, block) {
-                                if (self.focusable && self.blocks.indexOf(block) != -1) {
+                            self.init = function(){
+                                self.blocks = [];
+                                self.clearStyle();
+                                self.hilightedBlock = undefined;
+                            };
+
+                            /*
+                             * Catch event send when over block
+                             */
+                            self.selectBlock = function (blockName) {
+                                var block = self.availableBlocks[blockName];
+                                if (self.focusable && !self.exists(block)) {
+                                    self.blocks.push(block)
+                                }
+                            };
+
+                            /**
+                             * Catch event send when leave block
+                             */
+                            self.unSelectBlock = function (blockName) {
+                                var block = self.availableBlocks[blockName];
+                                if (self.focusable && self.exists(block)) {
                                     self.blocks.splice(self.blocks.indexOf(block), 1);
                                 }
-                            });
+                            };
                         }
+
+                        /**
+                         *
+                         */
+                        self.editSite = function () {
+                            $rootScope.editSite = true;
+                            self.clearStyle();
+                        };
+
+                        /**
+                         *
+                         */
+                        self.viewSite = function () {
+                            $rootScope.editSite = false;
+                            self.clearStyle();
+                            self.init();
+                        };
 
                         /*
                          Do block edit action
@@ -352,8 +394,58 @@ IteSoft.directive('itBlockControlPanel',
                          * @param block
                          */
                         self.hilightBlock = function (block) {
-                            self.hilightedBlock = block;
-                            $rootScope.$emit("hilightBlock", block);
+                            if (angular.isDefined(block)) {
+                                self.hilightedBlock = block;
+                                self.clearStyle();
+                                self.updateStyle(block.name);
+                            }
+                        };
+
+                        self.unHilightBlock = function (block) {
+                            if (angular.isDefined(block)) {
+                                self.hilightedBlock = undefined;
+                                self.clearStyle();
+                            }
+                        };
+
+                        /**
+                         * Update background selected style
+                         * @param blockName
+                         */
+                        self.updateStyle = function (blockName) {
+                            for (var name in self.availableBlocks) {
+                                if (name == blockName) {
+                                    self.availableBlocks[name].element.addClass("block-hilight");
+                                }
+                            }
+                        };
+
+                        /**
+                         * Init style
+                         */
+                        self.clearStyle = function () {
+                            for (var name in self.availableBlocks) {
+                                var element = self.availableBlocks[name].element;
+
+                                if(angular.isDefined(element)) {
+
+                                    element.removeClass("block-removed");
+                                    element.removeClass("block-hilight");
+                                    element.css('display', '');
+
+                                    if ($rootScope.editSite) {
+                                        element.children().attr("disabled",false);
+                                    }
+
+                                    if (self.availableBlocks[name].removed) {
+                                        if ($rootScope.editSite) {
+                                            element.addClass("block-removed");
+                                        } else {
+                                            element.css('display', 'none');
+                                        }
+                                    }
+                                }
+                            }
                         };
 
                         /**
@@ -369,9 +461,23 @@ IteSoft.directive('itBlockControlPanel',
                             }
                         };
 
+                        /**
+                         * Block already exists
+                         * @param block
+                         * @returns {boolean}
+                         */
+                        self.exists = function (block) {
+                            var find = false;
+                            self.blocks.forEach(function (existingBlock) {
+                                if (existingBlock.name == block.name) {
+                                    find = true;
+                                }
+                            });
+                            return find;
+                        };
 
                         /**
-                         * senf option to editor
+                         * Send option to editor
                          * @private
                          */
                         function _options() {

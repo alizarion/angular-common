@@ -21,6 +21,10 @@
  *   <td><code>masterDetail.getCurrentItemWrapper()</code></td>
  *   <td>Method to get the selected item wrapper that contain next attributes [originalItem ,currentItem, hasChanged ] .</td>
  *  </tr>
+ * <tr>
+ *   <td><code>attribute it-lock-on-change="true|false"</code></td>
+ *   <td>lock navigation if the selected item has changed.</td>
+ *  </tr>
  *  <tr>
  *   <td><code>masterDetail.undoChangeCurrentItem()</code></td>
  *   <td>Method to revert changes on the selected item.</td>

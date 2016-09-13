@@ -128,8 +128,7 @@
          </file>
      </example>
  */
-
-IteSoft
+angular.module('itesoft.popup',['ui.bootstrap.modal'])
     .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
