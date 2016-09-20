@@ -31,7 +31,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'itConfig',
             self.fields = {
                 socket: {},
                 request: {
-                    url: itConfig.get().REST_TEMPLATE_API_URL + "/api/editor",
+                    url: itConfig.get().REST_TEMPLATE_API_URL + "/t4html/editor",
                     contentType: 'application/json',
                     logLevel: 'debug',
                     transport: 'websocket',

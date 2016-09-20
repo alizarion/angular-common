@@ -132,7 +132,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.itConfig = itConfig;
                             self.blocks = [];
                             self.availableBlocks = [];
-                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/export/' + itConfig.get().CURRENT_PACKAGE;
+                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/rest/export/' + itConfig.get().CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
@@ -144,7 +144,15 @@ IteSoft.directive('itBlockControlPanel',
                                 });
                             };
                             self.interval = 0;
-                            _options();
+
+                            /**
+                             * Wait WS before calling option
+                             * @param response
+                             */
+                            PilotService.on.open = function (response) {
+                                _options();
+                            };
+
                             PilotSiteSideService.on.pong = function (res) {
                                 $log.debug("pong");
                                 $scope.$applyAsync(function () {
