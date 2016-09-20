@@ -282,6 +282,242 @@ IteSoft
         }]);
 
 
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
+);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1152,242 +1388,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
-);
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
 );
 "use strict";
 /**
@@ -4344,45 +4344,6 @@ IteSoft
             }
         }
 }]);
-"use strict";
-/**
- * You do not talk about FIGHT CLUB!!
- */
-IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
-        return {
-            restrict: 'A',
-            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
-            link: function(scope) {
-                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
-
-                var handler = function(e) {
-                    if (e.keyCode === konami_keys[konami_index++]) {
-                        if (konami_index === konami_keys.length) {
-                            $document.off('keydown', handler);
-
-                            var modalInstance =  $modal.open({
-                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
-                                   ,
-                                size: 'lg'
-                            });
-                            scope.cancel = function(){
-                                modalInstance.dismiss('cancel');
-                            } ;
-                        }
-                    } else {
-                        konami_index = 0;
-                    }
-                };
-
-                $document.on('keydown', handler);
-
-                scope.$on('$destroy', function() {
-                    $document.off('keydown', handler);
-                });
-            }
-        };
-    }]);
 'use strict';
 /**
  * TODO itInclude desc
@@ -4780,6 +4741,45 @@ angular.module('itesoft.viewer')
     };
 }]);
 
+"use strict";
+/**
+ * You do not talk about FIGHT CLUB!!
+ */
+IteSoft
+    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+        return {
+            restrict: 'A',
+            template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
+            link: function(scope) {
+                var konami_keys = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konami_index = 0;
+
+                var handler = function(e) {
+                    if (e.keyCode === konami_keys[konami_index++]) {
+                        if (konami_index === konami_keys.length) {
+                            $document.off('keydown', handler);
+
+                            var modalInstance =  $modal.open({
+                                template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
+                                   ,
+                                size: 'lg'
+                            });
+                            scope.cancel = function(){
+                                modalInstance.dismiss('cancel');
+                            } ;
+                        }
+                    } else {
+                        konami_index = 0;
+                    }
+                };
+
+                $document.on('keydown', handler);
+
+                scope.$on('$destroy', function() {
+                    $document.off('keydown', handler);
+                });
+            }
+        };
+    }]);
 "use strict";
 /**
  * @ngdoc directive
@@ -7087,19 +7087,19 @@ IteSoft
         function ($resource, itConfig) {
             return {
                 custom: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/custom/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/blocks/custom/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 all: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/all/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/blocks/all/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 original: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/original/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/blocks/original/:name'),
                 customByOriginal: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/original/' + itConfig.get().CURRENT_PACKAGE + '/:name/custom'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/original/' + itConfig.get().CURRENT_PACKAGE + '/:name/custom'),
                 restore: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/restore/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/blocks/restore/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 build: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/packages/build'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/packages/build'),
                 preview: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/packages/preview'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/rest/packages/preview'),
                 'new': function (name, ref, position, content, roleAllowed, version, removed, element) {
                     return {
                         'name': name,
@@ -7407,7 +7407,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.itConfig = itConfig;
                             self.blocks = [];
                             self.availableBlocks = [];
-                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/export/' + itConfig.get().CURRENT_PACKAGE;
+                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/rest/export/' + itConfig.get().CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
@@ -7419,7 +7419,15 @@ IteSoft.directive('itBlockControlPanel',
                                 });
                             };
                             self.interval = 0;
-                            _options();
+
+                            /**
+                             * Wait WS before calling option
+                             * @param response
+                             */
+                            PilotService.on.open = function (response) {
+                                _options();
+                            };
+
                             PilotSiteSideService.on.pong = function (res) {
                                 $log.debug("pong");
                                 $scope.$applyAsync(function () {
@@ -7809,7 +7817,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'itConfig',
             self.fields = {
                 socket: {},
                 request: {
-                    url: itConfig.get().REST_TEMPLATE_API_URL + "/api/editor",
+                    url: itConfig.get().REST_TEMPLATE_API_URL + "/t4html/editor",
                     contentType: 'application/json',
                     logLevel: 'debug',
                     transport: 'websocket',
@@ -8209,55 +8217,6 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'itConfig', 'Pilot
     }
 ]);
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 
 IteSoft
@@ -8339,13 +8298,14 @@ IteSoft
  *    <it-panel-form option="option" ></it-panel-form>
  * ```
  *
+ *
  * @example
  <example module="itesoft">
  <file name="index.html">
  <style>
  </style>
  <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
+ <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
  </div>
  </file>
  <file name="controller.js">
@@ -8357,17 +8317,16 @@ IteSoft
           {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
           {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-          {"title":"titleSelect1", "code": "codeSelect1", "value":
+          {"title":"titleSelect1", "code": "codeSelect1", "items":
              [{"code": "code1", "value": "value1"},
-             {"code": "code2", "value": "value2"}],
+             {"code": "code2", "value": "value2"}], value:"code1",
           "type":"select"},
-          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkbox"},
           {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
-          "type":"textArea"},
+          "type":"textarea"},
           {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
         ];
-
     }
  ]
  );
@@ -8375,65 +8334,65 @@ IteSoft
  </example>
  */
 IteSoft.component('itPanelForm', {
+        bindings:{
+            options:'=',
+            dateFormat:'@',
+            updateLabel:'@',
+            update: '&',
+            cancel: '&',
+            cancelLabel:'@'
+        },
+        template:'<div class="it-ac-panel-form">' +
+        '<form name="$ctrl.form" novalidate>'+
+        '<div ng-repeat="option in $ctrl.options">' +
+        '<div class="row">' +
+        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+        '<div ng-switch on="option.type">'+
+        '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="checkbox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
+        '<div ng-switch-when="textarea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-7">' +
+        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
+        '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
+        '</div>'+
+        '<!------------------- Template label  ------------------->'+
+        '<script type="text/ng-template" id="labelTemplate.html">' +
+        '<p>{{option.value}}</p>'+
+        '</script>'+
+        '<!------------------- Template input ------------------->'+
+        '<script type="text/ng-template" id="inputTemplate.html">' +
+        '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>'+
+        '</script>'+
+        '<!------------------- Template select ------------------->'+
+        '<script type="text/ng-template" id="selectTemplate.html">' +
+        '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+        ' ng-options="value.value for value in option.items"/>' +
+        '</select></p> '+
+        '</script>'+
+        '<!------------------- Template checkbox ------------------->'+
+        '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+        '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
+        '</script>' +
+        '<!------------------- Template textArea ------------------->'+
+        '<script type="text/ng-template" id="textAreaTemplate.html">' +
+        '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>'+
+        '</script>'+
+        '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
+        '<script type="text/ng-template" id="dateTemplate.html">' +
+        '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+        'ng-model="option[\'value\']" data-autoclose="1" ' +
+        'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>'+
+        '</script>',
+        controller: ['$scope', function($scope){
 
-    bindings: {
-        options: '=',
-        dateFormat: '@',
-        updateLabel: '@',
-        update: '&'
-    },
-    template: '<div class="it-ac-panel-form">' +
-    '<form name="$ctrl.form" novalidate>' +
-    '<div ng-repeat="option in $ctrl.options">' +
-    '<div class="row">' +
-    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-    '<div ng-switch on="option.type">' +
-    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
-    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
-    '</div>' +
-    '<!------------------- Template label ------------------->' +
-    '<script type="text/ng-template" id="labelTemplate.html">' +
-    '<p>{{option.value}}</p>' +
-    '</script>' +
-    '<!------------------- Template input ------------------->' +
-    '<script type="text/ng-template" id="inputTemplate.html">' +
-    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
-    '</script>' +
-    '<!------------------- Template select ------------------->' +
-    '<script type="text/ng-template" id="selectTemplate.html">' +
-    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
-    ' ng-options="value.value for value in option.items"/>' +
-    '</select></p> ' +
-    '</script>' +
-    '<!------------------- Template checkbox ------------------->' +
-    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
-    '</script>' +
-    '<!------------------- Template textArea ------------------->' +
-    '<script type="text/ng-template" id="textAreaTemplate.html">' +
-    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
-    '</script>' +
-    '<!------------------- Template date ------------------->' +
-    '<script type="text/ng-template" id="dateTemplate.html">' +
-    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-    'ng-model="option[\'value\']" data-autoclose="1" ' +
-    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
-    '</script>',
-    controller: ['$scope', function ($scope) {
+            var self = this;
 
-        //TODO gérer la locale pour l'affichage des dates
-        //Get current locale
-        // var locale = localStorageService.get('Locale');
-
-        var self = this;
 
         if (self.dateFormat == undefined) {
             self.dateFormat = "dd/MM/yyyy";
@@ -8442,6 +8401,10 @@ IteSoft.component('itPanelForm', {
         if (self.updateLabel == undefined) {
             self.updateLabel = "Update";
         }
+
+            if(self.cancelLabel == undefined){
+                self.cancelLabel = "Cancel";
+            }
 
 
     }]
@@ -8497,6 +8460,55 @@ IteSoft
             template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
         }
     });
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 /**
@@ -9537,295 +9549,6 @@ angular.module('itesoft.messaging',['ngWebSocket'])
 'use strict';
 /**
  * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-angular.module('itesoft.popup',['ui.bootstrap.modal'])
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
-
-'use strict';
-/**
- * @ngdoc service
  * @name itesoft.service:itNotifier
  * @module itesoft
  * @since 1.1
@@ -10249,6 +9972,295 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+angular.module('itesoft.popup',['ui.bootstrap.modal'])
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $modalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $modalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $modalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $modal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $modalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $modalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $modalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
+
 /**
  * Created by SZA on 28/06/2016.
  */

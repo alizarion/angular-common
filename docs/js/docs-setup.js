@@ -307,7 +307,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The itPanelForm provides dynamic content panel in a form embedded.",
-      "keywords": "$scope $templatecache angular api bonjour checkbox code code1 code2 codecheckbox codedate codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller directive dynamic eirufh embedded eriufb form function homectrl html ieru ieur ieurhf input itesoft itpanelform js label link module ng-controller option options panel query require scope select textarea title titlecheckbox titledate titleinput1 titleinput2 titleselect1 titletextarea true type update updatevalue value1 value2 valueinput1 valueinput2 valuelabel ziouee"
+      "keywords": "$scope $templatecache angular annuler api bonjour cancel cancel-label checkbox code code1 code2 codecheckbox codedate codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller date-format dd directive dynamic eirufh embedded eriufb form function homectrl html ieru ieur ieurhf input items itesoft itpanelform jours js label link mettre module ng-controller option options panel query require scope select textarea title titlecheckbox titledate titleinput1 titleinput2 titleselect1 titletextarea true type update update-label updatevalue value1 value2 valueinput1 valueinput2 valuelabel ziouee"
     },
     {
       "section": "api",
