@@ -1,6 +1,7 @@
 ::selection { background: rgba(0,0,255,0.3); }
 ::-moz-selection { background:rgba(0,0,255,0.3); }
 
+
 .multipage-container {
   margin-top: 60px;
   position: absolute;
@@ -9,6 +10,23 @@
   right: 0;
   bottom: 0;
   overflow: auto;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
+.selectable-layer {
+  -webkit-touch-callout: default; /* iOS Safari */
+  -webkit-user-select: text;   /* Chrome/Safari/Opera */
+  -khtml-user-select: text;    /* Konqueror */
+  -moz-user-select: text;      /* Firefox */
+  -ms-user-select: text;       /* Internet Explorer/Edge */
+  user-select: text;           /* Non-prefixed version, currently
+                                  not supported by any browser */
 }
 
 .thumbnail-viewer {
@@ -20,6 +38,7 @@
   overflow: auto;
   background-color: #cccccc;
   display: block;
+  z-index: 1000;
 }
 
 .thumbnail-viewer .page {
@@ -51,7 +70,7 @@
 }
 
 .multipage-viewer {
-  position: absolute;
+  position:  absolute;
   top: 0;
   bottom: 0;
   left: 0;
@@ -59,6 +78,7 @@
   overflow: auto;
   background-color: #cccccc;
   display: table-row;
+  z-index: 1000;
 }
 
 
@@ -289,6 +309,7 @@
   color: black;
   position: absolute;
   top: 50%;
+  z-index : 1010;
 }
 
 .ui-splitbar-container-row {
@@ -303,4 +324,15 @@
   color: black;
   position: absolute;
   top: 2px;
+  z-index : 1010;
+}
+
+.rectangle {
+  border: 1px solid #FF0000;
+  position: absolute;
+  z-index: 1100;
+}
+
+.viewer-zoom-cursor {
+  cursor: crosshair !important;
 }
