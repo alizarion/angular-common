@@ -30,6 +30,14 @@
  *  </tr>
  *  <tr>
  *      <td>
+ *          title
+ *      </td>
+ *      <td>
+ *          Button title
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
  *          id
  *      </td>
  *      <td>
@@ -48,9 +56,9 @@
  <example module="itesoft-showcase">
  <file name="index.html">
  <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
- <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab label="'Company'" title="'COMPANY'"  id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" title="'SUPPLIER'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" title="'INVOICE'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
  <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
  <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
  <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
@@ -67,10 +75,11 @@
 itTab.component('itTab', {
         bindings: {
             id: '=',
-            label: '='
+            label: '<',
+            title: '<'
         },
         template: '<button class="btn header-tab full-width " ng-click="$ctrl.changeTab()"' +
-        ' title="{{\'ACCOUNTING_CODING.PAYMENT.TITLE\' |translate }}" ng-disabled="$ctrl.isActiveTab"> <i class="fa' +
+        ' title="{{$ctrl.title |translate}}" ng-disabled="$ctrl.isActiveTab"><i class="fa' +
         ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.hasError()"></i> ' +
         '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
     controller
