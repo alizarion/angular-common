@@ -43,9 +43,9 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(pdfPage, hasTextLayer) {
+        function PDFPage(viewer, pdfPage, hasTextLayer) {
             this.base = MultiPagesPage;
-            this.base(pdfPage.pageIndex);
+            this.base(viewer, pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
             this.renderTask = null;
@@ -64,20 +64,20 @@ itPdfViewer
         PDFPage.prototype.getViewport = function (scale , rotation) {
             return this.pdfPage.getViewport(scale, rotation, 0, 0);
         };
-        PDFPage.prototype.transform = function () {
-            MultiPagesPage.prototype.transform.call(this);
+        /*PDFPage.prototype.transform = function () {
+         MultiPagesPage.prototype.transform.call(this);
 
-            this.textLayer = angular.element("<div class='text-layer'></div>");
-            this.textLayer.css("width", this.viewport.width + "px");
-            this.textLayer.css("height", this.viewport.height + "px");
-        };
+         this.textLayer = angular.element("<div class='text-layer'></div>");
+         this.textLayer.css("width", this.viewport.width + "px");
+         this.textLayer.css("height", this.viewport.height + "px");
+         };*/
         PDFPage.prototype.renderPage = function (page, callback) {
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
-                if(page.hasTextLayer) {
-                    page.wrapper.append(page.textLayer);
-                }
+                /*if(page.hasTextLayer) {
+                 page.wrapper.append(page.textLayer);
+                 }*/
             }else{
 
                 page.wrapper.append(page.canvas);
@@ -96,20 +96,21 @@ itPdfViewer
                     }
                     //wrapper.append(self.canvas);
 
-                    if(page.hasTextLayer) {
-                        page.pdfPage.getTextContent().then(function (textContent) {
-                            // Render the text layer...
-                            var textLayerBuilder = new TextLayerBuilder({
-                                textLayerDiv: page.textLayer[0],
-                                pageIndex: page.id,
-                                viewport: page.viewport
-                            });
+                    /*if(page.hasTextLayer) {
+                     page.pdfPage.getTextContent().then(function (textContent) {
+                     // Render the text layer...
+                     var textLayerBuilder = new TextLayerBuilder({
+                     textLayerDiv: page.textLayer[0],
+                     pageIndex: page.id,
+                     viewport: page.viewport
+                     });
 
-                            textLayerBuilder.setTextContent(textContent);
-                            textLayerBuilder.renderLayer();
-                            page.wrapper.append(page.textLayer);
-                        });
-                    }
+                     textLayerBuilder.setTextContent(textContent);
+                     textLayerBuilder.renderLayer();
+                     //page.wrapper.append(page.textLayer);
+                     page.addLayer(page.textLayer);
+                     });
+                     }*/
                 }, function (message) {
                     page.rendered = false;
                     page.renderTask = null;
@@ -132,51 +133,71 @@ itPdfViewer
 
     .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
         function PDFViewer(element) {
-                this.base = MultiPagesViewer;
-                this.base(new PDFViewerAPI(this), element);
+            this.base = MultiPagesViewer;
+            this.base(new PDFViewerAPI(this), element);
 
-                this.pdf = null;
-                // Hooks for the client...
-                this.passwordCallback = null;
-           }
+            this.pdf = null;
+            // Hooks for the client...
+            this.passwordCallback = null;
+        }
 
-            PDFViewer.prototype = new MultiPagesViewer;
+        PDFViewer.prototype = new MultiPagesViewer;
 
-            PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
-                this.element.empty();
-                this.pages = [];
-                if (obj !== undefined && obj !== null && obj !== '') {
-                    this.pageMargin = pageMargin;
-                    this.initialScale = initialScale;
-                    this.hasTextLayer = renderTextLayer;
-                    this.orientation = orientation;
-                    var isFile = typeof obj != typeof "";
+        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if (obj !== undefined && obj !== null && obj !== '') {
+                this.pageMargin = pageMargin;
+                this.initialScale = initialScale;
+                this.hasTextLayer = renderTextLayer;
+                this.orientation = orientation;
+                var isFile = typeof obj != typeof "";
 
-                    if(this.getDocumentTask != undefined){
-                        var self = this;
-                        this.getDocumentTask.destroy().then(function () {
-                            if(isFile){
-                                self.setFile(obj);
-                            }else {
-                                self.setUrl(obj);
-                            }
-                        });
-                    } else {
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function () {
                         if(isFile){
-                            this.setFile(obj);
+                            self.setFile(obj);
                         }else {
-                            this.setUrl(obj);
+                            self.setUrl(obj);
                         }
+                    });
+                } else {
+                    if(isFile){
+                        this.setFile(obj);
+                    }else {
+                        this.setUrl(obj);
                     }
                 }
-            };
-            PDFViewer.prototype.setUrl = function (url) {
-                var self = this;
-                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-                this.getDocumentTask.then(function (pdf) {
+            }
+        };
+        PDFViewer.prototype.setUrl = function (url) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+                    self.addPages();
+                    //self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
 
-                    self.getAllPages( function (pageList, pagesRefMap) {
+                    self.getAllPages(function (pageList, pagesRefMap) {
                         self.pages = pageList;
                         self.pagesRefMap = pagesRefMap;
                         self.addPages();
@@ -186,112 +207,89 @@ itPdfViewer
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
             };
-            PDFViewer.prototype.setFile = function (file) {
-                var self = this;
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var arrayBuffer = e.target.result;
-                    var uint8Array = new Uint8Array(arrayBuffer);
-                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                    getDocumentTask.then(function (pdf) {
-                        self.pdf = pdf;
 
-                        self.getAllPages(function (pageList, pagesRefMap) {
-                            self.pages = pageList;
-                            self.pagesRefMap = pagesRefMap;
-                            self.addPages();
-                            //self.setContainerSize(self.initialScale);
-                        });
-                    }, function (message) {
-                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                    });
-                };
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
 
-                reader.onprogress = function (e) {
-                    self.downloadProgress(e);
-                };
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
+                    }
 
-                reader.onloadend = function (e) {
-                    var error = e.target.error;
-                    if(error !== null) {
-                        var message = "File API error: ";
-                        switch(e.code) {
-                            case error.ENCODING_ERR:
-                                message += "Encoding error.";
-                                break;
-                            case error.NOT_FOUND_ERR:
-                                message += "File not found.";
-                                break;
-                            case error.NOT_READABLE_ERR:
-                                message += "File could not be read.";
-                                break;
-                            case error.SECURITY_ERR:
-                                message += "Security issue with file.";
-                                break;
-                            default:
-                                message += "Unknown error.";
-                                break;
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+        PDFViewer.prototype.getAllPages = function (callback) {
+            var pageList = [],
+                pagesRefMap = {},
+                numPages = this.pdf.numPages,
+                remainingPages = numPages,
+                self = this;
+
+            if(this.hasTextLayer) {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        // Page reference map. Required by the annotation layer.
+                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                        pagesRefMap[refStr] = page.pageIndex + 1;
+
+                        var pdfPage = new PDFPage(self, page, true);
+                        pageList[page.pageIndex] = pdfPage;
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
                         }
-
-                        self.onDataDownloaded("failed", 0, 0, message);
-                    }
-                };
-
-                reader.readAsArrayBuffer(file);
-            };
-            PDFViewer.prototype.getAllPages = function (callback) {
-                var pageList = [],
-                    pagesRefMap = {},
-                    numPages = this.pdf.numPages,
-                    remainingPages = numPages;
-
-                if(this.hasTextLayer) {
-                    for(var iPage = 0;iPage < numPages;++iPage) {
-                        pageList.push({});
-
-                        var getPageTask = this.pdf.getPage(iPage + 1);
-                        getPageTask.then(function (page) {
-                            // Page reference map. Required by the annotation layer.
-                            var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                            pagesRefMap[refStr] = page.pageIndex + 1;
-
-                            var pdfPage = new PDFPage(page, true);
-                            pageList[page.pageIndex] = pdfPage;
-
-                            --remainingPages;
-                            if(remainingPages === 0) {
-                                callback(pageList, pagesRefMap);
-                            }
-
-                            /*page.getTextContent().then(function (textContent) {
-                                pdfPage.textContent = textContent;
-                            });*/
-                        });
-                    }
-                } else {
-                    for(var iPage = 0;iPage < numPages;++iPage) {
-                        pageList.push({});
-
-                        var getPageTask = this.pdf.getPage(iPage + 1);
-                        getPageTask.then(function (page) {
-                            pageList[page.pageIndex] = new PDFPage(page, false);
-
-                            --remainingPages;
-                            if(remainingPages === 0) {
-                                callback(pageList, pagesRefMap);
-                            }
-                        });
-                    }
+                    });
                 }
-            };
-            PDFViewer.prototype.onDestroy = function () {
-                if(this.getDocumentTask){
-                    this.getDocumentTask.destroy();
-                    this.getDocumentTask = null;
-                }
-            };
+            } else {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
 
-            return (PDFViewer);
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        pageList[page.pageIndex] = new PDFPage(self, page, false);
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+                    });
+                }
+            }
+        };
+        PDFViewer.prototype.onDestroy = function () {
+            if(this.getDocumentTask){
+                this.getDocumentTask.destroy();
+                this.getDocumentTask = null;
+            }
+        };
+
+        return (PDFViewer);
     }])
 
     .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
