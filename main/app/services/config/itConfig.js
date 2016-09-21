@@ -73,7 +73,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     var defaultNamespace = null;
     var overrideConfig = undefined;
     var isLoaded = false;
-    var baseConfig = {};
+    var baseConfig = undefined;
 
     this.allowOverride = function (value) {
         allowOverride = value;
