@@ -29,7 +29,7 @@ IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
                 }
 
                 //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.]/g, "");
+                amountString = amountString.replace(/[^0-9,.-]/g, "");
 
                 // SI on est en France ou Italie, on peut taper . ou , pour les décimales
                 if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
@@ -86,7 +86,7 @@ IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
                     var amountString = amount.toString();
 
                     //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.]/g, "");
+                    amountString = amountString.replace(/[^0-9,.-]/g, "");
 
                     // SI on est en France ou Italie, on peut taper . ou , pour les décimales
                     if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
