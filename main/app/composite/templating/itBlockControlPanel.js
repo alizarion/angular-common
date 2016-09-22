@@ -132,7 +132,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.itConfig = itConfig;
                             self.blocks = [];
                             self.availableBlocks = [];
-                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/rest/export/' + itConfig.get().CURRENT_PACKAGE;
+                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/export/' + itConfig.get().CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
