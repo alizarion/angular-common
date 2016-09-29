@@ -63,7 +63,7 @@ IteSoft.component('itPanelForm', {
         template:'<div class="it-ac-panel-form">' +
         '<form name="$ctrl.form" novalidate>'+
         '<div ng-repeat="option in $ctrl.options">' +
-        '<div class="row">' +
+        '<div class="row panelFormRow">' +
         '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
         '<div ng-switch on="option.type">'+
         '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
