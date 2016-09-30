@@ -44,6 +44,55 @@ var IteSoft = angular.module('itesoft', [
     'itesoft.viewer'
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 /**
@@ -8351,53 +8400,53 @@ IteSoft.component('itPanelForm', {
             cancel: '&',
             cancelLabel:'@'
         },
-        template:'<div class="it-ac-panel-form">' +
-        '<form name="$ctrl.form" novalidate>'+
-        '<div ng-repeat="option in $ctrl.options">' +
-        '<div class="row">' +
-        '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
-        '<div ng-switch on="option.type">'+
-        '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="checkbox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
-        '<div ng-switch-when="textarea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-7">' +
-        '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
-        '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
-        '</div>'+
-        '<!------------------- Template label  ------------------->'+
-        '<script type="text/ng-template" id="labelTemplate.html">' +
-        '<p>{{option.value}}</p>'+
-        '</script>'+
-        '<!------------------- Template input ------------------->'+
-        '<script type="text/ng-template" id="inputTemplate.html">' +
-        '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>'+
-        '</script>'+
-        '<!------------------- Template select ------------------->'+
-        '<script type="text/ng-template" id="selectTemplate.html">' +
-        '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
-        ' ng-options="value.value for value in option.items"/>' +
-        '</select></p> '+
-        '</script>'+
-        '<!------------------- Template checkbox ------------------->'+
-        '<script type="text/ng-template" id="checkBoxTemplate.html">' +
-        '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
-        '</script>' +
-        '<!------------------- Template textArea ------------------->'+
-        '<script type="text/ng-template" id="textAreaTemplate.html">' +
-        '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>'+
-        '</script>'+
-        '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
-        '<script type="text/ng-template" id="dateTemplate.html">' +
-        '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-        'ng-model="option[\'value\']" data-autoclose="1" ' +
-        'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>'+
-        '</script>',
+    template:'<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>'+
+    '<div ng-repeat="option in $ctrl.options">' +
+    '<div class="row panelFormRow">' +
+    '<div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} :</label></div>' +
+    '<div ng-switch on="option.type">'+
+    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6 "><div ng-include=" \'labelTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="checkbox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="textarea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
+    '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
+    '</div>'+
+    '<!------------------- Template label ------------------->'+
+    '<script type="text/ng-template" id="labelTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p>{{option.value}}</p></div>'+
+    '</script>'+
+    '<!------------------- Template input ------------------->'+
+    '<script type="text/ng-template" id="inputTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p><input it-input class="form-control floating-label" type="text" ng-model="option[\'value\']" name="input" it-label=""></p></div>'+
+    '</script>'+
+    '<!------------------- Template select ------------------->'+
+    '<script type="text/ng-template" id="selectTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
+    ' ng-options="value.value for value in option.items"/>' +
+    '</select></p></div> '+
+    '</script>'+
+    '<!------------------- Template checkbox ------------------->'+
+    '<script type="text/ng-template" id="checkBoxTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
+    '</script>' +
+    '<!------------------- Template textArea ------------------->'+
+    '<script type="text/ng-template" id="textAreaTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p></div>'+
+    '</script>'+
+    '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
+    '<script type="text/ng-template" id="dateTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+    'ng-model="option[\'value\']" data-autoclose="1" ' +
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p></div>'+
+    '</script>',
         controller: ['$scope', function($scope){
 
             var self = this;
@@ -8470,54 +8519,190 @@ IteSoft
         }
     });
 
+'use strict';
 /**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
+ * @ngdoc service
+ * @name itesoft.service:itConfig
  * @module itesoft
- * @restrict EA
- * @since 1.0
+ * @since 1.2
+ * @requires $location
+ *
  * @description
- * Simple filter that escape string to unicode.
+ * This is a configuration provider. It load a json file and let you inject everywhere, you can also override
+ * each properties of the configuration through url parameters.
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>configFile</code></td>
+ *     <td>app/config/config.json</td>
+ *     <td>Allows to override the default url to get JSON configuration object</td>
+ * </tr>
+ * <tr>
+ *     <td><code>defaultNamespace</code></td>
+ *     <td>''</td>
+ *     <td>Set the default namespace of the configuration file when you use get() function</td>
+ * </tr>
+ * <tr>
+ *     <td><code>allowOverride</code></td>
+ *     <td>false</td>
+ *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
+ * </tr>
+ * </table>
+ *
  *
  *
  * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
+ <example module="itesoft">
+ <file name="Controller.js">
+ angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CaptureOmnicanal');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+			$scope.config=itConfig;
+	}]);
+ </file>
+ <file name="index.html">
+ <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+ <div ng-controller="Mycontroller">
+ <p>All properties : {{config.get() | json}}</p>
+ <p>Other namespace properties : {{config.get('common') | json}}</p>
+ <p>One propertie : {{config.get().baseUrl}}</p>
+ </div>
+ </file>
+ <file name="config.json">
+ {
+     "CaptureOmnicanal" : {
+         "baseUrl":"http://test/base"
+     },
+     "common": {
+         "debug":true
+     }
+ }
+ </file>
+ </example>
+ **/
+IteSoft.provider('itConfig', [function itConfigProvider() {
+    var allowOverride = false;
+    var configFile = 'app/config/config.json';
+    var defaultNamespace = null;
+    var overrideConfig = undefined;
+    var isLoaded = false;
+    var baseConfig = undefined;
 
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
+    this.allowOverride = function (value) {
+        allowOverride = value;
+    };
 
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
+    this.configFile = function (value) {
+        configFile = value;
+    };
 
-                    unicodeString += theUnicode;
+    this.defaultNamespace = function (value) {
+        defaultNamespace = value;
+    };
+
+    this.get = function () {
+        if (!isLoaded) {
+            return _load(overrideConfig);
+        } else {
+            return baseConfig[defaultNamespace];
+        }
+    };
+
+    /**
+     * Return query parameter without $location.search
+     * @returns {*|{}}
+     * @private
+     */
+    function _getRequestParam() {
+        var queryPart = location.search;
+        if(queryPart == ""){
+            queryPart = location.hash;
+        }
+        var search = queryPart
+            .split(/[&||?]/)
+            .filter(function (x) { return x.indexOf("=") > -1; })
+            .map(function (x) { return x.split(/=/); })
+            .map(function (x) {
+                x[1] = x[1].replace(/\+/g, " ");
+                return x;
+            })
+            .map(function (x) {
+                if (x[1] == "true") {
+                    x[1] = true;
+                    return x;
+                } else if (x[1] == "false") {
+                    x[1] = false;
+                    return x;
+                } else {
+                    return x;
                 }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
+            })
+            .reduce(function (acc, current) {
+                acc[current[0]] = current[1];
+                return acc;
+            }, {});
+        return search;
+    };
 
+    function _load(overrideConfig) {
+        var defaultConfig = {};
+        if (baseConfig == undefined) {
+            overrideConfig = _getRequestParam();
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    baseConfig = JSON.parse(xhttp.responseText);
+                    isLoaded = true;
+                    if (allowOverride) {
+                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                            defaultConfig = baseConfig[defaultNamespace];
+                            for (var propertyName in defaultConfig) {
+                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
+                                    defaultConfig[propertyName] = overrideConfig[propertyName];
+                                }
+                            }
+                        }
+                    }
+                    isLoaded = true;
+                }
+            };
+            xhttp.open("GET", configFile, false);
+            xhttp.send();
+        }
+        return defaultConfig;
+    }
+
+    this.$get = ['$location', function itConfigFactory($location) {
+
+        var self = this;
+        return {
+            get: function (namespace) {
+
+                if (!isLoaded) {
+                    _load(overrideConfig);
+                }
+
+                if ((namespace != null) && (namespace != undefined)) {
+                    return baseConfig[namespace];
+                } else {
+                    if (defaultNamespace != null) {
+                        return baseConfig[defaultNamespace];
+                    } else {
+                        return baseConfig;
+                    }
+                }
+            }
+        };
+    }];
+}]);
 
 
 'use strict';
@@ -8746,191 +8931,6 @@ angular.module('itesoft.language',['itesoft.popup','LocalStorageModule'])
         }
     }];
 });
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itConfig
- * @module itesoft
- * @since 1.2
- * @requires $location
- *
- * @description
- * This is a configuration provider. It load a json file and let you inject everywhere, you can also override
- * each properties of the configuration through url parameters.
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>configFile</code></td>
- *     <td>app/config/config.json</td>
- *     <td>Allows to override the default url to get JSON configuration object</td>
- * </tr>
- * <tr>
- *     <td><code>defaultNamespace</code></td>
- *     <td>''</td>
- *     <td>Set the default namespace of the configuration file when you use get() function</td>
- * </tr>
- * <tr>
- *     <td><code>allowOverride</code></td>
- *     <td>false</td>
- *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
- * </tr>
- * </table>
- *
- *
- *
- * @example
- <example module="itesoft">
- <file name="Controller.js">
- angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
-			//configuration of default values
-			itConfigProvider.defaultNamespace('CaptureOmnicanal');
-			itConfigProvider.allowOverride(true);
-			itConfigProvider.configFile("config.json");
-	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
-			$scope.config=itConfig;
-	}]);
- </file>
- <file name="index.html">
- <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
- <div ng-controller="Mycontroller">
- <p>All properties : {{config.get() | json}}</p>
- <p>Other namespace properties : {{config.get('common') | json}}</p>
- <p>One propertie : {{config.get().baseUrl}}</p>
- </div>
- </file>
- <file name="config.json">
- {
-     "CaptureOmnicanal" : {
-         "baseUrl":"http://test/base"
-     },
-     "common": {
-         "debug":true
-     }
- }
- </file>
- </example>
- **/
-IteSoft.provider('itConfig', [function itConfigProvider() {
-    var allowOverride = false;
-    var configFile = 'app/config/config.json';
-    var defaultNamespace = null;
-    var overrideConfig = undefined;
-    var isLoaded = false;
-    var baseConfig = undefined;
-
-    this.allowOverride = function (value) {
-        allowOverride = value;
-    };
-
-    this.configFile = function (value) {
-        configFile = value;
-    };
-
-    this.defaultNamespace = function (value) {
-        defaultNamespace = value;
-    };
-
-    this.get = function () {
-        if (!isLoaded) {
-            return _load(overrideConfig);
-        } else {
-            return baseConfig[defaultNamespace];
-        }
-    };
-
-    /**
-     * Return query parameter without $location.search
-     * @returns {*|{}}
-     * @private
-     */
-    function _getRequestParam() {
-        var queryPart = location.search;
-        if(queryPart == ""){
-            queryPart = location.hash;
-        }
-        var search = queryPart
-            .split(/[&||?]/)
-            .filter(function (x) { return x.indexOf("=") > -1; })
-            .map(function (x) { return x.split(/=/); })
-            .map(function (x) {
-                x[1] = x[1].replace(/\+/g, " ");
-                return x;
-            })
-            .map(function (x) {
-                if (x[1] == "true") {
-                    x[1] = true;
-                    return x;
-                } else if (x[1] == "false") {
-                    x[1] = false;
-                    return x;
-                } else {
-                    return x;
-                }
-            })
-            .reduce(function (acc, current) {
-                acc[current[0]] = current[1];
-                return acc;
-            }, {});
-        return search;
-    };
-
-    function _load(overrideConfig) {
-        var defaultConfig = {};
-        if (baseConfig == undefined) {
-            overrideConfig = _getRequestParam();
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (xhttp.readyState == 4 && xhttp.status == 200) {
-                    baseConfig = JSON.parse(xhttp.responseText);
-                    isLoaded = true;
-                    if (allowOverride) {
-                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                            defaultConfig = baseConfig[defaultNamespace];
-                            for (var propertyName in defaultConfig) {
-                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
-                                    defaultConfig[propertyName] = overrideConfig[propertyName];
-                                }
-                            }
-                        }
-                    }
-                    isLoaded = true;
-                }
-            };
-            xhttp.open("GET", configFile, false);
-            xhttp.send();
-        }
-        return defaultConfig;
-    }
-
-    this.$get = ['$location', function itConfigFactory($location) {
-
-        var self = this;
-        return {
-            get: function (namespace) {
-
-                if (!isLoaded) {
-                    _load(overrideConfig);
-                }
-
-                if ((namespace != null) && (namespace != undefined)) {
-                    return baseConfig[namespace];
-                } else {
-                    if (defaultNamespace != null) {
-                        return baseConfig[defaultNamespace];
-                    } else {
-                        return baseConfig;
-                    }
-                }
-            }
-        };
-    }];
-}]);
 
 'use strict';
 
@@ -10758,6 +10758,838 @@ itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', f
 
 'use strict';
 /**
+ * TODO CustomStyle desc
+ */
+itPdfViewer.factory('CustomStyle', [function () {
+        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
+        //              animate-css-transforms-firefox-webkit.html
+        // in some versions of IE9 it is critical that ms appear in this list
+        // before Moz
+        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
+        var _cache = {};
+
+        function CustomStyle() {}
+
+        CustomStyle.getProp = function get(propName, element) {
+            // check cache only when no element is given
+            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
+                return _cache[propName];
+            }
+
+            element = element || document.documentElement;
+            var style = element.style, prefixed, uPropName;
+
+            // test standard property first
+            if (typeof style[propName] === 'string') {
+                return (_cache[propName] = propName);
+            }
+
+            // capitalize
+            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+
+            // test vendor specific properties
+            for (var i = 0, l = prefixes.length; i < l; i++) {
+                prefixed = prefixes[i] + uPropName;
+                if (typeof style[prefixed] === 'string') {
+                    return (_cache[propName] = prefixed);
+                }
+            }
+
+            //if all fails then set to undefined
+            return (_cache[propName] = 'undefined');
+        };
+
+        CustomStyle.setProp = function set(propName, element, str) {
+            var prop = this.getProp(propName);
+            if (prop !== 'undefined') {
+                element.style[prop] = str;
+            }
+        };
+
+        return (CustomStyle);
+    }]);
+
+'use strict';
+/**
+ * TODO itPdfViewer desc
+ */
+itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function (scope, element, attrs) {
+
+        scope.thumbnailCollapsed = false;
+        scope.onPassword = function (reason) {
+            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
+
+        scope.toggleThumbnail = function () {
+            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
+        };
+
+        MultiPagesAddEventWatcher(scope);
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :
+        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
+            '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
+            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+                '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
+                    '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
+                        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
+                    '</div>' +
+                '</it-thumbnail-menu-viewer>' +
+            '</div>' +
+            '<div ui-layout-container>' +
+                '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options" password-callback="onPassword(reason)"></pdf-viewer>' +
+            '</div>' +
+            '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
+                '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
+            '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO Pdf implementation desc
+ */
+itPdfViewer
+    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function PDFViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        PDFViewerAPI.prototype.findNext = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
+            if(nextHighlightID >= this.viewer.searchResults.length) {
+                nextHighlightID = 0;
+            }
+
+            this.viewer.highlightSearchResult(nextHighlightID);
+        };
+
+        PDFViewerAPI.prototype.findPrev = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
+            if(prevHighlightID < 0) {
+                prevHighlightID = this.viewer.searchResults.length - 1;
+            }
+
+            this.viewer.highlightSearchResult(prevHighlightID);
+        };
+
+        return (PDFViewerAPI);
+    }])
+
+    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+
+        function PDFPage(viewer, pdfPage, hasTextLayer) {
+            this.base = MultiPagesPage;
+            this.base(viewer, pdfPage.pageIndex);
+
+            this.pdfPage = pdfPage;
+            this.renderTask = null;
+            this.hasTextLayer = hasTextLayer;
+        }
+
+        PDFPage.prototype = new MultiPagesPage;
+
+        PDFPage.prototype.clear = function () {
+            if(this.renderTask !== null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation, 0, 0);
+        };
+        /*PDFPage.prototype.transform = function () {
+         MultiPagesPage.prototype.transform.call(this);
+
+         this.textLayer = angular.element("<div class='text-layer'></div>");
+         this.textLayer.css("width", this.viewport.width + "px");
+         this.textLayer.css("height", this.viewport.height + "px");
+         };*/
+        PDFPage.prototype.renderPage = function (page, callback) {
+
+            if(page.canvasRendered){
+                page.wrapper.append(page.canvas);
+                /*if(page.hasTextLayer) {
+                 page.wrapper.append(page.textLayer);
+                 }*/
+            }else{
+
+                page.wrapper.append(page.canvas);
+
+                page.renderTask = this.pdfPage.render({
+                    canvasContext: page.canvas[0].getContext('2d'),
+                    viewport: page.viewport
+                });
+
+                page.renderTask.then(function () {
+
+                    //self.rendered = true;
+                    page.renderTask = null;
+                    if(callback) {
+                        callback(page, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                    //wrapper.append(self.canvas);
+
+                    /*if(page.hasTextLayer) {
+                     page.pdfPage.getTextContent().then(function (textContent) {
+                     // Render the text layer...
+                     var textLayerBuilder = new TextLayerBuilder({
+                     textLayerDiv: page.textLayer[0],
+                     pageIndex: page.id,
+                     viewport: page.viewport
+                     });
+
+                     textLayerBuilder.setTextContent(textContent);
+                     textLayerBuilder.renderLayer();
+                     //page.wrapper.append(page.textLayer);
+                     page.addLayer(page.textLayer);
+                     });
+                     }*/
+                }, function (message) {
+                    page.rendered = false;
+                    page.renderTask = null;
+
+                    if(message === "cancelled") {
+                        if(callback) {
+                            callback(page, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                        }
+                    } else {
+                        if(callback) {
+                            callback(page, MultiPagesConstants.PAGE_RENDER_FAILED);
+                        }
+                    }
+                });
+            }
+        };
+
+        return (PDFPage);
+    }])
+
+    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
+        function PDFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new PDFViewerAPI(this), element);
+
+            this.pdf = null;
+            // Hooks for the client...
+            this.passwordCallback = null;
+        }
+
+        PDFViewer.prototype = new MultiPagesViewer;
+
+        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if (obj !== undefined && obj !== null && obj !== '') {
+                this.pageMargin = pageMargin;
+                this.initialScale = initialScale;
+                this.hasTextLayer = renderTextLayer;
+                this.orientation = orientation;
+                var isFile = typeof obj != typeof "";
+
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function () {
+                        if(isFile){
+                            self.setFile(obj);
+                        }else {
+                            self.setUrl(obj);
+                        }
+                    });
+                } else {
+                    if(isFile){
+                        this.setFile(obj);
+                    }else {
+                        this.setUrl(obj);
+                    }
+                }
+            }
+        };
+        PDFViewer.prototype.setUrl = function (url) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+                    self.addPages();
+                    //self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
+                    self.pdf = pdf;
+
+                    self.getAllPages(function (pageList, pagesRefMap) {
+                        self.pages = pageList;
+                        self.pagesRefMap = pagesRefMap;
+                        self.addPages();
+                        //self.setContainerSize(self.initialScale);
+                    });
+                }, function (message) {
+                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                });
+            };
+
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
+
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
+                    }
+
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+        PDFViewer.prototype.getAllPages = function (callback) {
+            var pageList = [],
+                pagesRefMap = {},
+                numPages = this.pdf.numPages,
+                remainingPages = numPages,
+                self = this;
+
+            if(this.hasTextLayer) {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        // Page reference map. Required by the annotation layer.
+                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                        pagesRefMap[refStr] = page.pageIndex + 1;
+
+                        var pdfPage = new PDFPage(self, page, true);
+                        pageList[page.pageIndex] = pdfPage;
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+                    });
+                }
+            } else {
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    pageList.push({});
+
+                    var getPageTask = this.pdf.getPage(iPage + 1);
+                    getPageTask.then(function (page) {
+                        pageList[page.pageIndex] = new PDFPage(self, page, false);
+
+                        --remainingPages;
+                        if(remainingPages === 0) {
+                            callback(pageList, pagesRefMap);
+                        }
+                    });
+                }
+            }
+        };
+        PDFViewer.prototype.onDestroy = function () {
+            if(this.getDocumentTask){
+                this.getDocumentTask.destroy();
+                this.getDocumentTask = null;
+            }
+        };
+
+        return (PDFViewer);
+    }])
+
+    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                file: "=",
+                api: "=",
+                options: "=",
+                passwordCallback: "&"
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
+
+                $scope.getPassword = function (passwordFunc, reason) {
+                    if(this.passwordCallback) {
+                        var self = this;
+                        this.$apply(function () {
+                            var password = self.passwordCallback({reason: reason});
+
+                            if(password !== "" && password !== undefined && password !== null) {
+                                passwordFunc(password);
+                            } else {
+                                $log.log("A password is required to read this document.");
+                            }
+                        });
+                    } else {
+                        $log.log("A password is required to read this document.");
+                    }
+                };
+
+                var viewer = new PDFViewer($element);
+                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
+
+                $scope.api = viewer.getAPI();
+
+                var shouldRenderTextLayer = function () {
+                    var renderTextLayer = getOption("renderTextLayer");
+                    if(typeof renderTextLayer === typeof true) {
+                        return renderTextLayer;
+                    }
+
+                    return false;
+                };
+
+                $scope.onSrcChanged = function () {
+                    viewer.open($scope.src, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
+                };
+
+                $scope.onFileChanged = function () {
+                    viewer.open($scope.file, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
+                };
+
+                viewer.hookScope($scope);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', scope.onSrcChanged);
+
+                scope.$watch("file", scope.onFileChanged);
+            }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO TextLayerBuilder desc
+ */
+itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
+        var MAX_TEXT_DIVS_TO_RENDER = 100000;
+
+        var NonWhitespaceRegexp = /\S/;
+
+        function isAllWhitespace(str) {
+            return !NonWhitespaceRegexp.test(str);
+        }
+
+        function TextLayerBuilder(options) {
+            this.textLayerDiv = options.textLayerDiv;
+            this.renderingDone = false;
+            this.divContentDone = false;
+            this.pageIdx = options.pageIndex;
+            this.pageNumber = this.pageIdx + 1;
+            this.matches = [];
+            this.viewport = options.viewport;
+            this.textDivs = [];
+            this.findController = options.findController || null;
+        }
+
+        TextLayerBuilder.prototype = {
+            _finishRendering: function TextLayerBuilder_finishRendering() {
+                this.renderingDone = true;
+
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('textlayerrendered', true, true, {
+                    pageNumber: this.pageNumber
+                });
+                this.textLayerDiv.dispatchEvent(event);
+            },
+
+            renderLayer: function TextLayerBuilder_renderLayer() {
+                var textLayerFrag = document.createDocumentFragment();
+                var textDivs = this.textDivs;
+                var textDivsLength = textDivs.length;
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+
+                // No point in rendering many divs as it would make the browser
+                // unusable even after the divs are rendered.
+                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
+                    this._finishRendering();
+                    return;
+                }
+
+                var lastFontSize;
+                var lastFontFamily;
+                for (var i = 0; i < textDivsLength; i++) {
+                    var textDiv = textDivs[i];
+                    if (textDiv.dataset.isWhitespace !== undefined) {
+                        continue;
+                    }
+
+                    var fontSize = textDiv.style.fontSize;
+                    var fontFamily = textDiv.style.fontFamily;
+
+                    // Only build font string and set to context if different from last.
+                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
+                        ctx.font = fontSize + ' ' + fontFamily;
+                        lastFontSize = fontSize;
+                        lastFontFamily = fontFamily;
+                    }
+
+                    var width = ctx.measureText(textDiv.textContent).width;
+                    if (width > 0) {
+                        textLayerFrag.appendChild(textDiv);
+                        var transform;
+                        if (textDiv.dataset.canvasWidth !== undefined) {
+                            // Dataset values come of type string.
+                            var textScale = textDiv.dataset.canvasWidth / width;
+                            transform = 'scaleX(' + textScale + ')';
+                        } else {
+                            transform = '';
+                        }
+                        var rotation = textDiv.dataset.angle;
+                        if (rotation) {
+                            transform = 'rotate(' + rotation + 'deg) ' + transform;
+                        }
+                        if (transform) {
+                            CustomStyle.setProp('transform' , textDiv, transform);
+                        }
+                    }
+                }
+
+                this.textLayerDiv.appendChild(textLayerFrag);
+                this._finishRendering();
+                this.updateMatches();
+            },
+
+            /**
+             * Renders the text layer.
+             * @param {number} timeout (optional) if specified, the rendering waits
+             *   for specified amount of ms.
+             */
+            render: function TextLayerBuilder_render(timeout) {
+                if (!this.divContentDone || this.renderingDone) {
+                    return;
+                }
+
+                if (this.renderTimer) {
+                    clearTimeout(this.renderTimer);
+                    this.renderTimer = null;
+                }
+
+                if (!timeout) { // Render right away
+                    this.renderLayer();
+                } else { // Schedule
+                    var self = this;
+                    this.renderTimer = setTimeout(function() {
+                        self.renderLayer();
+                        self.renderTimer = null;
+                    }, timeout);
+                }
+            },
+
+            appendText: function TextLayerBuilder_appendText(geom, styles) {
+                var style = styles[geom.fontName];
+                var textDiv = document.createElement('div');
+                this.textDivs.push(textDiv);
+                if (isAllWhitespace(geom.str)) {
+                    textDiv.dataset.isWhitespace = true;
+                    return;
+                }
+                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
+                var angle = Math.atan2(tx[1], tx[0]);
+                if (style.vertical) {
+                    angle += Math.PI / 2;
+                }
+                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+                var fontAscent = fontHeight;
+                if (style.ascent) {
+                    fontAscent = style.ascent * fontAscent;
+                } else if (style.descent) {
+                    fontAscent = (1 + style.descent) * fontAscent;
+                }
+
+                var left;
+                var top;
+                if (angle === 0) {
+                    left = tx[4];
+                    top = tx[5] - fontAscent;
+                } else {
+                    left = tx[4] + (fontAscent * Math.sin(angle));
+                    top = tx[5] - (fontAscent * Math.cos(angle));
+                }
+                textDiv.style.left = left + 'px';
+                textDiv.style.top = top + 'px';
+                textDiv.style.fontSize = fontHeight + 'px';
+                textDiv.style.fontFamily = style.fontFamily;
+
+                textDiv.textContent = geom.str;
+                // |fontName| is only used by the Font Inspector. This test will succeed
+                // when e.g. the Font Inspector is off but the Stepper is on, but it's
+                // not worth the effort to do a more accurate test.
+                if (PDFJS.pdfBug) {
+                    textDiv.dataset.fontName = geom.fontName;
+                }
+                // Storing into dataset will convert number into string.
+                if (angle !== 0) {
+                    textDiv.dataset.angle = angle * (180 / Math.PI);
+                }
+                // We don't bother scaling single-char text divs, because it has very
+                // little effect on text highlighting. This makes scrolling on docs with
+                // lots of such divs a lot faster.
+                if (textDiv.textContent.length > 1) {
+                    if (style.vertical) {
+                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
+                    } else {
+                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
+                    }
+                }
+            },
+
+            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+                this.textContent = textContent;
+
+                var textItems = textContent.items;
+                for (var i = 0, len = textItems.length; i < len; i++) {
+                    this.appendText(textItems[i], textContent.styles);
+                }
+                this.divContentDone = true;
+            },
+
+            convertMatches: function TextLayerBuilder_convertMatches(matches) {
+                var i = 0;
+                var iIndex = 0;
+                var bidiTexts = this.textContent.items;
+                var end = bidiTexts.length - 1;
+                var queryLen = (this.findController === null ?
+                    0 : this.findController.state.query.length);
+                var ret = [];
+
+                for (var m = 0, len = matches.length; m < len; m++) {
+                    // Calculate the start position.
+                    var matchIdx = matches[m];
+
+                    // Loop over the divIdxs.
+                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    if (i === bidiTexts.length) {
+                        console.error('Could not find a matching mapping');
+                    }
+
+                    var match = {
+                        begin: {
+                            divIdx: i,
+                            offset: matchIdx - iIndex
+                        }
+                    };
+
+                    // Calculate the end position.
+                    matchIdx += queryLen;
+
+                    // Somewhat the same array as above, but use > instead of >= to get
+                    // the end position right.
+                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    match.end = {
+                        divIdx: i,
+                        offset: matchIdx - iIndex
+                    };
+                    ret.push(match);
+                }
+
+                return ret;
+            },
+
+            renderMatches: function TextLayerBuilder_renderMatches(matches) {
+                // Early exit if there is nothing to render.
+                if (matches.length === 0) {
+                    return;
+                }
+
+                var bidiTexts = this.textContent.items;
+                var textDivs = this.textDivs;
+                var prevEnd = null;
+                var pageIdx = this.pageIdx;
+                var isSelectedPage = (this.findController === null ?
+                    false : (pageIdx === this.findController.selected.pageIdx));
+                var selectedMatchIdx = (this.findController === null ?
+                    -1 : this.findController.selected.matchIdx);
+                var highlightAll = (this.findController === null ?
+                    false : this.findController.state.highlightAll);
+                var infinity = {
+                    divIdx: -1,
+                    offset: undefined
+                };
+
+                function beginText(begin, className) {
+                    var divIdx = begin.divIdx;
+                    textDivs[divIdx].textContent = '';
+                    appendTextToDiv(divIdx, 0, begin.offset, className);
+                }
+
+                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+                    var div = textDivs[divIdx];
+                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+                    var node = document.createTextNode(content);
+                    if (className) {
+                        var span = document.createElement('span');
+                        span.className = className;
+                        span.appendChild(node);
+                        div.appendChild(span);
+                        return;
+                    }
+                    div.appendChild(node);
+                }
+
+                var i0 = selectedMatchIdx, i1 = i0 + 1;
+                if (highlightAll) {
+                    i0 = 0;
+                    i1 = matches.length;
+                } else if (!isSelectedPage) {
+                    // Not highlighting all and this isn't the selected page, so do nothing.
+                    return;
+                }
+
+                for (var i = i0; i < i1; i++) {
+                    var match = matches[i];
+                    var begin = match.begin;
+                    var end = match.end;
+                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
+                    var highlightSuffix = (isSelected ? ' selected' : '');
+
+                    if (this.findController) {
+                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
+                            begin.divIdx, end.divIdx);
+                    }
+
+                    // Match inside new div.
+                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+                        // If there was a previous div, then add the text at the end.
+                        if (prevEnd !== null) {
+                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                        }
+                        // Clear the divs and set the content until the starting point.
+                        beginText(begin);
+                    } else {
+                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+                    }
+
+                    if (begin.divIdx === end.divIdx) {
+                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
+                            'highlight' + highlightSuffix);
+                    } else {
+                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
+                            'highlight begin' + highlightSuffix);
+                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+                        }
+                        beginText(end, 'highlight end' + highlightSuffix);
+                    }
+                    prevEnd = end;
+                }
+
+                if (prevEnd) {
+                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                }
+            },
+
+            updateMatches: function TextLayerBuilder_updateMatches() {
+                // Only show matches when all rendering is done.
+                if (!this.renderingDone) {
+                    return;
+                }
+
+                // Clear all matches.
+                var matches = this.matches;
+                var textDivs = this.textDivs;
+                var bidiTexts = this.textContent.items;
+                var clearedUntilDivIdx = -1;
+
+                // Clear all current matches.
+                for (var i = 0, len = matches.length; i < len; i++) {
+                    var match = matches[i];
+                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+                        var div = textDivs[n];
+                        div.textContent = bidiTexts[n].str;
+                        div.className = '';
+                    }
+                    clearedUntilDivIdx = match.end.divIdx + 1;
+                }
+
+                if (this.findController === null || !this.findController.active) {
+                    return;
+                }
+
+                // Convert the matches on the page controller into the match format
+                // used for the textLayer.
+                this.matches = this.convertMatches(this.findController === null ?
+                    [] : (this.findController.pageMatches[this.pageIdx] || []));
+                this.renderMatches(this.matches);
+            }
+        };
+
+        return (TextLayerBuilder);
+    }]);
+
+'use strict';
+/**
  * TODO itProgressbarViewer desc
  */
 itMultiPagesViewer.directive('itProgressbarViewer', [function(){
@@ -11967,1030 +12799,6 @@ itMultiPagesViewer.factory('ZoomSelection', ['$log' , 'MultiPagesConstants', fun
 
 'use strict';
 /**
- * TODO CustomStyle desc
- */
-itPdfViewer.factory('CustomStyle', [function () {
-        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
-        //              animate-css-transforms-firefox-webkit.html
-        // in some versions of IE9 it is critical that ms appear in this list
-        // before Moz
-        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
-        var _cache = {};
-
-        function CustomStyle() {}
-
-        CustomStyle.getProp = function get(propName, element) {
-            // check cache only when no element is given
-            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
-                return _cache[propName];
-            }
-
-            element = element || document.documentElement;
-            var style = element.style, prefixed, uPropName;
-
-            // test standard property first
-            if (typeof style[propName] === 'string') {
-                return (_cache[propName] = propName);
-            }
-
-            // capitalize
-            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-
-            // test vendor specific properties
-            for (var i = 0, l = prefixes.length; i < l; i++) {
-                prefixed = prefixes[i] + uPropName;
-                if (typeof style[prefixed] === 'string') {
-                    return (_cache[propName] = prefixed);
-                }
-            }
-
-            //if all fails then set to undefined
-            return (_cache[propName] = 'undefined');
-        };
-
-        CustomStyle.setProp = function set(propName, element, str) {
-            var prop = this.getProp(propName);
-            if (prop !== 'undefined') {
-                element.style[prop] = str;
-            }
-        };
-
-        return (CustomStyle);
-    }]);
-
-'use strict';
-/**
- * TODO itPdfViewer desc
- */
-itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
-    var linker = function (scope, element, attrs) {
-
-        scope.thumbnailCollapsed = false;
-        scope.onPassword = function (reason) {
-            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
-        };
-
-        scope.toggleThumbnail = function () {
-            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
-        };
-
-        MultiPagesAddEventWatcher(scope);
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :
-        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
-            '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
-            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
-                '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
-                    '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
-                        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
-                    '</div>' +
-                '</it-thumbnail-menu-viewer>' +
-            '</div>' +
-            '<div ui-layout-container>' +
-                '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options" password-callback="onPassword(reason)"></pdf-viewer>' +
-            '</div>' +
-            '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
-                '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
-            '</div>' +
-        '</div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO Pdf implementation desc
- */
-itPdfViewer
-    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function PDFViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        PDFViewerAPI.prototype.findNext = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
-            if(nextHighlightID >= this.viewer.searchResults.length) {
-                nextHighlightID = 0;
-            }
-
-            this.viewer.highlightSearchResult(nextHighlightID);
-        };
-
-        PDFViewerAPI.prototype.findPrev = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
-            if(prevHighlightID < 0) {
-                prevHighlightID = this.viewer.searchResults.length - 1;
-            }
-
-            this.viewer.highlightSearchResult(prevHighlightID);
-        };
-
-        return (PDFViewerAPI);
-    }])
-
-    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
-
-        function PDFPage(viewer, pdfPage, hasTextLayer) {
-            this.base = MultiPagesPage;
-            this.base(viewer, pdfPage.pageIndex);
-
-            this.pdfPage = pdfPage;
-            this.renderTask = null;
-            this.hasTextLayer = hasTextLayer;
-        }
-
-        PDFPage.prototype = new MultiPagesPage;
-
-        PDFPage.prototype.clear = function () {
-            if(this.renderTask !== null) {
-                this.renderTask.cancel();
-            }
-            MultiPagesPage.prototype.clear.call(this);
-            this.renderTask = null;
-        };
-        PDFPage.prototype.getViewport = function (scale , rotation) {
-            return this.pdfPage.getViewport(scale, rotation, 0, 0);
-        };
-        /*PDFPage.prototype.transform = function () {
-         MultiPagesPage.prototype.transform.call(this);
-
-         this.textLayer = angular.element("<div class='text-layer'></div>");
-         this.textLayer.css("width", this.viewport.width + "px");
-         this.textLayer.css("height", this.viewport.height + "px");
-         };*/
-        PDFPage.prototype.renderPage = function (page, callback) {
-
-            if(page.canvasRendered){
-                page.wrapper.append(page.canvas);
-                /*if(page.hasTextLayer) {
-                 page.wrapper.append(page.textLayer);
-                 }*/
-            }else{
-
-                page.wrapper.append(page.canvas);
-
-                page.renderTask = this.pdfPage.render({
-                    canvasContext: page.canvas[0].getContext('2d'),
-                    viewport: page.viewport
-                });
-
-                page.renderTask.then(function () {
-
-                    //self.rendered = true;
-                    page.renderTask = null;
-                    if(callback) {
-                        callback(page, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                    //wrapper.append(self.canvas);
-
-                    /*if(page.hasTextLayer) {
-                     page.pdfPage.getTextContent().then(function (textContent) {
-                     // Render the text layer...
-                     var textLayerBuilder = new TextLayerBuilder({
-                     textLayerDiv: page.textLayer[0],
-                     pageIndex: page.id,
-                     viewport: page.viewport
-                     });
-
-                     textLayerBuilder.setTextContent(textContent);
-                     textLayerBuilder.renderLayer();
-                     //page.wrapper.append(page.textLayer);
-                     page.addLayer(page.textLayer);
-                     });
-                     }*/
-                }, function (message) {
-                    page.rendered = false;
-                    page.renderTask = null;
-
-                    if(message === "cancelled") {
-                        if(callback) {
-                            callback(page, MultiPagesConstants.PAGE_RENDER_CANCELLED);
-                        }
-                    } else {
-                        if(callback) {
-                            callback(page, MultiPagesConstants.PAGE_RENDER_FAILED);
-                        }
-                    }
-                });
-            }
-        };
-
-        return (PDFPage);
-    }])
-
-    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
-        function PDFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new PDFViewerAPI(this), element);
-
-            this.pdf = null;
-            // Hooks for the client...
-            this.passwordCallback = null;
-        }
-
-        PDFViewer.prototype = new MultiPagesViewer;
-
-        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if (obj !== undefined && obj !== null && obj !== '') {
-                this.pageMargin = pageMargin;
-                this.initialScale = initialScale;
-                this.hasTextLayer = renderTextLayer;
-                this.orientation = orientation;
-                var isFile = typeof obj != typeof "";
-
-                if(this.getDocumentTask != undefined){
-                    var self = this;
-                    this.getDocumentTask.destroy().then(function () {
-                        if(isFile){
-                            self.setFile(obj);
-                        }else {
-                            self.setUrl(obj);
-                        }
-                    });
-                } else {
-                    if(isFile){
-                        this.setFile(obj);
-                    }else {
-                        this.setUrl(obj);
-                    }
-                }
-            }
-        };
-        PDFViewer.prototype.setUrl = function (url) {
-            var self = this;
-            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-            this.getDocumentTask.then(function (pdf) {
-                self.pdf = pdf;
-
-                self.getAllPages( function (pageList, pagesRefMap) {
-                    self.pages = pageList;
-                    self.pagesRefMap = pagesRefMap;
-                    self.addPages();
-                    //self.setContainerSize(self.initialScale);
-                });
-            }, function (message) {
-                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-            });
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
-                    self.pdf = pdf;
-
-                    self.getAllPages(function (pageList, pagesRefMap) {
-                        self.pages = pageList;
-                        self.pagesRefMap = pagesRefMap;
-                        self.addPages();
-                        //self.setContainerSize(self.initialScale);
-                    });
-                }, function (message) {
-                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                });
-            };
-
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
-
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
-                    }
-
-                    self.onDataDownloaded("failed", 0, 0, message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        };
-        PDFViewer.prototype.getAllPages = function (callback) {
-            var pageList = [],
-                pagesRefMap = {},
-                numPages = this.pdf.numPages,
-                remainingPages = numPages,
-                self = this;
-
-            if(this.hasTextLayer) {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        // Page reference map. Required by the annotation layer.
-                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                        pagesRefMap[refStr] = page.pageIndex + 1;
-
-                        var pdfPage = new PDFPage(self, page, true);
-                        pageList[page.pageIndex] = pdfPage;
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            } else {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(self, page, false);
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            }
-        };
-        PDFViewer.prototype.onDestroy = function () {
-            if(this.getDocumentTask){
-                this.getDocumentTask.destroy();
-                this.getDocumentTask = null;
-            }
-        };
-
-        return (PDFViewer);
-    }])
-
-    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope: {
-                src: "@",
-                file: "=",
-                api: "=",
-                options: "=",
-                passwordCallback: "&"
-            },
-            controller: ['$scope', '$element', function ($scope, $element) {
-
-                var getOption = function(optionName) {
-                    if($scope.options === null || $scope.options === undefined) {
-                        return null;
-                    }
-                    return $scope.options[optionName];
-                };
-
-                $scope.getPassword = function (passwordFunc, reason) {
-                    if(this.passwordCallback) {
-                        var self = this;
-                        this.$apply(function () {
-                            var password = self.passwordCallback({reason: reason});
-
-                            if(password !== "" && password !== undefined && password !== null) {
-                                passwordFunc(password);
-                            } else {
-                                $log.log("A password is required to read this document.");
-                            }
-                        });
-                    } else {
-                        $log.log("A password is required to read this document.");
-                    }
-                };
-
-                var viewer = new PDFViewer($element);
-                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
-
-                $scope.api = viewer.getAPI();
-
-                var shouldRenderTextLayer = function () {
-                    var renderTextLayer = getOption("renderTextLayer");
-                    if(typeof renderTextLayer === typeof true) {
-                        return renderTextLayer;
-                    }
-
-                    return false;
-                };
-
-                $scope.onSrcChanged = function () {
-                    viewer.open($scope.src, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open($scope.file, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
-                };
-
-                viewer.hookScope($scope);
-            }],
-            link: function (scope, element, attrs) {
-                attrs.$observe('src', scope.onSrcChanged);
-
-                scope.$watch("file", scope.onFileChanged);
-            }
-        };
-    }]);
-
-'use strict';
-/**
- * TODO TextLayerBuilder desc
- */
-itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
-        var MAX_TEXT_DIVS_TO_RENDER = 100000;
-
-        var NonWhitespaceRegexp = /\S/;
-
-        function isAllWhitespace(str) {
-            return !NonWhitespaceRegexp.test(str);
-        }
-
-        function TextLayerBuilder(options) {
-            this.textLayerDiv = options.textLayerDiv;
-            this.renderingDone = false;
-            this.divContentDone = false;
-            this.pageIdx = options.pageIndex;
-            this.pageNumber = this.pageIdx + 1;
-            this.matches = [];
-            this.viewport = options.viewport;
-            this.textDivs = [];
-            this.findController = options.findController || null;
-        }
-
-        TextLayerBuilder.prototype = {
-            _finishRendering: function TextLayerBuilder_finishRendering() {
-                this.renderingDone = true;
-
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('textlayerrendered', true, true, {
-                    pageNumber: this.pageNumber
-                });
-                this.textLayerDiv.dispatchEvent(event);
-            },
-
-            renderLayer: function TextLayerBuilder_renderLayer() {
-                var textLayerFrag = document.createDocumentFragment();
-                var textDivs = this.textDivs;
-                var textDivsLength = textDivs.length;
-                var canvas = document.createElement('canvas');
-                var ctx = canvas.getContext('2d');
-
-                // No point in rendering many divs as it would make the browser
-                // unusable even after the divs are rendered.
-                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
-                    this._finishRendering();
-                    return;
-                }
-
-                var lastFontSize;
-                var lastFontFamily;
-                for (var i = 0; i < textDivsLength; i++) {
-                    var textDiv = textDivs[i];
-                    if (textDiv.dataset.isWhitespace !== undefined) {
-                        continue;
-                    }
-
-                    var fontSize = textDiv.style.fontSize;
-                    var fontFamily = textDiv.style.fontFamily;
-
-                    // Only build font string and set to context if different from last.
-                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
-                        ctx.font = fontSize + ' ' + fontFamily;
-                        lastFontSize = fontSize;
-                        lastFontFamily = fontFamily;
-                    }
-
-                    var width = ctx.measureText(textDiv.textContent).width;
-                    if (width > 0) {
-                        textLayerFrag.appendChild(textDiv);
-                        var transform;
-                        if (textDiv.dataset.canvasWidth !== undefined) {
-                            // Dataset values come of type string.
-                            var textScale = textDiv.dataset.canvasWidth / width;
-                            transform = 'scaleX(' + textScale + ')';
-                        } else {
-                            transform = '';
-                        }
-                        var rotation = textDiv.dataset.angle;
-                        if (rotation) {
-                            transform = 'rotate(' + rotation + 'deg) ' + transform;
-                        }
-                        if (transform) {
-                            CustomStyle.setProp('transform' , textDiv, transform);
-                        }
-                    }
-                }
-
-                this.textLayerDiv.appendChild(textLayerFrag);
-                this._finishRendering();
-                this.updateMatches();
-            },
-
-            /**
-             * Renders the text layer.
-             * @param {number} timeout (optional) if specified, the rendering waits
-             *   for specified amount of ms.
-             */
-            render: function TextLayerBuilder_render(timeout) {
-                if (!this.divContentDone || this.renderingDone) {
-                    return;
-                }
-
-                if (this.renderTimer) {
-                    clearTimeout(this.renderTimer);
-                    this.renderTimer = null;
-                }
-
-                if (!timeout) { // Render right away
-                    this.renderLayer();
-                } else { // Schedule
-                    var self = this;
-                    this.renderTimer = setTimeout(function() {
-                        self.renderLayer();
-                        self.renderTimer = null;
-                    }, timeout);
-                }
-            },
-
-            appendText: function TextLayerBuilder_appendText(geom, styles) {
-                var style = styles[geom.fontName];
-                var textDiv = document.createElement('div');
-                this.textDivs.push(textDiv);
-                if (isAllWhitespace(geom.str)) {
-                    textDiv.dataset.isWhitespace = true;
-                    return;
-                }
-                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
-                var angle = Math.atan2(tx[1], tx[0]);
-                if (style.vertical) {
-                    angle += Math.PI / 2;
-                }
-                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-                var fontAscent = fontHeight;
-                if (style.ascent) {
-                    fontAscent = style.ascent * fontAscent;
-                } else if (style.descent) {
-                    fontAscent = (1 + style.descent) * fontAscent;
-                }
-
-                var left;
-                var top;
-                if (angle === 0) {
-                    left = tx[4];
-                    top = tx[5] - fontAscent;
-                } else {
-                    left = tx[4] + (fontAscent * Math.sin(angle));
-                    top = tx[5] - (fontAscent * Math.cos(angle));
-                }
-                textDiv.style.left = left + 'px';
-                textDiv.style.top = top + 'px';
-                textDiv.style.fontSize = fontHeight + 'px';
-                textDiv.style.fontFamily = style.fontFamily;
-
-                textDiv.textContent = geom.str;
-                // |fontName| is only used by the Font Inspector. This test will succeed
-                // when e.g. the Font Inspector is off but the Stepper is on, but it's
-                // not worth the effort to do a more accurate test.
-                if (PDFJS.pdfBug) {
-                    textDiv.dataset.fontName = geom.fontName;
-                }
-                // Storing into dataset will convert number into string.
-                if (angle !== 0) {
-                    textDiv.dataset.angle = angle * (180 / Math.PI);
-                }
-                // We don't bother scaling single-char text divs, because it has very
-                // little effect on text highlighting. This makes scrolling on docs with
-                // lots of such divs a lot faster.
-                if (textDiv.textContent.length > 1) {
-                    if (style.vertical) {
-                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
-                    } else {
-                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
-                    }
-                }
-            },
-
-            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
-                this.textContent = textContent;
-
-                var textItems = textContent.items;
-                for (var i = 0, len = textItems.length; i < len; i++) {
-                    this.appendText(textItems[i], textContent.styles);
-                }
-                this.divContentDone = true;
-            },
-
-            convertMatches: function TextLayerBuilder_convertMatches(matches) {
-                var i = 0;
-                var iIndex = 0;
-                var bidiTexts = this.textContent.items;
-                var end = bidiTexts.length - 1;
-                var queryLen = (this.findController === null ?
-                    0 : this.findController.state.query.length);
-                var ret = [];
-
-                for (var m = 0, len = matches.length; m < len; m++) {
-                    // Calculate the start position.
-                    var matchIdx = matches[m];
-
-                    // Loop over the divIdxs.
-                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    if (i === bidiTexts.length) {
-                        console.error('Could not find a matching mapping');
-                    }
-
-                    var match = {
-                        begin: {
-                            divIdx: i,
-                            offset: matchIdx - iIndex
-                        }
-                    };
-
-                    // Calculate the end position.
-                    matchIdx += queryLen;
-
-                    // Somewhat the same array as above, but use > instead of >= to get
-                    // the end position right.
-                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    match.end = {
-                        divIdx: i,
-                        offset: matchIdx - iIndex
-                    };
-                    ret.push(match);
-                }
-
-                return ret;
-            },
-
-            renderMatches: function TextLayerBuilder_renderMatches(matches) {
-                // Early exit if there is nothing to render.
-                if (matches.length === 0) {
-                    return;
-                }
-
-                var bidiTexts = this.textContent.items;
-                var textDivs = this.textDivs;
-                var prevEnd = null;
-                var pageIdx = this.pageIdx;
-                var isSelectedPage = (this.findController === null ?
-                    false : (pageIdx === this.findController.selected.pageIdx));
-                var selectedMatchIdx = (this.findController === null ?
-                    -1 : this.findController.selected.matchIdx);
-                var highlightAll = (this.findController === null ?
-                    false : this.findController.state.highlightAll);
-                var infinity = {
-                    divIdx: -1,
-                    offset: undefined
-                };
-
-                function beginText(begin, className) {
-                    var divIdx = begin.divIdx;
-                    textDivs[divIdx].textContent = '';
-                    appendTextToDiv(divIdx, 0, begin.offset, className);
-                }
-
-                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
-                    var div = textDivs[divIdx];
-                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
-                    var node = document.createTextNode(content);
-                    if (className) {
-                        var span = document.createElement('span');
-                        span.className = className;
-                        span.appendChild(node);
-                        div.appendChild(span);
-                        return;
-                    }
-                    div.appendChild(node);
-                }
-
-                var i0 = selectedMatchIdx, i1 = i0 + 1;
-                if (highlightAll) {
-                    i0 = 0;
-                    i1 = matches.length;
-                } else if (!isSelectedPage) {
-                    // Not highlighting all and this isn't the selected page, so do nothing.
-                    return;
-                }
-
-                for (var i = i0; i < i1; i++) {
-                    var match = matches[i];
-                    var begin = match.begin;
-                    var end = match.end;
-                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
-                    var highlightSuffix = (isSelected ? ' selected' : '');
-
-                    if (this.findController) {
-                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                            begin.divIdx, end.divIdx);
-                    }
-
-                    // Match inside new div.
-                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
-                        // If there was a previous div, then add the text at the end.
-                        if (prevEnd !== null) {
-                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                        }
-                        // Clear the divs and set the content until the starting point.
-                        beginText(begin);
-                    } else {
-                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
-                    }
-
-                    if (begin.divIdx === end.divIdx) {
-                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
-                            'highlight' + highlightSuffix);
-                    } else {
-                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
-                            'highlight begin' + highlightSuffix);
-                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
-                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
-                        }
-                        beginText(end, 'highlight end' + highlightSuffix);
-                    }
-                    prevEnd = end;
-                }
-
-                if (prevEnd) {
-                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                }
-            },
-
-            updateMatches: function TextLayerBuilder_updateMatches() {
-                // Only show matches when all rendering is done.
-                if (!this.renderingDone) {
-                    return;
-                }
-
-                // Clear all matches.
-                var matches = this.matches;
-                var textDivs = this.textDivs;
-                var bidiTexts = this.textContent.items;
-                var clearedUntilDivIdx = -1;
-
-                // Clear all current matches.
-                for (var i = 0, len = matches.length; i < len; i++) {
-                    var match = matches[i];
-                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
-                        var div = textDivs[n];
-                        div.textContent = bidiTexts[n].str;
-                        div.className = '';
-                    }
-                    clearedUntilDivIdx = match.end.divIdx + 1;
-                }
-
-                if (this.findController === null || !this.findController.active) {
-                    return;
-                }
-
-                // Convert the matches on the page controller into the match format
-                // used for the textLayer.
-                this.matches = this.convertMatches(this.findController === null ?
-                    [] : (this.findController.pageMatches[this.pageIdx] || []));
-                this.renderMatches(this.matches);
-            }
-        };
-
-        return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
-
-        function ThumbnailPage(viewer, page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(viewer, page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages,
-                self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
-                pageList[iPage] = page;
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
-        };
-
-        return (ThumbnailViewer);
-    }]);
-
-'use strict';
-/**
  * TODO itTiffViewer desc
  */
 itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
@@ -13259,4 +13067,196 @@ itTiffViewer
                 });
             }
         };
+    }]);
+
+'use strict';
+/**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+           return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+
+        function ThumbnailPage(viewer, page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(viewer, page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages,
+                self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
+                pageList[iPage] = page;
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
+            this.viewer.zoomTo(zoomSelection);
+        };
+
+        return (ThumbnailViewer);
     }]);
