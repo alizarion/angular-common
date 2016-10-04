@@ -26,8 +26,11 @@
  </timeline-event>
  </timeline>
  </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['angular-timeline','itesoft']);
+ </file>
  <file name="Controller.js">
- angular.module('itesoft').controller('mainController', ['$rootScope','$document','$timeout','$scope',
+ angular.module('itesoft-showcase').controller('mainController', ['$rootScope','$document','$timeout','$scope',
  function($rootScope, $document, $timeout, $scope) {
 
         var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. " +
