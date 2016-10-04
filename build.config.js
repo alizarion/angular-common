@@ -8,20 +8,19 @@ module.exports = {
     /**
      * Header de la distribution.
      */
-    banner:
-        '/*!\n' +
-        ' * Copyright 2015 itesoft.\n' +
-        ' * http://itesoft.com/\n' +
-        ' *\n' +
-        ' * Angular-common, v<%= pkg.version %>\n' +
-        ' *Itesoft common Angularjs libs.*/\n' ,
+    banner: '/*!\n' +
+    ' * Copyright 2015 itesoft.\n' +
+    ' * http://itesoft.com/\n' +
+    ' *\n' +
+    ' * Angular-common, v<%= pkg.version %>\n' +
+    ' *Itesoft common Angularjs libs.*/\n',
 
     closureStart: '(function() {\n',
     closureEnd: '\n})();',
-    distFolder:'dist',
+    distFolder: 'dist',
     srcFolder: 'main',
     testFolder: 'test',
-    docFolder : 'docs',
+    docFolder: 'docs',
 
     /**
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.
@@ -33,7 +32,7 @@ module.exports = {
     /**
      * Liste des librairies minifié à utiliser en prod
      */
-    vendorCssFiles : [
+    vendorCssFiles: [
         'main/assets/lib/components-font-awesome/css/font-awesome.min.css',
         'main/assets/lib/angular-bootstrap/ui-bootstrap-csp.css',
         'main/assets/lib/bootstrap/dist/css/bootstrap.min.css',
@@ -49,11 +48,13 @@ module.exports = {
         'main/assets/lib/codemirror/addon/fold/foldgutter.css',
         'main/assets/lib/codemirror/addon/lint/lint.css',
         'main/assets/lib/codemirror/addon/hint/show-hint.css',
-        'main/assets/lib/angular-ui-layout/src/ui-layout.css'
-
+        'main/assets/lib/angular-ui-layout/src/ui-layout.css',
+        'main/assets/lib/timeline/dist/angular-timeline.css',
+        'main/assets/lib/timeline/dist/angular-animations.css',
+        'main/assets/lib/timeline/dist/angular-bootstrap.css'
     ],
 
-    assetsDistFiles :[
+    assetsDistFiles: [
         'main/assets/**/*.gif',
         'main/assets/**/*.png',
         'main/assets/**/*.jpg',
@@ -61,7 +62,7 @@ module.exports = {
     ],
 
 
-    fontFiles :[
+    fontFiles: [
         'main/assets/**/*.eot',
         'main/assets/**/*.svg',
         'main/assets/**/*.ttf',
@@ -122,7 +123,8 @@ module.exports = {
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
         'main/assets/lib/angular-websocket/dist/angular-websocket.min.js',
-        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js',
+        'main/assets/lib/timeline/dist/angular-timeline.js'
     ],
 
     vendorJavascriptDebugFiles: [
@@ -187,14 +189,13 @@ module.exports = {
         e2e: [
             'test/e2e/**/*.js'
         ],
-        unminifiedDistFiles: [
-        ]
+        unminifiedDistFiles: []
     },
 
-    fileToCopyAndRename:
-    [
-        { src:"main/assets/lib/pdfjs-dist/build/pdf.worker.js", dest:"assets/lib/pdf.worker.js" },
-        { src:"main/assets/lib/pdfjs-dist/build/pdf.js", dest:"assets/lib/pdf.js" },
-        { src:"main/assets/lib/libtiff/tiff.min.js", dest:"assets/lib/tiff.min.js" }
+    fileToCopyAndRename: [
+        {src: "main/assets/lib/pdfjs-dist/build/pdf.worker.js", dest: "assets/lib/pdf.worker.js"},
+        {src: "main/assets/lib/pdfjs-dist/build/pdf.js", dest: "assets/lib/pdf.js"},
+        {src: "main/assets/lib/libtiff/tiff.min.js", dest: "assets/lib/tiff.min.js"},
+        {src: "main/assets/lib/timeline/dist/angular-timeline.js", dest: "assets/lib/angular-timeline.js"}
     ]
 };
