@@ -141,6 +141,7 @@ module.exports = {
         'main/assets/lib/angular-ui-grid/ui-grid.js',
         'main/assets/lib/angular-media-queries/match-media.js',
         'main/assets/lib/ngtoast/dist/ngToast.js',
+        'main/assets/lib/timeline/dist/angular-timeline.js',
         'main/assets/lib/codemirror/lib/codemirror.js',
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
@@ -195,7 +196,6 @@ module.exports = {
     fileToCopyAndRename: [
         {src: "main/assets/lib/pdfjs-dist/build/pdf.worker.js", dest: "assets/lib/pdf.worker.js"},
         {src: "main/assets/lib/pdfjs-dist/build/pdf.js", dest: "assets/lib/pdf.js"},
-        {src: "main/assets/lib/libtiff/tiff.min.js", dest: "assets/lib/tiff.min.js"},
-        {src: "main/assets/lib/timeline/dist/angular-timeline.js", dest: "assets/lib/angular-timeline.js"}
+        {src: "main/assets/lib/libtiff/tiff.min.js", dest: "assets/lib/tiff.min.js"}
     ]
 };
