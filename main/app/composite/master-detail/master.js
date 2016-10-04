@@ -199,10 +199,15 @@ IteSoft
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
                             gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                _selectionChangedHandler(row);
+                                if($scope.itMasterDetailControl.disableMultiSelect){
+                                    _selectionChangedHandler(row);
+                                }
+
                             });
                             gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                _selectionChangedHandler(row);
+                                if($scope.itMasterDetailControl.disableMultiSelect) {
+                                     _selectionChangedHandler(row);
+                                }
                             });
 
                         },
@@ -258,6 +263,9 @@ IteSoft
                                 $scope.$emit("MASTER_ROW_CHANGED",col.entity);
                             }, function (msg) {
                                 itPopup.alert($scope.itMasterDetailControl.navAlert);
+                                if($scope.$parent.currentItemWrapper && $scope.itMasterDetailControl.disableMultiSelect){
+                                   $scope.gridApi.selection.toggleRowSelection($scope.$parent.currentItemWrapper.originalItem);
+                                }
                             });
                         }
                     };
