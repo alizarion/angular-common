@@ -49,9 +49,9 @@ module.exports = {
         'main/assets/lib/codemirror/addon/lint/lint.css',
         'main/assets/lib/codemirror/addon/hint/show-hint.css',
         'main/assets/lib/angular-ui-layout/src/ui-layout.css',
+        'main/assets/lib/timeline/dist/angular-bootstrap.css',
         'main/assets/lib/timeline/dist/angular-timeline.css',
-        'main/assets/lib/timeline/dist/angular-animations.css',
-        'main/assets/lib/timeline/dist/angular-bootstrap.css'
+        'main/assets/lib/timeline/dist/angular-animations.css'
     ],
 
     assetsDistFiles: [
@@ -87,6 +87,7 @@ module.exports = {
         'main/assets/lib/angular-strap/dist/angular-strap.min.js',
         'main/assets/lib/angular-strap/dist/angular-strap.tpl.js',
         'main/assets/lib/ngtoast/dist/ngToast.min.js',
+        'main/assets/lib/timeline/dist/angular-timeline.js',
         'main/assets/lib/codemirror/lib/codemirror.js',
         'main/assets/lib/codemirror/mode/xml/xml.js',
         'main/assets/lib/codemirror/mode/javascript/javascript.js',
@@ -123,8 +124,7 @@ module.exports = {
         'main/assets/lib/jshint/dist/jshint.js',
         'main/assets/lib/angular-atmosphere/index.js',
         'main/assets/lib/angular-websocket/dist/angular-websocket.min.js',
-        'main/assets/lib/angular-ui-layout/src/ui-layout.js',
-        'main/assets/lib/timeline/dist/angular-timeline.js'
+        'main/assets/lib/angular-ui-layout/src/ui-layout.js'
     ],
 
     vendorJavascriptDebugFiles: [

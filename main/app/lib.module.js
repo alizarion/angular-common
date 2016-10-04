@@ -10,10 +10,10 @@ var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'u
 
 var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
 
-angular.module('itesoft.viewer',['it-image-viewer','it-tiff-viewer','it-pdf-viewer','it-multi-pages-viewer']);
+angular.module('itesoft.viewer', ['it-image-viewer', 'it-tiff-viewer', 'it-pdf-viewer', 'it-multi-pages-viewer']);
 
 
-var itTab = angular.module("it-tab",[]);
+var itTab = angular.module("it-tab", []);
 
 
 var IteSoft = angular.module('itesoft', [
@@ -41,5 +41,6 @@ var IteSoft = angular.module('itesoft', [
     'it-tab',
     'itesoft.messaging',
     'itesoft.language',
-    'itesoft.viewer'
+    'itesoft.viewer',
+    'angular-timeline'
 ]);
