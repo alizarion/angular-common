@@ -96,7 +96,6 @@ docsApp.directive.sourceEdit = function(getEmbeddedTemplate) {
         html: read($attrs.sourceEditHtml),
         css: read($attrs.sourceEditCss),
         js: read($attrs.sourceEditJs),
-        json: read($attrs.sourceEditJson),
         unit: read($attrs.sourceEditUnit),
         scenario: read($attrs.sourceEditScenario)
       };
@@ -175,7 +174,7 @@ docsApp.serviceFactory.formPostData = function($document) {
 
 docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loadedUrls) {
   return function(content) {
-    var allFiles = [].concat(content.js, content.css, content.html, content.json);
+    var allFiles = [].concat(content.js, content.css, content.html);
     var indexHtmlContent = '<!doctype html>\n' +
         '<html ng-app="{{module}}">\n' +
         '  <head>\n' +
@@ -191,7 +190,7 @@ docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loaded
         var ext = url.split(/\./).pop();
         if (ext == 'css') {
             scriptDeps += '    <link rel="stylesheet" href="' + url + '" type="text/css">\n';
-        } else if (ext == 'js' ) {
+        } else if (ext == 'js') {
             scriptDeps += '    <script src="' + url+ '"></script>\n';
         }
     });
@@ -199,7 +198,7 @@ docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loaded
       var ext = file.name.split(/\./).pop();
         if (ext == 'css') {
           scriptDeps += '    <link rel="stylesheet" href="' + file.name + '" type="text/css">\n';
-        } else if ((ext == 'js' || ext == 'json') && file.name !== 'angular.js') {
+        } else if (ext == 'js' && file.name !== 'angular.js') {
         scriptDeps += '    <script src="' + file.name + '"></script>\n';
       }
     });

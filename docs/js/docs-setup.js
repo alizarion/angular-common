@@ -41,6 +41,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "dependencies.directive:timeline",
+      "shortName": "timeline",
+      "type": "directive",
+      "moduleName": "dependencies",
+      "shortDescription": "An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.",
+      "keywords": "$document $el $rootscope $scope $timeout ac addclass addevent adipiscing ago amet angular angular-scroll-animate angular-timeline animateelementin animateelementout ante api arcu augue awesome badgeclass badgeiconclass bounce-in class congue consectetur container-fluid content contenthtml controller data-driven default defaultalign dependencies describe diam directive dolor donec egestas eget elit enim event events fa fa-check-square fa-credit-card footercontenthtml freeimages function generates glyphicon glyphicon-check glyphicon-credit-card glyphicon-time hard-code heading hendrerit history hours href html http https img-responsive info ipsum itesoft itesoft-showcase jpg js lacinia lectus left leftalign libero ligula lorem maecenas maincontroller mandatory mattis mauris module mollis nam nec ng-bind-html ng-click ng-controller ng-if ng-repeat optional pop porta praesent push quam reading removeclass responsive rightalign second sed sequence side sides sit src story text-muted third timeline timeline-hidden tincidunt title titlecontenthtml tortor twitter ultricies ut var vehicula vertical vitae viverra warning when-not-visible when-visible"
+    },
+    {
+      "section": "api",
       "id": "dependencies.directive:ui-code-mirror",
       "shortName": "ui-code-mirror",
       "type": "directive",
@@ -520,7 +529,8 @@ NG_DOCS={
       "js/dist/app/itesoft.debug.js",
       "js/dist/assets/lib/pdf.worker.js",
       "js/dist/assets/lib/pdf.js",
-      "js/dist/assets/lib/tiff.min.js"
+      "js/dist/assets/lib/tiff.min.js",
+      "js/dist/assets/lib/angular-timeline.js"
     ],
     "styles": [
       "css/dist/assets/fonts/itesoft-bundle.min.css"
@@ -547,7 +557,8 @@ NG_DOCS={
     "js/dist/app/itesoft.debug.js",
     "js/dist/assets/lib/pdf.worker.js",
     "js/dist/assets/lib/pdf.js",
-    "js/dist/assets/lib/tiff.min.js"
+    "js/dist/assets/lib/tiff.min.js",
+    "js/dist/assets/lib/angular-timeline.js"
   ],
   "styles": [
     "css/dist/assets/fonts/itesoft-bundle.min.css"
