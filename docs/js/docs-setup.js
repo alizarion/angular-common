@@ -529,8 +529,7 @@ NG_DOCS={
       "js/dist/app/itesoft.debug.js",
       "js/dist/assets/lib/pdf.worker.js",
       "js/dist/assets/lib/pdf.js",
-      "js/dist/assets/lib/tiff.min.js",
-      "js/dist/assets/lib/angular-timeline.js"
+      "js/dist/assets/lib/tiff.min.js"
     ],
     "styles": [
       "css/dist/assets/fonts/itesoft-bundle.min.css"
@@ -557,8 +556,7 @@ NG_DOCS={
     "js/dist/app/itesoft.debug.js",
     "js/dist/assets/lib/pdf.worker.js",
     "js/dist/assets/lib/pdf.js",
-    "js/dist/assets/lib/tiff.min.js",
-    "js/dist/assets/lib/angular-timeline.js"
+    "js/dist/assets/lib/tiff.min.js"
   ],
   "styles": [
     "css/dist/assets/fonts/itesoft-bundle.min.css"
