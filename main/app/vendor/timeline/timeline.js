@@ -10,7 +10,7 @@
  * An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.
  * See more :  {@link https://gitlab.com/itesoft/timeline}
  * @example
- <example module="itesoft">
+ <example module="itesoft-showcase">
  <file name="index.html">
  <timeline ng-controller="mainController">
  <timeline-event ng-repeat="event in events" side="right">
