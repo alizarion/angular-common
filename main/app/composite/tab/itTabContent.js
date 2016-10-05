@@ -96,7 +96,13 @@
  <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receipt</p></div>
  </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope','TabService', function($scope,TabService) {
+  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } };
+       //activation of tab-currency which is attach to the group 'first-group'
+    TabService.changeTab('tab-currency','first-group');
+    //activation of tab-company
+    TabService.changeTab('tab-supplier');
+ }]);
  </file>
  </example>
  */

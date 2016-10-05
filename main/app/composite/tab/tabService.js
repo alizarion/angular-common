@@ -21,10 +21,10 @@
  *  </tr>
  *  <tr>
  *      <td>
- *          changeTab(newTabId)
+ *          changeTab(newTabId, groupId)
  *      </td>
  *      <td>
- *          Change current tab to newTabId
+ *          Change current tab (attache to the provided groupId) to newTabId
  *      </td>
  *  </tr>
  *  <tr>
