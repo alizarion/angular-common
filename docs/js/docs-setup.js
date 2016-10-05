@@ -100,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Button that represent tab header",
-      "keywords": "$scope analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app button class company console content content-url controller description directive feature fit_height function github header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param rendertextlayer represent row showtoolbar supplier tab table title true validate-header-tab-company"
+      "keywords": "$ctrl $scope angular api attach button changetab class company console content content-url controller currency description directive feature first-group fit_height function github group group-id header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice third thirdparty title true validate-header-tab-company view-controller"
     },
     {
       "section": "api",
@@ -109,7 +109,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Div that represent tab content",
-      "keywords": "$ctrl $scope allow analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app class company console content content-url controller description directive div fit_height function github homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param reference rendertextlayer represent row showtoolbar supplier tab table template true url view view-controller"
+      "keywords": "$ctrl $scope allow angular api attach changetab class company console content content-url controller currency description directive div first-group fit_height function github group group-id homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt reference rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice template third thirdparty true url view view-controller"
     },
     {
       "section": "api",
@@ -118,7 +118,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "it-tab",
       "shortDescription": "Service that manage tab link to itTab",
-      "keywords": "$scope angular api call callback change changed changetab class controller current description function homectrl html isactivetab it-tab itesoft itesoft-showcase ittab js link manage method module newtabid ng-controller ontabchanged row service tab table tabservice"
+      "keywords": "$scope angular api call callback change changed changetab class controller current description function groupid homectrl html isactivetab istabactive it-tab itesoft itesoft-showcase ittab js link manage method module newtabid ng-controller ontabchanged provided row service tab table tabservice"
     },
     {
       "section": "api",

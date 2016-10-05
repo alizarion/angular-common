@@ -34,6 +34,14 @@
  </tr>
  <tr>
      <td>
+         group-id
+     </td>
+     <td>
+         group identifier (must be the same that group tab id)
+     </td>
+ </tr>
+ <tr>
+     <td>
         content-url
      </td>
      <td>
@@ -48,18 +56,63 @@
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="it-tab-directive-page it-tab-directive-ittabcontent-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-23" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-23 company.html supplier.html invoice.html currency.html thirdparty.html receipt.html" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
 <pre class="prettyprint linenums" ng-set-text="index.html-23" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
 <script type="text/ng-template" id="index.html-23">
 <div ng-controller="HomeCtrl" class="row">
-<it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
-<it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
-<it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
-<it-tab-content id="'analyticalCoding-header-tab-company'" view-controller="$ctrl"  content-url="'app/features/settings/view/company.html'"></it-tab-content>
-<it-tab-content id="'analyticalCoding-header-tab-supplier'" view-controller="$ctrl"  content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
-<it-tab-content id="'analyticalCoding-header-tab-invoice'" view-controller="$ctrl"  content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+<!-- Tab without group id -->
+<it-tab label="'Company'" id="'tab-company'"></it-tab>
+<it-tab label="'Supplier'" id="'tab-supplier'"></it-tab>
+<it-tab label="'Invoice'" id="'tab-invoice'"></it-tab>
+<it-tab-content id="'tab-company'" view-controller="$ctrl"  content-url="'company.html'"></it-tab-content>
+<it-tab-content id="'tab-supplier'" view-controller="$ctrl"  content-url="'supplier.html'"></it-tab-content>
+<it-tab-content id="'tab-invoice'" view-controller="$ctrl"  content-url="'invoice.html'"></it-tab-content>
+
+<!-- Tab with group id -->
+<it-tab label="'Currency'" group-id="'first-group'" id="'tab-currency'"></it-tab>
+<it-tab label="'Third Party'" group-id="'first-group'" id="'tab-thirdparty'"></it-tab>
+<it-tab label="'Receipt'" group-id="'first-group'" id="'tab-receipt'"></it-tab>
+<it-tab-content group-id="'first-group'" id="'tab-currency'" view-controller="$ctrl"content-url="'currency.html'"></it-tab-content>
+<it-tab-content group-id="'first-group'" id="'tab-thirdparty'" view-controller="$ctrl"  content-url="'thirdparty.html'"></it-tab-content>
+<it-tab-content group-id="'first-group'" id="'tab-receipt'" view-controller="$ctrl"  content-url="'receipt.html'"></it-tab-content>
 </div>
+</script>
+</div>
+<div class="tab-pane" title="company.html">
+<pre class="prettyprint linenums" ng-set-text="company.html"></pre>
+<script type="text/ng-template" id="company.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;company</p></div>
+</script>
+</div>
+<div class="tab-pane" title="supplier.html">
+<pre class="prettyprint linenums" ng-set-text="supplier.html"></pre>
+<script type="text/ng-template" id="supplier.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;supplier</p></div>
+</script>
+</div>
+<div class="tab-pane" title="invoice.html">
+<pre class="prettyprint linenums" ng-set-text="invoice.html"></pre>
+<script type="text/ng-template" id="invoice.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invoice</p></div>
+</script>
+</div>
+<div class="tab-pane" title="currency.html">
+<pre class="prettyprint linenums" ng-set-text="currency.html"></pre>
+<script type="text/ng-template" id="currency.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency</p></div>
+</script>
+</div>
+<div class="tab-pane" title="thirdparty.html">
+<pre class="prettyprint linenums" ng-set-text="thirdparty.html"></pre>
+<script type="text/ng-template" id="thirdparty.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thirdparty</p></div>
+</script>
+</div>
+<div class="tab-pane" title="receipt.html">
+<pre class="prettyprint linenums" ng-set-text="receipt.html"></pre>
+<script type="text/ng-template" id="receipt.html">
+<div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receipt</p></div>
 </script>
 </div>
 <div class="tab-pane" title="Module.js">
@@ -71,7 +124,13 @@ angular.module('itesoft-showcase',['itesoft'])
 <div class="tab-pane" title="controller.js">
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
-angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope','TabService', function($scope,TabService) {
+ $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } };
+      //activation of tab-currency which is attach to the group 'first-group'
+   TabService.changeTab('tab-currency','first-group');
+   //activation of tab-company
+   TabService.changeTab('tab-supplier');
+}]);
 </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
