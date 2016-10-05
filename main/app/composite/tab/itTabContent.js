@@ -111,7 +111,8 @@ itTab.component('itTabContent', {
     },
     template: '<div ng-show="$ctrl.fn.isTabActive()"' +
     '                class="row-height-10 under-tabs-container bloc-border-left">' +
-    '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
+    '           <div id="{{$ctrl.id}}" group-id="{{$ctrl.groupId}}" class="it-scpas-bloc-content-scrollable it-fill' +
+    ' content-tab"' +
     '               ng-include="$ctrl.contentUrl"></div>' +
     '           </div>',
     controller: [
