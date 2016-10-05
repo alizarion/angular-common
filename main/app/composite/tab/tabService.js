@@ -74,26 +74,17 @@ itTab.factory('TabService', [function () {
      * @private
      */
     function _changeTab(newTabId, groupId) {
-        console.log('_changeTab (' + newTabId + ',' + groupId + ')' + '] ...');
         if (checkGroupId(groupId)) {
-            console.log('before self.currentActiveTabIds[' + _DEFAULT_TAB_GROUP + '] = ' + self.currentActiveTabIds[_DEFAULT_TAB_GROUP]);
             self.currentActiveTabIds[_DEFAULT_TAB_GROUP] = newTabId;
-            console.log('after self.currentActiveTabIds[' + _DEFAULT_TAB_GROUP + '] = ' + self.currentActiveTabIds[_DEFAULT_TAB_GROUP]);
         } else {
             self.currentActiveTabIds[groupId] = newTabId;
         }
 
-        console.log('self.currentActiveTabIds[' + groupId + '] = ' + self.currentActiveTabIds[groupId]);
-        console.log('self.tabChangedCallBacks = ' + self.tabChangedCallBacks);
         self.tabChangedCallBacks.forEach(function (callBack) {
             if (angular.isDefined(callBack)) {
-                console.log('Executing callback [' + callBack + '(' + newTabId + ',' + groupId + ')' + '] ...');
                 callBack(newTabId, groupId);
-                console.log('Executing callback [' + callBack + '(' + newTabId + ',' + groupId + ')' + '] DONE.');
             }
         });
-        console.log('_changeTab (' + newTabId + ',' + groupId + ')' + '] DONE.');
-
     }
 
     function checkGroupId(groupId) {
