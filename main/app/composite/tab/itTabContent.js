@@ -38,6 +38,14 @@
  *  </tr>
  *  <tr>
  *      <td>
+ *          group-id
+ *      </td>
+ *      <td>
+ *          group identifier (must be the same that group tab id)
+ *      </td>
+ *  </tr>
+ *  <tr>
+ *      <td>
  *         content-url
  *      </td>
  *      <td>
@@ -49,16 +57,43 @@
  <example module="itesoft-showcase">
  <file name="index.html">
  <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
- <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
- <it-tab-content id="'analyticalCoding-header-tab-company'" view-controller="$ctrl"  content-url="'app/features/settings/view/company.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-supplier'" view-controller="$ctrl"  content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
- <it-tab-content id="'analyticalCoding-header-tab-invoice'" view-controller="$ctrl"  content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
+ <!-- Tab without group id -->
+ <it-tab label="'Company'" id="'tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'tab-invoice'"></it-tab>
+ <it-tab-content id="'tab-company'" view-controller="$ctrl"  content-url="'company.html'"></it-tab-content>
+ <it-tab-content id="'tab-supplier'" view-controller="$ctrl"  content-url="'supplier.html'"></it-tab-content>
+ <it-tab-content id="'tab-invoice'" view-controller="$ctrl"  content-url="'invoice.html'"></it-tab-content>
+
+ <!-- Tab with group id -->
+ <it-tab label="'Currency'" group-id="'first-group'" id="'tab-currency'"></it-tab>
+ <it-tab label="'Third Party'" group-id="'first-group'" id="'tab-thirdparty'"></it-tab>
+ <it-tab label="'Receipt'" group-id="'first-group'" id="'tab-receipt'"></it-tab>
+ <it-tab-content group-id="'first-group'" id="'tab-currency'" view-controller="$ctrl"content-url="'currency.html'"></it-tab-content>
+ <it-tab-content group-id="'first-group'" id="'tab-thirdparty'" view-controller="$ctrl"  content-url="'thirdparty.html'"></it-tab-content>
+ <it-tab-content group-id="'first-group'" id="'tab-receipt'" view-controller="$ctrl"  content-url="'receipt.html'"></it-tab-content>
  </div>
  </file>
  <file name="Module.js">
  angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="company.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;company</p></div>
+ </file>
+ <file name="supplier.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;supplier</p></div>
+ </file>
+ <file name="invoice.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invoice</p></div>
+ </file>
+ <file name="currency.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency</p></div>
+ </file>
+ <file name="thirdparty.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thirdparty</p></div>
+ </file>
+ <file name="receipt.html">
+ <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receipt</p></div>
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
@@ -67,28 +102,38 @@
  */
 
 itTab.component('itTabContent', {
-        restrict: 'E',
-        bindings: {
-            id: '=',
-            contentUrl: '=',
-            viewController: '='
-        },
-        template: '<div ng-show="$ctrl.isActiveTab"' +
-        '                class="row-height-10 under-tabs-container bloc-border-left">' +
-        '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
-        '               ng-include="$ctrl.contentUrl"></div>' +
-        '           </div>',
-        controller: ['$rootScope', 'TabService',
-            function ($rootScope, TabService) {
+    restrict: 'E',
+    bindings: {
+        groupId: '=',
+        id: '=',
+        contentUrl: '=',
+        viewController: '='
+    },
+    template: '<div ng-show="$ctrl.fn.isTabActive()"' +
+    '                class="row-height-10 under-tabs-container bloc-border-left">' +
+    '           <div id="{{$ctrl.id}}" group-id="{{$ctrl.groupId}}" class="it-scpas-bloc-content-scrollable it-fill' +
+    ' content-tab"' +
+    '               ng-include="$ctrl.contentUrl"></div>' +
+    '           </div>',
+    controller: [
+        '$rootScope',
+        'TabService',
+        function ($rootScope,
+                  TabService) {
 
-                var self = this;
-                self.isActiveTab = false;
+            var self = this;
+            self.fn = {
+                isTabActive: _isTabActive
+            };
 
-                self.isActiveTab = (TabService.currentActiveTabId == self.id);
 
-                TabService.onTabChanged(function (selectedTabId) {
-                    self.isActiveTab = (selectedTabId == self.id);
-                });
+            TabService.onTabChanged(function (selectedTabId, groupId) {
+                TabService.isTabActive(selectedTabId, groupId);
+            });
 
-            }]
-    });
+            function _isTabActive() {
+                return TabService.isTabActive(self.id, self.groupId);
+            }
+
+        }]
+});
