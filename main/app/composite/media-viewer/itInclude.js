@@ -5,6 +5,7 @@
 angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile', function($timeout, $compile) {
     var linker = function (scope, element, attrs) {
         var currentScope;
+        element.css("height", "100%");
         scope.$watch(attrs.itInclude, function (template) {
             $timeout(function () {
                 if(currentScope){

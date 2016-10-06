@@ -5,6 +5,10 @@
 itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
     var linker = function (scope, element, attrs) {
 
+        scope.$watch("api.getMode()", function (value) {
+            scope.mode = value;
+        });
+
         scope.$watch("api.getZoomLevel()", function (value) {
             scope.scale = value;
         });
@@ -15,6 +19,10 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
 
         scope.onZoomLevelChanged = function() {
             scope.api.zoomTo(scope.scale);
+        };
+
+        scope.onModeChanged = function() {
+            scope.api.setMode(scope.mode);
         };
 
         scope.onPageChanged = function() {
@@ -28,7 +36,10 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
         },
         restrict: 'E',
         template :  '<div class="toolbar">' +
+
         '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+        '<select ng-model="mode" ng-change="onModeChanged()" ng-options="mode as mode.label for mode in api.getModes()">' +
+        '</select> ' +
         '<button type="button" ng-click="api.zoomOut()">-</button> ' +
         '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
         '</select> ' +

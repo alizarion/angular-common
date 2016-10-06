@@ -2,7 +2,7 @@
 /**
  * TODO MultiPagesViewerAPI desc
  */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log', 'MultiPagesConstants', function ($log, MultiPagesConstants) {
 
     function MultiPagesViewerAPI(viewer) {
         this.viewer = viewer;
@@ -11,6 +11,15 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
     MultiPagesViewerAPI.prototype = {
         getViewer: function () {
             return this.viewer;
+        }, 
+        getMode: function () {
+            return this.viewer.mode;
+        },
+        getModes: function () {
+            return this.viewer.modes;
+        },
+        setMode : function(mode) {
+            this.viewer.setMode(mode);
         },
         getZoomLevels: function () {
             return this.viewer.zoomLevels;

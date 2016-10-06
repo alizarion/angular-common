@@ -71,12 +71,10 @@ itTiffViewer
 
         TIFFViewer.prototype = new MultiPagesViewer;
 
-        TIFFViewer.prototype.open = function(obj, initialScale, orientation, pageMargin) {
+        TIFFViewer.prototype.open = function(obj, options) {
             this.element.empty();
             this.pages = [];
-            this.pageMargin = pageMargin;
-            this.initialScale = initialScale;
-            this.orientation = orientation;
+            angular.extend(this, options);
             var isFile = typeof obj != typeof "";
 
             if(isFile){
@@ -203,28 +201,29 @@ itTiffViewer
                     return $scope.options[optionName];
                 };
 
+                var getOptions = function() {
+                    return {
+                        initialScale : getOption("initialScale"),
+                        initialMode : getOption("initialMode"),
+                        orientation : getOption("orientation"),
+                        zoomSelectionShortcutKey : getOption("zoomSelectionShortcutKey"),
+                        pageMargin : pageMargin
+                    };
+                };
+
                 var viewer = new TIFFViewer($element);
 
                 $scope.api = viewer.getAPI();
 
-                $scope.onSrcChanged = function() {
-                    viewer.open(this.src, getOption("initialScale"), getOption("orientation"), pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open(this.file, getOption("initialScale"), getOption("orientation"), pageMargin);
+                $scope.Open = function(value) {
+                    viewer.open(value, getOptions());
                 };
 
                 viewer.hookScope($scope);
             }],
             link: function(scope, element, attrs) {
-                attrs.$observe('src', function(src) {
-                    scope.onSrcChanged();
-                });
-
-                scope.$watch("file", function (file) {
-                    scope.onFileChanged();
-                });
+                attrs.$observe('src', scope.Open);
+                scope.$watch("file", scope.Open);
             }
         };
     }]);
