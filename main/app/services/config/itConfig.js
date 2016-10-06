@@ -29,7 +29,7 @@
  * <tr>
  *     <td><code>allowOverride</code></td>
  *     <td>false</td>
- *     <td>Allows to use URL parameters to override JSON configuration peroperties</td>
+ *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
  * </tr>
  * </table>
  *
@@ -73,7 +73,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     var defaultNamespace = null;
     var overrideConfig = undefined;
     var isLoaded = false;
-    var baseConfig = {};
+    var baseConfig = undefined;
 
     this.allowOverride = function (value) {
         allowOverride = value;
@@ -88,42 +88,80 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     };
 
     this.get = function () {
-        return _load(overrideConfig);
+        if (!isLoaded) {
+            return _load(overrideConfig);
+        } else {
+            return baseConfig[defaultNamespace];
+        }
+    };
+
+    /**
+     * Return query parameter without $location.search
+     * @returns {*|{}}
+     * @private
+     */
+    function _getRequestParam() {
+        var queryPart = location.search;
+        if(queryPart == ""){
+            queryPart = location.hash;
+        }
+        var search = queryPart
+            .split(/[&||?]/)
+            .filter(function (x) { return x.indexOf("=") > -1; })
+            .map(function (x) { return x.split(/=/); })
+            .map(function (x) {
+                x[1] = x[1].replace(/\+/g, " ");
+                return x;
+            })
+            .map(function (x) {
+                if (x[1] == "true") {
+                    x[1] = true;
+                    return x;
+                } else if (x[1] == "false") {
+                    x[1] = false;
+                    return x;
+                } else {
+                    return x;
+                }
+            })
+            .reduce(function (acc, current) {
+                acc[current[0]] = current[1];
+                return acc;
+            }, {});
+        return search;
     };
 
     function _load(overrideConfig) {
-
         var defaultConfig = {};
-
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-
-                if (!allowOverride) {
+        if (baseConfig == undefined) {
+            overrideConfig = _getRequestParam();
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
                     baseConfig = JSON.parse(xhttp.responseText);
-                } else {
-                    baseConfig = JSON.parse(xhttp.responseText);
-                    if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                        defaultConfig = baseConfig[defaultNamespace];
-                        for (var propertyName in defaultConfig) {
-                            if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
-                                defaultConfig[propertyName] = overrideConfig[propertyName];
+                    isLoaded = true;
+                    if (allowOverride) {
+                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                            defaultConfig = baseConfig[defaultNamespace];
+                            for (var propertyName in defaultConfig) {
+                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
+                                    defaultConfig[propertyName] = overrideConfig[propertyName];
+                                }
                             }
                         }
                     }
+                    isLoaded = true;
                 }
-            }
-        };
-        xhttp.open("GET", configFile, false);
-        xhttp.send();
-        isLoaded = true;
+            };
+            xhttp.open("GET", configFile, false);
+            xhttp.send();
+        }
         return defaultConfig;
-    };
+    }
 
     this.$get = ['$location', function itConfigFactory($location) {
-        overrideConfig = $location.search();
-        var self = this;
 
+        var self = this;
         return {
             get: function (namespace) {
 
