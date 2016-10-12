@@ -30,7 +30,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
-        this.scaleItem = null;
+        this.currentPages = [];
         this.fitWidthScale = 1.0;
         this.fitHeightScale = 1.0;
         this.fitPageScale = 1.0;
@@ -40,83 +40,104 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
         this.currentPage = 0;
         this.lastScrollDir = 0;
         this.rotation = 0;
+        this.scaleItem = null;
         this.scaleItems = {};
         this.zoomLevels = [];
+        this.modes = [
+            {
+                id: MultiPagesConstants.MODE_HAND,
+                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_HAND', 'Main'),
+                activate : function() {
+                    var container = element[0];
+                    var data = {
+                        acceptPropagatedEvent : true,
+                        preventDefault : true
+                    };
+                    var onMouseDown = function (event) {
+                            if(event.ctrlKey != true) {
+                                element.css("cursor", "-webkit-grabbing");
+                                element.css("cursor", "grabbing");
+                                // mousedown, left click, check propagation
+                                if (event.which!=1 ||
+                                    (!data.acceptPropagatedEvent && event.target != this)){
+                                    return false;
+                                }
+
+                                // Initial coordinates will be the last when dragging
+                                data.lastCoord = {left: event.clientX, top: event.clientY};
+
+                                $document.on('mouseup', onMouseUp);
+                                $document.on('mousemove', onMouseMove);
+                                if (data.preventDefault) {
+                                    event.preventDefault();
+                                    return false;
+                                }
+                            }
+                        },
+                        onMouseMove = function (event) {
+                            // How much did the mouse move?
+                            var delta = {left: (event.clientX - data.lastCoord.left),
+                                top: (event.clientY - data.lastCoord.top)};
+
+                            // Set the scroll position relative to what ever the scroll is now
+                            container.scrollLeft = container.scrollLeft - delta.left;
+                            container.scrollTop = container.scrollTop - delta.top;
+
+                            // Save where the cursor is
+                            data.lastCoord={left: event.clientX, top: event.clientY};
+                            if (data.preventDefault) {
+                                event.preventDefault();
+                                return false;
+                            }
+                        },
+                        onMouseUp = function (event) {
+                            $document.off('mouseup', onMouseUp);
+                            $document.off('mousemove', onMouseMove);
+                            element.css("cursor", "-webkit-grab");
+                            element.css("cursor", "grab");
+                            if (data.preventDefault) {
+                                event.preventDefault();
+                                return false;
+                            }
+                        };
+
+                    element.on('mousedown', onMouseDown);
+                    element.css("cursor", "-webkit-grab");
+                    element.css("cursor", "grab");
+
+                    this.cleanUp = function () {
+                        element.off('mousedown', onMouseDown);
+                        element.css("cursor", "default");
+                    };
+                }
+            },
+            {
+                id: MultiPagesConstants.MODE_ZOOM_SELECTION,
+                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_ZOOM_SELECTION', 'Zoom sélection'),
+                activate : function() { }
+            }
+        ];
+
         this.api = api;
 
         // Hooks for the client...
         this.onPageRendered = null;
+        this.onTextLayerRendered = null;
         this.onDataDownloaded = null;
         this.onCurrentPageChanged = null;
 
-        if(element != null) {
-            this.toggleMouseDrag();
-        }
+        this.setMode(this.modes[0]);
     }
 
     MultiPagesViewer.prototype = {
-        toggleMouseDrag : function() {
-            var element = this.element;
-            var container = element[0];
-            var data = {
-                acceptPropagatedEvent : true,
-                preventDefault : true
-            };
-            var onMouseDown = function (event) {
-                    if(event.ctrlKey != true) {
-                        element.css("cursor", "-webkit-grabbing");
-                        element.css("cursor", "grabbing");
-                        // mousedown, left click, check propagation
-                        if (event.which!=1 ||
-                            (!data.acceptPropagatedEvent && event.target != this)){
-                            return false;
-                        }
-
-                        // Initial coordinates will be the last when dragging
-                        data.lastCoord = {left: event.clientX, top: event.clientY};
-
-                        $document.on('mouseup', onMouseUp);
-                        $document.on('mousemove', onMouseMove);
-                        if (data.preventDefault) {
-                            event.preventDefault();
-                            return false;
-                        }
-                    }
-                },
-                onMouseMove = function (event) {
-                    // How much did the mouse move?
-                    var delta = {left: (event.clientX - data.lastCoord.left),
-                        top: (event.clientY - data.lastCoord.top)};
-
-                    // Set the scroll position relative to what ever the scroll is now
-                    container.scrollLeft = container.scrollLeft - delta.left;
-                    container.scrollTop = container.scrollTop - delta.top;
-
-                    // Save where the cursor is
-                    data.lastCoord={left: event.clientX, top: event.clientY};
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                },
-                onMouseUp = function (event) {
-                    $document.off('mouseup', onMouseUp);
-                    $document.off('mousemove', onMouseMove);
-                    element.css("cursor", "-webkit-grab");
-                    element.css("cursor", "grab");
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                };
-
-            element.on('mousedown', onMouseDown);
-            element.css("cursor", "-webkit-grab");
-            element.css("cursor", "grab");
-
-            this.cleanUp = function () {
-                element.off('mousedown', onMouseDown);
-            };
+        setMode : function(mode) {
+            if(this.element != null && mode != null && this.mode != mode) {
+                if(this.mode && this.mode.cleanUp != null) {
+                    this.mode.cleanUp();
+                }
+                this.mode = mode;
+                this.mode.activate();
+            }
         },
         getAPI: function () {
             return this.api;
@@ -165,13 +186,21 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             }
         },
         addPages : function () {
+            var self = this;
             // Append all page containers to the $element...
-            var numPages = this.pages.length;
+            var numPages = self.pages.length;
             for(var iPage = 0;iPage < numPages; ++iPage) {
-                this.element.append(this.pages[iPage].container);
+                this.element.append(self.pages[iPage].container);
             }
-            this.onPageRendered("loaded", 1, numPages, "");
-            this.setContainerSize(this.initialScale);
+            self.onPageRendered("loaded", 1, numPages, "");
+            if(self.initialMode != null) {
+                angular.forEach(self.modes, function(mode) {
+                    if (self.initialMode === mode.id) {
+                        self.setMode(mode);
+                    }
+                });
+            }
+            self.setContainerSize(self.initialScale);
         },
         updateScaleItem : function(scaleItem) {
             var result = this.scaleItems[scaleItem.id];
@@ -348,6 +377,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             }
 
             var self = this;
+            this.currentPages = [];
             var numPages = this.pages.length;
             var currentPageID = -1;
             var lastPageID = 0;
@@ -383,6 +413,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
 
                     atLeastOnePageInViewport = true;
                     lastPageID = iPage;
+                    this.currentPages.push(page);
                     page.render(function (page, status) {
                         if(status === MultiPagesConstants.PAGE_RENDERED) {
                             self.onPageRendered("success", page.id, self.pages.length, "");
@@ -407,7 +438,9 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                 if(this.lastScrollDir !== 0) {
                     var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
                     if(nextPageID >= 0 && nextPageID < numPages) {
-                        this.pages[nextPageID].render(function (page, status) {
+                        var page = this.pages[nextPageID];
+                        this.currentPages.push(page);
+                        page.render(function (page, status) {
                             if(status === MultiPagesConstants.PAGE_RENDERED) {
                                 self.onPageRendered("success", page.id, self.pages.length, "");
                             } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
@@ -442,11 +475,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             if(args != undefined) {
                 var page = this.pages[args.pageIndex];
                 if(page != undefined) {
-                    var rotation = page.viewport.rotation + args.rotation;
+                    var rotation = page.rotation + args.rotation;
                     if(rotation === 360 || rotation === -360){
                         rotation = 0;
                     }
-                    page.viewport.rotation = rotation;
+                    page.rotation = rotation;
                     page.rotate(rotation);
                     if(this.api.onPageRotation) {
                         this.api.onPageRotation(args);
@@ -547,12 +580,19 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                 onProgress("render", status, pageID, numPages, message);
             };
 
+            scope.onTextLayerRendered = function(pageID, textLayer) {
+                //$compile(textLayer)(scope);
+                $log.debug("TextLayer of page id " + pageID + " rendered");
+            };
+
             scope.onDataDownloaded = function(status, loaded, total, message) {
                 onProgress("download", status, loaded, total, message);
             };
 
             self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+            self.onTextLayerRendered =  angular.bind(scope, scope.onTextLayerRendered);
             self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
 
             scope.$on('$destroy', function() {
                 if(self.onDestroy != null){

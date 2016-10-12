@@ -57,7 +57,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
         setOrientation : function(orientation) {
             //this.orientation = orientation;
             switch (this.viewer.orientation) {
-                case MultiPagesConstants.ORIENTATION_HORIZONTAL :
+                case MultiPagesConstants.ORIENTATION_HORIZONTAL:
                     this.container.addClass("horizontal");
                     this.container.removeClass("vertical");
                     break;
@@ -107,6 +107,17 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                 }
             };
 
+            function getCtrlKey (e) {
+                if(e != null) {
+                    var shortcutKey = self.viewer.zoomSelectionShortcutKey;
+                    if(shortcutKey != null && e[shortcutKey] != null) {
+                        return e[shortcutKey];
+                    }
+                    return e.ctrlKey;
+                }
+                return false;
+            };
+
             var self = this,
                 mouse = {
                     x: 0,
@@ -117,7 +128,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                 rect = null,
                 element = null,
                 onMouseDown = function (e) {
-                    if(e.ctrlKey) {
+                    if(self.viewer.mode.id === MultiPagesConstants.MODE_ZOOM_SELECTION || getCtrlKey(e)) {
                         if(rect == null) {
                             setMousePosition(e);
 
@@ -129,7 +140,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                             rect = {};
                             rect.offsetX = mouse.x;
                             rect.offsetY = mouse.y;
-                            element = angular.element('<div class="rectangle"></div>');
+                            element = angular.element('<div class="zoom-selection-rectangle"></div>');
                             element.css("left",  mouse.x + 'px');
                             element.css("top",  mouse.y + 'px');
                             self.wrapper.append(element);
@@ -146,7 +157,6 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                             self.viewer.api.onPageClicked(self.id);
                         }
                     }
-
                 },
                 onMouseUp = function (e) {
                     self.viewer.element.removeClass("viewer-zoom-cursor");
@@ -183,9 +193,13 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
 
             self.cleanUp = function () {
                 self.container.off('mousedown', onMouseDown);
+                delete self.cleanUp;
             };
         },
         render: function (callback) {
+            if(this.onRendering) {
+                this.onRendering();
+            }
             if(this.rendered) {
                 if(callback) {
                     callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
@@ -201,7 +215,10 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                 if(status === MultiPagesConstants.PAGE_RENDERED) {
                     page.canvasRendered = true;
                     $log.debug("render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
+                } else  if(status === MultiPagesConstants.PAGE_ALREADY_RENDERED) {
+                    $log.debug("page " + page.id +" already rendered");
                 }
+                
                 if(callback) {
                     callback(page, status);
                 }

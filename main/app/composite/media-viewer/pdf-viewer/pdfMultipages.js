@@ -8,7 +8,7 @@ itPdfViewer
         function PDFViewerAPI(viewer) {
             this.base = MultiPagesViewerAPI;
             this.base(viewer);
-        };
+        }; 
 
         PDFViewerAPI.prototype = new MultiPagesViewerAPI;
 
@@ -41,15 +41,14 @@ itPdfViewer
         return (PDFViewerAPI);
     }])
 
-    .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+    .factory('PDFPage', ['$log', '$window', '$document', '$timeout', 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, $window, $document,$timeout, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(viewer, pdfPage, hasTextLayer) {
+        function PDFPage(viewer, pdfPage) {
             this.base = MultiPagesPage;
             this.base(viewer, pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
             this.renderTask = null;
-            this.hasTextLayer = hasTextLayer;
         }
 
         PDFPage.prototype = new MultiPagesPage;
@@ -62,23 +61,61 @@ itPdfViewer
             this.renderTask = null;
         };
         PDFPage.prototype.getViewport = function (scale , rotation) {
-            return this.pdfPage.getViewport(scale, rotation, 0, 0);
+            return this.pdfPage.getViewport(scale, rotation + (this.pdfPage.pageInfo ? this.pdfPage.pageInfo.rotate : 0), 0, 0);
         };
-        /*PDFPage.prototype.transform = function () {
-         MultiPagesPage.prototype.transform.call(this);
+        PDFPage.prototype.renderTextLayer = function () {
+            var self = this;
+            if(this.viewer.mode.id === MultiPagesConstants.MODE_TEXT) {
+                if(self.textLayer != null) {
+                    self.addLayer(self.textLayer);
+                } else {
 
-         this.textLayer = angular.element("<div class='text-layer'></div>");
-         this.textLayer.css("width", this.viewport.width + "px");
-         this.textLayer.css("height", this.viewport.height + "px");
-         };*/
+                    self.textLayer = angular.element("<div class='textLayer r" + self.rotation + "'></div>");
+                    self.textLayer.css("width", this.viewport.width + "px");
+                    self.textLayer.css("height", this.viewport.height + "px");
+                    if (self.textContentTask == null) {
+                        self.textContentTask = self.pdfPage.getTextContent();
+                    }
+
+                    self.textContentTask.then(function (textContent) {
+                        // Render the text layer...
+                        var textLayerBuilder = new TextLayerBuilder({
+                            textLayerDiv: self.textLayer[0],
+                            pageIndex: self.id,
+                            viewport: self.viewport
+                        });
+
+                        textLayerBuilder.setTextContent(textContent);
+                        textLayerBuilder.render(null, function() {
+                            self.addLayer(self.textLayer);
+                            self.viewer.onTextLayerRendered(self.id, self.textLayer);
+                        });
+                    });
+                }
+            }
+        };
+        PDFPage.prototype.removeTextLayer = function () {
+            if(this.textLayer != null) {
+                this.textLayer.remove();
+            }
+        };
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
+            this.textLayer = null;
+        };
+        PDFPage.prototype.onRendering = function() {
+            if(this.renderTextLayer) {
+                this.renderTextLayer();
+            }
+        };
         PDFPage.prototype.renderPage = function (page, callback) {
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
-                /*if(page.hasTextLayer) {
-                 page.wrapper.append(page.textLayer);
-                 }*/
-            }else{
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+            }else {
 
                 page.wrapper.append(page.canvas);
 
@@ -88,29 +125,11 @@ itPdfViewer
                 });
 
                 page.renderTask.then(function () {
-
-                    //self.rendered = true;
                     page.renderTask = null;
+
                     if(callback) {
                         callback(page, MultiPagesConstants.PAGE_RENDERED);
                     }
-                    //wrapper.append(self.canvas);
-
-                    /*if(page.hasTextLayer) {
-                     page.pdfPage.getTextContent().then(function (textContent) {
-                     // Render the text layer...
-                     var textLayerBuilder = new TextLayerBuilder({
-                     textLayerDiv: page.textLayer[0],
-                     pageIndex: page.id,
-                     viewport: page.viewport
-                     });
-
-                     textLayerBuilder.setTextContent(textContent);
-                     textLayerBuilder.renderLayer();
-                     //page.wrapper.append(page.textLayer);
-                     page.addLayer(page.textLayer);
-                     });
-                     }*/
                 }, function (message) {
                     page.rendered = false;
                     page.renderTask = null;
@@ -131,7 +150,7 @@ itPdfViewer
         return (PDFPage);
     }])
 
-    .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
+    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage' , 'MultiPagesConstants' , 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
         function PDFViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new PDFViewerAPI(this), element);
@@ -139,18 +158,163 @@ itPdfViewer
             this.pdf = null;
             // Hooks for the client...
             this.passwordCallback = null;
+
+            function setMousePosition(e) {
+                var ev = e || window.event; //Moz || IE
+                var el = element[0];
+                var offset = el.getBoundingClientRect();
+                if (ev.pageX) { //Moz
+                    mouse.x = (ev.pageX + el.scrollLeft - offset.left);
+                    mouse.y = (ev.pageY + el.scrollTop - offset.top);
+                } else if (ev.clientX) { //IE
+                    mouse.x = (ev.clientX + el.scrollLeft - offset.left);
+                    mouse.y = (ev.clientY + el.scrollTop  - offset.top);
+                }
+            };
+
+            function getPosition(el) {
+                var xPos = 0;
+                var yPos = 0;
+                var container = element[0];
+                do {
+                    xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+                    yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+
+                    el = el.offsetParent;
+                } while (el != container && el != null);
+                return {
+                    x: xPos,
+                    y: yPos
+                };
+            };
+
+            var self = this,
+                mouse = {
+                    x: 0,
+                    y: 0
+                },
+                onDbClick = function(e) {
+                    if ($window.getSelection) {
+                        if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
+                        self.wordEventTimeout = null;
+                        var selection =  $window.getSelection();
+                        var range = $document[0].createRange();
+                        range.selectNodeContents(e.target);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        var text = range.toString();
+                        self.api.selectedText = text;
+                        if(self.api.onTextSelected != null) {
+                            self.api.onTextSelected(text);
+                        }
+                    }
+                },
+                onMouseDown = function (e) {
+                    if(self.selectionTooltip == null){
+                        if(self.wordTooltip != null){
+                            self.wordTooltip.css("display", "none");
+                        }
+
+                        self.selectionTooltip = angular.element('<div class="selection-tooltip"></div>');
+                        self.selectionTooltip.css("left",  mouse.x + 'px');
+                        self.selectionTooltip.css("top",  mouse.y + 'px');
+                        element.append(self.selectionTooltip);
+                    }
+                },
+                onMouseUp = function (e) {
+                    if(self.selectionTooltip != null) {
+                        self.selectionTooltip.remove();
+                        self.selectionTooltip = null;
+                    }
+
+                    if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
+                    self.wordEventTimeout = $timeout(function() {
+                        var text = "";
+                        if ($window.getSelection) {
+                            text = $window.getSelection().toString();
+                        }
+                        if(text.length > 0) {
+                            self.api.selectedText = text;
+                            if(self.api.onTextSelected != null) {
+                                self.api.onTextSelected(text);
+                            }
+                        }
+                    }, 450);
+                },
+                onMouseMove = function (e) {
+                    setMousePosition(e);
+                    if(self.selectionTooltip != null) {
+                        self.selectionTooltip.css("left",  mouse.x + 'px');
+                        self.selectionTooltip.css("top",  mouse.y + 'px');
+                        var text = "";
+                        if ($window.getSelection) {
+                            text = $window.getSelection().toString();
+                        }
+                        if(text.length > 0) {
+                            if(text.length > 30) {
+                                var start = text.slice(0, 15);
+                                var end = text.slice(text.length - 15, text.length);
+                                self.selectionTooltip[0].innerHTML = start + " [...] " + end;
+                            } else {
+                                self.selectionTooltip[0].innerHTML = text;
+                            }
+                            self.selectionTooltip.css("display", "block");
+                        } else {
+                            self.selectionTooltip.css("display", "none");
+                        }
+                    } else {
+                        if(e.target && e.target.className == "word") {
+                            if(self.wordTooltip == null){
+                                self.wordTooltip = angular.element('<div class="word-tooltip"></div>');
+                            }
+                            element.append(self.wordTooltip);
+
+                            var position = getPosition(e.target);
+                            self.wordTooltip[0].textContent = e.target.textContent;
+                            self.wordTooltip.css("display", "table");
+                            self.wordTooltip.css("left",  position.x + 'px');
+                            self.wordTooltip.css("top",  (position.y - self.wordTooltip[0].offsetHeight - 10) + 'px');
+                        } else {
+                            if(self.wordTooltip != null){
+                                self.wordTooltip.css("display", "none");
+                            }
+                        }
+                    }
+                };
+
+            this.modes.push({
+                id: MultiPagesConstants.MODE_TEXT,
+                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_TEXT', 'Text'),
+                activate : function() {
+                    angular.forEach(self.currentPages, function(page) {
+                        page.renderTextLayer();
+                    });
+
+                    element.on('dblclick', onDbClick);
+                    element.on('mousedown', onMouseDown);
+                    element.on('mouseup', onMouseUp);
+                    element.on('mousemove', onMouseMove);
+                },
+                cleanUp : function() {
+                    for(var iPage = 0;iPage < self.pages.length;++iPage) {
+                        self.pages[iPage].removeTextLayer();
+                    }
+
+                    element.off('dblclick', onDbClick);
+                    element.off('mousedown', onMouseDown);
+                    element.off('mouseup', onMouseUp);
+                    element.off('mousemove', onMouseMove);
+                }
+            });
         }
 
         PDFViewer.prototype = new MultiPagesViewer;
 
-        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
+        PDFViewer.prototype.open = function (obj, options) {
             this.element.empty();
             this.pages = [];
             if (obj !== undefined && obj !== null && obj !== '') {
-                this.pageMargin = pageMargin;
-                this.initialScale = initialScale;
-                this.hasTextLayer = renderTextLayer;
-                this.orientation = orientation;
+                angular.extend(this, options);
                 var isFile = typeof obj != typeof "";
 
                 if(this.getDocumentTask != undefined){
@@ -247,39 +411,23 @@ itPdfViewer
                 remainingPages = numPages,
                 self = this;
 
-            if(this.hasTextLayer) {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                pageList.push({});
 
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        // Page reference map. Required by the annotation layer.
-                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                        pagesRefMap[refStr] = page.pageIndex + 1;
+                var getPageTask = this.pdf.getPage(iPage + 1);
+                getPageTask.then(function (page) {
+                    // Page reference map. Required by the annotation layer.
+                    var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                    pagesRefMap[refStr] = page.pageIndex + 1;
 
-                        var pdfPage = new PDFPage(self, page, true);
-                        pageList[page.pageIndex] = pdfPage;
+                    var pdfPage = new PDFPage(self, page, true);
+                    pageList[page.pageIndex] = pdfPage;
 
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            } else {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(self, page, false);
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
+                    --remainingPages;
+                    if(remainingPages === 0) {
+                        callback(pageList, pagesRefMap);
+                    }
+                });
             }
         };
         PDFViewer.prototype.onDestroy = function () {
@@ -313,6 +461,16 @@ itPdfViewer
                     return $scope.options[optionName];
                 };
 
+                var getOptions = function() {
+                    return {
+                        initialScale : getOption("initialScale"),
+                        initialMode : getOption("initialMode"),
+                        orientation : getOption("orientation"),
+                        zoomSelectionShortcutKey : getOption("zoomSelectionShortcutKey"),
+                        pageMargin : pageMargin
+                    };
+                };
+
                 $scope.getPassword = function (passwordFunc, reason) {
                     if(this.passwordCallback) {
                         var self = this;
@@ -335,29 +493,15 @@ itPdfViewer
 
                 $scope.api = viewer.getAPI();
 
-                var shouldRenderTextLayer = function () {
-                    var renderTextLayer = getOption("renderTextLayer");
-                    if(typeof renderTextLayer === typeof true) {
-                        return renderTextLayer;
-                    }
-
-                    return false;
-                };
-
-                $scope.onSrcChanged = function () {
-                    viewer.open($scope.src, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
-                };
-
-                $scope.onFileChanged = function () {
-                    viewer.open($scope.file, getOption("initialScale"), shouldRenderTextLayer(), getOption("orientation"), pageMargin);
+                $scope.Open = function(value) {
+                    viewer.open(value, getOptions());
                 };
 
                 viewer.hookScope($scope);
             }],
             link: function (scope, element, attrs) {
-                attrs.$observe('src', scope.onSrcChanged);
-
-                scope.$watch("file", scope.onFileChanged);
+                attrs.$observe('src', scope.Open);
+                scope.$watch("file", scope.Open);
             }
         };
     }]);

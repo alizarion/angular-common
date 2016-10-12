@@ -28,6 +28,10 @@
  *   <td>Object passed to the media viewer to apply options.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.libPath = 'assets/lib'</code></td>
+ *   <td>Specify where all libraries (pdfjs / tiffjs ect) are stored.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.onApiLoaded = function(api) { }</code></td>
  *   <td>Callback to be notify when the property api is available.</td>
  *  </tr>
@@ -38,6 +42,10 @@
  *  <tr>
  *   <td><code>options.orientation = 'vertical' | 'horizontal'</code></td>
  *   <td>Set orientation of the viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.zoomSelectionShortcutKey = 'ctrlKey' | 'shiftKey' | 'altKey'</code></td>
+ *   <td>Set zoom selection shortcut of the viewer.</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.showProgressbar = true | false</code></td>
@@ -58,6 +66,10 @@
  *  <tr>
  *   <td><code>options.initialScale  = '20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width'</code></td>
  *   <td>Set initial scale of media viewer.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>options.initialMode  = 'mode_hand' | 'mode_zoomSelection' | 'mode_text'</code></td>
+ *   <td>set initial mode of viewer (default is mode_hand).</td>
  *  </tr>
  *  <tr>
  *   <td><code>options.getApi()</code></td>
@@ -132,6 +144,10 @@
  *   <td>Callback to be notify on zoom to rectangle.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.api.onTextSelected = function (text) { }</code></td>
+ *   <td>Callback to be notify on text selected.</td>
+ *  </tr>
+ *  <tr>
  *  <tr>
  *   <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
  *   <td>Callback to be notify when click on a page.</td>
@@ -164,6 +180,21 @@
          .thumbnail-viewer .num-page {
          	text-align: center;
          }
+
+          //override full text rectangle
+         .multipage-viewer .textLayer > .word:hover {
+              border: solid;
+              border-color: red;
+              border-width: 1px;
+        }
+
+         //override text selection color
+        .multipage-viewer .textLayer ::selection {
+             background: rgba(0,0,255, 0.2);
+        }
+        .multipage-viewer .textLayer ::-moz-selection {
+             background: rgba(0,0,255, 0.2);
+        }
       </style>
  *    <it-media-viewer></it-media-viewer>
  * ```
@@ -172,14 +203,14 @@
  <example module="itesoft-showcase">
  <file name="index.html">
      <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+        <div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
      </div>
  </file>
  <file name="Module.js">
     angular.module('itesoft-showcase',['itesoft.viewer'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : '/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */

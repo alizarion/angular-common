@@ -2,17 +2,130 @@
 /**
  * TODO TextLayerBuilder desc
  */
-itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
-        var MAX_TEXT_DIVS_TO_RENDER = 100000;
-
-        var NonWhitespaceRegexp = /\S/;
-
-        function isAllWhitespace(str) {
-            return !NonWhitespaceRegexp.test(str);
+itPdfViewer.factory('TextLayerBuilder', ['CustomStyle' , 'EventBus', function (CustomStyle, EventBus) {
+        function attachDOMEventsToEventBus(eventBus) {
+            eventBus.on('documentload', function () {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('documentload', true, true, {});
+                window.dispatchEvent(event);
+            });
+            eventBus.on('pagerendered', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagerendered', true, true, {
+                    pageNumber: e.pageNumber,
+                    cssTransform: e.cssTransform,
+                });
+                e.source.div.dispatchEvent(event);
+            });
+            eventBus.on('textlayerrendered', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('textlayerrendered', true, true, {
+                    pageNumber: e.pageNumber
+                });
+                e.source.textLayerDiv.dispatchEvent(event);
+            });
+            eventBus.on('pagechange', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('pagechange', true, true, window, 0);
+                event.pageNumber = e.pageNumber;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('pagesinit', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagesinit', true, true, null);
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('pagesloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagesloaded', true, true, {
+                    pagesCount: e.pagesCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('scalechange', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('scalechange', true, true, window, 0);
+                event.scale = e.scale;
+                event.presetValue = e.presetValue;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('updateviewarea', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('updateviewarea', true, true, window, 0);
+                event.location = e.location;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('find', function (e) {
+                if (e.source === window) {
+                    return; // event comes from FirefoxCom, no need to replicate
+                }
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('find' + e.type, true, true, {
+                    query: e.query,
+                    phraseSearch: e.phraseSearch,
+                    caseSensitive: e.caseSensitive,
+                    highlightAll: e.highlightAll,
+                    findPrevious: e.findPrevious
+                });
+                window.dispatchEvent(event);
+            });
+            eventBus.on('attachmentsloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('attachmentsloaded', true, true, {
+                    attachmentsCount: e.attachmentsCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('sidebarviewchanged', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('sidebarviewchanged', true, true, {
+                    view: e.view,
+                });
+                e.source.outerContainer.dispatchEvent(event);
+            });
+            eventBus.on('pagemode', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagemode', true, true, {
+                    mode: e.mode,
+                });
+                e.source.pdfViewer.container.dispatchEvent(event);
+            });
+            eventBus.on('namedaction', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('namedaction', true, true, {
+                    action: e.action
+                });
+                e.source.pdfViewer.container.dispatchEvent(event);
+            });
+            eventBus.on('presentationmodechanged', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('presentationmodechanged', true, true, {
+                    active: e.active,
+                    switchInProgress: e.switchInProgress
+                });
+                window.dispatchEvent(event);
+            });
+            eventBus.on('outlineloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('outlineloaded', true, true, {
+                    outlineCount: e.outlineCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
         }
 
+        var globalEventBus = null;
+        function getGlobalEventBus() {
+            if (globalEventBus) {
+                return globalEventBus;
+            }
+            globalEventBus = new EventBus();
+            attachDOMEventsToEventBus(globalEventBus);
+            return globalEventBus;
+        }
         function TextLayerBuilder(options) {
             this.textLayerDiv = options.textLayerDiv;
+            this.eventBus = options.eventBus || getGlobalEventBus();
             this.renderingDone = false;
             this.divContentDone = false;
             this.pageIdx = options.pageIndex;
@@ -21,75 +134,19 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
             this.viewport = options.viewport;
             this.textDivs = [];
             this.findController = options.findController || null;
+            this.textLayerRenderTask = null;
+            this.enhanceTextSelection = options.enhanceTextSelection;
+            this._bindMouse();
         }
 
         TextLayerBuilder.prototype = {
             _finishRendering: function TextLayerBuilder_finishRendering() {
                 this.renderingDone = true;
 
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('textlayerrendered', true, true, {
+                this.eventBus.dispatch('textlayerrendered', {
+                    source: this,
                     pageNumber: this.pageNumber
                 });
-                this.textLayerDiv.dispatchEvent(event);
-            },
-
-            renderLayer: function TextLayerBuilder_renderLayer() {
-                var textLayerFrag = document.createDocumentFragment();
-                var textDivs = this.textDivs;
-                var textDivsLength = textDivs.length;
-                var canvas = document.createElement('canvas');
-                var ctx = canvas.getContext('2d');
-
-                // No point in rendering many divs as it would make the browser
-                // unusable even after the divs are rendered.
-                if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
-                    this._finishRendering();
-                    return;
-                }
-
-                var lastFontSize;
-                var lastFontFamily;
-                for (var i = 0; i < textDivsLength; i++) {
-                    var textDiv = textDivs[i];
-                    if (textDiv.dataset.isWhitespace !== undefined) {
-                        continue;
-                    }
-
-                    var fontSize = textDiv.style.fontSize;
-                    var fontFamily = textDiv.style.fontFamily;
-
-                    // Only build font string and set to context if different from last.
-                    if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
-                        ctx.font = fontSize + ' ' + fontFamily;
-                        lastFontSize = fontSize;
-                        lastFontFamily = fontFamily;
-                    }
-
-                    var width = ctx.measureText(textDiv.textContent).width;
-                    if (width > 0) {
-                        textLayerFrag.appendChild(textDiv);
-                        var transform;
-                        if (textDiv.dataset.canvasWidth !== undefined) {
-                            // Dataset values come of type string.
-                            var textScale = textDiv.dataset.canvasWidth / width;
-                            transform = 'scaleX(' + textScale + ')';
-                        } else {
-                            transform = '';
-                        }
-                        var rotation = textDiv.dataset.angle;
-                        if (rotation) {
-                            transform = 'rotate(' + rotation + 'deg) ' + transform;
-                        }
-                        if (transform) {
-                            CustomStyle.setProp('transform' , textDiv, transform);
-                        }
-                    }
-                }
-
-                this.textLayerDiv.appendChild(textLayerFrag);
-                this._finishRendering();
-                this.updateMatches();
             },
 
             /**
@@ -97,96 +154,53 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
              * @param {number} timeout (optional) if specified, the rendering waits
              *   for specified amount of ms.
              */
-            render: function TextLayerBuilder_render(timeout) {
+            render: function TextLayerBuilder_render(timeout, callback) {
                 if (!this.divContentDone || this.renderingDone) {
                     return;
                 }
 
-                if (this.renderTimer) {
-                    clearTimeout(this.renderTimer);
-                    this.renderTimer = null;
+                if (this.textLayerRenderTask) {
+                    this.textLayerRenderTask.cancel();
+                    this.textLayerRenderTask = null;
                 }
 
-                if (!timeout) { // Render right away
-                    this.renderLayer();
-                } else { // Schedule
-                    var self = this;
-                    this.renderTimer = setTimeout(function() {
-                        self.renderLayer();
-                        self.renderTimer = null;
-                    }, timeout);
-                }
-            },
-
-            appendText: function TextLayerBuilder_appendText(geom, styles) {
-                var style = styles[geom.fontName];
-                var textDiv = document.createElement('div');
-                this.textDivs.push(textDiv);
-                if (isAllWhitespace(geom.str)) {
-                    textDiv.dataset.isWhitespace = true;
-                    return;
-                }
-                var tx = PDFJS.Util.transform(this.viewport.transform, geom.transform);
-                var angle = Math.atan2(tx[1], tx[0]);
-                if (style.vertical) {
-                    angle += Math.PI / 2;
-                }
-                var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-                var fontAscent = fontHeight;
-                if (style.ascent) {
-                    fontAscent = style.ascent * fontAscent;
-                } else if (style.descent) {
-                    fontAscent = (1 + style.descent) * fontAscent;
-                }
-
-                var left;
-                var top;
-                if (angle === 0) {
-                    left = tx[4];
-                    top = tx[5] - fontAscent;
-                } else {
-                    left = tx[4] + (fontAscent * Math.sin(angle));
-                    top = tx[5] - (fontAscent * Math.cos(angle));
-                }
-                textDiv.style.left = left + 'px';
-                textDiv.style.top = top + 'px';
-                textDiv.style.fontSize = fontHeight + 'px';
-                textDiv.style.fontFamily = style.fontFamily;
-
-                textDiv.textContent = geom.str;
-                // |fontName| is only used by the Font Inspector. This test will succeed
-                // when e.g. the Font Inspector is off but the Stepper is on, but it's
-                // not worth the effort to do a more accurate test.
-                if (PDFJS.pdfBug) {
-                    textDiv.dataset.fontName = geom.fontName;
-                }
-                // Storing into dataset will convert number into string.
-                if (angle !== 0) {
-                    textDiv.dataset.angle = angle * (180 / Math.PI);
-                }
-                // We don't bother scaling single-char text divs, because it has very
-                // little effect on text highlighting. This makes scrolling on docs with
-                // lots of such divs a lot faster.
-                if (textDiv.textContent.length > 1) {
-                    if (style.vertical) {
-                        textDiv.dataset.canvasWidth = geom.height * this.viewport.scale;
-                    } else {
-                        textDiv.dataset.canvasWidth = geom.width * this.viewport.scale;
+                this.textDivs = [];
+                var textLayerFrag = document.createDocumentFragment();
+                this.textLayerRenderTask = PDFJS.renderTextLayer({
+                    textContent: this.textContent,
+                    container: textLayerFrag,
+                    viewport: this.viewport,
+                    textDivs: this.textDivs,
+                    timeout: timeout,
+                    enhanceTextSelection: this.enhanceTextSelection,
+                });
+                this.textLayerRenderTask.promise.then(function () {
+                    this.textLayerDiv.appendChild(textLayerFrag);
+                    this._finishRendering();
+                    this.updateMatches();
+                    for (var i = 0; i < this.textDivs.length; i++) {
+                        this.textDivs[i].setAttribute("class",  "word");
                     }
-                }
+
+                    if(callback) {
+                        callback();
+                    }
+                }.bind(this), function (reason) {
+                    // canceled or failed to render text layer -- skipping errors
+                });
             },
 
             setTextContent: function TextLayerBuilder_setTextContent(textContent) {
-                this.textContent = textContent;
-
-                var textItems = textContent.items;
-                for (var i = 0, len = textItems.length; i < len; i++) {
-                    this.appendText(textItems[i], textContent.styles);
+                if (this.textLayerRenderTask) {
+                    this.textLayerRenderTask.cancel();
+                    this.textLayerRenderTask = null;
                 }
+                this.textContent = textContent;
                 this.divContentDone = true;
             },
 
-            convertMatches: function TextLayerBuilder_convertMatches(matches) {
+            convertMatches: function TextLayerBuilder_convertMatches(matches,
+                                                                     matchesLength) {
                 var i = 0;
                 var iIndex = 0;
                 var bidiTexts = this.textContent.items;
@@ -194,7 +208,9 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
                 var queryLen = (this.findController === null ?
                     0 : this.findController.state.query.length);
                 var ret = [];
-
+                if (!matches) {
+                    return ret;
+                }
                 for (var m = 0, len = matches.length; m < len; m++) {
                     // Calculate the start position.
                     var matchIdx = matches[m];
@@ -217,7 +233,11 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
                     };
 
                     // Calculate the end position.
-                    matchIdx += queryLen;
+                    if (matchesLength) { // multiterm search
+                        matchIdx += matchesLength[m];
+                    } else { // phrase search
+                        matchIdx += queryLen;
+                    }
 
                     // Somewhat the same array as above, but use > instead of >= to get
                     // the end position right.
@@ -295,7 +315,7 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 
                     if (this.findController) {
                         this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                            begin.divIdx, end.divIdx);
+                            begin.divIdx);
                     }
 
                     // Match inside new div.
@@ -359,10 +379,67 @@ itPdfViewer.factory('TextLayerBuilder', ['CustomStyle', function (CustomStyle) {
 
                 // Convert the matches on the page controller into the match format
                 // used for the textLayer.
-                this.matches = this.convertMatches(this.findController === null ?
-                    [] : (this.findController.pageMatches[this.pageIdx] || []));
+                var pageMatches, pageMatchesLength;
+                if (this.findController !== null) {
+                    pageMatches = this.findController.pageMatches[this.pageIdx] || null;
+                    pageMatchesLength = (this.findController.pageMatchesLength) ?
+                    this.findController.pageMatchesLength[this.pageIdx] || null : null;
+                }
+
+                this.matches = this.convertMatches(pageMatches, pageMatchesLength);
                 this.renderMatches(this.matches);
-            }
+            },
+
+            /**
+             * Fixes text selection: adds additional div where mouse was clicked.
+             * This reduces flickering of the content if mouse slowly dragged down/up.
+             * @private
+             */
+            _bindMouse: function TextLayerBuilder_bindMouse() {
+                var div = this.textLayerDiv;
+                var self = this;
+                div.addEventListener('mousedown', function (e) {
+                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
+                        self.textLayerRenderTask.expandTextDivs(true);
+                        return;
+                    }
+                    var end = div.querySelector('.endOfContent');
+                    if (!end) {
+                        return;
+                    }
+                    //#if !(MOZCENTRAL || FIREFOX)
+                    // On non-Firefox browsers, the selection will feel better if the height
+                    // of the endOfContent div will be adjusted to start at mouse click
+                    // location -- this will avoid flickering when selections moves up.
+                    // However it does not work when selection started on empty space.
+                    var adjustTop = e.target !== div;
+                    //#if GENERIC
+                    adjustTop = adjustTop && window.getComputedStyle(end).
+                        getPropertyValue('-moz-user-select') !== 'none';
+                    //#endif
+                    if (adjustTop) {
+                        var divBounds = div.getBoundingClientRect();
+                        var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
+                        end.style.top = (r * 100).toFixed(2) + '%';
+                    }
+                    //#endif
+                    end.classList.add('active');
+                });
+                div.addEventListener('mouseup', function (e) {
+                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
+                        self.textLayerRenderTask.expandTextDivs(false);
+                        return;
+                    }
+                    var end = div.querySelector('.endOfContent');
+                    if (!end) {
+                        return;
+                    }
+                    //#if !(MOZCENTRAL || FIREFOX)
+                    end.style.top = '';
+                    //#endif
+                    end.classList.remove('active');
+                });
+            },
         };
 
         return (TextLayerBuilder);
