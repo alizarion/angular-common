@@ -585,11 +585,15 @@ angular.module('itesoft.messaging',['ngWebSocket'])
                 }
             }
 
-            this.subscribeToTopic = function(topicname,observers){
+            this.subscribeToTopic = function(topicname,observers,retrieve){
+                if(!retrieve){
+                    retrieve =0;
+                }
+
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe',
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe?retrieve='+retrieve,
                         method: "POST",
                         data : observers,
                         headers: {
