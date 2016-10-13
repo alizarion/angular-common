@@ -41,15 +41,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "dependencies.directive:timeline",
-      "shortName": "timeline",
-      "type": "directive",
-      "moduleName": "dependencies",
-      "shortDescription": "An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.",
-      "keywords": "$document $el $rootscope $scope $timeout ac addclass addevent adipiscing ago amet angular angular-scroll-animate angular-timeline animateelementin animateelementout ante api arcu augue awesome badgeclass badgeiconclass bounce-in class congue consectetur container-fluid content contenthtml controller data-driven default defaultalign dependencies describe diam directive dolor donec egestas eget elit enim event events fa fa-check-square fa-credit-card footercontenthtml freeimages function generates glyphicon glyphicon-check glyphicon-credit-card glyphicon-time hard-code heading hendrerit history hours href html http https img-responsive info ipsum itesoft itesoft-showcase jpg js lacinia lectus left leftalign libero ligula lorem maecenas maincontroller mandatory mattis mauris module mollis nam nec ng-bind-html ng-click ng-controller ng-if ng-repeat optional pop porta praesent push quam reading removeclass responsive rightalign second sed sequence side sides sit src story text-muted third timeline timeline-hidden tincidunt title titlecontenthtml tortor twitter ultricies ut var vehicula vertical vitae viverra warning when-not-visible when-visible"
-    },
-    {
-      "section": "api",
       "id": "dependencies.directive:ui-code-mirror",
       "shortName": "ui-code-mirror",
       "type": "directive",
@@ -100,7 +91,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Button that represent tab header",
-      "keywords": "$ctrl $scope angular api attach button changetab class company console content content-url controller currency description directive feature first-group fit_height function github group group-id header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice third thirdparty title true validate-header-tab-company view-controller"
+      "keywords": "$scope analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app button class company console content content-url controller description directive feature fit_height function github header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param rendertextlayer represent row showtoolbar supplier tab table title true validate-header-tab-company"
     },
     {
       "section": "api",
@@ -109,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Div that represent tab content",
-      "keywords": "$ctrl $scope allow angular api attach changetab class company console content content-url controller currency description directive div first-group fit_height function github group group-id homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt reference rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice template third thirdparty true url view view-controller"
+      "keywords": "$ctrl $scope allow analyticalcoding-header-tab-company analyticalcoding-header-tab-invoice analyticalcoding-header-tab-supplier angular api app class company console content content-url controller description directive div fit_height function github homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param reference rendertextlayer represent row showtoolbar supplier tab table template true url view view-controller"
     },
     {
       "section": "api",
@@ -118,7 +109,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "it-tab",
       "shortDescription": "Service that manage tab link to itTab",
-      "keywords": "$scope angular api call callback change changed changetab class controller current description function groupid homectrl html isactivetab istabactive it-tab itesoft itesoft-showcase ittab js link manage method module newtabid ng-controller ontabchanged provided row service tab table tabservice"
+      "keywords": "$scope angular api call callback change changed changetab class controller current description function homectrl html isactivetab it-tab itesoft itesoft-showcase ittab js link manage method module newtabid ng-controller ontabchanged row service tab table tabservice"
     },
     {
       "section": "api",
@@ -289,7 +280,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "",
-      "keywords": "$scope $translate aec alert allow altkey angular angular-ui-layout api apply args assets background bar border border-color border-style border-width case center change class click col-md-12 color console controller cross ctrlkey current directive document domain downloadprogress ect error extension false fit_height fit_page fit_width force full function getapi getcurrentpage getnumpages getzoomlevel getzoomlevels github gotonextpage gotopage gotoprevpage guess height homectrl horizontal html http implement initial initialmode initialscale io items itesoft itesoft-showcase js layout left level levels libpath libraries list log media menu message mode mode_hand mode_text mode_zoomselection module multipage-viewer ng-controller notify num-page number onapiloaded onerror onpageclicked onpagerotation ontemplatenotfound ontextselected onzoomlevelschanged onzoomtoselection options orientation origin pageindex parameter passed pdf prev progress property rectangle red rgba rotate rotatepageleft rotatepageright rotatepagesleft rotatepagesright rotation row scale selected selectedtext selection server shiftkey shortcut showprogressbar showsizemenu showthumbnail showtoolbar size solid src stored style table template text text-align textlayer thumbnail thumbnail-viewer tiffjs tool tracemonkey-pldi-09 translate true type url vertical viewer word zoom zoomin zoomout zoomselectionshortcutkey zoomto"
+      "keywords": "$scope $translate aec alert allow angular angular-ui-layout api apply args bar border-color border-style border-width case center change class click col-md-12 console controller cross current directive disable document domain downloadprogress enable error extension false fit_height fit_page fit_width force function getapi getcurrentpage getnumpages getzoomlevel getzoomlevels github gotonextpage gotopage gotoprevpage guess height homectrl horizontal html http implement initial initialscale io items itesoft itesoft-showcase js layer layout left level levels libpath list log media menu message module multipage-viewer ng-controller notify num-page number onapiloaded onerror onpageclicked onpagerotation ontemplatenotfound onzoomlevelschanged options orientation origin pageindex parameter passed pdf prev progress property red render rendertextlayer rotate rotatepageleft rotatepageright rotatepagesleft rotatepagesright rotation row scale selected selection server showprogressbar showsizemenu showthumbnail showtoolbar size solid src style table template text text-align thumbnail thumbnail-viewer tool tracemonkey-pldi-09 translate true type url vertical viewer zoom zoomin zoomout zoomto"
     },
     {
       "section": "api",
@@ -316,7 +307,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The itPanelForm provides dynamic content panel in a form embedded.",
-      "keywords": "$scope $templatecache angular annuler api bonjour cancel cancel-label checkbox code code1 code2 codecheckbox codedate codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller date-format dd directive dynamic eirufh embedded eriufb form function homectrl html ieru ieur ieurhf input items itesoft itpanelform jours js label link mettre module ng-controller option options panel query require scope select textarea title titlecheckbox titledate titleinput1 titleinput2 titleselect1 titletextarea true type update update-label updatevalue value1 value2 valueinput1 valueinput2 valuelabel ziouee"
+      "keywords": "$scope $templatecache angular api bonjour checkbox code code1 code2 codecheckbox codedate codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller directive dynamic eirufh embedded eriufb form function homectrl html ieru ieur ieurhf input itesoft itpanelform js label link module ng-controller option options panel query require scope select textarea title titlecheckbox titledate titleinput1 titleinput2 titleselect1 titletextarea true type update updatevalue value1 value2 valueinput1 valueinput2 valuelabel ziouee"
     },
     {
       "section": "api",

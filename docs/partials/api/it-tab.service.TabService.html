@@ -18,10 +18,10 @@
  </tr>
  <tr>
      <td>
-         changeTab(newTabId, groupId)
+         changeTab(newTabId)
      </td>
      <td>
-         Change current tab (attache to the provided groupId) to newTabId
+         Change current tab to newTabId
      </td>
  </tr>
  <tr>
@@ -54,8 +54,8 @@ angular.module('itesoft-showcase',['itesoft'])
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
 angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-   TabService.onTabChanged(function (selectedTabId,groupId) {
-             self.isActiveTab = TabService.isTabActive(selectedTabId, groupId);
+   TabService.onTabChanged(function (selectedTabId) {
+             self.isActiveTab = (selectedTabId == self.id);
          });
 }]
 );
