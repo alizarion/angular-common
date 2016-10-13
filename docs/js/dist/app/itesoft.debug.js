@@ -10,10 +10,10 @@ var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'u
 
 var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
 
-angular.module('itesoft.viewer', ['it-image-viewer', 'it-tiff-viewer', 'it-pdf-viewer', 'it-multi-pages-viewer']);
+angular.module('itesoft.viewer',['it-image-viewer','it-tiff-viewer','it-pdf-viewer','it-multi-pages-viewer']);
 
 
-var itTab = angular.module("it-tab", []);
+var itTab = angular.module("it-tab",[]);
 
 
 var IteSoft = angular.module('itesoft', [
@@ -41,9 +41,57 @@ var IteSoft = angular.module('itesoft', [
     'it-tab',
     'itesoft.messaging',
     'itesoft.language',
-    'itesoft.viewer',
-    'angular-timeline'
+    'itesoft.viewer'
 ]);
+
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
 
 'use strict';
 
@@ -148,6 +196,141 @@ IteSoft
         }]);
     }]);
 
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itModalFullScreen
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * print the encapsuled content into full screen modal popup. 42
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
+ *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
+ *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
+ *  </tr>
+ * <tr>
+ *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
+ *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
+ *  </tr>
+ *  </table>
+ * @example
+ <example module="itesoft">
+     <file name="index.html">
+
+         <it-modal-full-screen  class="it-fill">
+             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+             </div>
+         </it-modal-full-screen>
+            <div konami style="height:500px">
+            </div>
+     </file>
+
+ </example>
+ */
+IteSoft
+    .directive('itModalFullScreen',
+    [ '$timeout','$window','$document',
+        function( $timeout,$window,$document) {
+
+            function _findHighestZIndex()
+            {
+                var elements = document.getElementsByTagName("*");
+                var highest_index = 0;
+
+                for (var i = 0; i < elements.length - 1; i++) {
+                    var computedStyles = $window.getComputedStyle(elements[i]);
+                    var zindex = parseInt(computedStyles['z-index']);
+                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
+                        highest_index = zindex;
+                    }
+                }
+                return highest_index;
+            }
+
+            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
+                '<div class="it-modal-full-screen-header pull-right">'+
+                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
+
+                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
+                '</div>'+
+
+                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
+                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
+                '</div>'+
+                '</div>'+
+                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
+                '</div>';
+
+            return {
+                restrict: 'EA',
+                transclude: true,
+                scope: false,
+                template: TEMPLATE,
+                link : function(scope, iElement, iAttrs, controller){
+                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
+                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
+
+                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
+                    var content = angular.element(iElement[0]
+                        .querySelector('.it-modal-full-screen'));
+                    var contentElement = angular.element(content[0]);
+                    scope.$openModal = function () {
+                        scope.$isModalOpen = true;
+                        var body = document.getElementsByTagName("html");
+                        var computedStyles = $window.getComputedStyle(body[0]);
+                        var top = parseInt(computedStyles['top']);
+                        var marginTop = parseInt(computedStyles['margin-top']);
+                        var paddingTop = parseInt(computedStyles['padding-top']);
+                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
+                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
+                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
+                        contentElement.addClass('it-opened');
+                        contentElement.css('top', topSpace+'px');
+                        if(zindex !== null){
+                            contentElement.css('z-index',zindex );
+                        } else {
+                            contentElement.css('z-index', _findHighestZIndex() +100 );
+                        }
+                        $timeout(function(){
+                            var event = document.createEvent('Event');
+                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                            $window.dispatchEvent(event);
+                        },300)
+                    };
+
+                    scope.$closeModal = function(){
+                        scope.$isModalOpen = false;
+                        scope.$applyAsync(function(){
+                            contentElement.removeAttr( 'style' );
+                            contentElement.removeClass('it-opened');
+                            $timeout(function(){
+                                var event = document.createEvent('Event');
+                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                                $window.dispatchEvent(event);
+                            },300)
+                        })
+                    };
+
+                    $document.on('keyup', function(e) {
+                        if(e){
+                            if(e.keyCode == escapeKey){
+                                scope.$closeModal();
+                            }
+                        }
+                    });
+                }
+            }
+        }]);
+
+
 'use strict';
 /**
  * Service that provide RSQL query
@@ -179,7 +362,7 @@ IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
                 }
 
                 //Suppression des " " pour séparer les milliers et des caractères non numériques
-                amountString = amountString.replace(/[^0-9,.-]/g, "");
+                amountString = amountString.replace(/[^0-9,.]/g, "");
 
                 // SI on est en France ou Italie, on peut taper . ou , pour les décimales
                 if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
@@ -236,7 +419,7 @@ IteSoft.factory('itAmountCleanerService', ['$filter',function ($filter) {
                     var amountString = amount.toString();
 
                     //Suppression des " " pour séparer les milliers et des caractères non numériques
-                    amountString = amountString.replace(/[^0-9,.-]/g, "");
+                    amountString = amountString.replace(/[^0-9,.]/g, "");
 
                     // SI on est en France ou Italie, on peut taper . ou , pour les décimales
                     if (JSON.stringify(aLocale) == JSON.stringify(supportedLocales[2]) || JSON.stringify(aLocale) == JSON.stringify(supportedLocales[4])) {
@@ -1019,141 +1202,6 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
     }
     ]
 );
-/**
- * @ngdoc directive
- * @name itesoft.directive:itModalFullScreen
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * print the encapsuled content into full screen modal popup. 42
- *
- * <table class="table">
- *  <tr>
- *   <td><pre><it-modal-full-screen it-open-class="myCssClass"></pre></td>
- *   <td>class to set on the modal popup where is expanded , default class it-modal-background </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-escape-key="27"></pre></td>
- *   <td>it-escape-key keyboard mapping for close action, default 27 "escape key" </td>
- *  </tr>
- * <tr>
- *   <td><pre><it-modal-full-screen it-z-index="700"></pre></td>
- *   <td>set the  z-index of the modal element, by default take highest index of the view.</td>
- *  </tr>
- *  </table>
- * @example
- <example module="itesoft">
-     <file name="index.html">
-
-         <it-modal-full-screen  class="it-fill">
-             <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
-             </div>
-         </it-modal-full-screen>
-            <div konami style="height:500px">
-            </div>
-     </file>
-
- </example>
- */
-IteSoft
-    .directive('itModalFullScreen',
-    [ '$timeout','$window','$document',
-        function( $timeout,$window,$document) {
-
-            function _findHighestZIndex()
-            {
-                var elements = document.getElementsByTagName("*");
-                var highest_index = 0;
-
-                for (var i = 0; i < elements.length - 1; i++) {
-                    var computedStyles = $window.getComputedStyle(elements[i]);
-                    var zindex = parseInt(computedStyles['z-index']);
-                    if ((!isNaN(zindex)? zindex : 0 )> highest_index) {
-                        highest_index = zindex;
-                    }
-                }
-                return highest_index;
-            }
-
-            var TEMPLATE = '<div class="it-modal-full-screen" ng-class="$isModalOpen? $onOpenCss : \'\'">' +
-                '<div class="it-modal-full-screen-header pull-right">'+
-                '<div  ng-if="$isModalOpen"  class="it-modal-full-screen-button ">' +
-
-                '<button class="btn " ng-click="$closeModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-compress"></i></div></button>' +
-                '</div>'+
-
-                '<div  ng-if="!$isModalOpen"  class="it-modal-full-screen-button ">' +
-                ' <button class="btn pull-right"  ng-click="$openModal()"><div class="it-animated-ciruclar-button"><i class="fa fa-expand"></i></div></button> ' +
-                '</div>'+
-                '</div>'+
-                '<div  class="it-modal-full-screen-content it-fill"  ng-transclude> </div>' +
-                '</div>';
-
-            return {
-                restrict: 'EA',
-                transclude: true,
-                scope: false,
-                template: TEMPLATE,
-                link : function(scope, iElement, iAttrs, controller){
-                    var zindex = (!isNaN(parseInt(iAttrs.itZIndex))? parseInt(iAttrs.itZIndex) : null);
-                    scope.$onOpenCss = iAttrs.itOpenClass ?iAttrs.itOpenClass : 'it-modal-background';
-
-                    var escapeKey =   (!isNaN(parseInt(iAttrs.itEscapeKey))? parseInt(iAttrs.itEscapeKey) : 27);
-                    var content = angular.element(iElement[0]
-                        .querySelector('.it-modal-full-screen'));
-                    var contentElement = angular.element(content[0]);
-                    scope.$openModal = function () {
-                        scope.$isModalOpen = true;
-                        var body = document.getElementsByTagName("html");
-                        var computedStyles = $window.getComputedStyle(body[0]);
-                        var top = parseInt(computedStyles['top']);
-                        var marginTop = parseInt(computedStyles['margin-top']);
-                        var paddingTop = parseInt(computedStyles['padding-top']);
-                        var topSpace = (!isNaN(parseInt(top))? parseInt(top) : 0) +
-                            (!isNaN(parseInt(marginTop))? parseInt(marginTop) : 0)
-                            + (!isNaN(parseInt(paddingTop))? parseInt(paddingTop) : 0);
-                        contentElement.addClass('it-opened');
-                        contentElement.css('top', topSpace+'px');
-                        if(zindex !== null){
-                            contentElement.css('z-index',zindex );
-                        } else {
-                            contentElement.css('z-index', _findHighestZIndex() +100 );
-                        }
-                        $timeout(function(){
-                            var event = document.createEvent('Event');
-                            event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                            $window.dispatchEvent(event);
-                        },300)
-                    };
-
-                    scope.$closeModal = function(){
-                        scope.$isModalOpen = false;
-                        scope.$applyAsync(function(){
-                            contentElement.removeAttr( 'style' );
-                            contentElement.removeClass('it-opened');
-                            $timeout(function(){
-                                var event = document.createEvent('Event');
-                                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                                $window.dispatchEvent(event);
-                            },300)
-                        })
-                    };
-
-                    $document.on('keyup', function(e) {
-                        if(e){
-                            if(e.keyCode == escapeKey){
-                                scope.$closeModal();
-                            }
-                        }
-                    });
-                }
-            }
-        }]);
-
-
 "use strict";
 
 /**
@@ -1755,15 +1803,10 @@ IteSoft
                         onRegisterApi : function(gridApi){
                             $scope.gridApi = gridApi;
                             gridApi.selection.on.rowSelectionChanged($scope,function(row){
-                                if($scope.itMasterDetailControl.disableMultiSelect){
-                                    _selectionChangedHandler(row);
-                                }
-
+                                _selectionChangedHandler(row);
                             });
                             gridApi.selection.on.rowSelectionChangedBatch($scope,function(row){
-                                if($scope.itMasterDetailControl.disableMultiSelect) {
-                                     _selectionChangedHandler(row);
-                                }
+                                _selectionChangedHandler(row);
                             });
 
                         },
@@ -1819,9 +1862,6 @@ IteSoft
                                 $scope.$emit("MASTER_ROW_CHANGED",col.entity);
                             }, function (msg) {
                                 itPopup.alert($scope.itMasterDetailControl.navAlert);
-                                if($scope.$parent.currentItemWrapper && $scope.itMasterDetailControl.disableMultiSelect){
-                                   $scope.gridApi.selection.toggleRowSelection($scope.$parent.currentItemWrapper.originalItem);
-                                }
                             });
                         }
                     };
@@ -4439,6 +4479,10 @@ angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile',
  *   <td>Set initial scale of media viewer.</td>
  *  </tr>
  *  <tr>
+ *   <td><code>options.renderTextLayer = true | false</code></td>
+ *   <td>only used for pdf, Enable | Disable render of html text layer.</td>
+ *  </tr>
+ *  <tr>
  *   <td><code>options.getApi()</code></td>
  *   <td>Api of media viewer.</td>
  *  </tr>
@@ -4505,10 +4549,6 @@ angular.module('itesoft.viewer').directive('itInclude', ['$timeout', '$compile',
  *  <tr>
  *   <td><code>options.api.onError = function (operation, message) { }</code></td>
  *   <td>Callback to be notify on error.</td>
- *  </tr>
- *  <tr>
- *   <td><code>options.api.onZoomToSelection = function (zoomSelection) { }</code></td>
- *   <td>Callback to be notify on zoom to rectangle.</td>
  *  </tr>
  *  <tr>
  *  <tr>
@@ -5530,319 +5570,6 @@ IteSoft
         }
 });
 'use strict';
-
-/**
- * @ngdoc directive
- * @name style2016.directive:loginForm
- * @module style2016
- * @restrict C
- * @since 1.1
- * @description
- * Itesoft style 2016 (like SCPAS)
- *
- * To enable it just add
- * <pre class="prettyprint linenums">
- * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
- * </pre>
- * add the begin of your principal scss file
- *
- * <h3>Icon</h3>
- *
- * Class that can be used to show itesoftIcons:
- * <ul>
- *     <li>
- *         error_validate
- *     </li>
- *     <li>
- *         menu_admin
- *     </li>
- *     <li>
- *         menu_home
- *     </li>
- *     <li>
- *         menu_rapport
- *     </li>
- *     <li>
- *         menu_search
- *     </li>
- *     <li>
- *         menu_settings
- *     </li>
- *     <li>
- *         menu_task
- *     </li>
- * </ul>
- *
- *
- *
- *
- * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
- *
- * @example
- <example module="itesoft-showcase">
-     <file name="index.html">
-         <link rel="stylesheet" href="css/style2016.css" type="text/css">
-            <div class="container it-login-background ">
-             <it-busy-indicator class="row-height-10">
-                     <div class="row">
-                         <div class="center-block col-xs-6 col-md-4 login-block">
-                         <div class="it-login-logo">
-                         <br>
-                         </div>
-                         </div>
-                     </div>
-                     <div class="row">
-                         <div class="center-block col-xs-6 col-md-4 login-block">
-                         <form class="form-login width-300" role="form" name="formLogin"
-                         ng-submit="$ctrl.authService.login(formLogin.username.$viewValue)">
-                                 <div class="form-group">
-                                 <input class="form-control floating-label it-login-input"
-                                 type="text"
-                                 name="username"
-                                 placeholder="{{'GLOBAL.LOGIN.USER_LABEL' | translate}}"
-                                 ng-model="loginData.login"
-                                 it-error="message"
-                                 autocomplete
-                                 required
-                                 autofocus>
-                                 </div>
-                                 <div class="form-group">
-                                 <input class="form-control floating-label it-login-input"
-                                 type="password"
-                                 name="password"
-                                 placeholder="{{'GLOBAL.LOGIN.PASSWORD_LABEL' | translate}}"
-                                 ng-model="loginData.password"
-                                 autocomplete>
-                                 </div>
-                                 <div class="form-group">
-                                 <button class="btn btn-lg btn-success btn-block it-login-button"
-                                 type="submit"
-                                 name="submit"
-                                 translate>GLOBAL.LOGIN.SUBMIT_BUTTON_LABEL
-                                 </button>
-                                 </div>
-                         </form>
-                         </div>
-                     </div>
-                </it-block>
-             </it-busy-indicator>
-             </div>
-     </file>
-     <file name="Module.js">
-        angular.module('itesoft-showcase',['itesoft'])
-     </file>
-     <file name="controller.js">
-        angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) { }]);
-     </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name style2016.directive:style2016
- * @module style2016
- * @restrict C
- * @since 1.1
- * @description
- * Itesoft style 2016 (like SCPAS)
- *
- * To enable it just add
- * <pre class="prettyprint linenums">
- * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
- * </pre>
- * add the begin of your principal scss file
- *
- * <h3>Icon</h3>
- *
- * Class that can be used to show itesoftIcons:
- * <ul>
- *     <li>
- *         error_validate
- *     </li>
- *     <li>
- *         menu_admin
- *     </li>
- *     <li>
- *         menu_home
- *     </li>
- *     <li>
- *         menu_rapport
- *     </li>
- *     <li>
- *         menu_search
- *     </li>
- *     <li>
- *         menu_settings
- *     </li>
- *     <li>
- *         menu_task
- *     </li>
- * </ul>
- *
- *
- *
- *
- * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <link rel="stylesheet" href="css/style2016.css" type="text/css">
-     <div style="background-color:#EEEEEE">
-         <div style="height:200px">
-             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-                 <li class="logo">
-                 <a href="#" class="no-padding">
-
-                 </a>
-                 </li>
-                 <li it-collapsed-item>
-                 <a href="#/home"><i class="it-icon menu_home"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/search"><i class="it-icon menu_search"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/task"><i class="it-icon menu_task"></i></a>
-                 </li>
-                 <li>
-                 <a href="#/settings"><i class="it-icon menu_settings"></i></a>
-                 </li>
-             </ul>
-         </div>
-         <div >
-             <div class="row-height-10 dashboard-with-footer" style="height:500px;padding-top:100px;position:relative">
-                 <div class="col-xs-12" style="height:185px;margin-top: -185px">
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">14
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Tasks
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">12
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Invoices
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">1
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Capture
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">15
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Scan
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="dashboard-row-indicator">
-                 <div class="dashboard-panel-container-indicator">
-                 <div class="row-height-8">
-                 <div class="dashboard-indicator-count ng-binding">22
-                 </div>
-                 </div>
-                 <div class="row-height-2">
-                 <div class="dashboard-indicator-title ng-binding">Image
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-
-                 <div class="row-height-10 dashboard-container-with-footer">
-                 <div class="left-panel row-height-10 col-xs-4">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 LEFT
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 <div class="dashboard-scrollable-content smooth">
-                 left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="middle-panel row-height-10 col-xs-4 ">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 MIDDLE
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 </div>
-                 </div>
-                 </div>
-                 <div class="right-panel row-height-10 col-xs-4 ">
-                 <div class="dashboard-panel-container">
-                 <div class="messages-title dashboard-panel-header ng-binding">
-                 RIGHT
-                 </div>
-                 <div class="dashboard-panel-content row-height-10 ">
-                 </div>
-                 </div>
-                 </div>
-                 </div>
-                 <div class="it-button-bar" style="text-align: right">
-                     <button class="btn btn-success it-button-do">
-                     <span class="ng-binding">
-                     Capturer
-                     </span>
-                     </button>
-                     <button class="btn btn-primary it-button-do">
-                     <span class="ng-binding">
-                     Envoyer
-                     </span>
-                     </button>
-                 </div>
-             </div>
-         </div>
-
-         <div style="height:500px;overflow: auto">
-             <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
-             <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
-             <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
-             <table ng-controller="HomeCtrl as $ctrl" class="table-condensed-small table-striped col-md-12"> <thead> <tr class="it-header-tab"> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.TASK_NAME' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.DATE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CATEGORY' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CODE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.DOC_NUMBER' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.NET_AMOUNT' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.TOTAL_AMOUNT' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.SUPPLIER' | translate}} </th> <th class="nowrap text-left excel-style-header"></th> <th class="nowrap text-left excel-style-header"><span class="excel-style-settings"></span></th> </tr> </thead> <tbody class="row-height-10"> <tr ng-repeat="item in $ctrl.invoices" class="it-line" ng-class="{'excel-style-row-selected': $ctrl.selectedLine.id == item.id}" ng-dblclick="$emit('goToCodingForm',{event: $event, invoiceId: $ctrl.selectedLine.invoice.id, attachmentId: $ctrl.selectedLine.attachment.id, taskId: $ctrl.selectedLine.id, taskName: $ctrl.selectedLine.name})"> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-task-name nowrap text-left excel-style-header no-border"> <span class="it-task-invoice-type">{{'TASK.DOCUMENT.TYPE.'+item.invoice.type | translate}}</span>&nbsp;{{$ctrl.taskService.getTranslatedTaskName(item.name)}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-date nowrap text-left excel-style-header no-border"> {{item.invoice.date | date:'dd/MM/yyyy HH:mm'}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-category nowrap text-left excel-style-header no-border"> {{'TASK.DOCUMENT.CATEGORY.'+item.invoice.category | translate}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-itesoft-id nowrap text-left excel-style-header no-border"> {{item.invoice.code}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-doc-number nowrap text-left excel-style-header no-border"> {{item.docNumber}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-net-amount nowrap text-right excel-style-header no-border"> {{item.netAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-total-amount nowrap text-right excel-style-header no-border"> {{item.totalAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-supplier-name nowrap text-left excel-style-header no-border"> {{item.supplierName}} </div> </td> <td colspan="2" ng-click=""> <button class="small-btn btn-primary" title="{{'GLOBAL.BUTTON.FOLLOW_REMOVE' | translate}}"> <i class="fa fa-trash"></i> </button> </td> </tr> </tbody> </table>
-        </div>
-     </div>
-
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-  var self = this; self.selectedLine = {} ; self.invoices = [{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 } ]; self.updateSelectedLine = function (item) { self.selectedLine = item; };
-  }]) ;
- </file>
- </example>
- */
-'use strict';
 /**
  * @ngdoc directive
  * @name itesoft.directive:itSidePanel
@@ -6647,6 +6374,319 @@ IteSoft
 'use strict';
 
 /**
+ * @ngdoc directive
+ * @name style2016.directive:loginForm
+ * @module style2016
+ * @restrict C
+ * @since 1.1
+ * @description
+ * Itesoft style 2016 (like SCPAS)
+ *
+ * To enable it just add
+ * <pre class="prettyprint linenums">
+ * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
+ * </pre>
+ * add the begin of your principal scss file
+ *
+ * <h3>Icon</h3>
+ *
+ * Class that can be used to show itesoftIcons:
+ * <ul>
+ *     <li>
+ *         error_validate
+ *     </li>
+ *     <li>
+ *         menu_admin
+ *     </li>
+ *     <li>
+ *         menu_home
+ *     </li>
+ *     <li>
+ *         menu_rapport
+ *     </li>
+ *     <li>
+ *         menu_search
+ *     </li>
+ *     <li>
+ *         menu_settings
+ *     </li>
+ *     <li>
+ *         menu_task
+ *     </li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
+ *
+ * @example
+ <example module="itesoft-showcase">
+     <file name="index.html">
+         <link rel="stylesheet" href="css/style2016.css" type="text/css">
+            <div class="container it-login-background ">
+             <it-busy-indicator class="row-height-10">
+                     <div class="row">
+                         <div class="center-block col-xs-6 col-md-4 login-block">
+                         <div class="it-login-logo">
+                         <br>
+                         </div>
+                         </div>
+                     </div>
+                     <div class="row">
+                         <div class="center-block col-xs-6 col-md-4 login-block">
+                         <form class="form-login width-300" role="form" name="formLogin"
+                         ng-submit="$ctrl.authService.login(formLogin.username.$viewValue)">
+                                 <div class="form-group">
+                                 <input class="form-control floating-label it-login-input"
+                                 type="text"
+                                 name="username"
+                                 placeholder="{{'GLOBAL.LOGIN.USER_LABEL' | translate}}"
+                                 ng-model="loginData.login"
+                                 it-error="message"
+                                 autocomplete
+                                 required
+                                 autofocus>
+                                 </div>
+                                 <div class="form-group">
+                                 <input class="form-control floating-label it-login-input"
+                                 type="password"
+                                 name="password"
+                                 placeholder="{{'GLOBAL.LOGIN.PASSWORD_LABEL' | translate}}"
+                                 ng-model="loginData.password"
+                                 autocomplete>
+                                 </div>
+                                 <div class="form-group">
+                                 <button class="btn btn-lg btn-success btn-block it-login-button"
+                                 type="submit"
+                                 name="submit"
+                                 translate>GLOBAL.LOGIN.SUBMIT_BUTTON_LABEL
+                                 </button>
+                                 </div>
+                         </form>
+                         </div>
+                     </div>
+                </it-block>
+             </it-busy-indicator>
+             </div>
+     </file>
+     <file name="Module.js">
+        angular.module('itesoft-showcase',['itesoft'])
+     </file>
+     <file name="controller.js">
+        angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) { }]);
+     </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name style2016.directive:style2016
+ * @module style2016
+ * @restrict C
+ * @since 1.1
+ * @description
+ * Itesoft style 2016 (like SCPAS)
+ *
+ * To enable it just add
+ * <pre class="prettyprint linenums">
+ * @ import "../lib/angular-common/dist/assets/scss/style2016/style2016";
+ * </pre>
+ * add the begin of your principal scss file
+ *
+ * <h3>Icon</h3>
+ *
+ * Class that can be used to show itesoftIcons:
+ * <ul>
+ *     <li>
+ *         error_validate
+ *     </li>
+ *     <li>
+ *         menu_admin
+ *     </li>
+ *     <li>
+ *         menu_home
+ *     </li>
+ *     <li>
+ *         menu_rapport
+ *     </li>
+ *     <li>
+ *         menu_search
+ *     </li>
+ *     <li>
+ *         menu_settings
+ *     </li>
+ *     <li>
+ *         menu_task
+ *     </li>
+ * </ul>
+ *
+ *
+ *
+ *
+ * See http://seraimtfs11:8080/tfs/ItesoftCollection/ItesoftDev/_git/QuickStartSCPAS. to show how to use it ;)
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <link rel="stylesheet" href="css/style2016.css" type="text/css">
+     <div style="background-color:#EEEEEE">
+         <div style="height:200px">
+             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+                 <li class="logo">
+                 <a href="#" class="no-padding">
+
+                 </a>
+                 </li>
+                 <li it-collapsed-item>
+                 <a href="#/home"><i class="it-icon menu_home"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/search"><i class="it-icon menu_search"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/task"><i class="it-icon menu_task"></i></a>
+                 </li>
+                 <li>
+                 <a href="#/settings"><i class="it-icon menu_settings"></i></a>
+                 </li>
+             </ul>
+         </div>
+         <div >
+             <div class="row-height-10 dashboard-with-footer" style="height:500px;padding-top:100px;position:relative">
+                 <div class="col-xs-12" style="height:185px;margin-top: -185px">
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">14
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Tasks
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">12
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Invoices
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">1
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Capture
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">15
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Scan
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="dashboard-row-indicator">
+                 <div class="dashboard-panel-container-indicator">
+                 <div class="row-height-8">
+                 <div class="dashboard-indicator-count ng-binding">22
+                 </div>
+                 </div>
+                 <div class="row-height-2">
+                 <div class="dashboard-indicator-title ng-binding">Image
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+
+                 <div class="row-height-10 dashboard-container-with-footer">
+                 <div class="left-panel row-height-10 col-xs-4">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 LEFT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 <div class="dashboard-scrollable-content smooth">
+                 left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>left<br/>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="middle-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 MIDDLE
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 <div class="right-panel row-height-10 col-xs-4 ">
+                 <div class="dashboard-panel-container">
+                 <div class="messages-title dashboard-panel-header ng-binding">
+                 RIGHT
+                 </div>
+                 <div class="dashboard-panel-content row-height-10 ">
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 <div class="it-button-bar" style="text-align: right">
+                     <button class="btn btn-success it-button-do">
+                     <span class="ng-binding">
+                     Capturer
+                     </span>
+                     </button>
+                     <button class="btn btn-primary it-button-do">
+                     <span class="ng-binding">
+                     Envoyer
+                     </span>
+                     </button>
+                 </div>
+             </div>
+         </div>
+
+         <div style="height:500px;overflow: auto">
+             <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+             <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+             <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+             <table ng-controller="HomeCtrl as $ctrl" class="table-condensed-small table-striped col-md-12"> <thead> <tr class="it-header-tab"> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.TASK_NAME' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.DATE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CATEGORY' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.INVOICE.CODE' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.DOC_NUMBER' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.NET_AMOUNT' | translate}} </th> <th class="nowrap text-right excel-style-header">{{'TASK.LINES.TABLE.TOTAL_AMOUNT' | translate}} </th> <th class="nowrap text-left excel-style-header">{{'TASK.LINES.TABLE.SUPPLIER' | translate}} </th> <th class="nowrap text-left excel-style-header"></th> <th class="nowrap text-left excel-style-header"><span class="excel-style-settings"></span></th> </tr> </thead> <tbody class="row-height-10"> <tr ng-repeat="item in $ctrl.invoices" class="it-line" ng-class="{'excel-style-row-selected': $ctrl.selectedLine.id == item.id}" ng-dblclick="$emit('goToCodingForm',{event: $event, invoiceId: $ctrl.selectedLine.invoice.id, attachmentId: $ctrl.selectedLine.attachment.id, taskId: $ctrl.selectedLine.id, taskName: $ctrl.selectedLine.name})"> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-task-name nowrap text-left excel-style-header no-border"> <span class="it-task-invoice-type">{{'TASK.DOCUMENT.TYPE.'+item.invoice.type | translate}}</span>&nbsp;{{$ctrl.taskService.getTranslatedTaskName(item.name)}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-date nowrap text-left excel-style-header no-border"> {{item.invoice.date | date:'dd/MM/yyyy HH:mm'}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-invoice-category nowrap text-left excel-style-header no-border"> {{'TASK.DOCUMENT.CATEGORY.'+item.invoice.category | translate}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-itesoft-id nowrap text-left excel-style-header no-border"> {{item.invoice.code}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-doc-number nowrap text-left excel-style-header no-border"> {{item.docNumber}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-net-amount nowrap text-right excel-style-header no-border"> {{item.netAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-total-amount nowrap text-right excel-style-header no-border"> {{item.totalAmount | currency}} </div> </td> <td ng-click="$ctrl.updateSelectedLine(item)"> <div class=" it-task-lines-table-supplier-name nowrap text-left excel-style-header no-border"> {{item.supplierName}} </div> </td> <td colspan="2" ng-click=""> <button class="small-btn btn-primary" title="{{'GLOBAL.BUTTON.FOLLOW_REMOVE' | translate}}"> <i class="fa fa-trash"></i> </button> </td> </tr> </tbody> </table>
+        </div>
+     </div>
+
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
+  var self = this; self.selectedLine = {} ; self.invoices = [{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 }, { "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 },{ "id": 18900, "name": "Accounting Code", "invoice": { "id": "184a7026-cb81-4a59-b9b1-43f05cb5f14c", "code": "201607201642271", "date": "2016-02-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "18822"}, "supplierName": "EDF", "docNumber": "FAC1000006", "netAmount": 100000.0, "totalAmount": 118550.0 }, { "id": 20900, "name": "Accounting Code", "invoice": { "id": "184a7026-c231-4a59-b9b1-43f05cb5f14c", "code": "201607201642481", "date": "2017-08-15T00:00:00Z", "type": "INV", "category": "WOPO" }, "owner": null, "attachment": {"id": "19822"}, "supplierName": "PMU", "docNumber": "FAC1000006", "netAmount": 100010.0, "totalAmount": 122050.0 } ]; self.updateSelectedLine = function (item) { self.selectedLine = item; };
+  }]) ;
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
  * @ngdoc service
  * @name itesoft.service:CurrentErrorsService
  * @module itesoft
@@ -6829,26 +6869,10 @@ IteSoft.factory('CurrentErrors', [function () {
  *  </tr>
  *  <tr>
  *      <td>
- *          title
- *      </td>
- *      <td>
- *          Button title
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *          id
  *      </td>
  *      <td>
  *          tab identifier (must be the same that tab content id)
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
- *          group-id
- *      </td>
- *      <td>
- *          group identifier (must be the same that the id of group tab content )
  *      </td>
  *  </tr>
  *  </table>
@@ -6863,104 +6887,59 @@ IteSoft.factory('CurrentErrors', [function () {
  <example module="itesoft-showcase">
  <file name="index.html">
  <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" title="'COMPANY'"  id="'tab-company'"></it-tab>
- <it-tab label="'Supplier'" title="'SUPPLIER'" id="'tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" title="'INVOICE'" id="'tab-invoice'"></it-tab>
- <it-tab-content id="'tab-company'" content-url="'company.html'"></it-tab-content>
- <it-tab-content id="'tab-supplier'" content-url="'supplier.html'"></it-tab-content>
- <it-tab-content id="'tab-invoice'" content-url="'invoice.html'"></it-tab-content>
-
-
- <!-- Tab with group id -->
- <it-tab label="'Currency'" group-id="'first-group'" title="'CURRENCY'" id="'tab-currency'"></it-tab>
- <it-tab label="'ThirdParty'" group-id="'first-group'" title="'THIRD PARTY'" id="'tab-thirdparty'"></it-tab>
- <it-tab label="'Receipt'" group-id="'first-group'" title="'RECEIPT'" id="'tab-receipt'"></it-tab>
- <it-tab-content group-id="'first-group'" id="'tab-currency'" view-controller="$ctrl"content-url="'currency.html'"></it-tab-content>
- <it-tab-content group-id="'first-group'" id="'tab-thirdparty'" view-controller="$ctrl"  content-url="'thirdparty.html'"></it-tab-content>
- <it-tab-content group-id="'first-group'" id="'tab-receipt'" view-controller="$ctrl"  content-url="'receipt.html'"></it-tab-content>
-
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
  </div>
  </file>
  <file name="Module.js">
  angular.module('itesoft-showcase',['itesoft'])
  </file>
- <file name="company.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;company </p></div>
- </file>
- <file name="supplier.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;supplier</p></div>
- </file>
- <file name="invoice.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invoice</p></div>
- </file>
- <file name="currency.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency</p></div>
- </file>
- <file name="thirdparty.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thirdparty</p></div>
- </file>
- <file name="receipt.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receipt</p></div>
- </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope','TabService', function($scope,TabService) {
-    $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } };
-    //activation of tab-currency which is attach to the group 'first-group'
-    TabService.changeTab('tab-currency','first-group');
-    //activation of tab-company
-    TabService.changeTab('tab-supplier');
- }]);
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */
 itTab.component('itTab', {
-    bindings: {
-        groupId: '=',
-        id: '=',
-        label: '<',
-        title: '<'
-    },
-    template: '<button class="btn header-tab full-width " ng-click="$ctrl.fn.changeTab()"' +
-    ' title="{{$ctrl.title |translate}}" ng-disabled="$ctrl.fn.isTabActive()"><i class="fa' +
-    ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.fn.hasError()"></i> ' +
-    '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.fn.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
-    controller: [
-        '$rootScope',
-        'CurrentErrors',
-        'TabService',
-        function ($rootScope,
-                  CurrentErrors,
-                  TabService) {
+        bindings: {
+            id: '=',
+            label: '='
+        },
+        template: '<button class="btn header-tab full-width " ng-click="$ctrl.changeTab()"' +
+        ' title="{{\'ACCOUNTING_CODING.PAYMENT.TITLE\' |translate }}" ng-disabled="$ctrl.isActiveTab"> <i class="fa' +
+        ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.hasError()"></i> ' +
+        '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
+    controller
+:
+['$rootScope',  'CurrentErrors', 'TabService', function ($rootScope, CurrentErrors, TabService) {
 
-            var self = this;
+    var self = this;
+    self.isActiveTab = false;
 
-            self.fn = {
-                isTabActive: _isTabActive,
-                hasError: _hasError,
-                hasWarning: _hasWarning,
-                changeTab: _changeTab
-            };
+    self.hasError = _hasError;
+    self.hasWarning = _hasWarning;
+    self.changeTab = _changeTab;
 
-            TabService.onTabChanged(function (selectedTabId, groupId) {
-                TabService.isTabActive(selectedTabId, groupId);
-            });
+    self.isActiveTab = (TabService.currentActiveTabId == self.id);
+    TabService.onTabChanged(function (selectedTabId) {
+        self.isActiveTab = (selectedTabId == self.id);
+    });
 
-            function _isTabActive() {
-                return TabService.isTabActive(self.id, self.groupId);
-            }
+    function _changeTab() {
+        TabService.changeTab(self.id);
+    }
 
-            function _changeTab() {
-                TabService.changeTab(self.id, self.groupId);
-            }
+    function _hasError() {
+        return CurrentErrors.hasError(self.id);
+    }
 
-            function _hasError() {
-                return CurrentErrors.hasError(self.id);
-            }
-
-            function _hasWarning() {
-                return CurrentErrors.hasWarning(self.id);
-            }
-        }]
+    function _hasWarning() {
+        return CurrentErrors.hasWarning(self.id);
+    }
+}]
 })
 ;
 'use strict';
@@ -7003,14 +6982,6 @@ itTab.component('itTab', {
  *  </tr>
  *  <tr>
  *      <td>
- *          group-id
- *      </td>
- *      <td>
- *          group identifier (must be the same that group tab id)
- *      </td>
- *  </tr>
- *  <tr>
- *      <td>
  *         content-url
  *      </td>
  *      <td>
@@ -7022,92 +6993,49 @@ itTab.component('itTab', {
  <example module="itesoft-showcase">
  <file name="index.html">
  <div ng-controller="HomeCtrl" class="row">
- <!-- Tab without group id -->
- <it-tab label="'Company'" id="'tab-company'"></it-tab>
- <it-tab label="'Supplier'" id="'tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" id="'tab-invoice'"></it-tab>
- <it-tab-content id="'tab-company'" view-controller="$ctrl"  content-url="'company.html'"></it-tab-content>
- <it-tab-content id="'tab-supplier'" view-controller="$ctrl"  content-url="'supplier.html'"></it-tab-content>
- <it-tab-content id="'tab-invoice'" view-controller="$ctrl"  content-url="'invoice.html'"></it-tab-content>
-
- <!-- Tab with group id -->
- <it-tab label="'Currency'" group-id="'first-group'" id="'tab-currency'"></it-tab>
- <it-tab label="'Third Party'" group-id="'first-group'" id="'tab-thirdparty'"></it-tab>
- <it-tab label="'Receipt'" group-id="'first-group'" id="'tab-receipt'"></it-tab>
- <it-tab-content group-id="'first-group'" id="'tab-currency'" view-controller="$ctrl"content-url="'currency.html'"></it-tab-content>
- <it-tab-content group-id="'first-group'" id="'tab-thirdparty'" view-controller="$ctrl"  content-url="'thirdparty.html'"></it-tab-content>
- <it-tab-content group-id="'first-group'" id="'tab-receipt'" view-controller="$ctrl"  content-url="'receipt.html'"></it-tab-content>
+ <it-tab label="'Company'" id="'analyticalCoding-header-tab-company'"></it-tab>
+ <it-tab label="'Supplier'" id="'analyticalCoding-header-tab-supplier'"></it-tab>
+ <it-tab label="'Invoice'" id="'analyticalCoding-header-tab-invoice'"></it-tab>
+ <it-tab-content id="'analyticalCoding-header-tab-company'" view-controller="$ctrl"  content-url="'app/features/settings/view/company.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-supplier'" view-controller="$ctrl"  content-url="'app/features/settings/view/supplier.html'"></it-tab-content>
+ <it-tab-content id="'analyticalCoding-header-tab-invoice'" view-controller="$ctrl"  content-url="'app/features/settings/view/invoice.html'"></it-tab-content>
  </div>
  </file>
  <file name="Module.js">
  angular.module('itesoft-showcase',['itesoft'])
  </file>
- <file name="company.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;company</p></div>
- </file>
- <file name="supplier.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;supplier</p></div>
- </file>
- <file name="invoice.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;invoice</p></div>
- </file>
- <file name="currency.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currency</p></div>
- </file>
- <file name="thirdparty.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thirdparty</p></div>
- </file>
- <file name="receipt.html">
- <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;receipt</p></div>
- </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope','TabService', function($scope,TabService) {
-  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } };
-       //activation of tab-currency which is attach to the group 'first-group'
-    TabService.changeTab('tab-currency','first-group');
-    //activation of tab-company
-    TabService.changeTab('tab-supplier');
- }]);
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */
 
 itTab.component('itTabContent', {
-    restrict: 'E',
-    bindings: {
-        groupId: '=',
-        id: '=',
-        contentUrl: '=',
-        viewController: '='
-    },
-    template: '<div ng-show="$ctrl.fn.isTabActive()"' +
-    '                class="row-height-10 under-tabs-container bloc-border-left">' +
-    '           <div id="{{$ctrl.id}}" group-id="{{$ctrl.groupId}}" class="it-scpas-bloc-content-scrollable it-fill' +
-    ' content-tab"' +
-    '               ng-include="$ctrl.contentUrl"></div>' +
-    '           </div>',
-    controller: [
-        '$rootScope',
-        'TabService',
-        function ($rootScope,
-                  TabService) {
+        restrict: 'E',
+        bindings: {
+            id: '=',
+            contentUrl: '=',
+            viewController: '='
+        },
+        template: '<div ng-show="$ctrl.isActiveTab"' +
+        '                class="row-height-10 under-tabs-container bloc-border-left">' +
+        '           <div id="{{$ctrl.id}}" class="it-scpas-bloc-content-scrollable it-fill content-tab"' +
+        '               ng-include="$ctrl.contentUrl"></div>' +
+        '           </div>',
+        controller: ['$rootScope', 'TabService',
+            function ($rootScope, TabService) {
 
-            var self = this;
-            self.fn = {
-                isTabActive: _isTabActive
-            };
+                var self = this;
+                self.isActiveTab = false;
 
+                self.isActiveTab = (TabService.currentActiveTabId == self.id);
 
-            TabService.onTabChanged(function (selectedTabId, groupId) {
-                TabService.isTabActive(selectedTabId, groupId);
-            });
+                TabService.onTabChanged(function (selectedTabId) {
+                    self.isActiveTab = (selectedTabId == self.id);
+                });
 
-            function _isTabActive() {
-                return TabService.isTabActive(self.id, self.groupId);
-            }
-
-        }]
-});
+            }]
+    });
 'use strict';
 
 /**
@@ -7131,10 +7059,10 @@ itTab.component('itTabContent', {
  *  </tr>
  *  <tr>
  *      <td>
- *          changeTab(newTabId, groupId)
+ *          changeTab(newTabId)
  *      </td>
  *      <td>
- *          Change current tab (attache to the provided groupId) to newTabId
+ *          Change current tab to newTabId
  *      </td>
  *  </tr>
  *  <tr>
@@ -7157,8 +7085,8 @@ itTab.component('itTabContent', {
  </file>
  <file name="controller.js">
  angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {
-    TabService.onTabChanged(function (selectedTabId,groupId) {
-              self.isActiveTab = TabService.isTabActive(selectedTabId, groupId);
+    TabService.onTabChanged(function (selectedTabId) {
+              self.isActiveTab = (selectedTabId == self.id);
           });
  }]
  );
@@ -7167,70 +7095,37 @@ itTab.component('itTabContent', {
  */
 
 itTab.factory('TabService', [function () {
-    var self = this;
+        var self = this;
+        self.tabChangedCallBacks = [];
+        self.changeTab = _changeTab;
+        self.onTabChanged = _onTabChanged;
+        self.currentActiveTabId = "";
 
-    var _DEFAULT_TAB_GROUP = '_IT_DEFAULT_TAB_GROUP';
-
-    self.tabChangedCallBacks = [];
-    self.changeTab = _changeTab;
-    self.onTabChanged = _onTabChanged;
-    self.isTabActive = _isTabActive;
-    self.currentActiveTabIds = [];
-
-    /**
-     * Change current active tab
-     * @param newTabId id of the tab
-     * @param groupId id of the group
-     * @private
-     */
-    function _changeTab(newTabId, groupId) {
-        if (checkGroupId(groupId)) {
-            self.currentActiveTabIds[_DEFAULT_TAB_GROUP] = newTabId;
-        } else {
-            self.currentActiveTabIds[groupId] = newTabId;
+        /**
+         * Change current active tab
+         * @param newTabId
+         * @private
+         */
+        function _changeTab(newTabId) {
+            self.currentActiveTabId = newTabId;
+            self.tabChangedCallBacks.forEach(function (callBack) {
+                if (angular.isDefined(callBack)) {
+                    callBack(newTabId);
+                }
+            })
         }
 
-        self.tabChangedCallBacks.forEach(function (callBack) {
-            if (angular.isDefined(callBack)) {
-                callBack(newTabId, groupId);
-            }
-        });
-    }
-
-    function checkGroupId(groupId) {
-        return !angular.isDefined(groupId) || groupId == null || groupId === '';
-    }
-
-
-    /**
-     * Does the tab is active
-     * @param tabId the identifier of the tab
-     * @param groupId the identifier of the tab group
-     * @returns {boolean}
-     * @private
-     */
-    function _isTabActive(tabId, groupId) {
-        var result = false;
-
-        if (checkGroupId(groupId)) {
-            result = self.currentActiveTabIds[_DEFAULT_TAB_GROUP] === tabId;
-        } else {
-            result = self.currentActiveTabIds[groupId] === tabId;
+        /**
+         * Register listener changed
+         * @param callBack
+         * @private
+         */
+        function _onTabChanged(callBack) {
+            self.tabChangedCallBacks.push(callBack)
         }
-        return result;
-    }
 
-    /**
-     * Register listener changed
-     * @param callBack
-     * @private
-     */
-    function _onTabChanged(callBack) {
-        self.tabChangedCallBacks.push(callBack)
-    }
-
-    return self;
-}]);
+        return self;
+    }]);
 
 /**
  * Created by sza on 22/04/2016.
@@ -7241,19 +7136,19 @@ IteSoft
         function ($resource, itConfig) {
             return {
                 custom: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/blocks/custom/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/custom/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 all: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/blocks/all/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/all/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 original: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/blocks/original/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/original/:name'),
                 customByOriginal: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/original/' + itConfig.get().CURRENT_PACKAGE + '/:name/custom'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/original/' + itConfig.get().CURRENT_PACKAGE + '/:name/custom'),
                 restore: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/blocks/restore/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/blocks/restore/' + itConfig.get().CURRENT_PACKAGE + '/:name'),
                 build: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/packages/build'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/packages/build'),
                 preview: $resource(
-                    itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/packages/preview'),
+                    itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/packages/preview'),
                 'new': function (name, ref, position, content, roleAllowed, version, removed, element) {
                     return {
                         'name': name,
@@ -7273,7 +7168,6 @@ IteSoft
  * @name itesoft.directive:itBlock
  * @module itesoft
  * @restrict EAC
- * @since 1.2
  *
  * @description
  * The Block widgets provides  way to customize UI.
@@ -7433,7 +7327,6 @@ IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, Bl
  * @name itesoft.directive:itBlockControlPanel
  * @module itesoft
  * @restrict E
- * @since 1.2
  *
  * @description
  * The Control Panel Block widgets provides a way to activate it-block edition
@@ -7561,7 +7454,7 @@ IteSoft.directive('itBlockControlPanel',
                             self.itConfig = itConfig;
                             self.blocks = [];
                             self.availableBlocks = [];
-                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/t4html/rest/export/' + itConfig.get().CURRENT_PACKAGE;
+                            self.url = itConfig.get().REST_TEMPLATE_API_URL + '/api/rest/export/' + itConfig.get().CURRENT_PACKAGE;
                             this.refresh = function () {
                                 BlockService.build.get(function () {
                                     location.reload();
@@ -7573,15 +7466,7 @@ IteSoft.directive('itBlockControlPanel',
                                 });
                             };
                             self.interval = 0;
-
-                            /**
-                             * Wait WS before calling option
-                             * @param response
-                             */
-                            PilotService.on.open = function (response) {
-                                _options();
-                            };
-
+                            _options();
                             PilotSiteSideService.on.pong = function (res) {
                                 $log.debug("pong");
                                 $scope.$applyAsync(function () {
@@ -7971,7 +7856,7 @@ IteSoft.factory('PilotService', ['$resource', '$log', 'itConfig',
             self.fields = {
                 socket: {},
                 request: {
-                    url: itConfig.get().REST_TEMPLATE_API_URL + "/t4html/editor",
+                    url: itConfig.get().REST_TEMPLATE_API_URL + "/api/editor",
                     contentType: 'application/json',
                     logLevel: 'debug',
                     transport: 'websocket',
@@ -8452,14 +8337,13 @@ IteSoft
  *    <it-panel-form option="option" ></it-panel-form>
  * ```
  *
- *
  * @example
  <example module="itesoft">
  <file name="index.html">
  <style>
  </style>
  <div ng-controller="HomeCtrl" >
- <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
+ <it-panel-form options="options" update="updateValue(options)"></it-panel-form>
  </div>
  </file>
  <file name="controller.js">
@@ -8471,16 +8355,17 @@ IteSoft
           {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
           {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
-          {"title":"titleSelect1", "code": "codeSelect1", "items":
+          {"title":"titleSelect1", "code": "codeSelect1", "value":
              [{"code": "code1", "value": "value1"},
-             {"code": "code2", "value": "value2"}], value:"code1",
+             {"code": "code2", "value": "value2"}],
           "type":"select"},
-          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkbox"},
+          {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkBox"},
           {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
-          "type":"textarea"},
+          "type":"textArea"},
           {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
           {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
         ];
+
     }
  ]
  );
@@ -8488,65 +8373,65 @@ IteSoft
  </example>
  */
 IteSoft.component('itPanelForm', {
-        bindings:{
-            options:'=',
-            dateFormat:'@',
-            updateLabel:'@',
-            update: '&',
-            cancel: '&',
-            cancelLabel:'@'
-        },
-    template:'<div class="it-ac-panel-form">' +
-    '<form name="$ctrl.form" novalidate>'+
+
+    bindings: {
+        options: '=',
+        dateFormat: '@',
+        updateLabel: '@',
+        update: '&'
+    },
+    template: '<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>' +
     '<div ng-repeat="option in $ctrl.options">' +
-    '<div class="row panelFormRow">' +
-    '<div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} :</label></div>' +
-    '<div ng-switch on="option.type">'+
-    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6 "><div ng-include=" \'labelTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="checkbox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="textarea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>'+
+    '<div class="row">' +
+    '<div class="col-xs-3 col-md-4 col-lg-6"> <label>{{option.title}} :</label></div>' +
+    '<div ng-switch on="option.type">' +
+    '<div ng-switch-when="label" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'labelTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="input" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'inputTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="select" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'selectTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="date" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'dateTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="checkBox" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'checkBoxTemplate.html\' "></div></div>' +
+    '<div ng-switch-when="textArea" class="col-xs-3 col-md-4 col-lg-6"><div ng-include=" \'textAreaTemplate.html\' "></div></div>' +
     '</div>' +
     '</div>' +
     '</div>' +
-    '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
-    '<button type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
-    '</div>'+
-    '<!------------------- Template label ------------------->'+
-    '<script type="text/ng-template" id="labelTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<p>{{option.value}}</p></div>'+
-    '</script>'+
-    '<!------------------- Template input ------------------->'+
-    '<script type="text/ng-template" id="inputTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<p><input it-input class="form-control floating-label" type="text" ng-model="option[\'value\']" name="input" it-label=""></p></div>'+
-    '</script>'+
-    '<!------------------- Template select ------------------->'+
-    '<script type="text/ng-template" id="selectTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<button type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button></form>' +
+    '</div>' +
+    '<!------------------- Template label ------------------->' +
+    '<script type="text/ng-template" id="labelTemplate.html">' +
+    '<p>{{option.value}}</p>' +
+    '</script>' +
+    '<!------------------- Template input ------------------->' +
+    '<script type="text/ng-template" id="inputTemplate.html">' +
+    '<p><input type="text" ng-model="option[\'value\']" name="input" value="{{option.value}}"></p>' +
+    '</script>' +
+    '<!------------------- Template select ------------------->' +
+    '<script type="text/ng-template" id="selectTemplate.html">' +
     '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value"' +
     ' ng-options="value.value for value in option.items"/>' +
-    '</select></p></div> '+
-    '</script>'+
-    '<!------------------- Template checkbox ------------------->'+
-    '<script type="text/ng-template" id="checkBoxTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
+    '</select></p> ' +
     '</script>' +
-    '<!------------------- Template textArea ------------------->'+
-    '<script type="text/ng-template" id="textAreaTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p></div>'+
-    '</script>'+
-    '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
-    '<script type="text/ng-template" id="dateTemplate.html"><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<!------------------- Template checkbox ------------------->' +
+    '<script type="text/ng-template" id="checkBoxTemplate.html">' +
+    '<p><input type="checkbox" ng-model="option[\'value\']" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>' +
+    '</script>' +
+    '<!------------------- Template textArea ------------------->' +
+    '<script type="text/ng-template" id="textAreaTemplate.html">' +
+    '<p><textarea ng-model="option[\'value\']" name="textArea"></textarea></p>' +
+    '</script>' +
+    '<!------------------- Template date ------------------->' +
+    '<script type="text/ng-template" id="dateTemplate.html">' +
     '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
     'ng-model="option[\'value\']" data-autoclose="1" ' +
-    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p></div>'+
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p>' +
     '</script>',
-        controller: ['$scope', function($scope){
+    controller: ['$scope', function ($scope) {
 
-            var self = this;
+        //TODO gérer la locale pour l'affichage des dates
+        //Get current locale
+        // var locale = localStorageService.get('Locale');
 
+        var self = this;
 
         if (self.dateFormat == undefined) {
             self.dateFormat = "dd/MM/yyyy";
@@ -8555,10 +8440,6 @@ IteSoft.component('itPanelForm', {
         if (self.updateLabel == undefined) {
             self.updateLabel = "Update";
         }
-
-            if(self.cancelLabel == undefined){
-                self.cancelLabel = "Cancel";
-            }
 
 
     }]
@@ -8615,258 +8496,12 @@ IteSoft
         }
     });
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
-'use strict';
-
-
-/**
- * @ngdoc directive
- * @name dependencies.directive:timeline
- * @module dependencies
- * @since 1.2
- * @description
- * An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.
- * See more :  {@link https://gitlab.com/itesoft/timeline}
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-
-
- <div class="container-fluid"  ng-controller="mainController">
- <h1>Angular Timeline</h1>
- <button ng-click="addEvent()">Add New Event</button>
- <button ng-click="leftAlign()">Left Side</button>
- <button ng-click="rightAlign()">Right Side</button>
- <button ng-click="defaultAlign()">Alternate Sides</button>
- <br/>
- <br/>
- <timeline>
- <!-- can also hard-code to side="left" or side="right" -->
- <timeline-event ng-repeat="event in events" side="{{side}}">
- <!-- uses angular-scroll-animate to give it some pop -->
- <timeline-badge class="{{event.badgeClass}} timeline-hidden"
- when-visible="animateElementIn" when-not-visible="animateElementOut">
- <i class="glyphicon {{event.badgeIconClass}}"></i>
- </timeline-badge>
-
- <!-- uses angular-scroll-animate to give it some pop -->
- <timeline-panel class="{{event.badgeClass}} timeline-hidden"
- when-visible="animateElementIn" when-not-visible="animateElementOut">
- <timeline-heading>
- <h4>{{event.title}}</h4>
-
- <p ng-if="event.when">
- <small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{event.when}}</small>
- </p>
- <p ng-if="event.titleContentHtml" ng-bind-html="event.titleContentHtml">
- </p>
- </timeline-heading>
- <p ng-bind-html="event.contentHtml"></p>
- <timeline-footer ng-if="event.footerContentHtml">
- <span ng-bind-html="event.footerContentHtml"></span>
- </timeline-footer>
- </timeline-panel>
- </timeline-event>
- </timeline>
- </div>
-
-
-
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['angular-timeline','itesoft']);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase').controller('mainController', ['$rootScope','$document','$timeout','$scope',
- function($rootScope, $document, $timeout, $scope) {
-
-        var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. " +
-                      "Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor." +
-                      "Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, " +
-                      "ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor." +
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-
-        $scope.side = '';
-
-
-
-        $scope.events = [{
-            badgeClass: 'info',
-            badgeIconClass: 'fa fa-check-square',
-            title: 'First heading',
-            when: '11 hours ago via Twitter',
-            content: 'Some awesome content.'
-        }, {
-            badgeClass: 'warning',
-            badgeIconClass: 'fa fa-credit-card',
-            title: 'Second heading',
-            when: '12 hours ago via Twitter',
-            content: 'More awesome content.'
-        }, {
-            badgeClass: 'default',
-            badgeIconClass: 'glyphicon-credit-card',
-            title: 'Third heading',
-            titleContentHtml: '<img class="img-responsive" src="http://www.freeimages.com/assets/183333/1833326510/wood-weel-1444183-m.jpg">',
-            contentHtml: lorem,
-            footerContentHtml: '<a href="">Continue Reading</a>'
-        }];
-
-        $scope.addEvent = function() {
-            $scope.events.push({
-                badgeClass: 'info',
-                badgeIconClass: 'glyphicon-check',
-                title: 'First heading',
-                when: '3 hours ago via Twitter',
-                content: 'Some awesome content.'
-            });
-
-        };
-        // optional: not mandatory (uses angular-scroll-animate)
-        $scope.animateElementIn = function($el) {
-            $el.removeClass('timeline-hidden');
-            $el.addClass('bounce-in');
-        };
-
-        // optional: not mandatory (uses angular-scroll-animate)
-        $scope.animateElementOut = function($el) {
-            $el.addClass('timeline-hidden');
-            $el.removeClass('bounce-in');
-        };
-
-        $scope.leftAlign = function() {
-            $scope.side = 'left';
-        }
-
-        $scope.rightAlign = function() {
-            $scope.side = 'right';
-        }
-
-        $scope.defaultAlign = function() {
-            $scope.side = '';
-        }
-    }
- ]);
- </file>
-
- </example>
- */
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name dependencies.directive:ui-layout
- * @module dependencies
- * @restrict AE
- * @since 1.2
- * @description
- * This directive allows you to split
- * See more :  {@link https://github.com/angular-ui/ui-layout}
- * @example
- <example module="itesoft-showcase">
- <file name="Module.js">
- angular.module('itesoft-showcase',['ui.layout']);
- </file>
- <file name="index.html">
-    <div style="position: relative;height:500px">
-     <div ui-layout style="margin-left: 90px;margin-right: 10px" >
-     <div ui-layout-container  size="100px">
-     <h3>
-     NEW CAPTURE 2016JUN30-00001
-     </h3>
-     <div>
-     <span>Environment:</span>
-     </div>
-     <div>
-     <span>Profile:</span>
-     </div>
-     </div>
-     <div ui-layout-container>
-     <div ui-layout="{flow : 'column'}" >
-     <div ui-layout-container  >Settings</div>
-     <div ui-layout-container  >
-     <div>[ ]image 001</div>
-     <div>[ ]image 002</div>
-     <div>[ ]image 003</div>
-     <div>[ ]image 004</div>
-     </div>
-     <div ui-layout-container  >Viewer</div>
-     </div>
-     </div>
-
-     <div ui-layout-container size="60px" style="text-align: right" >
-     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-success it-button-do"
-     disabled="disabled">
-     <span class="ng-binding">
-     Capturer
-     </span>
-     </button>
-     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-primary it-button-do"
-     disabled="disabled">
-     <span class="ng-binding">
-     Envoyer
-     </span>
-     </button>
-     </div>
-     </div>
-    </div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc service
  * @name itesoft.service:itConfig
  * @module itesoft
- * @since 1.2
+ * @since 1.1
  * @requires $location
  *
  * @description
@@ -8892,7 +8527,7 @@ IteSoft
  * <tr>
  *     <td><code>allowOverride</code></td>
  *     <td>false</td>
- *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
+ *     <td>Allows to use URL parameters to override JSON configuration peroperties</td>
  * </tr>
  * </table>
  *
@@ -8936,7 +8571,7 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     var defaultNamespace = null;
     var overrideConfig = undefined;
     var isLoaded = false;
-    var baseConfig = undefined;
+    var baseConfig = {};
 
     this.allowOverride = function (value) {
         allowOverride = value;
@@ -8951,80 +8586,42 @@ IteSoft.provider('itConfig', [function itConfigProvider() {
     };
 
     this.get = function () {
-        if (!isLoaded) {
-            return _load(overrideConfig);
-        } else {
-            return baseConfig[defaultNamespace];
-        }
-    };
-
-    /**
-     * Return query parameter without $location.search
-     * @returns {*|{}}
-     * @private
-     */
-    function _getRequestParam() {
-        var queryPart = location.search;
-        if(queryPart == ""){
-            queryPart = location.hash;
-        }
-        var search = queryPart
-            .split(/[&||?]/)
-            .filter(function (x) { return x.indexOf("=") > -1; })
-            .map(function (x) { return x.split(/=/); })
-            .map(function (x) {
-                x[1] = x[1].replace(/\+/g, " ");
-                return x;
-            })
-            .map(function (x) {
-                if (x[1] == "true") {
-                    x[1] = true;
-                    return x;
-                } else if (x[1] == "false") {
-                    x[1] = false;
-                    return x;
-                } else {
-                    return x;
-                }
-            })
-            .reduce(function (acc, current) {
-                acc[current[0]] = current[1];
-                return acc;
-            }, {});
-        return search;
+        return _load(overrideConfig);
     };
 
     function _load(overrideConfig) {
+
         var defaultConfig = {};
-        if (baseConfig == undefined) {
-            overrideConfig = _getRequestParam();
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (xhttp.readyState == 4 && xhttp.status == 200) {
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+
+                if (!allowOverride) {
                     baseConfig = JSON.parse(xhttp.responseText);
-                    isLoaded = true;
-                    if (allowOverride) {
-                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                            defaultConfig = baseConfig[defaultNamespace];
-                            for (var propertyName in defaultConfig) {
-                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
-                                    defaultConfig[propertyName] = overrideConfig[propertyName];
-                                }
+                } else {
+                    baseConfig = JSON.parse(xhttp.responseText);
+                    if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                        defaultConfig = baseConfig[defaultNamespace];
+                        for (var propertyName in defaultConfig) {
+                            if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
+                                defaultConfig[propertyName] = overrideConfig[propertyName];
                             }
                         }
                     }
-                    isLoaded = true;
                 }
-            };
-            xhttp.open("GET", configFile, false);
-            xhttp.send();
-        }
+            }
+        };
+        xhttp.open("GET", configFile, false);
+        xhttp.send();
+        isLoaded = true;
         return defaultConfig;
-    }
+    };
 
     this.$get = ['$location', function itConfigFactory($location) {
-
+        overrideConfig = $location.search();
         var self = this;
+
         return {
             get: function (namespace) {
 
@@ -9861,11 +9458,15 @@ angular.module('itesoft.messaging',['ngWebSocket'])
                 }
             }
 
-            this.subscribeToTopic = function(topicname,observers){
+            this.subscribeToTopic = function(topicname,observers,retrieve){
+                if(!retrieve){
+                    retrieve =0;
+                }
+
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe',
+                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe?retrieve='+retrieve,
                         method: "POST",
                         data : observers,
                         headers: {
@@ -10821,6 +10422,69 @@ IteSoft
 
 
     }])
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name dependencies.directive:ui-layout
+ * @module dependencies
+ * @restrict AE
+ * @since 1.0
+ * @description
+ * This directive allows you to split
+ * See more :  {@link https://github.com/angular-ui/ui-layout}
+ * @example
+ <example module="itesoft-showcase">
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ui.layout']);
+ </file>
+ <file name="index.html">
+    <div style="position: relative;height:500px">
+     <div ui-layout style="margin-left: 90px;margin-right: 10px" >
+     <div ui-layout-container  size="100px">
+     <h3>
+     NEW CAPTURE 2016JUN30-00001
+     </h3>
+     <div>
+     <span>Environment:</span>
+     </div>
+     <div>
+     <span>Profile:</span>
+     </div>
+     </div>
+     <div ui-layout-container>
+     <div ui-layout="{flow : 'column'}" >
+     <div ui-layout-container  >Settings</div>
+     <div ui-layout-container  >
+     <div>[ ]image 001</div>
+     <div>[ ]image 002</div>
+     <div>[ ]image 003</div>
+     <div>[ ]image 004</div>
+     </div>
+     <div ui-layout-container  >Viewer</div>
+     </div>
+     </div>
+
+     <div ui-layout-container size="60px" style="text-align: right" >
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-success it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Capturer
+     </span>
+     </button>
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-primary it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Envoyer
+     </span>
+     </button>
+     </div>
+     </div>
+    </div>
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * TODO Image implementation desc
@@ -10828,9 +10492,9 @@ IteSoft
 itImageViewer
     .factory('IMAGEPage', ['$log' , 'MultiPagesPage', 'PageViewport', 'MultiPagesConstants', function($log, MultiPagesPage, PageViewport, MultiPagesConstants) {
 
-        function IMAGEPage(viewer, pageIndex, img, view) {
+        function IMAGEPage(pageIndex, img, view) {
             this.base = MultiPagesPage;
-            this.base(viewer, pageIndex, view);
+            this.base(pageIndex, view);
             this.img = img;
         }
 
@@ -10839,13 +10503,13 @@ itImageViewer
         IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
             /*if(this.rendered) {
-             if(callback) {
-             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-             }
-             return;
-             };
+                if(callback) {
+                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+                return;
+            };
 
-             this.rendered = true;*/
+            this.rendered = true;*/
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
@@ -10894,6 +10558,7 @@ itImageViewer
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
                     self.addPages();
+                    //self.setContainerSize(self.initialScale);
                 });
             }
         };
@@ -10906,6 +10571,7 @@ itImageViewer
                     self.getAllPages(url, function(pageList) {
                         self.pages = pageList;
                         self.addPages();
+                        //self.setContainerSize(self.initialScale);
                     });
                 };
 
@@ -10951,7 +10617,7 @@ itImageViewer
             var img = new Image;
             img.onprogress = angular.bind(this, self.downloadProgress);
             img.onload = function() {
-                var page =  new IMAGEPage(self, 0, img, [0,0, img.width, img.height]);
+                var page =  new IMAGEPage(0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
 
                 //self.addPage(page);
@@ -11082,26 +10748,26 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
         },
         restrict: 'E',
         template :  '<div class="toolbar">' +
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button type="button" ng-click="api.zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
-        '</select> ' +
-        '<button type="button" ng-click="api.zoomIn()">+</button> ' +
-        '</div>' +
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                            '<button ng-click="api.zoomOut()">-</button> ' +
+                            '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
+                            '</select> ' +
+                            '<button ng-click="api.zoomIn()">+</button> ' +
+                        '</div>' +
 
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
-        '<span>Page : </span>' +
-        '<button type="button" ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button type="button" ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span> ' +
-        '</div>' +
+                        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+                            '<span>Page : </span>' +
+                            '<button ng-click="api.goToPrevPage()"><</button> ' +
+                            '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+                            '<button ng-click="api.goToNextPage()">></button> ' +
+                            '<span> of {{api.getNumPages()}}</span> ' +
+                        '</div>' +
 
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button type="button" ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
-        '<button type="button" ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
-        '</div>' +
-        '</div>',
+                        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
+                            '<button ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+                            '<button ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+                        '</div>' +
+                    '</div>',
         link: linker
     };
 }])
@@ -11166,10 +10832,9 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport' , 'ZoomSelection', function ($log, MultiPagesConstants, PageViewport, ZoomSelection) {
+itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport', function ($log, MultiPagesConstants, PageViewport) {
 
-    function MultiPagesPage(viewer, pageIndex, view) {
-        this.viewer = viewer;
+    function MultiPagesPage(pageIndex, view) {
         this.pageIndex = pageIndex;
         this.id = pageIndex + 1;
 
@@ -11177,7 +10842,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
         this.container = angular.element('<div></div>');
         this.container.attr("id", "page_" + pageIndex);
 
-        this.wrapper = angular.element('<div class="page {{api.isPageSelected(' + this.id + ')}}"  ></div>');
+        this.wrapper = angular.element('<div class="page {{api.isPageSelected(' + this.id + ')}}" ng-click="onPageClicked(' + this.id + ')"></div>');
         this.container.append(this.wrapper);
 
         this.canvasRendered = false;
@@ -11194,10 +10859,6 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
         clear: function () {
             this.rendered = false;
             this.wrapper.empty();
-            this.layer = null;
-            if(this.cleanUp) {
-                this.cleanUp();
-            }
         },
         getViewport: function (scale, rotation) {
             return new PageViewport(this.view, scale, rotation, 0, 0, true);
@@ -11214,13 +10875,12 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
             this.wrapper.css("height", this.viewport.height + "px");
         },
         resize: function (scale) {
-            this.setOrientation();
             this.scale = scale;
             this.transform();
         },
         setOrientation : function(orientation) {
-            //this.orientation = orientation;
-            switch (this.viewer.orientation) {
+            this.orientation = orientation;
+            switch (orientation) {
                 case MultiPagesConstants.ORIENTATION_HORIZONTAL :
                     this.container.addClass("horizontal");
                     this.container.removeClass("vertical");
@@ -11238,7 +10898,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
         isVisible: function () {
             var pageContainer = this.container[0];
             var parentContainer = this.container.parent()[0];
-            switch (this.viewer.orientation) {
+            switch (this.orientation) {
                 case MultiPagesConstants.ORIENTATION_HORIZONTAL :
                     var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
                     var pageRight = pageLeft + pageContainer.offsetWidth;
@@ -11251,104 +10911,6 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                     break;
             };
         },
-        addLayer : function(layer) {
-            if(this.layer == null) {
-                this.layer = angular.element("<div class='selectable-layer'></div>");
-                this.wrapper.append(this.layer);
-            }
-            this.layer.append(layer);
-        },
-        initSelectZoom : function () {
-            function setMousePosition(e) {
-                var ev = e || window.event; //Moz || IE
-                var offset = self.wrapper[0].getBoundingClientRect();
-                if (ev.pageX) { //Moz
-                    mouse.x = (ev.pageX - offset.left);
-                    mouse.y = (ev.pageY - offset.top);
-                } else if (ev.clientX) { //IE
-                    mouse.x = (ev.clientX - offset.left);
-                    mouse.y = (ev.clientY  - offset.top);
-                }
-            };
-
-            var self = this,
-                mouse = {
-                    x: 0,
-                    y: 0,
-                    startX: 0,
-                    startY: 0
-                },
-                rect = null,
-                element = null,
-                onMouseDown = function (e) {
-                    if(e.ctrlKey) {
-                        if(rect == null) {
-                            setMousePosition(e);
-
-                            if(self.layer) {
-                                self.layer.removeClass("selectable-layer");
-                            }
-                            mouse.startX = mouse.x;
-                            mouse.startY = mouse.y;
-                            rect = {};
-                            rect.offsetX = mouse.x;
-                            rect.offsetY = mouse.y;
-                            element = angular.element('<div class="rectangle"></div>');
-                            element.css("left",  mouse.x + 'px');
-                            element.css("top",  mouse.y + 'px');
-                            self.wrapper.append(element);
-                            self.viewer.element.on('mouseup', onMouseUp);
-                            self.viewer.element.on('mousemove', onMouseMove);
-                            self.viewer.element.addClass("viewer-zoom-cursor");
-                        }
-                    } else {
-                        self.viewer.selectedPage = self.id;
-                        if(self.viewer.onPageClicked) {
-                            self.viewer.onPageClicked(self.id);
-                        }
-                        if(self.viewer.api.onPageClicked) {
-                            self.viewer.api.onPageClicked(self.id);
-                        }
-                    }
-
-                },
-                onMouseUp = function (e) {
-                    self.viewer.element.removeClass("viewer-zoom-cursor");
-                    self.viewer.element.off('mouseup', onMouseUp);
-                    self.viewer.element.off('mousemove', onMouseMove);
-                    if(rect != null) {
-                        if(self.layer) {
-                            self.layer.addClass("selectable-layer");
-                        }
-                        if(rect.width > 10 || rect.height > 10) {
-                            self.viewer.zoomTo(new ZoomSelection(rect, self));
-                        }
-
-                        element.remove();
-                        element = null;
-                        rect = null;
-                    }
-                },
-                onMouseMove = function (e) {
-                    setMousePosition(e);
-                    if (rect !== null) {
-                        rect.width =  Math.abs(mouse.x - mouse.startX);
-                        rect.height = Math.abs(mouse.y - mouse.startY);
-                        rect.offsetLeft = (mouse.x - mouse.startX < 0) ? mouse.x : mouse.startX;
-                        rect.offsetTop = (mouse.y - mouse.startY < 0) ? mouse.y : mouse.startY;
-                        element.css("width", rect.width + 'px');
-                        element.css("height", rect.height + 'px');
-                        element.css("left", rect.offsetLeft + 'px');
-                        element.css("top", rect.offsetTop + 'px');
-                    }
-                };
-
-            self.container.on('mousedown', onMouseDown);
-
-            self.cleanUp = function () {
-                self.container.off('mousedown', onMouseDown);
-            };
-        },
         render: function (callback) {
             if(this.rendered) {
                 if(callback) {
@@ -11357,14 +10919,13 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
                 return;
             };
 
-            $log.debug("render page " + this.id +" started");
-            var start = new Date();
+            //$log.debug("render page " + this.id +" started");
+            //var start = new Date();
             this.rendered = true;
-            this.initSelectZoom();
             this.renderPage(this, function (page, status) {
                 if(status === MultiPagesConstants.PAGE_RENDERED) {
                     page.canvasRendered = true;
-                    $log.debug("render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
+                    //$log.debug("render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
                 }
                 if(callback) {
                     callback(page, status);
@@ -11383,7 +10944,7 @@ itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'P
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', '$document' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, $document, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
+itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
     function getElementInnerSize(element, margin) {
         var tallTempElement = angular.element("<div></div>");
         tallTempElement.css("height", "10000px");
@@ -11407,7 +10968,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             width: w,
             height: h
         };
-    };
+    }
 
     function MultiPagesViewer(api, element) {
         this.pages = [];
@@ -11429,121 +10990,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
         this.onPageRendered = null;
         this.onDataDownloaded = null;
         this.onCurrentPageChanged = null;
-
-        if(element != null) {
-            this.toggleMouseDrag();
-        }
     }
 
     MultiPagesViewer.prototype = {
-        toggleMouseDrag : function() {
-            var element = this.element;
-            var container = element[0];
-            var data = {
-                acceptPropagatedEvent : true,
-                preventDefault : true
-            };
-            var onMouseDown = function (event) {
-                    if(event.ctrlKey != true) {
-                        element.css("cursor", "-webkit-grabbing");
-                        element.css("cursor", "grabbing");
-                        // mousedown, left click, check propagation
-                        if (event.which!=1 ||
-                            (!data.acceptPropagatedEvent && event.target != this)){
-                            return false;
-                        }
-
-                        // Initial coordinates will be the last when dragging
-                        data.lastCoord = {left: event.clientX, top: event.clientY};
-
-                        $document.on('mouseup', onMouseUp);
-                        $document.on('mousemove', onMouseMove);
-                        if (data.preventDefault) {
-                            event.preventDefault();
-                            return false;
-                        }
-                    }
-                },
-                onMouseMove = function (event) {
-                    // How much did the mouse move?
-                    var delta = {left: (event.clientX - data.lastCoord.left),
-                        top: (event.clientY - data.lastCoord.top)};
-
-                    // Set the scroll position relative to what ever the scroll is now
-                    container.scrollLeft = container.scrollLeft - delta.left;
-                    container.scrollTop = container.scrollTop - delta.top;
-
-                    // Save where the cursor is
-                    data.lastCoord={left: event.clientX, top: event.clientY};
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                },
-                onMouseUp = function (event) {
-                    $document.off('mouseup', onMouseUp);
-                    $document.off('mousemove', onMouseMove);
-                    element.css("cursor", "-webkit-grab");
-                    element.css("cursor", "grab");
-                    if (data.preventDefault) {
-                        event.preventDefault();
-                        return false;
-                    }
-                };
-
-            element.on('mousedown', onMouseDown);
-            element.css("cursor", "-webkit-grab");
-            element.css("cursor", "grab");
-
-            this.cleanUp = function () {
-                element.off('mousedown', onMouseDown);
-            };
-        },
         getAPI: function () {
             return this.api;
-        },
-        zoomTo : function(zoomSelection) {
-            var page = this.pages[zoomSelection.pageIndex];
-            if(page != undefined) {
-                var rect = {
-                    width : (page.viewport.width * zoomSelection.percentWidth) / 100,
-                    height : (page.viewport.height * zoomSelection.percentHeight) / 100
-                };
-                var containerSize = {
-                    width: this.containerSize.width * this.scaleItem.value,
-                    height: this.containerSize.height * this.scaleItem.value
-                };
-
-                var mainProperty = rect.width > rect.height ? "width" : "height";
-                var numZoomLevels = this.zoomLevels.length;
-                for (var i = 0; i < numZoomLevels; ++i) {
-                    var zoomLevel = this.zoomLevels[i];
-                    var nextZoomLevel = this.zoomLevels[i + 1];
-
-                    var rectValue = rect[mainProperty];
-
-                    if ((nextZoomLevel == null || (zoomLevel.value * rectValue) <= containerSize[mainProperty] && (nextZoomLevel.value * rectValue) >= containerSize[mainProperty])) {
-                        if(this.scaleItem.value != zoomLevel.value) {
-                            this.setScale(zoomLevel);
-                        }
-
-                        var scrollTop = ((page.viewport.height * zoomSelection.percentTop) / 100) + page.container[0].offsetTop;
-                        var scrollLeft = ((page.viewport.width * zoomSelection.percentLeft) / 100) + page.container[0].offsetLeft;
-
-                        this.element[0].scrollTop = scrollTop;
-                        this.element[0].scrollLeft = scrollLeft;
-
-                        if(zoomSelection.pageIndex === 0) {
-                            this.renderAllVisiblePages();
-                        }
-
-                        if(this.api.onZoomToSelection) {
-                            this.api.onZoomToSelection(zoomSelection);
-                        }
-                        break;
-                    }
-                }
-            }
         },
         addPages : function () {
             // Append all page containers to the $element...
@@ -11572,7 +11023,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                 var containerSize = getElementInnerSize(this.element, this.pageMargin);
                 if(containerSize.width > 0 && containerSize.height > 0) {
                     if(this.onContainerSizeChanged) {
-                        this.onContainerSizeChanged(containerSize);
+                       this.onContainerSizeChanged(containerSize);
                     }
                     this.containerSize = containerSize;
 
@@ -11589,35 +11040,35 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                         var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
                         var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
                         if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                                value : this.fitWidthScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
-                            });
-                        }
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                               value : this.fitWidthScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
+                           });
+                       }
 
-                        if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                                value : this.fitHeightScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
-                            });
-                        }
+                       if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                               value : this.fitHeightScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
+                           });
+                       }
 
-                        if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                                value : this.fitPageScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
-                            });
-                        }
+                       if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                           scaleItem = this.updateScaleItem({
+                               id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                               value : this.fitPageScale,
+                               label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
+                           });
+                       }
 
-                        var label = (newScale * 100.0).toFixed(0) + "%";
-                        scaleItem = this.updateScaleItem({
-                            id: label,
-                            value : newScale,
-                            label: label
-                        });
+                       var label = (newScale * 100.0).toFixed(0) + "%";
+                       scaleItem = this.updateScaleItem({
+                           id: label,
+                           value : newScale,
+                           label: label
+                       });
                     }
 
                     if (this.scaleItem == undefined && initialScale) {
@@ -11638,7 +11089,6 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                     }
 
                     this.setScale(this.scaleItem);
-                    this.render();
                 }
             }
         },
@@ -11649,7 +11099,6 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             this.orientation = orientation;
             if(this.hasMultiplePages()) {
                 this.setScale(this.scaleItem);
-                this.render();
             }
         },
         setScale: function (scaleItem) {
@@ -11662,9 +11111,12 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
 
             for(var iPage = 0;iPage < numPages;++iPage) {
                 var page = this.pages[iPage];
+                page.setOrientation(this.orientation);
                 // Resize to current scaleItem...
                 page.resize(sci.value);
             }
+
+            this.render();
         },
         calcScale: function (desiredScale) {
             if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
@@ -11744,13 +11196,13 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                         if(currentPageID === -1) {
                             if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
                                 var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
-                                var pageCenter = pageContainer.offsetWidth / 1.5;
+                                var pageCenter = pageContainer.offsetWidth / 2;
                                 if((pageCenter + pageLeft) >= 0) {
                                     currentPageID = iPage;
                                 }
                             } else {
                                 var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                                var pageCenter = pageContainer.offsetHeight / 1.5;
+                                var pageCenter = pageContainer.offsetHeight / 2;
                                 if((pageCenter + pageTop) >= 0) {
                                     currentPageID = iPage;
                                 }
@@ -11814,7 +11266,7 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
         },
         render: function () {
             if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.api.getSelectedPage());
+                this.api.goToPage(this.currentPage);
             }else{
                 this.renderAllVisiblePages();
             }
@@ -11883,11 +11335,11 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
             var lastScrollY = 0;
             var watcher = new SizeWatcher(self.element[0], 200);
             scope.$watchGroup(watcher.group, function(values) {
-                if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
-                scope.sizeWatcherTimeout = $timeout(function() {
-                    $log.debug("SizeChanged");
-                    self.setContainerSize(self.initialScale);
-                }, 450);
+                  if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
+                  scope.sizeWatcherTimeout = $timeout(function() {
+                       $log.debug("SizeChanged");
+                       self.setContainerSize(self.initialScale);
+                  }, 450);
             });
 
             scope.$watch("options.orientation", function (value) {
@@ -11921,6 +11373,16 @@ itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', 
                             $log.debug("Something went really bad!\n\n" + message);
                         }
                     }
+                }
+            };
+
+            scope.onPageClicked = function(pageIndex) {
+                self.selectedPage = pageIndex;
+                if(self.onPageClicked) {
+                    self.onPageClicked(pageIndex);
+                }
+                if(self.api.onPageClicked) {
+                    self.api.onPageClicked(pageIndex);
                 }
             };
 
@@ -11989,14 +11451,10 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         zoomTo: function (scaleItem) {
             if(scaleItem != undefined) {
                 this.viewer.setScale(scaleItem);
-                this.viewer.render();
             }
         },
         getZoomLevel: function () {
             return this.viewer.scaleItem;
-        },
-        zoomToSelection: function (zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
         },
         zoomIn: function() {
             var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
@@ -12032,14 +11490,12 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
                     offsetLeft -= 1;
                 }
                 element.scrollLeft = offsetLeft;
-                element.scrollTop = 0;
             } else {
                 var offsetTop = pageContainer.offsetTop - 10;
                 if(Math.round(element.scrollTop) === offsetTop){
                     offsetTop -= 1;
                 }
                 element.scrollTop = offsetTop;
-                element.scrollLeft = 0;
             }
         },
         goToNextPage: function () {
@@ -12065,6 +11521,9 @@ itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log' , 'MultiPagesConstants
         },
         rotatePage: function(args) {
             this.viewer.rotate(args);
+            if(this.onPageRotation) {
+                this.onPageRotation(args);
+            }
         }
     };
 
@@ -12228,24 +11687,6 @@ itMultiPagesViewer.factory('TranslateViewer', ['$translate', function($translate
 
 'use strict';
 /**
- * TODO MultiPagesPage desc
- */
-itMultiPagesViewer.factory('ZoomSelection', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-    function ZoomSelection(rect, page) {
-        this.percentTop = (rect.offsetTop * 100) / page.viewport.height;
-        this.percentLeft = (rect.offsetLeft * 100) / page.viewport.width;
-        this.percentWidth = (rect.width * 100) / page.viewport.width;
-        this.percentHeight = (rect.height * 100) / page.viewport.height;
-
-        this.pageIndex = page.pageIndex;
-    }
-
-    return (ZoomSelection);
-}]);
-
-
-'use strict';
-/**
  * TODO CustomStyle desc
  */
 itPdfViewer.factory('CustomStyle', [function () {
@@ -12387,9 +11828,9 @@ itPdfViewer
 
     .factory('PDFPage', ['$log' , 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
-        function PDFPage(viewer, pdfPage, hasTextLayer) {
+        function PDFPage(pdfPage, hasTextLayer) {
             this.base = MultiPagesPage;
-            this.base(viewer, pdfPage.pageIndex);
+            this.base(pdfPage.pageIndex);
 
             this.pdfPage = pdfPage;
             this.renderTask = null;
@@ -12408,20 +11849,20 @@ itPdfViewer
         PDFPage.prototype.getViewport = function (scale , rotation) {
             return this.pdfPage.getViewport(scale, rotation, 0, 0);
         };
-        /*PDFPage.prototype.transform = function () {
-         MultiPagesPage.prototype.transform.call(this);
+        PDFPage.prototype.transform = function () {
+            MultiPagesPage.prototype.transform.call(this);
 
-         this.textLayer = angular.element("<div class='text-layer'></div>");
-         this.textLayer.css("width", this.viewport.width + "px");
-         this.textLayer.css("height", this.viewport.height + "px");
-         };*/
+            this.textLayer = angular.element("<div class='text-layer'></div>");
+            this.textLayer.css("width", this.viewport.width + "px");
+            this.textLayer.css("height", this.viewport.height + "px");
+        };
         PDFPage.prototype.renderPage = function (page, callback) {
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
-                /*if(page.hasTextLayer) {
-                 page.wrapper.append(page.textLayer);
-                 }*/
+                if(page.hasTextLayer) {
+                    page.wrapper.append(page.textLayer);
+                }
             }else{
 
                 page.wrapper.append(page.canvas);
@@ -12440,21 +11881,20 @@ itPdfViewer
                     }
                     //wrapper.append(self.canvas);
 
-                    /*if(page.hasTextLayer) {
-                     page.pdfPage.getTextContent().then(function (textContent) {
-                     // Render the text layer...
-                     var textLayerBuilder = new TextLayerBuilder({
-                     textLayerDiv: page.textLayer[0],
-                     pageIndex: page.id,
-                     viewport: page.viewport
-                     });
+                    if(page.hasTextLayer) {
+                        page.pdfPage.getTextContent().then(function (textContent) {
+                            // Render the text layer...
+                            var textLayerBuilder = new TextLayerBuilder({
+                                textLayerDiv: page.textLayer[0],
+                                pageIndex: page.id,
+                                viewport: page.viewport
+                            });
 
-                     textLayerBuilder.setTextContent(textContent);
-                     textLayerBuilder.renderLayer();
-                     //page.wrapper.append(page.textLayer);
-                     page.addLayer(page.textLayer);
-                     });
-                     }*/
+                            textLayerBuilder.setTextContent(textContent);
+                            textLayerBuilder.renderLayer();
+                            page.wrapper.append(page.textLayer);
+                        });
+                    }
                 }, function (message) {
                     page.rendered = false;
                     page.renderTask = null;
@@ -12477,71 +11917,51 @@ itPdfViewer
 
     .factory('PDFViewer', ['$log', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', function ($log, MultiPagesViewer, PDFViewerAPI, PDFPage) {
         function PDFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new PDFViewerAPI(this), element);
+                this.base = MultiPagesViewer;
+                this.base(new PDFViewerAPI(this), element);
 
-            this.pdf = null;
-            // Hooks for the client...
-            this.passwordCallback = null;
-        }
+                this.pdf = null;
+                // Hooks for the client...
+                this.passwordCallback = null;
+           }
 
-        PDFViewer.prototype = new MultiPagesViewer;
+            PDFViewer.prototype = new MultiPagesViewer;
 
-        PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if (obj !== undefined && obj !== null && obj !== '') {
-                this.pageMargin = pageMargin;
-                this.initialScale = initialScale;
-                this.hasTextLayer = renderTextLayer;
-                this.orientation = orientation;
-                var isFile = typeof obj != typeof "";
+            PDFViewer.prototype.open = function (obj, initialScale, renderTextLayer, orientation, pageMargin) {
+                this.element.empty();
+                this.pages = [];
+                if (obj !== undefined && obj !== null && obj !== '') {
+                    this.pageMargin = pageMargin;
+                    this.initialScale = initialScale;
+                    this.hasTextLayer = renderTextLayer;
+                    this.orientation = orientation;
+                    var isFile = typeof obj != typeof "";
 
-                if(this.getDocumentTask != undefined){
-                    var self = this;
-                    this.getDocumentTask.destroy().then(function () {
+                    if(this.getDocumentTask != undefined){
+                        var self = this;
+                        this.getDocumentTask.destroy().then(function () {
+                            if(isFile){
+                                self.setFile(obj);
+                            }else {
+                                self.setUrl(obj);
+                            }
+                        });
+                    } else {
                         if(isFile){
-                            self.setFile(obj);
+                            this.setFile(obj);
                         }else {
-                            self.setUrl(obj);
+                            this.setUrl(obj);
                         }
-                    });
-                } else {
-                    if(isFile){
-                        this.setFile(obj);
-                    }else {
-                        this.setUrl(obj);
                     }
                 }
-            }
-        };
-        PDFViewer.prototype.setUrl = function (url) {
-            var self = this;
-            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-            this.getDocumentTask.then(function (pdf) {
-                self.pdf = pdf;
-
-                self.getAllPages( function (pageList, pagesRefMap) {
-                    self.pages = pageList;
-                    self.pagesRefMap = pagesRefMap;
-                    self.addPages();
-                    //self.setContainerSize(self.initialScale);
-                });
-            }, function (message) {
-                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-            });
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
+            };
+            PDFViewer.prototype.setUrl = function (url) {
+                var self = this;
+                this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+                this.getDocumentTask.then(function (pdf) {
                     self.pdf = pdf;
 
-                    self.getAllPages(function (pageList, pagesRefMap) {
+                    self.getAllPages( function (pageList, pagesRefMap) {
                         self.pages = pageList;
                         self.pagesRefMap = pagesRefMap;
                         self.addPages();
@@ -12551,89 +11971,112 @@ itPdfViewer
                     self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
                 });
             };
+            PDFViewer.prototype.setFile = function (file) {
+                var self = this;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var arrayBuffer = e.target.result;
+                    var uint8Array = new Uint8Array(arrayBuffer);
+                    var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                    getDocumentTask.then(function (pdf) {
+                        self.pdf = pdf;
 
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
+                        self.getAllPages(function (pageList, pagesRefMap) {
+                            self.pages = pageList;
+                            self.pagesRefMap = pagesRefMap;
+                            self.addPages();
+                            //self.setContainerSize(self.initialScale);
+                        });
+                    }, function (message) {
+                        self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                    });
+                };
 
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
+                reader.onprogress = function (e) {
+                    self.downloadProgress(e);
+                };
+
+                reader.onloadend = function (e) {
+                    var error = e.target.error;
+                    if(error !== null) {
+                        var message = "File API error: ";
+                        switch(e.code) {
+                            case error.ENCODING_ERR:
+                                message += "Encoding error.";
+                                break;
+                            case error.NOT_FOUND_ERR:
+                                message += "File not found.";
+                                break;
+                            case error.NOT_READABLE_ERR:
+                                message += "File could not be read.";
+                                break;
+                            case error.SECURITY_ERR:
+                                message += "Security issue with file.";
+                                break;
+                            default:
+                                message += "Unknown error.";
+                                break;
+                        }
+
+                        self.onDataDownloaded("failed", 0, 0, message);
                     }
+                };
 
-                    self.onDataDownloaded("failed", 0, 0, message);
+                reader.readAsArrayBuffer(file);
+            };
+            PDFViewer.prototype.getAllPages = function (callback) {
+                var pageList = [],
+                    pagesRefMap = {},
+                    numPages = this.pdf.numPages,
+                    remainingPages = numPages;
+
+                if(this.hasTextLayer) {
+                    for(var iPage = 0;iPage < numPages;++iPage) {
+                        pageList.push({});
+
+                        var getPageTask = this.pdf.getPage(iPage + 1);
+                        getPageTask.then(function (page) {
+                            // Page reference map. Required by the annotation layer.
+                            var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                            pagesRefMap[refStr] = page.pageIndex + 1;
+
+                            var pdfPage = new PDFPage(page, true);
+                            pageList[page.pageIndex] = pdfPage;
+
+                            --remainingPages;
+                            if(remainingPages === 0) {
+                                callback(pageList, pagesRefMap);
+                            }
+
+                            /*page.getTextContent().then(function (textContent) {
+                                pdfPage.textContent = textContent;
+                            });*/
+                        });
+                    }
+                } else {
+                    for(var iPage = 0;iPage < numPages;++iPage) {
+                        pageList.push({});
+
+                        var getPageTask = this.pdf.getPage(iPage + 1);
+                        getPageTask.then(function (page) {
+                            pageList[page.pageIndex] = new PDFPage(page, false);
+
+                            --remainingPages;
+                            if(remainingPages === 0) {
+                                callback(pageList, pagesRefMap);
+                            }
+                        });
+                    }
+                }
+            };
+            PDFViewer.prototype.onDestroy = function () {
+                if(this.getDocumentTask){
+                    this.getDocumentTask.destroy();
+                    this.getDocumentTask = null;
                 }
             };
 
-            reader.readAsArrayBuffer(file);
-        };
-        PDFViewer.prototype.getAllPages = function (callback) {
-            var pageList = [],
-                pagesRefMap = {},
-                numPages = this.pdf.numPages,
-                remainingPages = numPages,
-                self = this;
-
-            if(this.hasTextLayer) {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        // Page reference map. Required by the annotation layer.
-                        var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                        pagesRefMap[refStr] = page.pageIndex + 1;
-
-                        var pdfPage = new PDFPage(self, page, true);
-                        pageList[page.pageIndex] = pdfPage;
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            } else {
-                for(var iPage = 0;iPage < numPages;++iPage) {
-                    pageList.push({});
-
-                    var getPageTask = this.pdf.getPage(iPage + 1);
-                    getPageTask.then(function (page) {
-                        pageList[page.pageIndex] = new PDFPage(self, page, false);
-
-                        --remainingPages;
-                        if(remainingPages === 0) {
-                            callback(pageList, pagesRefMap);
-                        }
-                    });
-                }
-            }
-        };
-        PDFViewer.prototype.onDestroy = function () {
-            if(this.getDocumentTask){
-                this.getDocumentTask.destroy();
-                this.getDocumentTask = null;
-            }
-        };
-
-        return (PDFViewer);
+            return (PDFViewer);
     }])
 
     .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
@@ -13163,9 +12606,9 @@ itMultiPagesViewer
 
     .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
-        function ThumbnailPage(viewer, page, showNumPages) {
+        function ThumbnailPage(page, showNumPages) {
             this.base = MultiPagesPage;
-            this.base(viewer, page.pageIndex, page.view);
+            this.base(page.pageIndex, page.view);
 
             if(showNumPages) {
                 this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
@@ -13214,7 +12657,7 @@ itMultiPagesViewer
                 if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
                     this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
                 } else {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                     this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
                 }
 
                 this.getAllPages(function(pageList) {
@@ -13227,12 +12670,14 @@ itMultiPagesViewer
         ThumbnailViewer.prototype.getAllPages = function(callback) {
             var pageList = [],
                 numPages = this.viewer.pages.length,
-                remainingPages = numPages,
-                self = this;
+                remainingPages = numPages;
+            var self = this;
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
-                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
+                var page =  new ThumbnailPage(this.viewer.pages[iPage], this.showNumPages);
                 pageList[iPage] = page;
+
+                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {
@@ -13259,10 +12704,6 @@ itMultiPagesViewer
                 this.viewer.thumbnail = null;
                 self.viewer = null;
             }
-        };
-
-        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
         };
 
         return (ThumbnailViewer);
@@ -13316,9 +12757,9 @@ itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', fun
 itTiffViewer
     .factory('TIFFPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
 
-        function TIFFPage(viewer, pageIndex, getSrc, view) {
+        function TIFFPage(pageIndex, getSrc, view) {
             this.base = MultiPagesPage;
-            this.base(viewer, pageIndex, view);
+            this.base(pageIndex, view);
 
             this.getSrc = getSrc;
         }
@@ -13326,15 +12767,7 @@ itTiffViewer
         TIFFPage.prototype = new MultiPagesPage;
 
         TIFFPage.prototype.renderPage = function (page, callback) {
-            var self = this;
-            /*if(this.rendered) {
-             if(callback) {
-             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-             }
-             return;
-             };
-
-             this.rendered = true;*/
+            var self = this; 
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
@@ -13463,18 +12896,19 @@ itTiffViewer
         TIFFViewer.prototype.getAllPages = function(callback) {
             var pageList = [],
                 numPages = this.tiff.countDirectory(),
-                remainingPages = numPages,
-                self = this;
-
+                remainingPages = numPages;
+            var self = this;
             function _getUrl(index) {
                 self.tiff.setDirectory(index);
                 return self.tiff.toDataURL();
             };
             for(var iPage = 0; iPage<numPages;++iPage) {
                 pageList.push({});
-                self.tiff.setDirectory(iPage);
-                var page =  new TIFFPage(self, iPage, _getUrl, [0,0, self.tiff.width(), self.tiff.height()]);
+                this.tiff.setDirectory(iPage);
+                var page =  new TIFFPage(iPage, _getUrl, [0,0, this.tiff.width(), this.tiff.height()]);
                 pageList[iPage] = page;
+
+                //this.addPage(page);
 
                 --remainingPages;
                 if (remainingPages === 0) {
