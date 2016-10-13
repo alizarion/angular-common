@@ -23,6 +23,10 @@
  <td>Object passed to the media viewer to apply options.</td>
 </tr>
 <tr>
+ <td><code>options.libPath = &#39;assets/lib&#39;</code></td>
+ <td>Specify where all libraries (pdfjs / tiffjs ect) are stored.</td>
+</tr>
+<tr>
  <td><code>options.onApiLoaded = function(api) { }</code></td>
  <td>Callback to be notify when the property api is available.</td>
 </tr>
@@ -33,6 +37,10 @@
 <tr>
  <td><code>options.orientation = &#39;vertical&#39; | &#39;horizontal&#39;</code></td>
  <td>Set orientation of the viewer.</td>
+</tr>
+<tr>
+ <td><code>options.zoomSelectionShortcutKey = &#39;ctrlKey&#39; | &#39;shiftKey&#39; | &#39;altKey&#39;</code></td>
+ <td>Set zoom selection shortcut of the viewer.</td>
 </tr>
 <tr>
  <td><code>options.showProgressbar = true | false</code></td>
@@ -55,8 +63,8 @@
  <td>Set initial scale of media viewer.</td>
 </tr>
 <tr>
- <td><code>options.renderTextLayer = true | false</code></td>
- <td>only used for pdf, Enable | Disable render of html text layer.</td>
+ <td><code>options.initialMode  = &#39;mode_hand&#39; | &#39;mode_zoomSelection&#39; | &#39;mode_text&#39;</code></td>
+ <td>set initial mode of viewer (default is mode_hand).</td>
 </tr>
 <tr>
  <td><code>options.getApi()</code></td>
@@ -127,6 +135,14 @@
  <td>Callback to be notify on error.</td>
 </tr>
 <tr>
+ <td><code>options.api.onZoomToSelection = function (zoomSelection) { }</code></td>
+ <td>Callback to be notify on zoom to rectangle.</td>
+</tr>
+<tr>
+ <td><code>options.api.onTextSelected = function (text) { }</code></td>
+ <td>Callback to be notify on text selected.</td>
+</tr>
+<tr>
 <tr>
  <td><code>options.api.onPageClicked = function (pageIndex) { }</code></td>
  <td>Callback to be notify when click on a page.</td>
@@ -158,6 +174,21 @@
         .thumbnail-viewer .num-page {
             text-align: center;
         }
+
+         //override full text rectangle
+        .multipage-viewer .textLayer &gt; .word:hover {
+             border: solid;
+             border-color: red;
+             border-width: 1px;
+       }
+
+        //override text selection color
+       .multipage-viewer .textLayer ::selection {
+            background: rgba(0,0,255, 0.2);
+       }
+       .multipage-viewer .textLayer ::-moz-selection {
+            background: rgba(0,0,255, 0.2);
+       }
      &lt;/style&gt;
   &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
 </code></pre>
@@ -187,7 +218,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-media-viewer"&gt;
 <pre class="prettyprint linenums" ng-set-text="index.html-12" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
 <script type="text/ng-template" id="index.html-12">
     <div ng-controller="HomeCtrl" class="row">
-       <div class="col-md-12"><div style="height: 500px;"><it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+       <div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
     </div>
 </script>
 </div>
@@ -200,7 +231,7 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-media-viewer"&gt;
 <div class="tab-pane" title="controller.js">
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
-    angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', renderTextLayer : true, libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+    angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : '/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
 </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>

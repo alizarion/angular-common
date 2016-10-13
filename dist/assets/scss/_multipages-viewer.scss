@@ -1,14 +1,29 @@
 ::selection { background: rgba(0,0,255,0.3); }
 ::-moz-selection { background:rgba(0,0,255,0.3); }
 
+
 .multipage-container {
-  margin-top: 60px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: auto;
+  position: relative;
+  min-height: 100px;
+  min-width: 200px;
+  height: 100%;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
+.multipage-viewer .selectable-layer {
+  -webkit-touch-callout: default; /* iOS Safari */
+  -webkit-user-select: text;   /* Chrome/Safari/Opera */
+  -khtml-user-select: text;    /* Konqueror */
+  -moz-user-select: text;      /* Firefox */
+  -ms-user-select: text;       /* Internet Explorer/Edge */
+  user-select: text;           /* Non-prefixed version, currently
+                                  not supported by any browser */
 }
 
 .thumbnail-viewer {
@@ -20,6 +35,7 @@
   overflow: auto;
   background-color: #cccccc;
   display: block;
+  z-index: 1000;
 }
 
 .thumbnail-viewer .page {
@@ -51,7 +67,7 @@
 }
 
 .multipage-viewer {
-  position: absolute;
+  position:  absolute;
   top: 0;
   bottom: 0;
   left: 0;
@@ -59,6 +75,7 @@
   overflow: auto;
   background-color: #cccccc;
   display: table-row;
+  z-index: 1000;
 }
 
 
@@ -84,46 +101,6 @@
   margin: auto;
   background-color: #ffffff;
   box-sizing:content-box;
-}
-
-.multipage-viewer .text-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  height: 1000px;
-}
-
-.multipage-viewer .text-layer > div {
-  color: transparent;
-  position: absolute;
-  white-space: pre;
-  cursor: text;
-  transform-origin: 0% 0%;
-}
-
-.multipage-viewer .text-layer .highlight {
-  margin: -1px;
-  padding: 1px;
-  background-color: rgba(180, 0, 170, 0.2);
-  border-radius: 4px;
-}
-
-.multipage-viewer .text-layer .highlight.begin {
-  border-radius: 4px 0px 0px 4px;
-}
-
-.multipage-viewer .text-layer .highlight.end {
-  border-radius: 0px 4px 4px 0px;
-}
-
-.multipage-viewer .text-layer .highlight.middle {
-  border-radius: 0px;
-}
-
-.multipage-viewer .text-layer .highlight.selected {
-  background-color: rgba(0, 100, 0, 0.2);
 }
 
 .multipage-viewer .page .annotLink > a {
@@ -289,6 +266,7 @@
   color: black;
   position: absolute;
   top: 50%;
+  z-index : 1010;
 }
 
 .ui-splitbar-container-row {
@@ -303,4 +281,101 @@
   color: black;
   position: absolute;
   top: 2px;
+  z-index : 1010;
+}
+
+/* Zoom Selection */
+.zoom-selection-rectangle {
+  border: 1px solid #FF0000;
+  position: absolute;
+  z-index: 1100;
+}
+
+.viewer-zoom-cursor {
+  cursor: crosshair !important;
+}
+
+/* Pdf TextLayer */
+.selection-tooltip {
+  display: none;
+  font-size: 16px;
+  margin-left: 28px;
+  position: absolute;
+  z-index: 1070;
+  padding: 3px 8px;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  background-color: #000;
+  border-radius: 4px;
+}
+
+.word-tooltip {
+  font-size: 16px;
+  position: absolute;
+  z-index: 1070;
+  padding: 3px 8px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #000;
+  border-radius: 4px;
+  max-height: 40px;
+  max-width: 600px;
+  display: table;
+}
+
+.multipage-viewer .textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  /*opacity: 0.2;*/
+  line-height: 1.0;
+}
+
+.multipage-viewer .textLayer ::selection {
+  background: rgba(0,0,255, 0.2);
+}
+.multipage-viewer .textLayer ::-moz-selection {
+  background: rgba(0,0,255, 0.2);
+}
+
+.multipage-viewer .textLayer > .word {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  -webkit-transform-origin: 0% 0%;
+  -moz-transform-origin: 0% 0%;
+  -o-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
+}
+
+.multipage-viewer .textLayer > .word:hover {
+  border: solid;
+  border-color: red;
+  border-width: 1px;
+}
+
+.multipage-viewer .r0 > .word:hover {
+  margin: -2px;
+  padding: 1px;
+}
+
+.multipage-viewer .r90 > .word:hover {
+  margin-top: -1px;
+  margin-left: 1px;
+}
+
+.multipage-viewer .r180 > .word:hover {
+  margin-left: 1px;
+  margin-top: 1px;
+}
+
+.multipage-viewer .r270 > .word:hover {
+  margin-left: -1px;
+  margin-top: 1px;
 }
