@@ -1,0 +1,58 @@
+<h1><code ng:non-bindable="">itPanelForm</code>
+<div><span class="hint">directive in module <code ng:non-bindable="">itesoft</code>
+<code ng:non-bindable=""><a target="_blank" href="https://github.com/alizarion/angular-common/releases/tag/v1.2"> since v1.2</a></code>
+</span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="itesoft-directive-page itesoft-directive-itpanelform-page"><p>The itPanelForm provides dynamic content panel in a form embedded.</p>
+<pre><code class="lang-html">   &lt;it-panel-form option=&quot;option&quot; &gt;&lt;/it-panel-form&gt;
+</code></pre>
+</div></div>
+<h2 id="usage">Usage</h2>
+<div class="usage">as element:<pre class="prettyprint linenums">&lt;it-panel-form&gt;
+&lt;/it-panel-form&gt;</pre>
+</div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="itesoft-directive-page itesoft-directive-itpanelform-page"><h4 id="example_source">Source</h4>
+<div source-edit="itesoft" source-edit-deps="angular.js controller.js" source-edit-html="index.html-27" source-edit-css="" source-edit-js="controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-27" ng-html-wrap-loaded="itesoft angular.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-27">
+<style>
+</style>
+<div ng-controller="HomeCtrl" >
+<it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
+</div>
+</script>
+</div>
+<div class="tab-pane" title="controller.js">
+<pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
+<script type="text/ng-template" id="controller.js">
+angular.module('itesoft')
+.controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+       $scope.query = "";
+       // require to link directive with scope
+       $scope.options = [
+         {"title":"label", "code": "codeLabel", "value":"valueLabel", "type":"label"},
+         {"title":"titleInput1", "code": "codeInput1", "value":"valueInput1", "type":"input"},
+         {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+         {"title":"titleSelect1", "code": "codeSelect1", "items":
+            [{"code": "code1", "value": "value1"},
+            {"code": "code2", "value": "value2"}], value:"code1",
+         "type":"select"},
+         {"title":"titleCheckBox", "code": "codeCheckBox", "value":"true", "type":"checkbox"},
+         {"title":"titleTextArea", "code": "codeTextArea", "value":"Bonjour ziouee eirufh ieur ieurhf eriufb ieru ",
+         "type":"textarea"},
+         {"title":"titleDate", "code": "codeDate", "value":"2016-07-25T08:19:09.069Z", "type":"date"},
+         {"title":"titleInput2", "code": "codeInput2", "value":"valueInput2", "type":"input"},
+       ];
+   }
+]
+);
+</script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-27" ng-eval-javascript="controller.js"></div>
+</div></div>
+</div>
