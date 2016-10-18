@@ -22,19 +22,46 @@
  *  </tr>
  *  </table>
  * @example
- <example module="itesoft">
- <file name="index.html">
+ <example module="itesoft-showcase">
+     <file name="index.html">
+         <div ng-controller="HomeCtrl">
+                 <it-modal-full-screen  class="it-fill">
+                 <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+                 </div>
+                 </it-modal-full-screen>
 
- <it-modal-full-screen  class="it-fill">
- <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
- consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
- ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
- </div>
- </it-modal-full-screen>
- <div konami style="height:500px">
- </div>
- </file>
-
+                 <button class="fa fa-expand" ng-click="expandFullScreenAttachment()"></button>
+                 <it-modal-full-screen  class="it-fill" options="fields.modalFullScreenOption">
+                 <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+                 consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+                 ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+                 </div>
+                 </it-modal-full-screen>
+                 <div konami style="height:500px">
+                 </div>
+         </div>
+     </file>
+     <file name="Module.js">
+        angular.module('itesoft-showcase',['itesoft'])
+     </file>
+     <file name="controller.js">
+ angular.module('itesoft-showcase').controller('HomeCtrl',
+ [
+ '$scope',
+ function($scope)   {
+      $scope.fields =      {
+         modalFullScreenOption:{
+            onRegisterApi:function(itModalFullScreen)            {
+               $scope.expandFullScreenAttachment = itModalFullScreen.open;
+                $scope.compressFullScreenAttachment = itModalFullScreen.close;
+            }
+         }
+      }
+   }
+ ]);
+     </file>
  </example>
  */
 IteSoft
@@ -122,13 +149,7 @@ IteSoft
 
                         /**
                          * Enable to use external button
-                         *   self.fields.modalFullScreenOption = {
-                                onRegisterApi: function(itModalFullScreen){
-                                    self.fn.expandFullScreenAttachment = itModalFullScreen.open;
-                                    self.fn.compressFullScreenAttachment = itModalFullScreen.close;
-
-                                }
-                            };
+                         *
                          */
                         var options = scope.$eval(iAttrs.options);
                         if (angular.isObject(options)) {
