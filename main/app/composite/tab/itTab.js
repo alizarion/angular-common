@@ -64,18 +64,18 @@
  <example module="itesoft-showcase">
  <file name="index.html">
  <div ng-controller="HomeCtrl" class="row">
- <it-tab label="'Company'" title="'COMPANY'"  id="'tab-company'"></it-tab>
- <it-tab label="'Supplier'" title="'SUPPLIER'" id="'tab-supplier'"></it-tab>
- <it-tab label="'Invoice'" title="'INVOICE'" id="'tab-invoice'"></it-tab>
+ <it-tab label="'Company'" title="'COMPANY'"  id="'tab-company'" class="col-xs-2"></it-tab>
+ <it-tab label="'Supplier'" title="'SUPPLIER'" id="'tab-supplier'" class="col-xs-2"></it-tab>
+ <it-tab label="'Invoice'" title="'INVOICE'" id="'tab-invoice'" class="col-xs-2"></it-tab>
  <it-tab-content id="'tab-company'" content-url="'company.html'"></it-tab-content>
  <it-tab-content id="'tab-supplier'" content-url="'supplier.html'"></it-tab-content>
  <it-tab-content id="'tab-invoice'" content-url="'invoice.html'"></it-tab-content>
 
 
  <!-- Tab with group id -->
- <it-tab label="'Currency'" group-id="'first-group'" title="'CURRENCY'" id="'tab-currency'"></it-tab>
- <it-tab label="'ThirdParty'" group-id="'first-group'" title="'THIRD PARTY'" id="'tab-thirdparty'"></it-tab>
- <it-tab label="'Receipt'" group-id="'first-group'" title="'RECEIPT'" id="'tab-receipt'"></it-tab>
+ <it-tab label="'Currency'" group-id="'first-group'" title="'CURRENCY'" id="'tab-currency'" class="col-xs-2"></it-tab>
+ <it-tab label="'ThirdParty'" group-id="'first-group'" title="'THIRD PARTY'" id="'tab-thirdparty'" class="col-xs-2"></it-tab>
+ <it-tab label="'Receipt'" group-id="'first-group'" title="'RECEIPT'" id="'tab-receipt'" class="col-xs-2"></it-tab>
  <it-tab-content group-id="'first-group'" id="'tab-currency'" view-controller="$ctrl"content-url="'currency.html'"></it-tab-content>
  <it-tab-content group-id="'first-group'" id="'tab-thirdparty'" view-controller="$ctrl"  content-url="'thirdparty.html'"></it-tab-content>
  <it-tab-content group-id="'first-group'" id="'tab-receipt'" view-controller="$ctrl"  content-url="'receipt.html'"></it-tab-content>
@@ -121,10 +121,12 @@ itTab.component('itTab', {
         label: '<',
         title: '<'
     },
-    template: '<button class="btn header-tab full-width " ng-click="$ctrl.fn.changeTab()"' +
-    ' title="{{$ctrl.title |translate}}" ng-disabled="$ctrl.fn.isTabActive()"><i class="fa' +
-    ' fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.fn.hasError()"></i> ' +
-    '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.fn.hasWarning()"></i> <span> {{$ctrl.label |translate }} </span> </button>',
+    template: '<button class="btn header-tab header-tab-btn full-width label-text-overflow " ng-click="$ctrl.fn.changeTab()"' +
+    ' title="{{$ctrl.title |translate}}" ng-disabled="$ctrl.fn.isTabActive()">' +
+    '<i class="fa fa-exclamation-triangle color-danger" aria-hidden="true" ng-if="$ctrl.fn.hasError()"></i> ' +
+    '<i class="fa fa-exclamation-triangle color-warning" aria-hidden="true" ng-if="$ctrl.fn.hasWarning()"></i>' +
+    ' <span class="label-text-overflow"> {{$ctrl.label |translate }} </span>' +
+    ' </button>',
     controller: [
         '$rootScope',
         'CurrentErrors',
