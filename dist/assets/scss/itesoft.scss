@@ -16,7 +16,8 @@
 "multipages-viewer",
 "it-lazy-grid",
 "messaging",
-"timeline";
+"timeline",
+"it-tab";
 
 html {
   height: 100%;
@@ -112,4 +113,19 @@ input::-ms-clear {
   .width-#{25 * $i} {
     width: 25 * $i+px;
   }
+}
+
+.message-text-overflow {
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.label-text-overflow {
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }

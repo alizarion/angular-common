@@ -100,7 +100,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "it-tab",
       "shortDescription": "Button that represent tab header",
-      "keywords": "$ctrl $scope angular api attach button changetab class company console content content-url controller currency description directive feature first-group fit_height function github group group-id header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice third thirdparty title true validate-header-tab-company view-controller"
+      "keywords": "$ctrl $scope angular api attach button changetab class col-xs-2 company console content content-url controller currency description directive feature first-group fit_height function github group group-id header homectrl html http identifier initialscale invoice io it-tab itesoft itesoft-showcase js label libpath log module ng-controller onapiloaded onzoomlevelschanged options param party receipt rendertextlayer represent row showtoolbar supplier tab tab-company tab-currency tab-invoice tab-receipt tab-supplier tab-thirdparty table tabservice third thirdparty title true validate-header-tab-company view-controller"
     },
     {
       "section": "api",
@@ -298,7 +298,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "print the encapsuled content into full screen modal popup. 42",
-      "keywords": "ab action adipisicing amet api assumenda autem blanditiis class close consectetur content cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expedita fugiat full height highest html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft jumbotron key keyboard konami mapping maxime modal module mycssclass pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
+      "keywords": "$scope ab action adipisicing amet angular api assumenda autem blanditiis class close compressfullscreenattachment consectetur content controller cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expandfullscreenattachment expedita fa fa-expand fields fugiat full function height highest homectrl html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft itesoft-showcase itmodalfullscreen js jumbotron key keyboard konami mapping maxime modal modalfullscreenoption module mycssclass ng-click ng-controller onregisterapi open options pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
     },
     {
       "section": "api",

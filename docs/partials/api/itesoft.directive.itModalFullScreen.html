@@ -30,22 +30,56 @@ as attribute<pre class="prettyprint linenums">&lt;ANY it-modal-full-screen&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itmodalfullscreen-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft" source-edit-deps="angular.js" source-edit-html="index.html-1" source-edit-css="" source-edit-js="" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-1" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-1" ng-html-wrap-loaded="itesoft angular.js"></pre>
+<pre class="prettyprint linenums" ng-set-text="index.html-1" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
 <script type="text/ng-template" id="index.html-1">
+      <div ng-controller="HomeCtrl">
+              <it-modal-full-screen  class="it-fill">
+              <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+              consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+              ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+              </div>
+              </it-modal-full-screen>
 
-<it-modal-full-screen  class="it-fill">
-<div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
-consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
-ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+              <button class="fa fa-expand" ng-click="expandFullScreenAttachment()"></button>
+              <it-modal-full-screen  class="it-fill" options="fields.modalFullScreenOption">
+              <div class="jumbotron it-fill" >Lorem ipsum dolor sit amet,
+              consectetur adipisicing elit.  Assumenda autem cupiditate dolor dolores dolorum et fugiat inventore
+              ipsum maxime, pariatur praesentium quas sit temporibus velit, vitae. Ab blanditiis expedita tenetur.
+              </div>
+              </it-modal-full-screen>
+              <div konami style="height:500px">
+              </div>
+      </div>
+  </script>
 </div>
-</it-modal-full-screen>
-<div konami style="height:500px">
+<div class="tab-pane" title="Module.js">
+<pre class="prettyprint linenums" ng-set-text="Module.js"></pre>
+<script type="text/ng-template" id="Module.js">
+     angular.module('itesoft-showcase',['itesoft'])
+  </script>
 </div>
-</script>
+<div class="tab-pane" title="controller.js">
+<pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
+<script type="text/ng-template" id="controller.js">
+angular.module('itesoft-showcase').controller('HomeCtrl',
+[
+'$scope',
+function($scope)   {
+   $scope.fields =      {
+      modalFullScreenOption:{
+         onRegisterApi:function(itModalFullScreen)            {
+            $scope.expandFullScreenAttachment = itModalFullScreen.open;
+             $scope.compressFullScreenAttachment = itModalFullScreen.close;
+         }
+      }
+   }
+}
+]);
+  </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft" ng-set-html="index.html-1" ng-eval-javascript=""></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-1" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>
