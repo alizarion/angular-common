@@ -1,0 +1,84 @@
+ .it-side-menu .navbar .navbar-nav > .active > a, .navbar .navbar-nav > .active > a:focus, .navbar .navbar-nav > .active {
+
+  background-color: $btnSuccessBackColor;
+  color: #F5F5F7;
+
+}
+ .navbar-inverse {
+   background-color: white;
+ }
+
+
+it-side-menu .navbar-inverse.navbar {
+  background-color: white;
+  color: #1C1F26;
+}
+
+ it-side-menu-header .it-material-design-hamburger__layer {
+  background-color: #1C1F26 !important;
+}
+
+ it-side-menu-header .nav .btn {
+  color: #71788E !important
+
+}
+
+ it-side-menu nav ul .logo {
+  height: 80px !important;
+  width: 100%;
+  background: black url("../../assets/img/logo/logo_50x50.png") center no-repeat;
+}
+
+ it-side-menu nav ul .profile-scpas {
+  position: absolute;
+  bottom: 0;
+  width: 80px;
+}
+
+ it-side-menu nav ul .profile-scpas img {
+  width: 40px;
+  max-height: 45px;
+}
+
+ it-side-menu nav ul li a .bubule {
+  width: 22px;
+  height: 17px;
+  position: absolute;
+  right: 10px;
+  top: 2px;
+  font-size: 13px;
+  background-color: #E1E1E2;
+}
+
+ it-side-menu nav ul li.active a .bubule {
+  color: $btnSuccessBackColor !important;
+  background-color: #F5F5F7;
+}
+
+ it-side-menu nav {
+  font-size: 30px;
+}
+
+ .navbar-nav>li>input {
+   color: black !important;
+ }
+
+
+ .it-side-menu .navbar .navbar-nav > .active > a, .navbar .navbar-nav > .active > a:focus, .navbar .navbar-nav > .active > a:hover {
+  border-left: none;
+}
+
+
+ it-side-menu .navbar-inverse .navbar-nav>li>a:focus, .navbar-inverse .navbar-nav>li>a:hover {
+   color: black !important;
+
+ }
+
+ it-side-menu nav ul li a {
+  height: 50px;
+  text-align: center;
+}
+
+ .it-side-menu .it-sidebar-inner{
+   overflow:hidden !important;
+ }

@@ -21,6 +21,7 @@ module.exports = {
     srcFolder: 'main',
     testFolder: 'test',
     docFolder: 'docs',
+    themes : ['itesoft-default','itesoft-scpas'],
 
     /**
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.

@@ -275,7 +275,7 @@ IteSoft
             restrict: 'EA',
             transclude : true,
             scope :true,
-            template : '<div it-bottom-glue="" class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
+            template : '<div class="it-master-detail-container jumbotron "> <div class="it-fill row " ng-transclude></div></div>',
             controller : [
                 '$scope',
                 'screenSize',

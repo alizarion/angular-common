@@ -433,6 +433,16 @@ IteSoft
                     };
 
 
+
+
+                    /**
+                     * set text filter value
+                     */
+                    $scope.itMasterDetailControl.setFilterText = function(t){
+                       $scope.filterText = t;
+                    };
+
+
                     /**
                      * Handler to unlock the current item.
                      */
