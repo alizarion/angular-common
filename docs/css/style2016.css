@@ -189,7 +189,8 @@ it-tab .btn {
   font-family: 'Source Sans Pro', sans-serif; }
 
 input, select {
-  padding-left: 5px; }
+  padding-left: 5px;
+  height: 30px; }
 
 table input.scpas-input, table select.scpas-input, table .it-autocomplete-input {
   margin-bottom: 0px;
@@ -207,6 +208,10 @@ input.scpas-input, select.scpas-input, .it-autocomplete-input {
 input.scpas-input:hover, select.scpas-input:hover, .it-autocomplete-input:hover {
   background-color: #ffffff;
   border: 2px solid #E1E1E2; }
+
+input.ng-invalid, button.ng-invalid {
+  background-color: #FAEBE5 !important;
+  border: 1px solid #D13D01 !important; }
 
 .form-control:focus {
   border: 2px solid #3A89EB !important;
@@ -630,6 +635,52 @@ tr.it-line td {
   background-color: #E1E1E2 !important;
   font-size: 11px;
   margin-top: 0px; }
+
+button[bs-select] {
+  padding: 0px;
+  padding-left: 2px;
+  height: 30px;
+  padding-right: 20px;
+  border-radius: 0px !important; }
+
+button[bs-select] {
+  background-color: #F5F5F7 !important;
+  color: #1C1F26;
+  font-size: 15px;
+  background-image: none;
+  background-size: 0px;
+  margin: 5px;
+  width: 100%;
+  text-align: inherit; }
+
+ul.dropdown-menu > li > a:hover {
+  background-color: #eeeeee !important;
+  color: black !important; }
+
+button[bs-select] > span.caret {
+  right: 0px;
+  position: absolute;
+  margin: 10px; }
+
+ul.dropdown-menu > li > a {
+  margin: 0px;
+  padding-left: 1px; }
+
+ul.dropdown-menu {
+  border-radius: 0px !important;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #3A89EB; }
+
+.dropdown-menu .active a, .dropdown-menu .active-add a, .dropdown-menu .active-add a:focus, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
+  color: white;
+  text-decoration: none;
+  background-color: #3A89EB;
+  outline: 0; }
+
+.it-master .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell {
+  background: #3A89EB !important;
+  color: white; }
 
 .dashboard-with-footer {
   height: 100%;

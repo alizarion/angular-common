@@ -1,5 +1,6 @@
 input, select {
   padding-left: 5px;
+  height: 30px;
 }
 
 table input.scpas-input, table select.scpas-input, table .it-autocomplete-input {
@@ -22,6 +23,14 @@ input.scpas-input:hover, select.scpas-input:hover, .it-autocomplete-input:hover 
   border: 2px solid #E1E1E2;
 }
 
+input.ng-invalid, button.ng-invalid {
+  background-color: #FAEBE5 !important;
+  border: 1px solid #D13D01 !important;
+}
+
+input.ng-valid {
+}
+
 .form-control:focus {
   border: 2px solid $highlightColor !important;
   background-image: none !important;
@@ -36,7 +45,6 @@ input.scpas-input:hover, select.scpas-input:hover, .it-autocomplete-input:hover 
   color: $labelColor;
   font-size: 12px;
 }
-
 
 .it-field-warning, .has-warning .form-control {
   background-color: #FEF7E9 !important;
