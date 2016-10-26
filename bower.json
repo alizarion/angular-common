@@ -3,7 +3,7 @@
   "private": "true",
   "version": "1.0-beta.1",
   "description": "Mise en commun des composants AngularJS",
-  "devDependencies": {
+  "dependencies": {
     "bootstrap": "3.3.4",
     "angular": "1.5.5",
     "angular-route": "1.5.5",
@@ -23,6 +23,7 @@
     "ngtoast": "2.0.0",
     "angular-local-storage": "0.2.3",
     "angular-ui-codemirror": "0.3",
+    "angular-websocket": "^2.0.0",
     "jsonlint": "https://gitlab.com/itesoft/jsonlint.git",
     "css-lint": "https://gitlab.com/itesoft/css-lint.git#master",
     "jshint": "2.9.1",
@@ -31,8 +32,5 @@
     "pdfjs-dist": "https://gitlab.com/itesoft/pdfjs.dist.git#1.6.212",
     "angular-ui-layout": "1.4.2",
     "timeline": "https://gitlab.com/itesoft/timeline.git"
-  },
-  "dependencies": {
-    "angular-websocket": "^2.0.0"
   }
 }

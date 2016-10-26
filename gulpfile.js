@@ -20,8 +20,9 @@ var buildConfig = require('./build.config.js');
 var gulpDocs = require('gulp-ngdocs');
 var less = require('gulp-less');
 var flatten = require('gulp-flatten');
+var connect = require('gulp-connect');
+var cors = require('cors');
 var sh = require('shelljs');
-var webserver = require('gulp-webserver');
 var useref = require('gulp-useref');
 var gulpif = require('gulp-if');
 var karma = require('gulp-karma');
@@ -49,7 +50,7 @@ gulp.task('build', function(callback) {
 gulp.task('less', function () {
     return gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
         .pipe(less())
-        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css'));
+        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css/itesoft-default'));
 });
 
 /**
@@ -109,27 +110,35 @@ gulp.task('vendor-css',function(done){
 /**
  * build css minified css file.
  */
-gulp.task('itesoft-css',function(done){
-    gulp.src([buildConfig.srcFolder + '/assets/css/*.css'])
-        .pipe(concat('itesoft.css'))
-        .pipe(minifyCss({
-            keepSpecialComments: 0
-        }))
-        .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest(buildConfig.distFolder + '/assets/css'))
-        .on('end', done);
+gulp.task('itesoft-css',function(){
+    buildConfig.themes.forEach(function(entry){
+        gulp.src([buildConfig.srcFolder + '/assets/css/'+entry+'/*.css'])
+            .pipe(concat(entry+'.css'))
+            .pipe(minifyCss({
+                keepSpecialComments: 0
+            }))
+            .pipe(rename({ extname: '.min.css' }))
+            .pipe(gulp.dest(buildConfig.distFolder + '/assets/css'))
+
+    })
 });
+
 
 /**
  * build bundle css file.
  */
-gulp.task('css-bundle',function(done){
-    gulp.src([buildConfig.distFolder + '/assets/fonts/vendor.min.css',buildConfig.distFolder + '/assets/css/*.css'])
-        .pipe(concat('itesoft-bundle.css'))
-        .pipe(rename({ extname: '.min.css' }))
-        .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'))
-        .on('end', done);
+gulp.task('css-bundle',function(){
+    buildConfig.themes.forEach(function(entry){
+        gulp.src([buildConfig.distFolder + '/assets/fonts/vendor.min.css',
+            buildConfig.distFolder + '/assets/css/'+entry+'.min.css'])
+            .pipe(concat(entry+'-bundle.css'))
+            .pipe(rename({ extname: '.min.css' }))
+            .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'))
+
+    })
+
 });
+
 
 
 
@@ -182,7 +191,13 @@ gulp.task('docs', function () {
 
     var options = {
         html5Mode: false,
-        styles:[buildConfig.distFolder + '/assets/fonts/itesoft-bundle.min.css'],
+        styles:[{
+            theme:'Black',
+            file : buildConfig.distFolder + '/assets/fonts/itesoft-default-bundle.min.css'
+        },{
+            theme:'SCPAS',
+            file : buildConfig.distFolder + '/assets/fonts/itesoft-scpas-bundle.min.css'
+        }],
         scripts:scripts,
         loadDefaults: {
             angular:false,
@@ -197,8 +212,8 @@ gulp.task('docs', function () {
     gulp.src(docFiles)
         .pipe(gulpDocs.process(options))
         .pipe(gulp.dest(buildConfig.docFolder));
-    gulp.src(buildConfig.srcFolder + '/assets/css/style2016/style2016.css')
-        .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
+    // gulp.src(buildConfig.srcFolder + '/assets/css/style2016/style2016.css')
+    //     .pipe(gulp.dest(buildConfig.docFolder+'/css/'));
     gulp.src(buildConfig.srcFolder + '/assets/fonts/**/*')
         .pipe(gulp.dest(buildConfig.docFolder +'/fonts/'));
     gulp.src(buildConfig.srcFolder + '/assets/img/**/*')
@@ -249,7 +264,7 @@ gulp.task('vendor', function() {
  */
 gulp.task('html', function() {
     gulp.src(buildConfig.srcFolder + '/app/**/*.html')
-        // And put it in the dist folder
+    // And put it in the dist folder
         .pipe(gulp.dest(buildConfig.distFolder + '/app'));
 });
 
@@ -260,7 +275,7 @@ gulp.task('assets', function() {
     var globalAssetsType = buildConfig.assetsDistFiles.slice();
     globalAssetsType = globalAssetsType.concat(buildConfig.fontFiles.slice());
     gulp.src(globalAssetsType)
-        // And put it in the dist folder
+    // And put it in the dist folder
         .pipe(gulp.dest(buildConfig.distFolder + '/assets'));
 });
 
@@ -269,7 +284,7 @@ gulp.task('assets', function() {
 
 gulp.task('deploy',['test'], function() {
     return gulp.src(['!./node_modules/**/*','!' + buildConfig.srcFolder +'/**/*','!' +
-        buildConfig.testFolder +'/**/*','!./*','./**/*'])
+    buildConfig.testFolder +'/**/*','!./*','./**/*'])
         .pipe(ghPages());
 });
 
@@ -353,10 +368,15 @@ gulp.task('css-debug', function(callback) {
 
 
 gulp.task('serve', function () {
-    gulp.src(buildConfig.docFolder)
-        .pipe(webserver({
-            port: 3000
-        }));
+    connect.server({
+
+        root: buildConfig.docFolder,
+        middleware: function() {
+            return [cors()];
+        },
+        port: 3000,
+        livereload: true
+    });
 });
 
 gulp.task('webdriver_update', webdriver_update);
@@ -367,10 +387,16 @@ gulp.task('webdriver_standalone', webdriver_standalone);
  * Execute l'action de test e2e
  */
 gulp.task('e2e', ['webdriver_update'], function (callback) {
-    var stream = gulp.src(buildConfig.docFolder)
-        .pipe(webserver({
-            port: 4000
-        }));
+
+    connect.server({
+
+        root: buildConfig.docFolder,
+        middleware: function() {
+            return [cors()];
+        },
+        port: 4000,
+        livereload: true
+    });
     var fileStream = gulp.src(buildConfig.excludeFromAppDist.e2e);
     fileStream.pipe(protractor({
         configFile: "protractor.conf.js",
@@ -402,10 +428,10 @@ gulp.task('install', ['git-check'], function() {
 gulp.task('git-check', function(done) {
     if (!sh.which('git')) {
         console.log(
-                '  ' + gutil.colors.red('Git is not installed.'),
+            '  ' + gutil.colors.red('Git is not installed.'),
             '\n  Git, the version control system, is required to download Ionic.',
             '\n  Download git here:', gutil.colors.cyan('http://git-scm.com/downloads') + '.',
-                '\n  Once git is installed, run \'' + gutil.colors.cyan('gulp install') + '\' again.'
+            '\n  Once git is installed, run \'' + gutil.colors.cyan('gulp install') + '\' again.'
         );
         process.exit(1);
     }
