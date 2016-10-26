@@ -1,0 +1,80 @@
+input, select {
+  padding-left: 5px;
+  height: 30px;
+}
+
+table input.scpas-input, table select.scpas-input, table .it-autocomplete-input {
+  margin-bottom: 0px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+input.scpas-input, select.scpas-input, .it-autocomplete-input {
+  background-color: $inputTextBackColor;
+  color: $inputTextColor;
+  font-size: 15px;
+  background-image: none;
+  background-size: 0px;
+  margin-bottom: 10px;
+}
+
+input.scpas-input:hover, select.scpas-input:hover, .it-autocomplete-input:hover {
+  background-color: $white;
+  border: 2px solid #E1E1E2;
+}
+
+input.ng-invalid, button.ng-invalid {
+  background-color: #FAEBE5 !important;
+  border: 1px solid #D13D01 !important;
+}
+
+input.ng-valid {
+}
+
+.form-control:focus {
+  border: 2px solid $highlightColor !important;
+  background-image: none !important;
+}
+
+.form-control {
+  border: 2px solid $inputTextBackColor !important;
+  background-image: none !important;
+}
+
+.form-group .control-label, .form-group-default .control-label {
+  color: $labelColor;
+  font-size: 12px;
+}
+
+.it-field-warning, .has-warning .form-control {
+  background-color: #FEF7E9 !important;
+  border: 1px solid #FDB62B !important;
+}
+
+.it-field-error {
+  background-color: #FAEBE5 !important;
+  border: 1px solid #D13D01 !important;
+}
+
+.it-field-error input, .it-field-error select {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.form-control, .form-control.focus, .form-control:focus {
+  background-image: none;
+}
+
+.form-control {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: none;
+  transition: none;
+}
+
+table input, table select, table it-autocomplete {
+  border: none !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+

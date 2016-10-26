@@ -17,6 +17,26 @@
         // dynamically add base tag as well as css and javascript files.
         // we can't add css/js the usual way, because some browsers (FF) eagerly prefetch resources
         // before the base attribute is added, causing 404 and terribly slow loading of the docs app.
+        function getParameterByName(name, url) {
+                        if (!url) url = window.location.href;
+                        name = name.replace(/[\[\]]/g, "\\$&");
+                        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                            results = regex.exec(url);
+                        if (!results) return null;
+                        if (!results[2]) return '';
+                        return decodeURIComponent(results[2].replace(/\+/g, " "));
+                    }
+
+
+                    function getCurrentThemeUrl(themeName,styles){
+                    var result = null;
+                        styles.forEach(function(entry){
+                            if(entry.theme === themeName){
+                               result = entry.file;
+                            }
+                        })
+                        return result ? result : styles[0].file;
+                    };
         (function() {
             var indexFile = (location.pathname.match(/\/(index[^\.]*\.html)/) || ['', ''])[1],
                     rUrl = /(#!\/|api|index[^\.]*\.html).*$/,
@@ -28,9 +48,11 @@
             addTag('base', {href: baseUrl});
 
 
-            
-                addTag('link', {rel: 'stylesheet', href: 'css/dist/assets/fonts/itesoft-bundle.min.css', type: 'text/css'}, sync);
-                
+            var theme =  getParameterByName('theme');
+            var styles =   [{"theme":"Black","file":"css/dist/assets/fonts/itesoft-default-bundle.min.css"},{"theme":"SCPAS","file":"css/dist/assets/fonts/itesoft-scpas-bundle.min.css"}];
+            console.log(getCurrentThemeUrl(theme,styles));
+            addTag('link', {rel: 'stylesheet', href: getCurrentThemeUrl(theme,styles), type: 'text/css'}, sync);
+            addTag('link', {rel: 'stylesheet', href: 'css/font-awesome.css', type: 'text/css'});
             addTag('link', {rel: 'stylesheet', href: 'css/font-awesome.css', type: 'text/css'});
             addTag('link', {rel: 'stylesheet', href: 'css/prettify.css', type: 'text/css'});
             addTag('link', {rel: 'stylesheet', href: 'css/docs.css', type: 'text/css'});
@@ -123,6 +145,20 @@
     </it-side-menu-header>
 
     <it-side-menu>
+
+
+        <ul class="nav navbar-nav nav-pills nav-stacked list-group">
+
+            <li  it-collapsed-item="">
+                <a href=""><h5><i class="fa fa-paint-brush fa-fw"></i>&nbsp; Themes</h5></a>
+                <ul it-nav-active="active"  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+                    <li ng-repeat="theme in options.styles " ng-class="navClass(page)"
+                    class="api-list-item expand">
+                        <a href="#?theme={{theme.theme}}" target="_blank" tabindex="2">{{theme.theme}}</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
 
         <ul class="nav navbar-nav nav-pills nav-stacked list-group">
 

@@ -1,0 +1,118 @@
+it-message-panel it-side-panel .message-panel-below {
+  z-index: 100 !important;
+}
+
+.messages-title {
+  background-color: $grey-300;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.messages-container-title {
+  padding-top: 10px;
+  padding-left: 5px;
+}
+
+.badge.btn-message-filter {
+  color: $black;
+  background-color: $grey-200;
+  font-weight: normal;
+  padding: 5px 12px;
+  border-radius: 15px;
+}
+
+.badge.btn-message-filter:hover {
+  color: $black;
+  background-color: $grey-300;
+}
+
+.badge.btn-comment-filter-activated {
+  background-color: $indigo-100;
+}
+
+.badge.btn-comment-filter-activated:hover {
+  background-color: $indigo-200;
+}
+
+.badge.btn-notification-filter-activated {
+  background-color: $orange-100;
+}
+
+.badge.btn-notification-filter-activated:hover {
+  background-color: $orange-200;
+}
+
+.btn-refresh-messages {
+  padding: 0;
+  margin: 0;
+}
+
+.message {
+  padding: 10px;
+  color: $black;
+  padding-right: 50px;
+  position: relative;
+}
+
+.comment {
+  background-color: $indigo-100;
+  border-radius: 10px;
+  border-top-left-radius: 0px;
+}
+
+.adminComment {
+  color: red;
+  background-color: #ffc8c5;
+}
+
+.adminCommentFrom {
+  font-weight: bold;
+  color: black;
+}
+
+.notification {
+  background-color: $orange-100;
+}
+
+.message label {
+  color: $black;
+  margin: 0px;
+}
+
+.message-code {
+  color: white;
+  background-color: black;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.date-container {
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+.date {
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-bottom: 20px;
+  background-color: $grey-200;
+  color: $grey-600;
+  text-align: center;
+}
+
+.time {
+  color: $grey-600;
+  font-size: 11px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+}
+
+.comment-input {
+  width: 100%;
+  background-color: #f9f9f9 !important;
+  border: 1pt solid #EEE;
+}
+
+.comment-input:focus {
+  border-color: $indigo-100;
+}

@@ -298,7 +298,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "print the encapsuled content into full screen modal popup. 42",
-      "keywords": "$scope ab action adipisicing amet angular api assumenda autem blanditiis class close compressfullscreenattachment consectetur content controller cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expandfullscreenattachment expedita fa fa-expand fields fugiat full function height highest homectrl html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft itesoft-showcase itmodalfullscreen js jumbotron key keyboard konami mapping maxime modal modalfullscreenoption module mycssclass ng-click ng-controller onregisterapi open options pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
+      "keywords": "$scope ab action adipisicing amet angular api assumenda autem blanditiis class close compressfullscreenattachment consectetur content controller cupiditate default directive dolor dolores dolorum ea element elit encapsuled escape expanded expandfullscreenattachment expedita fields fugiat full function height highest homectrl html inventore ipsum it-escape-key it-fill it-modal-background it-open-class it-z-index itesoft itesoft-showcase itmodalfullscreen js jumbotron key keyboard konami mapping maxime modal modalfullscreenoption module mycssclass ng-controller onregisterapi open pariatur popup praesentium print quas screen set sit style table temporibus tenetur velit view vitae z-index"
     },
     {
       "section": "api",
@@ -532,7 +532,14 @@ NG_DOCS={
       "js/dist/assets/lib/tiff.min.js"
     ],
     "styles": [
-      "css/dist/assets/fonts/itesoft-bundle.min.css"
+      {
+        "theme": "Black",
+        "file": "css/dist/assets/fonts/itesoft-default-bundle.min.css"
+      },
+      {
+        "theme": "SCPAS",
+        "file": "css/dist/assets/fonts/itesoft-scpas-bundle.min.css"
+      }
     ],
     "title": "Itesoft Awesome Docs",
     "html5Mode": false,
@@ -559,6 +566,13 @@ NG_DOCS={
     "js/dist/assets/lib/tiff.min.js"
   ],
   "styles": [
-    "css/dist/assets/fonts/itesoft-bundle.min.css"
+    {
+      "theme": "Black",
+      "file": "css/dist/assets/fonts/itesoft-default-bundle.min.css"
+    },
+    {
+      "theme": "SCPAS",
+      "file": "css/dist/assets/fonts/itesoft-scpas-bundle.min.css"
+    }
   ]
 };

@@ -92,10 +92,12 @@ docsApp.directive.sourceEdit = function(getEmbeddedTemplate) {
     controller: function($scope, $attrs, openPlunkr) {
       var sources = {
         module: $attrs.sourceEdit,
+        module: $attrs.sourceEdit,
         deps: read($attrs.sourceEditDeps),
         html: read($attrs.sourceEditHtml),
         css: read($attrs.sourceEditCss),
         js: read($attrs.sourceEditJs),
+        json: read($attrs.sourceEditJson),
         unit: read($attrs.sourceEditUnit),
         scenario: read($attrs.sourceEditScenario)
       };
@@ -147,13 +149,17 @@ docsApp.serviceFactory.loadedUrls = function($document) {
     }
   });
 
-    angular.forEach(NG_DOCS.styles, function(style) {
-        tmp.href = style;
+
+
+   angular.forEach(NG_DOCS.styles, function(style) {
+        tmp.pathname = style.file;
         var match = cssUrls[tmp.pathname];
         if (match) {
             urls.base.push(match);
         }
     });
+
+
   return urls;
 };
 
@@ -174,7 +180,7 @@ docsApp.serviceFactory.formPostData = function($document) {
 
 docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loadedUrls) {
   return function(content) {
-    var allFiles = [].concat(content.js, content.css, content.html);
+    var allFiles = [].concat(content.js, content.css, content.html, content.json);
     var indexHtmlContent = '<!doctype html>\n' +
         '<html ng-app="{{module}}">\n' +
         '  <head>\n' +
@@ -190,15 +196,16 @@ docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loaded
         var ext = url.split(/\./).pop();
         if (ext == 'css') {
             scriptDeps += '    <link rel="stylesheet" href="' + url + '" type="text/css">\n';
-        } else if (ext == 'js') {
+        } else if (ext == 'js' ) {
             scriptDeps += '    <script src="' + url+ '"></script>\n';
         }
     });
+
     angular.forEach(allFiles, function(file) {
       var ext = file.name.split(/\./).pop();
         if (ext == 'css') {
           scriptDeps += '    <link rel="stylesheet" href="' + file.name + '" type="text/css">\n';
-        } else if (ext == 'js' && file.name !== 'angular.js') {
+        } else if ((ext == 'js' || ext == 'json') && file.name !== 'angular.js') {
         scriptDeps += '    <script src="' + file.name + '"></script>\n';
       }
     });
@@ -316,6 +323,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
    ***********************************/
 
   $scope.sections = {};
+  $scope.options = NG_DOCS.__options;
   angular.forEach(NG_DOCS.sections, function(section, url) {
     $scope.sections[(NG_DOCS.html5Mode ? '' : '#/') + url] = section;
   });
