@@ -4,11 +4,11 @@
   box-shadow: $params;
 }
 
-.it-autocomplete-container {
+it-autocomplete .it-autocomplete-container {
   position: absolute;
 }
 
-.it-autocomplete-content {
+it-autocomplete .it-autocomplete-content {
   top: 0px;
   right: 0;
   bottom: 0;
@@ -16,7 +16,7 @@
   width: 100%;
 }
 
-.it-autocomplete-select {
+it-autocomplete .it-autocomplete-select {
   background-color: white;
   cursor: pointer;
   padding-left: 10px;
@@ -24,38 +24,39 @@
   width: 100%;
 }
 
-.it-autocomplete-select:hover {
+it-autocomplete .it-autocomplete-select:hover {
   background-color: whitesmoke;
 }
 
-.it-autocomplete-selected:hover {
+it-autocomplete .it-autocomplete-selected:hover {
   background-color: #337ab6;
 }
 
-.it-autocomplete-selected {
+it-autocomplete .it-autocomplete-selected {
   background-color: #337ab7;
   cursor: default;
   color: white;
 }
 
-.ui-grid-filter-container .it-autocomplete-container {
+it-autocomplete .ui-grid-filter-container .it-autocomplete-container {
   position: fixed;
   z-index: 9999;
 }
 
-.it-autocomplete-btn{
+it-autocomplete .it-autocomplete-btn {
   width: 30px;
   position: absolute;
-  top:0;
-  right:15px;
+  top: 0;
+  right: 15px;
   pointer-events: none;
   display: inline-block;
 }
 
-.it-autocomplete-div-visible:hover .it-autocomplete-btn {
+it-autocomplete .it-autocomplete-div-visible:hover .it-autocomplete-btn {
   color: #03a9f4;
 }
-.it-autocomplete-container {
+
+it-autocomplete .it-autocomplete-container {
   max-height: 200px;
   min-height: 50px;
   min-width: 50px;
@@ -66,10 +67,10 @@
   @include box-shadow(1px 1px 1px #666);
 }
 
-.it-autocomplete-div-visible{
+it-autocomplete .it-autocomplete-div-visible {
 }
 
-.it-autocomplete-input{
+it-autocomplete .it-autocomplete-input {
   display: inline-block;
   padding-right: 30px !important;
 }
