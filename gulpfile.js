@@ -44,13 +44,16 @@ gulp.task('build', function(callback) {
 
 /**
  *
- * Supression des fichiers du precedent build
+ * Traitement du less pour chaque theme
  *
  */
 gulp.task('less', function () {
-    return gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
-        .pipe(less())
-        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css/itesoft-default'));
+    buildConfig.themes.forEach(function (entry) {
+        gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
+            .pipe(less())
+            .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css/' + entry));
+
+    })
 });
 
 /**
