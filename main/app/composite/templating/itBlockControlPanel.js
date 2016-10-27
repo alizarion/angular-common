@@ -57,10 +57,7 @@
 			itConfigProvider.defaultNamespace('CONFIG');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('HomeCtrl',
+	}]).controller('HomeCtrl',
  ['$scope','$rootScope',
  function($scope,$rootScope) {$rootScope.editSite=true;}]);
  </file>
