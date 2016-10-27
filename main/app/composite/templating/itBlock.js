@@ -100,10 +100,7 @@
 			itConfigProvider.defaultNamespace('CONFIG');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('HomeCtrl',
+	}]).controller('HomeCtrl',
  ['$scope','$rootScope','$http','uiGridGroupingConstants',
  function($scope,$rootScope,$http,uiGridGroupingConstants) {
                        $rootScope.editSite = true;
