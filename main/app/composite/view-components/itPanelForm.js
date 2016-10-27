@@ -72,6 +72,7 @@ IteSoft.component('itPanelForm', {
     '<div class="row panelFormRow">' +
     '<div ng-switch on="option.type">'+
     '<div ng-switch-when="title"><div ng-include=" \'titleTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="labelalone"><div ng-include=" \'labelAloneTemplate.html\' "></div></div>'+
     '<div ng-switch-when="label"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'labelTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6 "></div></div>'+
     '<div ng-switch-when="input"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'inputTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
     '<div ng-switch-when="select"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'selectTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
@@ -94,6 +95,10 @@ IteSoft.component('itPanelForm', {
     '</script>'+
     '<!------------------- Template label ------------------->'+
     '<script type="text/ng-template" id="labelTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-label">' +
+    '<p>{{option.value}}</p></div>'+
+    '</script>'+
+    '<!------------------- Template label alone ------------------->'+
+    '<script type="text/ng-template" id="labelAloneTemplate.html"><div class="col-xs-8 col-md-8 col-lg-8 it-panel-form-label">' +
     '<p>{{option.value}}</p></div>'+
     '</script>'+
     '<!------------------- Template input ------------------->'+
