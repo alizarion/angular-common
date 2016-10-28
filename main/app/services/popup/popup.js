@@ -129,7 +129,7 @@
      </example>
  */
 angular.module('itesoft.popup',['ui.bootstrap.modal'])
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($modal,$modalStack,$rootScope,$q,$compile){
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($uibModal,$uibModalStack,$rootScope,$q,$compile){
 
         var MODAL_TPLS = '<div class="modal-header it-view-header">' +
                              '<h3 it-compile="options.title"></h3>'+
