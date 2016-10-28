@@ -48,11 +48,11 @@
           labelAlone: "Je suis un label sans titre",
           label: "Je suis un label",
           input: " Je suis un input",
-          select: "code1",
+          select: {id: '1', value: "value1"},
           checkbox:true,
           area:" Je suis un text area",
           date:"2016-07-25T08:19:09.069Z",
-          autocomplete:"code1",
+          autocomplete:1,
           inputNumber:9,
           html:"<a href=\"http://www.google.com\">Google</a>"
        };
@@ -63,16 +63,16 @@
           {"title":"label", "code": "label", "value":$scope.fields, "type":"label"},
         {"title":"titleInput1", "code": "input", "value":$scope.fields, "type":"input"},
         {"title":"titleSelect1", "code": "select", "items":
-           [{"code": "code1", "value": "value1"},
-           {"code": "code2", "value": "value2"}], "value":$scope.fields,
+           [{"id": '1', "value": "value1"},
+           {"id": '2', "value": "value2"}], "value":$scope.fields,
         "type":"select"},
         {"title":"titleCheckBox", "code": "checkbox", "value":$scope.fields, "type":"toggle"},
         {"title":"titleTextArea", "code": "area", "value":$scope.fields,
         "type":"textarea"},
         {"title":"titleDate", "code": "date", "value":$scope.fields, "type":"date"},
-        {"title":"titleAutocomplete1", "code": "codeSelect1", "items":
-           [{"id": "code1", "value": "value1"},
-           {"id": "code2", "value": "value2"}], "value":$scope.fields,
+        {"title":"titleAutocomplete1", "code": "autocomplete", "items":
+           [{"id": 1, "value": "value1"},
+           {"id": 2, "value": "value2"}], "value":$scope.fields,
         "type":"autocomplete"},
          {"title":"titleInputNumber", "code": "inputNumber", "value":$scope.fields, "type":"number"},
          {"title":"titleHtml", "code": "html", "value":"", "type":$scope.fields}
