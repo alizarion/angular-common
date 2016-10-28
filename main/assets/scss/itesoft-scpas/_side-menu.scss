@@ -50,12 +50,12 @@ it-side-menu {
     border-left: none;
   }
 
-  it-side-menu .navbar-inverse .navbar-nav > li > a:focus, .navbar-inverse .navbar-nav > li > a:hover {
+  .navbar-inverse .navbar-nav > li > a:focus, .navbar-inverse .navbar-nav > li > a:hover {
     color: black !important;
 
   }
 
-  it-side-menu nav ul li a {
+  nav ul li a {
     height: 50px;
     text-align: center;
   }

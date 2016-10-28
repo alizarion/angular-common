@@ -1,3 +1,5 @@
+@import "../colors";
+
 $primary: $light-blue;
 $success: $green;
 $info: #17C3F5;
@@ -38,21 +40,21 @@ $btnColor: #E1E1E2;
 
 $btnSuccessHoverBackColor: #2B66B0;
 $btnSuccessBackColor: #3A89EB;
-$btnSuccessHoverColor:#F5F5F7;
+$btnSuccessHoverColor: #F5F5F7;
 
 $btnPrimaryBackColor: #8A8F9B;
 $btnWarningBackColor: $btnPrimaryBackColor;
 
-$btnWarningHoverBackColor:#676B74;
-$btnDangerHoverBackColor:$btnWarningHoverBackColor;
-$btnPrimaryHoverBackColor:$btnWarningHoverBackColor;
+$btnWarningHoverBackColor: #676B74;
+$btnDangerHoverBackColor: $btnWarningHoverBackColor;
+$btnPrimaryHoverBackColor: $btnWarningHoverBackColor;
 
 $btnDangerBackColor: $btnWarningBackColor;
 $btnPrimaryDisableBackColor: $btnWarningBackColor;
-$btnDangerDisableBackColor:$btnWarningBackColor;
+$btnDangerDisableBackColor: $btnWarningBackColor;
 
-$btnPrimaryHoverColor:#F5F5F7;
+$btnPrimaryHoverColor: #F5F5F7;
 $btnWarningHoverColor: $btnPrimaryHoverColor;
-$btnDangerHoverColor:$btnPrimaryHoverColor;
+$btnDangerHoverColor: $btnPrimaryHoverColor;
 
 
