@@ -8,7 +8,7 @@ itMultiPagesViewer.directive('itProgressbarViewer', [function(){
             api: "="
         },
         restrict: 'E',
-        template :  '<div class="loader" >' +
+        template :  '<div class="multipage-viewer-loader" >' +
         '<div class="progress-bar">' +
         '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
         '</div>' +

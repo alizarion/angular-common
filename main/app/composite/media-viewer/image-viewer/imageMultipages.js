@@ -15,19 +15,10 @@ itImageViewer
 
         IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
-            /*if(this.rendered) {
-             if(callback) {
-             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-             }
-             return;
-             };
-
-             this.rendered = true;*/
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
             }else {
-                //self.canvasRendered = true;
                 page.wrapper.append(page.canvas);
 
                 var ctx = page.canvas[0].getContext('2d');
@@ -44,10 +35,11 @@ itImageViewer
         return (IMAGEPage);
     }])
 
-    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
+    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage' , 'DownloadManager', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage, DownloadManager) {
         function IMAGEViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new MultiPagesViewerAPI(this), element);
+            this.name = "IMAGEViewer";
         }
 
         IMAGEViewer.prototype = new MultiPagesViewer;
@@ -67,10 +59,14 @@ itImageViewer
         IMAGEViewer.prototype.setUrl = function(url) {
             if (url !== undefined && url !== null && url !== '') {
                 var self = this;
+                self.url = url;
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
                     self.addPages();
                 });
+                self.api.download = function () {
+                    DownloadManager.download(null, url);
+                };
             }
         };
         IMAGEViewer.prototype.setFile = function(file) {
@@ -83,6 +79,9 @@ itImageViewer
                         self.pages = pageList;
                         self.addPages();
                     });
+                    self.api.download = function () {
+                        DownloadManager.download(DownloadManager.dataURItoBlob(url), url, 'document.png');
+                    };
                 };
 
                 reader.onprogress = function (e) {
@@ -129,8 +128,6 @@ itImageViewer
             img.onload = function() {
                 var page =  new IMAGEPage(self, 0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
-
-                //self.addPage(page);
 
                 callback(pageList);
             };

@@ -3,12 +3,37 @@
  * TODO Pdf implementation desc
  */
 itPdfViewer
-    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+    .factory('PDFViewerAPI', ['$log', 'MultiPagesViewerAPI', 'DownloadManager', function ($log, MultiPagesViewerAPI, DownloadManager) {
+
+        function getFileNameFromURL (url) {
+            var reURI = /^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
+            //            SCHEME      HOST         1.PATH  2.QUERY   3.REF
+            // Pattern to get last matching NAME.pdf
+            var reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
+            var splitURI = reURI.exec(url);
+            var suggestedFilename = reFilename.exec(splitURI[1]) ||
+                reFilename.exec(splitURI[2]) ||
+                reFilename.exec(splitURI[3]);
+            if (suggestedFilename) {
+                suggestedFilename = suggestedFilename[0];
+                if (suggestedFilename.indexOf('%') !== -1) {
+                    // URL-encoded %2Fpath%2Fto%2Ffile.pdf should be file.pdf
+                    try {
+                        suggestedFilename =
+                            reFilename.exec(decodeURIComponent(suggestedFilename))[0];
+                    } catch(e) { // Possible (extremely rare) errors:
+                        // URIError "Malformed URI", e.g. for "%AA.pdf"
+                        // TypeError "null has no properties", e.g. for "%2F.pdf"
+                    }
+                }
+            }
+            return suggestedFilename || 'document.pdf';
+        }
 
         function PDFViewerAPI(viewer) {
             this.base = MultiPagesViewerAPI;
             this.base(viewer);
-        }; 
+        };
 
         PDFViewerAPI.prototype = new MultiPagesViewerAPI;
 
@@ -24,7 +49,6 @@ itPdfViewer
 
             this.viewer.highlightSearchResult(nextHighlightID);
         };
-
         PDFViewerAPI.prototype.findPrev = function () {
             if(this.viewer.searchHighlightResultID === -1) {
                 return;
@@ -37,11 +61,24 @@ itPdfViewer
 
             this.viewer.highlightSearchResult(prevHighlightID);
         };
+        PDFViewerAPI.prototype.download = function() {
+            var self = this;
+            var url = self.viewer.url;
+            var filename = getFileNameFromURL(url);
+
+            self.viewer.pdf.getData().then(function (data) {
+                    var blob = DownloadManager.createBlob(data, 'application/pdf');
+                    DownloadManager.download(blob, url, filename);
+                }, function() {
+                    DownloadManager.downloadUrl(url, filename);
+                } // Error occurred try downloading with just the url.
+            );
+        };
 
         return (PDFViewerAPI);
     }])
 
-    .factory('PDFPage', ['$log', '$window', '$document', '$timeout', 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, $window, $document,$timeout, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+    .factory('PDFPage', ['$log', 'MultiPagesPage', 'MultiPagesConstants', 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
         function PDFPage(viewer, pdfPage) {
             this.base = MultiPagesPage;
@@ -54,7 +91,7 @@ itPdfViewer
         PDFPage.prototype = new MultiPagesPage;
 
         PDFPage.prototype.clear = function () {
-            if(this.renderTask !== null) {
+            if(this.renderTask != null) {
                 this.renderTask.cancel();
             }
             MultiPagesPage.prototype.clear.call(this);
@@ -100,6 +137,9 @@ itPdfViewer
             }
         };
         PDFPage.prototype.transform = function () {
+            if(this.renderTask) {
+                this.renderTask.cancel();
+            }
             MultiPagesPage.prototype.transform.call(this);
             this.textLayer = null;
         };
@@ -110,12 +150,12 @@ itPdfViewer
         };
         PDFPage.prototype.renderPage = function (page, callback) {
 
-            if(page.canvasRendered){
+            if(page.canvasRendered === true){
                 page.wrapper.append(page.canvas);
                 if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                    callback(page, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                 }
-            }else {
+            } else {
 
                 page.wrapper.append(page.canvas);
 
@@ -150,11 +190,12 @@ itPdfViewer
         return (PDFPage);
     }])
 
-    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage' , 'MultiPagesConstants' , 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
+    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', 'MultiPagesConstants', 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
+
         function PDFViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new PDFViewerAPI(this), element);
-
+            this.name = "PDFViewer";
             this.pdf = null;
             // Hooks for the client...
             this.passwordCallback = null;
@@ -312,6 +353,7 @@ itPdfViewer
 
         PDFViewer.prototype.open = function (obj, options) {
             this.element.empty();
+            this.url = null;
             this.pages = [];
             if (obj !== undefined && obj !== null && obj !== '') {
                 angular.extend(this, options);
@@ -340,6 +382,7 @@ itPdfViewer
             this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
             this.getDocumentTask.then(function (pdf) {
                 self.pdf = pdf;
+                self.url = url;
 
                 self.getAllPages( function (pageList, pagesRefMap) {
                     self.pages = pageList;

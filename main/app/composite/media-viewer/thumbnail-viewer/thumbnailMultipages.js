@@ -2,7 +2,7 @@
 /**
  * TODO Thumbnail implementation desc
  */
-itMultiPagesViewer
+itMultiPagesViewer 
     .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
 
         function ThumbnailViewerAPI(viewer) {
@@ -13,13 +13,13 @@ itMultiPagesViewer
         ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
 
         ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
+            return this.viewer.viewer.getAPI().getSelectedPage();
         };
 
         return (ThumbnailViewerAPI);
     }])
 
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', function($log, $timeout, MultiPagesPage) {
 
         function ThumbnailPage(viewer, page, showNumPages) {
             this.base = MultiPagesPage;
@@ -34,6 +34,13 @@ itMultiPagesViewer
 
         ThumbnailPage.prototype = new MultiPagesPage;
 
+        ThumbnailPage.prototype.clear = function () {
+            if(this.renderTask != null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
         ThumbnailPage.prototype.getViewport = function (scale, rotation) {
             return this.page.getViewport(scale, rotation);
         };
@@ -42,6 +49,9 @@ itMultiPagesViewer
             if(this.pageNum != undefined) {
                 page.wrapper.append(this.pageNum);
             }
+        };
+        ThumbnailPage.prototype.getZoomSelectionShortcutKey = function(e) {
+            return this.page.getZoomSelectionShortcutKey(e);
         };
 
         return (ThumbnailPage);
@@ -52,6 +62,7 @@ itMultiPagesViewer
         function ThumbnailViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new ThumbnailViewerAPI(this), element);
+            this.name = "ThumbnailViewer";
         }
 
         ThumbnailViewer.prototype = new MultiPagesViewer;
@@ -62,6 +73,8 @@ itMultiPagesViewer
             if(viewerApi != null) {
                 var self = this;
                 this.viewer = viewerApi.getViewer();
+                //defer rendering of thumbnail
+                this.renderAllVisiblePagesTimeoutValue = (this.viewer.renderAllVisiblePagesTimeoutValue + 100);
                 this.viewer.thumbnail = this;
                 this.pageMargin = pageMargin;
                 this.showNumPages = showNumPages;
@@ -119,8 +132,8 @@ itMultiPagesViewer
             }
         };
 
-        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
+        ThumbnailViewer.prototype.zoomToSelection = function(value) {
+            this.viewer.zoomToSelection(value);
         };
 
         return (ThumbnailViewer);

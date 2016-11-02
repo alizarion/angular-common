@@ -1,234 +1,31 @@
-::selection {
-  background: rgba(0, 0, 255, 0.3);
+::selection { background: rgba(0,0,255,0.3); }
+::-moz-selection { background:rgba(0,0,255,0.3); }
+
+.multipage-container {
+  position: relative;
+  min-height: 100px;
+  min-width: 200px;
+  height: 100%;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
 }
 
-::-moz-selection {
-  background: rgba(0, 0, 255, 0.3);
+.multipage-viewer .selectable-layer {
+  -webkit-touch-callout: default; /* iOS Safari */
+  -webkit-user-select: text;   /* Chrome/Safari/Opera */
+  -khtml-user-select: text;    /* Konqueror */
+  -moz-user-select: text;      /* Firefox */
+  -ms-user-select: text;       /* Internet Explorer/Edge */
+  user-select: text;           /* Non-prefixed version, currently
+                                  not supported by any browser */
 }
 
-it-image-viewer, it-tiff-viewer, it-pdf-viewer {
-
-  .multipage-container {
-    position: relative;
-    min-height: 100px;
-    min-width: 200px;
-    height: 100%;
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Chrome/Safari/Opera */
-    -khtml-user-select: none; /* Konqueror */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none;
-    /* Non-prefixed version, currently
-                           not supported by any browser */
-  }
-
-  .multipage-viewer .selectable-layer {
-    -webkit-touch-callout: default; /* iOS Safari */
-    -webkit-user-select: text; /* Chrome/Safari/Opera */
-    -khtml-user-select: text; /* Konqueror */
-    -moz-user-select: text; /* Firefox */
-    -ms-user-select: text; /* Internet Explorer/Edge */
-    user-select: text;
-    /* Non-prefixed version, currently
-                           not supported by any browser */
-  }
-
-  .multipage-viewer {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow: auto;
-    background-color: #cccccc;
-    display: table-row;
-    z-index: 1000;
-  }
-
-  .multipage-viewer .selected {
-    border-style: solid;
-    border-width: 1px;
-    border-color: red;
-  }
-  .multipage-viewer .horizontal {
-    display: table-cell;
-    padding: 5px;
-  }
-
-  .multipage-viewer .vertical {
-    padding: 10px;
-  }
-
-  .multipage-viewer .page {
-    position: relative;
-    display: block;
-    box-shadow: 0px 0px 10px #666666;
-    margin: auto;
-    background-color: #ffffff;
-    box-sizing: content-box;
-  }
-
-  .multipage-viewer .page .annotLink > a {
-    position: absolute;
-    font-size: 1em;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .multipage-viewer .page .annotLink > a:hover {
-    background-color: rgba(255, 255, 0, 0.25);
-  }
-
-  .multipage-viewer .page .annotText > img {
-    position: absolute;
-    cursor: pointer;
-  }
-
-  .multipage-viewer .page .annotTextContentWrapper {
-    position: absolute;
-    width: 20em;
-  }
-
-  .multipage-viewer .page .annotTextContent {
-    z-index: 200;
-    float: left;
-    max-width: 20em;
-    background-color: #FFFF99;
-    box-shadow: 0px 2px 5px #333;
-    border-radius: 2px;
-    padding: 0.6em;
-    cursor: pointer;
-  }
-
-  .multipage-viewer .page .annotTextContent > h1 {
-    font-size: 1em;
-    border-bottom: 1px solid #000000;
-    padding-bottom: 0.2em;
-  }
-
-  .multipage-viewer .page .annotTextContent > p {
-    padding-top: 0.2em;
-  }
-
-  /*Thumbnai menu*/
-  .thumbnail-menu {
-    background-color: #cccccc;
-  }
-
-  .multipage-container .ui-splitbar-container-column {
-    width: 8px;
-    height: 100%;
-  }
-
-  .multipage-container .ui-splitbar-container-column > .collapsed-splitbar-button {
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    color: black;
-    position: absolute;
-    top: 50%;
-    z-index: 1010;
-  }
-  /* Zoom Selection */
-  .zoom-selection-rectangle {
-    border: 1px solid #FF0000;
-    position: absolute;
-    z-index: 1100;
-  }
-
-  .viewer-zoom-cursor {
-    cursor: crosshair !important;
-  }
-
-  .selection-tooltip {
-    display: none;
-    font-size: 16px;
-    margin-left: 28px;
-    position: absolute;
-    z-index: 1070;
-    padding: 3px 8px;
-    color: #fff;
-    text-align: center;
-    text-decoration: none;
-    background-color: #000;
-    border-radius: 4px;
-  }
-  .word-tooltip {
-    font-size: 16px;
-    position: absolute;
-    z-index: 1070;
-    padding: 3px 8px;
-    color: #fff;
-    text-decoration: none;
-    background-color: #000;
-    border-radius: 4px;
-    max-height: 40px;
-    max-width: 600px;
-    display: table;
-  }
-
-  .multipage-viewer .textLayer {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    /*opacity: 0.2;*/
-    line-height: 1.0;
-  }
-  .multipage-viewer .textLayer ::selection {
-    background: rgba(0, 0, 255, 0.2);
-  }
-
-  .multipage-viewer .textLayer ::-moz-selection {
-    background: rgba(0, 0, 255, 0.2);
-  }
-
-  .multipage-viewer .textLayer > .word {
-    color: transparent;
-    position: absolute;
-    white-space: pre;
-    cursor: text;
-    -webkit-transform-origin: 0% 0%;
-    -moz-transform-origin: 0% 0%;
-    -o-transform-origin: 0% 0%;
-    -ms-transform-origin: 0% 0%;
-    transform-origin: 0% 0%;
-  }
-
-  .multipage-viewer .textLayer > .word:hover {
-    border: solid;
-    border-color: red;
-    border-width: 1px;
-  }
-
-  .multipage-viewer .r0 > .word:hover {
-    margin: -2px;
-    padding: 1px;
-  }
-
-  .multipage-viewer .r90 > .word:hover {
-    margin-top: -1px;
-    margin-left: 1px;
-  }
-
-  .multipage-viewer .r180 > .word:hover {
-    margin-left: 1px;
-    margin-top: 1px;
-  }
-
-  .multipage-viewer .r270 > .word:hover {
-    margin-left: -1px;
-    margin-top: 1px;
-  }
-
-}
-
-it-thumbnail-viewer.thumbnail-viewer {
+.thumbnail-viewer {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -238,147 +35,248 @@ it-thumbnail-viewer.thumbnail-viewer {
   background-color: #cccccc;
   display: block;
   z-index: 1000;
-  .page {
-    position: relative;
-    display: block;
-    margin: auto;
-    box-shadow: 0px 0px 10px #666666;
-    background-color: #ffffff;
-    box-sizing: content-box;
-  }
-
-  .horizontal {
-    display: table-cell;
-    padding: 5px;
-  }
-  .vertical {
-    padding: 12px;
-  }
-
-  .num-page {
-    text-align: center;
-  }
-
-  .selected {
-    border-style: solid;
-    border-width: 1px;
-    border-color: red;
-  }
-
 }
 
+.thumbnail-viewer .page {
+  position: relative;
+  display: block;
+  margin: auto;
+  box-shadow: 0px 0px 10px #666666;
+  background-color: #ffffff;
+  box-sizing:content-box;
+}
+
+.thumbnail-viewer .horizontal {
+  display: table-cell;
+  padding:  5px ;
+}
+
+.thumbnail-viewer .vertical {
+  padding: 12px;
+}
+
+.thumbnail-viewer .num-page {
+  text-align: center;
+}
+
+.thumbnail-viewer .selected {
+  border-style: solid;
+  border-width: 1px;
+  border-color: red;
+}
+
+.multipage-viewer {
+  position:  absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+  background-color: #666666;
+  display: table-row;
+  z-index: 1000;
+}
+
+
+.multipage-viewer .selected {
+  border-style: solid;
+  border-width: 1px;
+  border-color: red;
+}
+
+.multipage-viewer .horizontal {
+  display: table-cell;
+  padding: 5px;
+}
+
+.multipage-viewer .vertical {
+  padding:  10px;
+}
+
+.multipage-viewer .page {
+  position: relative;
+  display: block;
+  box-shadow: 0px 0px 10px black;
+  margin: auto;
+  background-color: #ffffff;
+  box-sizing:content-box;
+}
+
+.multipage-viewer .page .annotLink > a {
+  position: absolute;
+  font-size: 1em;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.multipage-viewer .page .annotLink > a:hover {
+  background-color: rgba(255, 255, 0, 0.25);
+}
+
+.multipage-viewer .page .annotText > img {
+  position: absolute;
+  cursor: pointer;
+}
+
+.multipage-viewer .page .annotTextContentWrapper {
+  position: absolute;
+  width: 20em;
+}
+
+.multipage-viewer .page .annotTextContent {
+  z-index: 200;
+  float: left;
+  max-width: 20em;
+  background-color: #FFFF99;
+  box-shadow: 0px 2px 5px #333;
+  border-radius: 2px;
+  padding: 0.6em;
+  cursor: pointer;
+}
+
+.multipage-viewer .page .annotTextContent > h1 {
+  font-size: 1em;
+  border-bottom: 1px solid #000000;
+  padding-bottom: 0.2em;
+}
+
+.multipage-viewer .page .annotTextContent > p {
+  padding-top: 0.2em;
+}
+
+
 /*Progressbar*/
-it-progressbar-viewer {
-  .loader {
-    position: absolute;
-    top: -6px;
-    left: 0;
-    right: 0;
-    overflow: hidden;
-    z-index: 1010;
-    width: 100%;
+.multipage-viewer-loader {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  z-index : 1010;
+  width: 100%;
+}
 
-    div {
-      text-align: center;
-    }
+.multipage-viewer-loader div {
+  text-align: center;
+}
 
-    .progress-bar {
-      margin: auto;
-    }
+.multipage-viewer-loader .progress-bar {
+  margin: auto;
+}
 
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background-color: transparent;
-      overflow: hidden;
-    }
-    .progress-bar span.bar {
-      display: inline-block;
-      background-color: green;
-      height: 100%;
-      text-align: left;
-    }
-  }
+.multipage-viewer-loader .progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: transparent;
+  overflow: hidden;
+}
 
+.multipage-viewer-loader .progress-bar span.bar {
+  display: inline-block;
+  background-color: green;
+  height: 100%;
+  text-align: left;
 }
 
 /*Toolbar*/
-it-toolbar-viewer {
-  .toolbar .zoom_wrapper,
-  .toolbar .select_page_wrapper {
-    display: inline-block;
-    margin: 3px 10px;
-  }
 
-  .toolbar .select_page_wrapper input[type="text"] {
-    width: 40px;
-    text-align: center;
-  }
-
-  .toolbar {
-    position: absolute;
-    z-index: 1010;
-    right: 75px;
-  }
+.multipage-viewer-toolbar {
+  background-color: rgba(255,255,255, 0.4);
+  padding: 0 5px;
+  border-radius: 5px;
+  text-align: center;
+  position: absolute;
+  z-index: 1001;
+  right : 30px;
+  margin: 5px;
 }
 
-it-thumbnail-menu-viewer {
-  .thumbnail-menu-vertical-small {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 140px;
-  }
-  .thumbnail-menu-vertical-medium {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 180px;
-  }
-  .thumbnail-menu-vertical-big {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 210px;
-  }
-  .thumbnail-menu-select {
-    position: absolute;
-    top: 3px;
-    z-index: 1010;
-  }
-  .ui-splitbar-container-row {
-    height: 8px;
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to bottom, #fff 0%, #eee 100%);
-    overflow-y: hidden;
-  }
-  .ui-splitbar-container-row > .collapsed-splitbar-button {
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    color: #aaa;
-    position: absolute;
-    top: 2px;
-  }
-  .ui-splitbar-container-column {
-    width: 8px;
-    height: 100%;
-  }
-  .ui-splitbar-container-column > .collapsed-splitbar-button {
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    color: black;
-    position: absolute;
-    top: 50%;
-    z-index: 1010;
-  }
+.multipage-viewer-toolbar .input-page {
+  text-align: center;
+  max-width: 30px;
+}
+
+.multipage-viewer-toolbar .form-group {
+  margin: 0;
+}
+
+.multipage-viewer-toolbar .form-group .form-control,
+.horizontal-group {
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+  margin: 0;
+}
+
+/*Thumbnai menu*/
+.multipage-viewer-thumbnail-menu {
+  background-color: #666666;
+}
+
+.thumbnail-menu-vertical-small {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 140px;
+}
+
+.thumbnail-menu-vertical-medium {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 180px;
+}
+
+.thumbnail-menu-vertical-big {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 210px;
+}
+
+.thumbnail-menu-select {
+  position: absolute;
+  top: 3px;
+  z-index : 1010;
+}
+
+.ui-splitbar-container-row {
+  height: 8px;
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+  overflow-y: hidden;
+}
+
+.ui-splitbar-container-row > .collapsed-splitbar-button {
+  cursor: pointer;
+  text-align: center;
+  font-size: 16px;
+  color: #aaa;
+  position: absolute;
+  top: 2px;
+}
+
+.ui-splitbar-container-column {
+  width: 8px;
+  height: 100%;
+}
+
+.ui-splitbar-container-column > .collapsed-splitbar-button {
+  cursor: pointer;
+  text-align: center;
+  font-size: 16px;
+  color: black;
+  position: absolute;
+  top: 50%;
+  z-index : 1010;
 }
 
 .ui-splitbar-container-row {
@@ -393,5 +291,101 @@ it-thumbnail-menu-viewer {
   color: black;
   position: absolute;
   top: 2px;
-  z-index: 1010;
+  z-index : 1010;
+}
+
+/* Zoom Selection */
+.zoom-selection-rectangle {
+  border: 1px solid #FF0000;
+  position: absolute;
+  z-index: 1100;
+}
+
+.viewer-zoom-cursor {
+  cursor: crosshair !important;
+}
+
+/* Pdf TextLayer */
+.selection-tooltip {
+  display: none;
+  font-size: 16px;
+  margin-left: 28px;
+  position: absolute;
+  z-index: 1070;
+  padding: 3px 8px;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  background-color: #000;
+  border-radius: 4px;
+}
+
+.word-tooltip {
+  font-size: 16px;
+  position: absolute;
+  z-index: 1070;
+  padding: 3px 8px;
+  color: #fff;
+  text-decoration: none;
+  background-color: #000;
+  border-radius: 4px;
+  max-height: 40px;
+  max-width: 600px;
+  display: table;
+}
+
+.multipage-viewer .textLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  /*opacity: 0.2;*/
+  line-height: 1.0;
+}
+
+.multipage-viewer .textLayer ::selection {
+  background: rgba(0,0,255, 0.2);
+}
+.multipage-viewer .textLayer ::-moz-selection {
+  background: rgba(0,0,255, 0.2);
+}
+
+.multipage-viewer .textLayer > .word {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  -webkit-transform-origin: 0% 0%;
+  -moz-transform-origin: 0% 0%;
+  -o-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
+}
+
+.multipage-viewer .textLayer > .word:hover {
+  border: solid;
+  border-color: red;
+  border-width: 1px;
+}
+
+.multipage-viewer .r0 > .word:hover {
+  margin: -2px;
+  padding: 1px;
+}
+
+.multipage-viewer .r90 > .word:hover {
+  margin-top: -1px;
+  margin-left: 1px;
+}
+
+.multipage-viewer .r180 > .word:hover {
+  margin-left: 1px;
+  margin-top: 1px;
+}
+
+.multipage-viewer .r270 > .word:hover {
+  margin-left: -1px;
+  margin-top: 1px;
 }
