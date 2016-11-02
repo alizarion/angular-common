@@ -180,7 +180,7 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
                 scope: self.scope,
                 template : MODAL_TPLS,
 
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
+                controller :['$scope' ,'$uibModalInstance',function($scope, $uibModalInstance) {
                    // $scope.data = {};
                     $scope.itButtonAction= function(event, button ) {
                         var todo = (button.onTap || _noop)(event,$scope);
@@ -192,10 +192,10 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
                     };
 
                     function close(){
-                        $modalInstance.close($scope.data);
+                        $uibModalInstance.close($scope.data);
                     }
                     function cancel() {
-                        $modalInstance.dismiss('cancel');
+                        $uibModalInstance.dismiss('cancel');
                     }
                 }],
                 buttons: []
@@ -211,14 +211,14 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
         }
 
         function _showPopup(options){
-            $modalStack.dismissAll();
+            $uibModalStack.dismissAll();
             var popup = _createPopup(options);
 
-            return  $modal.open(popup.options).result;
+            return  $uibModal.open(popup.options).result;
         }
 
         function _showAlert(opts){
-            $modalStack.dismissAll();
+            $uibModalStack.dismissAll();
 
             return _showPopup(angular.extend({
 
@@ -233,7 +233,7 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
         }
 
         function _showConfirm(opts){
-            $modalStack.dismissAll();
+            $uibModalStack.dismissAll();
 
             return _showPopup(angular.extend({
                 buttons: [
@@ -251,12 +251,12 @@ angular.module('itesoft.popup',['ui.bootstrap.modal'])
 
 
         function _showCustom(opts){
-            $modalStack.dismissAll();
+            $uibModalStack.dismissAll();
          return   _showPopup(opts);
         }
 
         function _showPromt(opts){
-            $modalStack.dismissAll();
+            $uibModalStack.dismissAll();
 
             var scope = $rootScope.$new(true);
             scope.data = {};
