@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en-US" ng-app="itesoft-app" ng-strict-di>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>itViewer</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+    <!--
+     <link rel='stylesheet' type='text/css' href='assets/lib/components-font-awesome/css/font-awesome.min.css' />
+     <link rel='stylesheet' type='text/css' href='assets/css/itViewer.min.css' />
+     <link rel='stylesheet' type='text/css' href='assets/lib/angular-translate/src/ui-layout.css' />
+
+     <script src="assets/lib/angular/angular.min.js"></script>
+     <script src="assets/lib/angular-translate/angular-translate.min.js"></script>
+     <script src="assets/lib/angular-ui-layout/src/ui-layout.min.js"></script>
+
+     <script src="app/itViewer.min.js"></script>
+     -->
+
+    <link rel='stylesheet' type='text/css' href='assets/lib/components-font-awesome/css/font-awesome.css' />
+    <link rel='stylesheet' type='text/css' href='assets/css/itViewer.css' />
+    <link rel='stylesheet' type='text/css' href='assets/lib/angular-ui-layout/src/ui-layout.css' />
+
+    <script src="assets/lib/angular/angular.js"></script>
+    <script src="assets/lib/angular-translate/angular-translate.js"></script>
+    <script src="assets/lib/angular-ui-layout/src/ui-layout.js"></script>
+
+    <script src="app/itViewer.js"></script>
+
+    <script type="text/javascript">
+        var app = angular.module('itesoft-app', ['itesoft.viewer']);
+
+        app.config(['$translateProvider', '$logProvider' ,function ($translateProvider, $logProvider) {
+            $logProvider.debugEnabled(false);
+
+            $translateProvider.translations('en', {
+                GLOBAL : {
+                    VIEWER : {
+                        FIT_WIDTH_LABEL : "Fit width",
+                        FIT_HEIGHT_LABEL : "Fit height",
+                        FIT_PAGE_LABEL : "Fit page",
+                        SIZE_MENU : {
+                            SMALL : "Small",
+                            MEDIUM : "Medium",
+                            BIG : "Big"
+                        }
+                    }
+                }
+            });
+            $translateProvider.translations('fr', {
+                GLOBAL : {
+                    VIEWER : {
+                        FIT_WIDTH_LABEL : "Ajustement largeur",
+                        FIT_HEIGHT_LABEL : "Ajustement hauteur",
+                        FIT_PAGE_LABEL : "Ajustement page",
+                        SIZE_MENU : {
+                            SMALL : "Petit",
+                            MEDIUM : "Moyen",
+                            BIG : "Gros"
+                        }
+                    }
+                }
+            });
+            $translateProvider.preferredLanguage('fr');
+        }]);
+
+        app.controller('MainCtrl', ['$scope', function($scope) {
+            $scope.src = "http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf";
+
+            $scope.options = {
+                orientation : "vertical", //'vertical' | 'horizontal'
+                showProgressbar : true,
+                showNumPages : true,
+                showThumbnail : true,
+                showSizeMenu : true,
+                showToolbar : true,
+                initialScale : 'fit_height', //'20 - 500%' | 'fit_height' | 'fit_page' | 'fit_width',
+                initialMode : 'mode_zoomSelection', //'mode_hand' | 'mode_text'
+                renderTextLayer : true,
+                libPath : 'assets/lib/lib-viewer',
+                onTemplateNotFound : function(extension) {
+                    console.log(extension);
+                },
+                onApiLoaded : function (api) {
+                    api.onZoomLevelsChanged = function (zoomLevels) {
+                        console.log("onZoomLevelsChanged : " + JSON.stringify(zoomLevels));
+                    };
+                    api.onPageRotation  = function (args) {
+                        console.log("onPageRotation (pageIndex , angle) : " + args.pageIndex + " " + args.rotation);
+                    };
+                    api.onPageClicked   = function (pageId) {
+                        console.log("onPageClicked (pageId) : " + pageId);
+                    };
+                    api.onError    = function (operation, message) {
+                        console.log("onError : " + operation + " " + message);
+                    };
+                    api.onTextSelected = function(text) {
+                        console.log("onTextSelected : " + text);
+                    };
+                    api.onZoomToSelection = function(value) {
+                        console.log("onZoomToSelection : " + JSON.stringify(value));
+                    };
+                }
+            };
+        }]);
+    </script>
+</head>
+<body>
+<div ng-controller="MainCtrl">
+    <it-media-viewer src="src" options="options"></it-media-viewer>
+</div>
+</body>
+</html>

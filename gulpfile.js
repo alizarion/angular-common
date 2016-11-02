@@ -43,6 +43,62 @@ gulp.task('build', function(callback) {
 
 
 /**
+ * Build le viewer
+ */
+gulp.task('build-viewer', function() {
+    var libs = [
+        { src : 'main/assets/lib/pdfjs-dist/**/*', dest : '/assets/lib/pdfjs-dist' },
+        { src : 'main/assets/lib/libtiff/**/*', dest : '/assets/lib/libtiff' },
+
+        { src : 'main/assets/lib/pdfjs-dist/build/pdf.js', dest : '/assets/lib/lib-viewer' },
+        { src : 'main/assets/lib/pdfjs-dist/build/pdf.worker.js', dest : '/assets/lib/lib-viewer' },
+        { src : 'main/assets/lib/libtiff/tiff.min.js', dest : '/assets/lib/lib-viewer' },
+
+        { src : 'main/assets/lib/angular/**/*', dest : '/assets/lib/angular' },
+        { src : 'main/assets/lib/angular-ui-layout/**/*', dest : '/assets/lib/angular-ui-layout' },
+        { src : 'main/assets/lib/angular-translate/**/*', dest : '/assets/lib/angular-translate' },
+        { src : 'main/assets/lib/components-font-awesome/**/*', dest : '/assets/lib/components-font-awesome' },
+
+        { src : 'main/app/composite/media-viewer/index.html', dest : '' }
+    ];
+    //clean
+    return gulp.src([buildConfig.viewerFolder], {force: true})
+        .pipe(clean())
+        .on('end', function () {
+            //sass
+            gulp.src(buildConfig.srcFolder + '/assets/scss/itViewer.scss')
+                .pipe(sass({
+                    errLogToConsole: true
+                }))
+                .pipe(gulp.dest(buildConfig.viewerFolder + '/assets/css'))
+                .pipe(minifyCss({
+                    keepSpecialComments: 0
+                }))
+                .pipe(rename({ extname: '.min.css' }))
+                .pipe(gulp.dest(buildConfig.viewerFolder + '/assets/css'));
+
+            //copy viewer lib
+            for (var i = 0; i < libs.length; i++) {
+                var fileToCopy = libs[i];
+                gulp.src(fileToCopy.src)
+                    .pipe(gulp.dest(buildConfig.viewerFolder + fileToCopy.dest + "/"));
+            }
+
+            //itViewer.js and itViewer.min.js
+            return  gulp.src([buildConfig.srcFolder + '/app/viewer.module.js', buildConfig.srcFolder + '/app/composite/media-viewer/**/*.js'])
+                .pipe(concat('itViewer.js'))
+                .pipe(header(buildConfig.closureStart))
+                .pipe(footer(buildConfig.closureEnd))
+                .pipe(header(buildConfig.banner,{pkg:pkg}))
+                .pipe(gulp.dest(buildConfig.viewerFolder + '/app'))
+                .pipe(uglify())
+                .pipe(concat('itViewer.min.js'))
+                .pipe(header(buildConfig.banner,{pkg:pkg}))
+                .pipe(gulp.dest(buildConfig.viewerFolder + '/app'));
+        });
+});
+
+/**
  *
  * Traitement du less pour chaque theme
  *

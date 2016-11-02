@@ -21,6 +21,7 @@ module.exports = {
     srcFolder: 'main',
     testFolder: 'test',
     docFolder: 'docs',
+    viewerFolder : 'dist-viewer',
     themes : ['itesoft-default','itesoft-scpas'],
 
     /**
