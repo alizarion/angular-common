@@ -1,26 +1,27 @@
+it-autocomplete, *[it-autocomplete] {
+  .it-autocomplete-div:hover .it-autocomplete-btn {
+    color: $highlightColor;
+  }
 
-.it-autocomplete-div:hover .it-autocomplete-btn {
-  color: $highlightColor;
-}
+  .it-autocomplete-div {
+    padding-right: 0px;
+    padding-left: 0px;
+  }
 
-.it-autocomplete-div {
-  padding-right: 0px;
-  padding-left: 0px;
-}
+  .it-autocomplete-btn {
+    line-height: 30px;
+    right: 0px;
+  }
 
-.it-autocomplete-btn {
-  line-height: 30px;
-  right: 0px;
-}
+  .it-autocomplete-input:focus, select:focus, input[bs-datepicker]:focus {
+  }
 
-.it-autocomplete-input:focus, select:focus, input[bs-datepicker]:focus {
-}
+  .it-autocomplete-container, .datepicker {
+    border: 1px solid $highlightColor;
+    background-image: none !important;
+  }
 
-.it-autocomplete-container, .datepicker {
-  border: 1px solid $highlightColor;
-  background-image: none !important;
-}
-
-.it-autocomplete-container {
-  width: 150px;
+  .it-autocomplete-container {
+    width: 150px;
+  }
 }

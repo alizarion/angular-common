@@ -1,23 +1,22 @@
 @charset "UTF-8";
 
-@import "colors",
-"variables",
-"../modal-full-screen",
-"nav-tabs",
-"../side-menu",
-"master-detail",
-"view-title",
-"busy-indicator",
-"autocomplete",
-"side-panel",
-"date-picker",
+@import "variables",
 "../circular-btn",
-"template",
-"../multipages-viewer",
-"it-lazy-grid",
 "../messaging",
+"../modal-full-screen",
+"../multipages-viewer",
+"../side-menu",
 "../timeline",
-"it-tab";
+"autocomplete",
+"busy-indicator",
+"date-picker",
+"it-lazy-grid",
+"it-tab",
+"master-detail",
+"nav-tabs",
+"side-panel",
+"template",
+"view-title";
 
 html {
   height: 100%;
