@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-@import "../itesoft-default/itesoft-default.scss","colors",
+@import "../itesoft-default/itesoft-default.scss",
 "variables",
 "login",
 "thin-bootstrap",
@@ -10,6 +10,7 @@
 "btn",
 "icon",
 "effect",
+"filter",
 "autocomplete",
 "side-menu",
 "message-panel",
@@ -18,7 +19,6 @@
 "select",
 "master-detail",
 "dashboard";
-
 
 .ui-grid-cell {
   text-align: center;
@@ -90,7 +90,6 @@ select[disabled]::-ms-expand {
 .scrollable {
   overflow: auto !important;
 }
-
 
 .text-left {
   text-align: left;

@@ -1,13 +1,13 @@
-button[bs-select] {
+button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
   padding: 0px;
   padding-left: 2px;
   height: 30px;
   padding-right: 20px;
-  border-radius: 0px !important;
+  border-radius: 0px;
 }
 
-button[bs-select] {
-  background-color: $inputTextBackColor !important;
+button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
+  background-color: $inputTextBackColor;
   color: $inputTextColor;
   font-size: 15px;
   background-image: none;
@@ -17,7 +17,31 @@ button[bs-select] {
   text-align: inherit;
 }
 
-ul.dropdown-menu > li > a:hover {
+.it-select-more-filter {
+  background-color: transparent;
+  background-size: 100%;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  border: 0;
+  color: transparent;
+}
+
+.it-save-filter {
+  background-size: 100%;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  border: 0;
+  color: grey;
+  margin-top: auto;
+  cursor: pointer;
+  right: -5px;
+  bottom: -10px;
+  position: absolute;
+}
+
+ul.dropdown-menu > li:not(.active) > a:hover {
   background-color: #eeeeee !important;
   color: black !important;
 }
@@ -40,7 +64,7 @@ ul.dropdown-menu {
   border-color: #3A89EB;
 }
 
-.dropdown-menu .active a,.dropdown-menu .active-add a,.dropdown-menu .active-add a:focus, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
+.dropdown-menu .active a, .dropdown-menu .active-add a, .dropdown-menu .active-add a:focus, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
   color: white;
   text-decoration: none;
   background-color: #3A89EB;

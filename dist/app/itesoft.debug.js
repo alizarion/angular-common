@@ -1,18 +1,7 @@
 /**
  *
  */
-
-var itMultiPagesViewer = angular.module('it-multi-pages-viewer', ['pascalprecht.translate']);
-
-var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer', 'ui.layout']);
-
-var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'ui.layout']);
-
-var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
-
-angular.module('itesoft.viewer', ['it-image-viewer', 'it-tiff-viewer', 'it-pdf-viewer', 'it-multi-pages-viewer']);
-
-
+ 
 var itTab = angular.module("it-tab", []);
 
 
@@ -44,6 +33,122 @@ var IteSoft = angular.module('itesoft', [
     'itesoft.viewer',
     'angular-timeline'
 ]);
+
+/**
+ *
+ */
+
+var itMultiPagesViewer = angular.module('it-multi-pages-viewer', ['pascalprecht.translate']);
+
+var itPdfViewer = angular.module("it-pdf-viewer", ['it-multi-pages-viewer', 'ui.layout']);
+
+var itTiffViewer = angular.module("it-tiff-viewer", ['it-multi-pages-viewer', 'ui.layout']);
+
+var itImageViewer = angular.module("it-image-viewer", ['it-multi-pages-viewer']);
+
+angular.module('itesoft.viewer', ['it-image-viewer', 'it-tiff-viewer', 'it-pdf-viewer', 'it-multi-pages-viewer']);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCircularBtn
+ * @module itesoft
+ * @since 1.1
+ * @restrict AEC
+ *
+ * @description
+ * Provide a circular button like for the full screen button
+ *
+ * ```html
+ *   <it-circular-btn></it-circular-btn>
+ * ```
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+     <div ng-controller="HomeCtrl">
+     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
+     </div>
+ </file>
+ <file name="Module.js">
+    angular.module('itesoft-showcase',['itesoft'])
+ </file>
+ <file name="controller.js">
+     angular.module('itesoft-showcase').controller('HomeCtrl',
+     ['$scope',
+     function($scope) {
+
+                        }]);
+ </file>
+ </example>
+ */
+
+IteSoft.directive('itCircularBtn',
+    [
+        function () {
+            return {
+                restrict: 'ACE',
+                scope: false,
+                transclude: true,
+                template:'<span class="it-circular-button-container ">' +
+                '<button class="btn  pull-right" > ' +
+                '<div class="it-animated-circular-button">' +
+                '<ng-transclude></ng-transclude>' +
+                '</div>' +
+                '</button> '+
+                '</span>'
+
+            }
+        }]
+);
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCompile
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * This directive can evaluate and transclude an expression in a scope context.
+ *
+ * @example
+  <example module="itesoft">
+    <file name="index.html">
+        <div ng-controller="DemoController">
+             <div class="jumbotron ">
+                 <div it-compile="pleaseCompileThis"></div>
+             </div>
+    </file>
+    <file name="controller.js">
+         angular.module('itesoft')
+         .controller('DemoController',['$scope', function($scope) {
+
+                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
+                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
+                    ' laudantium molestiae officia possimus quaerat quibusdam!';
+
+                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
+            }]);
+    </file>
+  </example>
+ */
+IteSoft
+    .config(['$compileProvider', function ($compileProvider) {
+        $compileProvider.directive('itCompile', ['$compile',function($compile) {
+            return function (scope, element, attrs) {
+                scope.$watch(
+                    function (scope) {
+                        return scope.$eval(attrs.itCompile);
+                    },
+                    function (value) {
+                        element.html(value);
+                        $compile(element.contents())(scope);
+                    }
+                );
+            };
+        }]);
+    }]);
 
 /**
  * @ngdoc directive
@@ -212,345 +317,6 @@ IteSoft
             }]);
 
 
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCircularBtn
- * @module itesoft
- * @since 1.1
- * @restrict AEC
- *
- * @description
- * Provide a circular button like for the full screen button
- *
- * ```html
- *   <it-circular-btn></it-circular-btn>
- * ```
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-     <div ng-controller="HomeCtrl">
-     <it-circular-btn><i class="fa fa-expand"></i></it-circular-btn>
-     </div>
- </file>
- <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft'])
- </file>
- <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl',
-     ['$scope',
-     function($scope) {
-
-                        }]);
- </file>
- </example>
- */
-
-IteSoft.directive('itCircularBtn',
-    [
-        function () {
-            return {
-                restrict: 'ACE',
-                scope: false,
-                transclude: true,
-                template:'<span class="it-circular-button-container ">' +
-                '<button class="btn  pull-right" > ' +
-                '<div class="it-animated-circular-button">' +
-                '<ng-transclude></ng-transclude>' +
-                '</div>' +
-                '</button> '+
-                '</span>'
-
-            }
-        }]
-);
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itCompile
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * This directive can evaluate and transclude an expression in a scope context.
- *
- * @example
-  <example module="itesoft">
-    <file name="index.html">
-        <div ng-controller="DemoController">
-             <div class="jumbotron ">
-                 <div it-compile="pleaseCompileThis"></div>
-             </div>
-    </file>
-    <file name="controller.js">
-         angular.module('itesoft')
-         .controller('DemoController',['$scope', function($scope) {
-
-                $scope.simpleText = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-                    'Adipisci architecto, deserunt doloribus libero magni molestiae nisi odio' +
-                    ' officiis perferendis repudiandae. Alias blanditiis delectus dicta' +
-                    ' laudantium molestiae officia possimus quaerat quibusdam!';
-
-                $scope.pleaseCompileThis = '<h4>This is the compile result</h4><p>{{simpleText}}</p>';
-            }]);
-    </file>
-  </example>
- */
-IteSoft
-    .config(['$compileProvider', function ($compileProvider) {
-        $compileProvider.directive('itCompile', ['$compile',function($compile) {
-            return function (scope, element, attrs) {
-                scope.$watch(
-                    function (scope) {
-                        return scope.$eval(attrs.itCompile);
-                    },
-                    function (value) {
-                        element.html(value);
-                        $compile(element.contents())(scope);
-                    }
-                );
-            };
-        }]);
-    }]);
-
-"use strict";
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBusyIndicator
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
- * <li>It has 2 usage modes:
- * <ul>
- *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
- *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
- * </ul>
- * </li>
- *
- * @usage
- * <it-busy-indicator is-busy="true">
- * </it-busy-indicator>
- *
- * @example
- <example module="itesoft-showcase">
- <file name="index.html">
- <div ng-controller="LoaderDemoController">
-     <it-busy-indicator is-busy="loading">
-     <div class="container-fluid">
-     <div class="jumbotron">
-     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
-    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
-     <div class="row">
-     <table class="table table-striped table-hover ">
-     <thead>
-     <tr>
-     <th>#</th>
-     <th>title</th>
-     <th>url</th>
-     <th>image</th>
-     </tr>
-     </thead>
-     <tbody>
-     <tr ng-repeat="dataItem in data">
-     <td>{{dataItem.id}}</td>
-     <td>{{dataItem.title}}</td>
-     <td>{{dataItem.url}}</td>
-     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
-     </tr>
-     </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
-     </it-busy-indicator>
- </div>
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['ngResource','itesoft']);
- </file>
- <file name="PhotosService.js">
- angular.module('itesoft-showcase')
- .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
- </file>
- <file name="Controller.js">
- angular.module('itesoft-showcase')
- .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
-        $scope.loading = false;
-
-        var loadInternalData = function () {
-            var data = [];
-            for (var i = 0; i < 15; i++) {
-                var dataItem = {
-                    "id" : i,
-                    "title": "title " + i,
-                    "url" : "url " + i
-                };
-                data.push(dataItem);
-            }
-            return data;
-        };
-
-        $scope.loadData = function() {
-            $scope.data = [];
-            $scope.loading = true;
-
-            $timeout(function() {
-                $scope.data = loadInternalData();
-            },500)
-            .then(function(){
-                $scope.loading = false;
-            });
-        }
-
-        $scope.loadAutoData = function() {
-            $scope.data = [];
-            Photos.query().$promise
-            .then(function(data){
-                $scope.data = data;
-            });
-        }
- }]);
- </file>
-
- </example>
- *
- **/
-
-IteSoft
-    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
-        var _loadingTimeout;
-
-        function link(scope, element, attrs) {
-            scope.$watch(function () {
-                return ($http.pendingRequests.length > 0);
-            }, function (value) {
-                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
-                if (value === true) {
-                    _loadingTimeout = $timeout(function () {
-                        scope.hasPendingRequests = true;
-                    }, 250);
-                }
-                else {
-                    scope.hasPendingRequests = false;
-                }
-            });
-        }
-
-        return {
-            link: link,
-            restrict: 'AE',
-            transclude: true,
-            scope: {
-                isBusy:'='
-            },
-            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
-                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
-                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
-        };
-    }]);
-"use strict";
-
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itLoader
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple loading spinner that handle http request pending.
- *
- *
- * @example
-    <example module="itesoft-showcase">
-        <file name="index.html">
-            <div ng-controller="LoaderDemoController">
-                 <div class="jumbotron ">
-                 <div class="bs-component">
-                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
-                 <it-loader></it-loader>
-                 <table class="table table-striped table-hover ">
-                 <thead>
-                 <tr>
-                 <th>#</th>
-                 <th>title</th>
-                 <th>url</th>
-                 <th>image</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr ng-repeat="data in datas">
-                 <td>{{data.id}}</td>
-                 <td>{{data.title}}</td>
-                 <td>{{data.url}}</td>
-                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
-                 </tr>
-                 </tbody>
-                 </table>
-                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
-                 </div>
-            </div>
-        </file>
-         <file name="Module.js">
-             angular.module('itesoft-showcase',['ngResource','itesoft']);
-         </file>
-         <file name="PhotosService.js">
-          angular.module('itesoft-showcase')
-                .factory('Photos',['$resource', function($resource){
-                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
-                            }]);
-         </file>
-         <file name="Controller.js">
-             angular.module('itesoft-showcase')
-                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
-                            $scope.datas = [];
-
-                            $scope.loadMoreData = function(){
-                                Photos.query().$promise.then(function(datas){
-                                    $scope.datas = datas;
-                                });
-                     };
-             }]);
-         </file>
-
-    </example>
- *
- **/
-IteSoft
-    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
-        return {
-            restrict : 'EA',
-            scope:true,
-            template : '<span class="fa-stack">' +
-                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
-                            '</i>' +
-                        '</span>',
-            link : function ($scope) {
-                $scope.$watch(function() {
-                    if($http.pendingRequests.length>0){
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = true;
-                        });
-
-                    } else {
-                        $scope.$applyAsync(function(){
-                            $scope.$isLoading = false;
-                        });
-
-                    }
-                });
-
-            }
-        }
-    }]
-);
 'use strict';
 /**
  * Service that provide RSQL query
@@ -1421,6 +1187,242 @@ IteSoft.factory('itQueryFactory', ['OPERATOR', function (OPERATOR) {
         }
     }
     ]
+);
+"use strict";
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBusyIndicator
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * <li>Simple loading spinner displayed instead of the screen while waiting to fill the data.</li>
+ * <li>It has 2 usage modes:
+ * <ul>
+ *     <li> manual : based on "is-busy" attribute value to manage into the controller.</li>
+ *     <li> automatic : no need to use "is-busy" attribute , automatically displayed while handling http request pending.</li>
+ * </ul>
+ * </li>
+ *
+ * @usage
+ * <it-busy-indicator is-busy="true">
+ * </it-busy-indicator>
+ *
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+ <div ng-controller="LoaderDemoController">
+     <it-busy-indicator is-busy="loading">
+     <div class="container-fluid">
+     <div class="jumbotron">
+     <button class="btn btn-primary" ng-click="loadData()">Start Loading (manual mode)</button>
+    <button class="btn btn-primary" ng-click="loadAutoData()">Start Loading (auto mode)</button>
+     <div class="row">
+     <table class="table table-striped table-hover ">
+     <thead>
+     <tr>
+     <th>#</th>
+     <th>title</th>
+     <th>url</th>
+     <th>image</th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr ng-repeat="dataItem in data">
+     <td>{{dataItem.id}}</td>
+     <td>{{dataItem.title}}</td>
+     <td>{{dataItem.url}}</td>
+     <td><img ng-src="{{dataItem.thumbnailUrl}}" alt="">{{dataItem.body}}</td>
+     </tr>
+     </tbody>
+     </table>
+     </div>
+     </div>
+     </div>
+     </it-busy-indicator>
+ </div>
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ngResource','itesoft']);
+ </file>
+ <file name="PhotosService.js">
+ angular.module('itesoft-showcase')
+ .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase')
+ .controller('LoaderDemoController',['$scope','Photos','$timeout', function($scope,Photos,$timeout) {
+        $scope.loading = false;
+
+        var loadInternalData = function () {
+            var data = [];
+            for (var i = 0; i < 15; i++) {
+                var dataItem = {
+                    "id" : i,
+                    "title": "title " + i,
+                    "url" : "url " + i
+                };
+                data.push(dataItem);
+            }
+            return data;
+        };
+
+        $scope.loadData = function() {
+            $scope.data = [];
+            $scope.loading = true;
+
+            $timeout(function() {
+                $scope.data = loadInternalData();
+            },500)
+            .then(function(){
+                $scope.loading = false;
+            });
+        }
+
+        $scope.loadAutoData = function() {
+            $scope.data = [];
+            Photos.query().$promise
+            .then(function(data){
+                $scope.data = data;
+            });
+        }
+ }]);
+ </file>
+
+ </example>
+ *
+ **/
+
+IteSoft
+    .directive('itBusyIndicator', ['$timeout', '$http', function ($timeout, $http) {
+        var _loadingTimeout;
+
+        function link(scope, element, attrs) {
+            scope.$watch(function () {
+                return ($http.pendingRequests.length > 0);
+            }, function (value) {
+                if (_loadingTimeout) $timeout.cancel(_loadingTimeout);
+                if (value === true) {
+                    _loadingTimeout = $timeout(function () {
+                        scope.hasPendingRequests = true;
+                    }, 250);
+                }
+                else {
+                    scope.hasPendingRequests = false;
+                }
+            });
+        }
+
+        return {
+            link: link,
+            restrict: 'AE',
+            transclude: true,
+            scope: {
+                isBusy:'='
+            },
+            template:   '<div class="mask-loading-container" ng-show="hasPendingRequests"></div>' +
+                '<div class="main-loading-container" ng-show="hasPendingRequests || isBusy"><i class="fa fa-circle-o-notch fa-spin fa-4x text-primary "></i></div>' +
+                '<ng-transclude ng-show="!isBusy" class="it-fill"></ng-transclude>'
+        };
+    }]);
+"use strict";
+
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itLoader
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple loading spinner that handle http request pending.
+ *
+ *
+ * @example
+    <example module="itesoft-showcase">
+        <file name="index.html">
+            <div ng-controller="LoaderDemoController">
+                 <div class="jumbotron ">
+                 <div class="bs-component">
+                 <button class="btn btn-primary" ng-click="loadMoreData()">Load more</button>
+                 <it-loader></it-loader>
+                 <table class="table table-striped table-hover ">
+                 <thead>
+                 <tr>
+                 <th>#</th>
+                 <th>title</th>
+                 <th>url</th>
+                 <th>image</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr ng-repeat="data in datas">
+                 <td>{{data.id}}</td>
+                 <td>{{data.title}}</td>
+                 <td>{{data.url}}</td>
+                 <td><img ng-src="{{data.thumbnailUrl}}" alt="">{{data.body}}</td>
+                 </tr>
+                 </tbody>
+                 </table>
+                 <div class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div></div>
+                 </div>
+            </div>
+        </file>
+         <file name="Module.js">
+             angular.module('itesoft-showcase',['ngResource','itesoft']);
+         </file>
+         <file name="PhotosService.js">
+          angular.module('itesoft-showcase')
+                .factory('Photos',['$resource', function($resource){
+                                return $resource('http://jsonplaceholder.typicode.com/photos/:id',null,{});
+                            }]);
+         </file>
+         <file name="Controller.js">
+             angular.module('itesoft-showcase')
+                     .controller('LoaderDemoController',['$scope','Photos', function($scope,Photos) {
+                            $scope.datas = [];
+
+                            $scope.loadMoreData = function(){
+                                Photos.query().$promise.then(function(datas){
+                                    $scope.datas = datas;
+                                });
+                     };
+             }]);
+         </file>
+
+    </example>
+ *
+ **/
+IteSoft
+    .directive('itLoader',['$http','$rootScope', function ($http,$rootScope) {
+        return {
+            restrict : 'EA',
+            scope:true,
+            template : '<span class="fa-stack">' +
+                            '<i class="fa fa-refresh fa-stack-1x" ng-class="{\'fa-spin\':$isLoading}">' +
+                            '</i>' +
+                        '</span>',
+            link : function ($scope) {
+                $scope.$watch(function() {
+                    if($http.pendingRequests.length>0){
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = true;
+                        });
+
+                    } else {
+                        $scope.$applyAsync(function(){
+                            $scope.$isLoading = false;
+                        });
+
+                    }
+                });
+
+            }
+        }
+    }]
 );
 "use strict";
 /**
@@ -4829,7 +4831,7 @@ angular.module('itesoft.viewer')
  * You do not talk about FIGHT CLUB!!
  */
 IteSoft
-    .directive("konami", ['$document','$uibModal', function($document,$modal) {
+    .directive("konami", ['$document','$uibModal', function($document,$uibModal) {
         return {
             restrict: 'A',
             template : '<style type="text/css"> @-webkit-keyframes easterEggSpinner { from { -webkit-transform: rotateY(0deg); } to { -webkit-transform: rotateY(-360deg); } } @keyframes easterEggSpinner { from { -moz-transform: rotateY(0deg); -ms-transform: rotateY(0deg); transform: rotateY(0deg); } to { -moz-transform: rotateY(-360deg); -ms-transform: rotateY(-360deg); transform: rotateY(-360deg); } } .easterEgg { -webkit-animation-name: easterEggSpinner; -webkit-animation-timing-function: linear; -webkit-animation-iteration-count: infinite; -webkit-animation-duration: 6s; animation-name: easterEggSpinner; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 6s; -webkit-transform-style: preserve-3d; -moz-transform-style: preserve-3d; -ms-transform-style: preserve-3d; transform-style: preserve-3d; } .easterEgg img { position: absolute; border: 1px solid #ccc; background: rgba(255,255,255,0.8); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); } </style>',
@@ -4841,7 +4843,7 @@ IteSoft
                         if (konami_index === konami_keys.length) {
                             $document.off('keydown', handler);
 
-                            var modalInstance =  $modal.open({
+                            var modalInstance =  $uibModal.open({
                                 template: '<div style="max-width: 100%;" class="easterEgg"> <img style="-webkit-transform: rotateY(0deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-72deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-144deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-216deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> <img style="-webkit-transform: rotateY(-288deg) translateX(180px); padding: 0 0 0 0px;" src="http://media1.woopic.com/493/f/470x264/q/85/fd/p/newsweb-finance-article%7Cc8c%7C177%7Cbe13e9df471d6c4469b3e3ac93/itesoft-la-sf2i-monte-a-9-9-des-parts%7Cl_itesoftlogo.png" width="100%" height="160" alt=""> </div>'
                                    ,
                                 size: 'lg'
@@ -4928,6 +4930,190 @@ IteSoft
 
         };
     }]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itBottomGlue
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Simple directive to fill height.
+ *
+ *
+ * @example
+     <example module="itesoft">
+         <file name="index.html">
+             <div class="jumbotron " style="background-color: red; ">
+                 <div class="jumbotron " style="background-color: blue; ">
+                     <div class="jumbotron " style="background-color: yellow; ">
+                         <div it-bottom-glue="" class="jumbotron ">
+                            Resize the window height the component will  always fill the bottom !!
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </file>
+     </example>
+ */
+IteSoft
+    .directive('itBottomGlue', ['$window','$timeout',
+        function ($window,$timeout) {
+    return function (scope, element) {
+        function _onWindowsResize () {
+
+            var currentElement = element[0];
+            var elementToResize = angular.element(element)[0];
+            var marginBottom = 0;
+            var paddingBottom = 0;
+            var  paddingTop = 0;
+            var  marginTop =0;
+
+            while(currentElement !== null && typeof currentElement !== 'undefined'){
+                var computedStyles = $window.getComputedStyle(currentElement);
+                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
+                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
+                var ptop = parseInt(computedStyles['padding-top'], 10);
+                var mtop = parseInt(computedStyles['margin-top'], 10);
+                marginTop += !isNaN(mtop)? mtop : 0;
+                marginBottom += !isNaN(mbottom) ? mbottom : 0;
+                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
+                paddingTop += !isNaN(ptop)? ptop : 0;
+                currentElement = currentElement.parentElement;
+            }
+
+            var elementProperties = $window.getComputedStyle(element[0]);
+            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
+            var elementToResizeContainer = elementToResize.getBoundingClientRect();
+            element.css('height', ($window.innerHeight
+                - (elementToResizeContainer.top )-marginBottom -
+                (paddingBottom - elementPaddingBottom)
+                + 'px' ));
+            element.css('overflow-y', 'auto');
+        }
+
+        $timeout(function(){
+            _onWindowsResize();
+        $window.addEventListener('resize', function () {
+            _onWindowsResize();
+        });
+        },250)
+
+    };
+
+}]);
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:pixelWidth
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage width.
+ * width-x increment by 25
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-75
+         </div>
+         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-225
+         </div>
+         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .width-1000
+         </div>
+ </file>
+ </example>
+ */
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:rowHeight
+ * @module itesoft
+ * @restrict A
+ * @since 1.1
+ * @description
+ * Simple Stylesheet class to manage height like bootstrap row.<br/>
+ * Height is split in 10 parts.<br/>
+ * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <div style="height: 300px" >
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-5
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+        <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-1
+         </div>
+         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+           .row-height-2
+         </div>
+         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-3
+         </div>
+         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+            .row-height-4
+         </div>
+     </div>
+     <div  class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-1
+         </div>
+    </div>
+     <div class="col-md-3 row-height-10">
+         <!-- CSS adaptation for example purposes. Do not do this in production-->
+         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
+         .row-height-10
+         </div>
+     </div>
+ <div>
+ </file>
+ </example>
+ */
 'use strict';
 /**
  * @ngdoc directive
@@ -5419,190 +5605,6 @@ IteSoft
             template : '<div class="it-side-menu-group" ng-transclude></div>'
         }
 });
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:itBottomGlue
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Simple directive to fill height.
- *
- *
- * @example
-     <example module="itesoft">
-         <file name="index.html">
-             <div class="jumbotron " style="background-color: red; ">
-                 <div class="jumbotron " style="background-color: blue; ">
-                     <div class="jumbotron " style="background-color: yellow; ">
-                         <div it-bottom-glue="" class="jumbotron ">
-                            Resize the window height the component will  always fill the bottom !!
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </file>
-     </example>
- */
-IteSoft
-    .directive('itBottomGlue', ['$window','$timeout',
-        function ($window,$timeout) {
-    return function (scope, element) {
-        function _onWindowsResize () {
-
-            var currentElement = element[0];
-            var elementToResize = angular.element(element)[0];
-            var marginBottom = 0;
-            var paddingBottom = 0;
-            var  paddingTop = 0;
-            var  marginTop =0;
-
-            while(currentElement !== null && typeof currentElement !== 'undefined'){
-                var computedStyles = $window.getComputedStyle(currentElement);
-                var mbottom = parseInt(computedStyles['margin-bottom'], 10);
-                var pbottom = parseInt(computedStyles['padding-bottom'], 10);
-                var ptop = parseInt(computedStyles['padding-top'], 10);
-                var mtop = parseInt(computedStyles['margin-top'], 10);
-                marginTop += !isNaN(mtop)? mtop : 0;
-                marginBottom += !isNaN(mbottom) ? mbottom : 0;
-                paddingBottom += !isNaN(pbottom) ? pbottom : 0;
-                paddingTop += !isNaN(ptop)? ptop : 0;
-                currentElement = currentElement.parentElement;
-            }
-
-            var elementProperties = $window.getComputedStyle(element[0]);
-            var elementPaddingBottom = parseInt(elementProperties['padding-bottom'], 10);
-            var elementToResizeContainer = elementToResize.getBoundingClientRect();
-            element.css('height', ($window.innerHeight
-                - (elementToResizeContainer.top )-marginBottom -
-                (paddingBottom - elementPaddingBottom)
-                + 'px' ));
-            element.css('overflow-y', 'auto');
-        }
-
-        $timeout(function(){
-            _onWindowsResize();
-        $window.addEventListener('resize', function () {
-            _onWindowsResize();
-        });
-        },250)
-
-    };
-
-}]);
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:pixelWidth
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage width.
- * width-x increment by 25
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="width-75" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-75
-         </div>
-         <div class="width-225" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-225
-         </div>
-         <div class="width-1000" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .width-1000
-         </div>
- </file>
- </example>
- */
-'use strict';
-
-/**
- * @ngdoc directive
- * @name itesoft.directive:rowHeight
- * @module itesoft
- * @restrict A
- * @since 1.1
- * @description
- * Simple Stylesheet class to manage height like bootstrap row.<br/>
- * Height is split in 10 parts.<br/>
- * Div's parent need to have a define height (in pixel, or all parent need to have it-fill class).<br/>
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <div style="height: 300px" >
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-5" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-5
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-        <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-1
-         </div>
-         <div class="row-height-2" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-           .row-height-2
-         </div>
-         <div class="row-height-3" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-3
-         </div>
-         <div class="row-height-4" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-            .row-height-4
-         </div>
-     </div>
-     <div  class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-         <div class="row-height-1" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-1
-         </div>
-    </div>
-     <div class="col-md-3 row-height-10">
-         <!-- CSS adaptation for example purposes. Do not do this in production-->
-         <div class="row-height-10" style="background-color: rgba(86,61,124,.15);border: solid 1px white;padding:5px; ">
-         .row-height-10
-         </div>
-     </div>
- <div>
- </file>
- </example>
- */
 'use strict';
 /**
  * @ngdoc directive
@@ -7324,316 +7326,6 @@ itTab.factory('TabService', [function () {
     return self;
 }]);
 
-'use strict';
-
-IteSoft
-    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
-        return {
-            restrict: 'A',
-            scope: {
-                footerElementId: '@',
-                additionalPadding: '@'
-            },
-            link: function (scope, element, attrs) {
-
-                angular.element($window).on('resize', onWindowResize);
-
-                onWindowResize();
-
-                function onWindowResize() {
-                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
-                    var footerElementHeight;
-
-                    if (footerElement.length === 1) {
-                        footerElementHeight = footerElement[0].offsetHeight
-                            + getTopMarginAndBorderHeight(footerElement)
-                            + getBottomMarginAndBorderHeight(footerElement);
-                    } else {
-                        footerElementHeight = 0;
-                    }
-
-                    var elementOffsetTop = element[0].offsetTop;
-                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
-
-                    var additionalPadding = scope.additionalPadding || 0;
-
-                    var elementHeight = $window.innerHeight
-                        - elementOffsetTop
-                        - elementBottomMarginAndBorderHeight
-                        - footerElementHeight
-                        - additionalPadding;
-
-                    element.css('height', elementHeight + 'px');
-                }
-
-                function getTopMarginAndBorderHeight(element) {
-                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
-                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
-                    return footerTopMarginHeight + footerTopBorderHeight;
-                }
-
-                function getBottomMarginAndBorderHeight(element) {
-                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
-                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
-                    return footerBottomMarginHeight + footerBottomBorderHeight;
-                }
-
-                function getCssNumeric(element, propertyName) {
-                    return parseInt(element.css(propertyName), 10) || 0;
-                }
-            }
-        };
-
-    }]);
-
-
-/**
- * Created by vco on 20/06/2016.
- */
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itPanelForm
- * @module itesoft
- * @restrict E
- * @since 1.2
- * @description
- * The itPanelForm provides dynamic content panel in a form embedded.
- *
- *
- * ```html
- *    <it-panel-form option="option" ></it-panel-form>
- * ```
- *
- *
- * @example
- <example module="itesoft">
- <file name="index.html">
- <style>
- </style>
- <div ng-controller="HomeCtrl">
-     <h1>Global variable</h1>
-     <p>labelalone  :   {{fields.labelAlone}}</p>
-     <p>label  :   {{fields.label}}</p>
-     <p>input  :  {{fields.input}}</p>
-     <p>select :   {{fields.select}}</p>
-     <p>checkbox :   {{fields.checkbox}}</p>
-     <p>area :   {{fields.area}}</p>
-     <p>date :   {{fields.date}}</p>
-     <p>autocomplete :   {{fields.autocomplete}}</p>
-     <p>inputNumber  :  {{fields.inputNumber}}</p>
-     <p>html :   {{fields.html}}</p>
-     <hr>
-     <h1>itPanelForm</h1>
-     <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
- </div>
- </file>
- <file name="controller.js">
- angular.module('itesoft')
- .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
-       $scope.query = "";
-
-       $scope.fields={
-          labelAlone: "Je suis un label sans titre",
-          label: "Je suis un label",
-          input: " Je suis un input",
-          select: {id: '1', value: "value1"},
-          checkbox:true,
-          area:" Je suis un text area",
-          date:"2016-07-25T08:19:09.069Z",
-          autocomplete:1,
-          inputNumber:9,
-          html:"<a href=\"http://www.google.com\">Google</a>"
-       };
-
-       // require to link directive with scope
-       $scope.options = [
-          {"title":"labelalone", "code": "labelAlone", "value":$scope.fields, "type":"labelalone"},
-          {"title":"label", "code": "label", "value":$scope.fields, "type":"label"},
-        {"title":"titleInput1", "code": "input", "value":$scope.fields, "type":"input"},
-        {"title":"titleSelect1", "code": "select", "items":
-           [{"id": '1', "value": "value1"},
-           {"id": '2', "value": "value2"}], "value":$scope.fields,
-        "type":"select"},
-        {"title":"titleCheckBox", "code": "checkbox", "value":$scope.fields, "type":"toggle"},
-        {"title":"titleTextArea", "code": "area", "value":$scope.fields,
-        "type":"textarea"},
-        {"title":"titleDate", "code": "date", "value":$scope.fields, "type":"date"},
-        {"title":"titleAutocomplete1", "code": "autocomplete", "items":
-           [{"id": 1, "value": "value1"},
-           {"id": 2, "value": "value2"}], "value":$scope.fields,
-        "type":"autocomplete"},
-         {"title":"titleInputNumber", "code": "inputNumber", "value":$scope.fields, "type":"number"},
-         {"title":"titleHtml", "code": "html", "value":"", "type":$scope.fields}
-       ];
-   }
- ]
- );
-
- </file>
- </example>
- */
-IteSoft.component('itPanelForm', {
-    bindings:{
-        options:'=',
-        dateFormat:'@',
-        updateLabel:'@',
-        update: '&',
-        cancel: '&',
-        cancelLabel:'@'
-    },
-    template:'<div class="it-ac-panel-form">' +
-    '<form name="$ctrl.form" novalidate>'+
-    '<div ng-repeat="option in $ctrl.options">' +
-    '<div class="row panelFormRow">' +
-    '<div ng-switch on="option.type">'+
-    '<div ng-switch-when="title"><div ng-include=" \'titleTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="labelalone"><div ng-include=" \'labelAloneTemplate.html\' "></div></div>'+
-    '<div ng-switch-when="label"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'labelTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6 "></div></div>'+
-    '<div ng-switch-when="input"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'inputTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="select"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'selectTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="date"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'dateTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="toggle"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'toggleTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="textarea"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'textAreaTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="autocomplete"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'autoCompleteTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="number"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'numberTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '<div ng-switch-when="html"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'htmlTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-4">' +
-    '<button ng-show="{{$ctrl.showButtonUpdate}}"  type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
-    '<button ng-show="{{$ctrl.showButtonCancel}}"  type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
-    '</div>'+
-    '<!------------------- Template title ------------------->'+
-    '<script type="text/ng-template" id="titleTemplate.html"><div class="col-xs-9 col-md-9 col-lg- it-panel-form-group">' +
-    '<p>{{option.value}}</p><hr style="background-color:black;margin-top: 0px;"></div>'+
-    '</script>'+
-    '<!------------------- Template label ------------------->'+
-    '<script type="text/ng-template" id="labelTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-label">' +
-    '<p>{{option.value[option.code]}}</p></div>'+
-    '</script>'+
-    '<!------------------- Template label alone ------------------->'+
-    '<script type="text/ng-template" id="labelAloneTemplate.html"><div class="col-xs-8 col-md-8 col-lg-8 it-panel-form-label">' +
-    '<p>{{option.value[option.code]}}</p></div>'+
-    '</script>'+
-    '<!------------------- Template input ------------------->'+
-    '<script type="text/ng-template" id="inputTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-input">' +
-    '<p><input it-input class="form-control floating-label" type="text" ng-model="option.value[option.code]" name="input" it-label=""></p></div>'+
-    '</script>'+
-    '<!------------------- Template select ------------------->'+
-    '<script type="text/ng-template" id="selectTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-select">' +
-    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value[option.code]"' +
-    ' ng-options="value.value for value in option.items"/>' +
-    '</select></p></div> '+
-    '</script>'+
-    '<!------------------- Template toggle ------------------->'+
-    '<script type="text/ng-template" id="toggleTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-toggle">' +
-    '<p><input it-toggle type="checkbox" ng-model="option.value[option.code]" ng-true-value="true" ng-false-value="false"><br></p>'+
-    '</script>' +
-    '<!------------------- Template textArea ------------------->'+
-    '<script type="text/ng-template" id="textAreaTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-textarea">' +
-    '<p><textarea ng-model="option.value[option.code]" name="textArea"></textarea></p></div>'+
-    '</script>'+
-    '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
-    '<script type="text/ng-template" id="dateTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-date">' +
-    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
-    'ng-model="option.value[option.code]" data-autoclose="1" ' +
-    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p></div>'+
-    '</script>'+
-    '<!------------------- Template autoComplete Input ------------------->'+
-    '<script type="text/ng-template" id="autoCompleteTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-auto">' +
-    '<p><it-autocomplete name="autoComplete" id="autoComplete" items="option.items" selected-option="option.value[option.code]"></it-autocomplete></p></div>'+
-    '</script>'+
-    '<!------------------- Template number Input ------------------->'+
-    '<script type="text/ng-template" id="numberTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-number">' +
-    '<p><input it-input class="form-control floating-label" type="number" name="input" ng-model="option.value[option.code]" it-label=""></p></div>'+
-    '</script>'+
-    '<!------------------- Template html Input ------------------->'+
-    '<script type="text/ng-template" id="htmlTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-html">' +
-    '<p><div  ng-bind-html="option.value[option.code]"/></p></div>'+
-    '</script>',
-    controller: ['$scope', function($scope){
-
-        var self = this;
-
-        if (self.updateLabel == undefined) {
-            self.showButtonUpdate = false;
-        }else{
-            self.showButtonUpdate = true;
-        }
-
-        if (self.cancelLabel == undefined) {
-            self.showButtonCancel = false;
-        }else{
-            self.showButtonCancel = true;
-        }
-
-        if (self.dateFormat == undefined) {
-            self.dateFormat = "dd/MM/yyyy";
-        }
-
-        if (self.updateLabel == undefined) {
-            self.updateLabel = "Update";
-        }
-
-        if(self.cancelLabel == undefined){
-            self.cancelLabel = "Cancel";
-        }
-    }]
-
-});
-'use strict';
-
-IteSoft
-    .directive('itViewMasterHeader',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template :  '<div class="row">' +
-                            '<div class="col-md-6">' +
-                                '<div class="btn-toolbar" ng-transclude>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-md-6 pull-right">' +
-                                '<div>' +
-            '<form>' +
-            '<div class="form-group has-feedback">' +
-            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
-            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
-            '</div>' +
-            '</form>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewPanel',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="jumbotron" ng-transclude></div>'
-        }
-    });
-
-'use strict';
-
-IteSoft
-    .directive('itViewTitle',function(){
-        return {
-            restrict: 'E',
-            transclude : true,
-            scope:true,
-            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
-        }
-    });
-
 /**
  * Created by sza on 22/04/2016.
  */
@@ -7772,10 +7464,7 @@ IteSoft
 			itConfigProvider.defaultNamespace('CONFIG');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('HomeCtrl',
+	}]).controller('HomeCtrl',
  ['$scope','$rootScope','$http','uiGridGroupingConstants',
  function($scope,$rootScope,$http,uiGridGroupingConstants) {
                        $rootScope.editSite = true;
@@ -7888,10 +7577,7 @@ IteSoft.directive('itBlock', ['$timeout', 'BlockService', function ($timeout, Bl
 			itConfigProvider.defaultNamespace('CONFIG');
 			itConfigProvider.allowOverride(true);
 			itConfigProvider.configFile("config.json");
-	}]).run(['itConfig', function (itConfig) {
-	    //initialize itConfig
-        itConfig.initialize();
-    }]).controller('HomeCtrl',
+	}]).controller('HomeCtrl',
  ['$scope','$rootScope',
  function($scope,$rootScope) {$rootScope.editSite=true;}]);
  </file>
@@ -8773,6 +8459,316 @@ IteSoft.factory('PilotSiteSideService', ['$resource', '$log', 'itConfig', 'Pilot
     }
 ]);
 
+'use strict';
+
+IteSoft
+    .directive('itFillHeight', ['$window', '$document', function($window, $document) {
+        return {
+            restrict: 'A',
+            scope: {
+                footerElementId: '@',
+                additionalPadding: '@'
+            },
+            link: function (scope, element, attrs) {
+
+                angular.element($window).on('resize', onWindowResize);
+
+                onWindowResize();
+
+                function onWindowResize() {
+                    var footerElement = angular.element($document[0].getElementById(scope.footerElementId));
+                    var footerElementHeight;
+
+                    if (footerElement.length === 1) {
+                        footerElementHeight = footerElement[0].offsetHeight
+                            + getTopMarginAndBorderHeight(footerElement)
+                            + getBottomMarginAndBorderHeight(footerElement);
+                    } else {
+                        footerElementHeight = 0;
+                    }
+
+                    var elementOffsetTop = element[0].offsetTop;
+                    var elementBottomMarginAndBorderHeight = getBottomMarginAndBorderHeight(element);
+
+                    var additionalPadding = scope.additionalPadding || 0;
+
+                    var elementHeight = $window.innerHeight
+                        - elementOffsetTop
+                        - elementBottomMarginAndBorderHeight
+                        - footerElementHeight
+                        - additionalPadding;
+
+                    element.css('height', elementHeight + 'px');
+                }
+
+                function getTopMarginAndBorderHeight(element) {
+                    var footerTopMarginHeight = getCssNumeric(element, 'margin-top');
+                    var footerTopBorderHeight = getCssNumeric(element, 'border-top-width');
+                    return footerTopMarginHeight + footerTopBorderHeight;
+                }
+
+                function getBottomMarginAndBorderHeight(element) {
+                    var footerBottomMarginHeight = getCssNumeric(element, 'margin-bottom');
+                    var footerBottomBorderHeight = getCssNumeric(element, 'border-bottom-width');
+                    return footerBottomMarginHeight + footerBottomBorderHeight;
+                }
+
+                function getCssNumeric(element, propertyName) {
+                    return parseInt(element.css(propertyName), 10) || 0;
+                }
+            }
+        };
+
+    }]);
+
+
+/**
+ * Created by vco on 20/06/2016.
+ */
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itPanelForm
+ * @module itesoft
+ * @restrict E
+ * @since 1.2
+ * @description
+ * The itPanelForm provides dynamic content panel in a form embedded.
+ *
+ *
+ * ```html
+ *    <it-panel-form option="option" ></it-panel-form>
+ * ```
+ *
+ *
+ * @example
+ <example module="itesoft">
+ <file name="index.html">
+ <style>
+ </style>
+ <div ng-controller="HomeCtrl">
+     <h1>Global variable</h1>
+     <p>labelalone  :   {{fields.labelAlone}}</p>
+     <p>label  :   {{fields.label}}</p>
+     <p>input  :  {{fields.input}}</p>
+     <p>select :   {{fields.select}}</p>
+     <p>checkbox :   {{fields.checkbox}}</p>
+     <p>area :   {{fields.area}}</p>
+     <p>date :   {{fields.date}}</p>
+     <p>autocomplete :   {{fields.autocomplete}}</p>
+     <p>inputNumber  :  {{fields.inputNumber}}</p>
+     <p>html :   {{fields.html}}</p>
+     <hr>
+     <h1>itPanelForm</h1>
+     <it-panel-form options="options" date-format="dd/MM/yyyy" update-label="Mettre à jours" update="updateValue(options)" cancel-label="Annuler" cancel="cancel()"></it-panel-form>
+ </div>
+ </file>
+ <file name="controller.js">
+ angular.module('itesoft')
+ .controller('HomeCtrl',['$scope', '$templateCache', function ($scope,$templateCache) {
+       $scope.query = "";
+
+       $scope.fields={
+          labelAlone: "Je suis un label sans titre",
+          label: "Je suis un label",
+          input: " Je suis un input",
+          select: {id: '1', value: "value1"},
+          checkbox:true,
+          area:" Je suis un text area",
+          date:"2016-07-25T08:19:09.069Z",
+          autocomplete:1,
+          inputNumber:9,
+          html:"<a href=\"http://www.google.com\">Google</a>"
+       };
+
+       // require to link directive with scope
+       $scope.options = [
+          {"title":"labelalone", "code": "labelAlone", "value":$scope.fields, "type":"labelalone"},
+          {"title":"label", "code": "label", "value":$scope.fields, "type":"label"},
+        {"title":"titleInput1", "code": "input", "value":$scope.fields, "type":"input"},
+        {"title":"titleSelect1", "code": "select", "items":
+           [{"id": '1', "value": "value1"},
+           {"id": '2', "value": "value2"}], "value":$scope.fields,
+        "type":"select"},
+        {"title":"titleCheckBox", "code": "checkbox", "value":$scope.fields, "type":"toggle"},
+        {"title":"titleTextArea", "code": "area", "value":$scope.fields,
+        "type":"textarea"},
+        {"title":"titleDate", "code": "date", "value":$scope.fields, "type":"date"},
+        {"title":"titleAutocomplete1", "code": "autocomplete", "items":
+           [{"id": 1, "value": "value1"},
+           {"id": 2, "value": "value2"}], "value":$scope.fields,
+        "type":"autocomplete"},
+         {"title":"titleInputNumber", "code": "inputNumber", "value":$scope.fields, "type":"number"},
+         {"title":"titleHtml", "code": "html", "value":"", "type":$scope.fields}
+       ];
+   }
+ ]
+ );
+
+ </file>
+ </example>
+ */
+IteSoft.component('itPanelForm', {
+    bindings:{
+        options:'=',
+        dateFormat:'@',
+        updateLabel:'@',
+        update: '&',
+        cancel: '&',
+        cancelLabel:'@'
+    },
+    template:'<div class="it-ac-panel-form">' +
+    '<form name="$ctrl.form" novalidate>'+
+    '<div ng-repeat="option in $ctrl.options">' +
+    '<div class="row panelFormRow">' +
+    '<div ng-switch on="option.type">'+
+    '<div ng-switch-when="title"><div ng-include=" \'titleTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="labelalone"><div ng-include=" \'labelAloneTemplate.html\' "></div></div>'+
+    '<div ng-switch-when="label"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'labelTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6 "></div></div>'+
+    '<div ng-switch-when="input"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'inputTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="select"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'selectTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="date"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'dateTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="toggle"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'toggleTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="textarea"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'textAreaTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="autocomplete"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'autoCompleteTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="number"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'numberTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '<div ng-switch-when="html"><div class="col-xs-3 col-md-3 col-lg-5"> <label>{{option.title}} </label></div><div ng-include=" \'htmlTemplate.html\' " class="col-xs-3 col-md-4 col-lg-6"></div></div>'+
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="col-xs-3 col-md-3 col-lg-5"></div><div class="col-xs-3 col-md-4 col-lg-4">' +
+    '<button ng-show="{{$ctrl.showButtonUpdate}}"  type="submit" ng-click="$ctrl.update({message:options})" class="btn btn-primary">{{$ctrl.updateLabel}}</button>' +
+    '<button ng-show="{{$ctrl.showButtonCancel}}"  type="submit" ng-click="$ctrl.cancel()" class="btn btn-primary">{{$ctrl.cancelLabel}}</button></div></form>'+
+    '</div>'+
+    '<!------------------- Template title ------------------->'+
+    '<script type="text/ng-template" id="titleTemplate.html"><div class="col-xs-9 col-md-9 col-lg- it-panel-form-group">' +
+    '<p>{{option.value}}</p><hr style="background-color:black;margin-top: 0px;"></div>'+
+    '</script>'+
+    '<!------------------- Template label ------------------->'+
+    '<script type="text/ng-template" id="labelTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-label">' +
+    '<p>{{option.value[option.code]}}</p></div>'+
+    '</script>'+
+    '<!------------------- Template label alone ------------------->'+
+    '<script type="text/ng-template" id="labelAloneTemplate.html"><div class="col-xs-8 col-md-8 col-lg-8 it-panel-form-label">' +
+    '<p>{{option.value[option.code]}}</p></div>'+
+    '</script>'+
+    '<!------------------- Template input ------------------->'+
+    '<script type="text/ng-template" id="inputTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-input">' +
+    '<p><input it-input class="form-control floating-label" type="text" ng-model="option.value[option.code]" name="input" it-label=""></p></div>'+
+    '</script>'+
+    '<!------------------- Template select ------------------->'+
+    '<script type="text/ng-template" id="selectTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-select">' +
+    '<p><select name="repeatSelect" id="repeatSelect" ng-model="option.value[option.code]"' +
+    ' ng-options="value.value for value in option.items"/>' +
+    '</select></p></div> '+
+    '</script>'+
+    '<!------------------- Template toggle ------------------->'+
+    '<script type="text/ng-template" id="toggleTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-toggle">' +
+    '<p><input it-toggle type="checkbox" ng-model="option.value[option.code]" ng-true-value="true" ng-false-value="false"><br></p>'+
+    '</script>' +
+    '<!------------------- Template textArea ------------------->'+
+    '<script type="text/ng-template" id="textAreaTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-textarea">' +
+    '<p><textarea ng-model="option.value[option.code]" name="textArea"></textarea></p></div>'+
+    '</script>'+
+    '<!------------------- Template date Input format yyyy-mm-dd ------------------->'+
+    '<script type="text/ng-template" id="dateTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-date">' +
+    '<p><input type="text" class="form-control" style="width: 75px;display:inline;margin-left: 1px;margin-right: 1px" ' +
+    'ng-model="option.value[option.code]" data-autoclose="1" ' +
+    'name="date" data-date-format="{{$ctrl.dateFormat}}" bs-datepicker></p></div>'+
+    '</script>'+
+    '<!------------------- Template autoComplete Input ------------------->'+
+    '<script type="text/ng-template" id="autoCompleteTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-auto">' +
+    '<p><it-autocomplete name="autoComplete" id="autoComplete" items="option.items" selected-option="option.value[option.code]"></it-autocomplete></p></div>'+
+    '</script>'+
+    '<!------------------- Template number Input ------------------->'+
+    '<script type="text/ng-template" id="numberTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-number">' +
+    '<p><input it-input class="form-control floating-label" type="number" name="input" ng-model="option.value[option.code]" it-label=""></p></div>'+
+    '</script>'+
+    '<!------------------- Template html Input ------------------->'+
+    '<script type="text/ng-template" id="htmlTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-html">' +
+    '<p><div  ng-bind-html="option.value[option.code]"/></p></div>'+
+    '</script>',
+    controller: ['$scope', function($scope){
+
+        var self = this;
+
+        if (self.updateLabel == undefined) {
+            self.showButtonUpdate = false;
+        }else{
+            self.showButtonUpdate = true;
+        }
+
+        if (self.cancelLabel == undefined) {
+            self.showButtonCancel = false;
+        }else{
+            self.showButtonCancel = true;
+        }
+
+        if (self.dateFormat == undefined) {
+            self.dateFormat = "dd/MM/yyyy";
+        }
+
+        if (self.updateLabel == undefined) {
+            self.updateLabel = "Update";
+        }
+
+        if(self.cancelLabel == undefined){
+            self.cancelLabel = "Cancel";
+        }
+    }]
+
+});
+'use strict';
+
+IteSoft
+    .directive('itViewMasterHeader',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template :  '<div class="row">' +
+                            '<div class="col-md-6">' +
+                                '<div class="btn-toolbar" ng-transclude>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="col-md-6 pull-right">' +
+                                '<div>' +
+            '<form>' +
+            '<div class="form-group has-feedback">' +
+            '<span class="glyphicon glyphicon-search form-control-feedback"></span>' +
+            '<input it-input class="form-control" type="text" placeholder="Rechercher"/>' +
+            '</div>' +
+            '</form>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewPanel',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="jumbotron" ng-transclude></div>'
+        }
+    });
+
+'use strict';
+
+IteSoft
+    .directive('itViewTitle',function(){
+        return {
+            restrict: 'E',
+            transclude : true,
+            scope:true,
+            template : '<div class="row"><div class="col-xs-12"><h3 ng-transclude></h3><hr></div></div>'
+        }
+    });
+
 /**
  * @ngdoc filter
  * @name itesoft.filter:itUnicode
@@ -8823,202 +8819,190 @@ IteSoft
 
 
 'use strict';
-
-
 /**
- * @ngdoc directive
- * @name dependencies.directive:timeline
- * @module dependencies
+ * @ngdoc service
+ * @name itesoft.service:itConfig
+ * @module itesoft
  * @since 1.2
+ * @requires $location
+ *
  * @description
- * An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.
- * See more :  {@link https://gitlab.com/itesoft/timeline}
+ * This is a configuration provider. It load a json file and let you inject everywhere, you can also override
+ * each properties of the configuration through url parameters.
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>configFile</code></td>
+ *     <td>app/config/config.json</td>
+ *     <td>Allows to override the default url to get JSON configuration object</td>
+ * </tr>
+ * <tr>
+ *     <td><code>defaultNamespace</code></td>
+ *     <td>''</td>
+ *     <td>Set the default namespace of the configuration file when you use get() function</td>
+ * </tr>
+ * <tr>
+ *     <td><code>allowOverride</code></td>
+ *     <td>false</td>
+ *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
+ * </tr>
+ * </table>
+ *
+ *
+ *
  * @example
- <example module="itesoft-showcase">
- <file name="index.html">
-
-
- <div class="container-fluid"  ng-controller="mainController">
- <h1>Angular Timeline</h1>
- <button ng-click="addEvent()">Add New Event</button>
- <button ng-click="leftAlign()">Left Side</button>
- <button ng-click="rightAlign()">Right Side</button>
- <button ng-click="defaultAlign()">Alternate Sides</button>
- <br/>
- <br/>
- <timeline>
- <!-- can also hard-code to side="left" or side="right" -->
- <timeline-event ng-repeat="event in events" side="{{side}}">
- <!-- uses angular-scroll-animate to give it some pop -->
- <timeline-badge class="{{event.badgeClass}} timeline-hidden"
- when-visible="animateElementIn" when-not-visible="animateElementOut">
- <i class="glyphicon {{event.badgeIconClass}}"></i>
- </timeline-badge>
-
- <!-- uses angular-scroll-animate to give it some pop -->
- <timeline-panel class="{{event.badgeClass}} timeline-hidden"
- when-visible="animateElementIn" when-not-visible="animateElementOut">
- <timeline-heading>
- <h4>{{event.title}}</h4>
-
- <p ng-if="event.when">
- <small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{event.when}}</small>
- </p>
- <p ng-if="event.titleContentHtml" ng-bind-html="event.titleContentHtml">
- </p>
- </timeline-heading>
- <p ng-bind-html="event.contentHtml"></p>
- <timeline-footer ng-if="event.footerContentHtml">
- <span ng-bind-html="event.footerContentHtml"></span>
- </timeline-footer>
- </timeline-panel>
- </timeline-event>
- </timeline>
- </div>
-
-
-
- </file>
- <file name="Module.js">
- angular.module('itesoft-showcase',['angular-timeline','itesoft']);
- </file>
+ <example module="itesoft">
  <file name="Controller.js">
- angular.module('itesoft-showcase').controller('mainController', ['$rootScope','$document','$timeout','$scope',
- function($rootScope, $document, $timeout, $scope) {
-
-        var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. " +
-                      "Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor." +
-                      "Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, " +
-                      "ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor." +
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-
-        $scope.side = '';
-
-
-
-        $scope.events = [{
-            badgeClass: 'info',
-            badgeIconClass: 'fa fa-check-square',
-            title: 'First heading',
-            when: '11 hours ago via Twitter',
-            content: 'Some awesome content.'
-        }, {
-            badgeClass: 'warning',
-            badgeIconClass: 'fa fa-credit-card',
-            title: 'Second heading',
-            when: '12 hours ago via Twitter',
-            content: 'More awesome content.'
-        }, {
-            badgeClass: 'default',
-            badgeIconClass: 'glyphicon-credit-card',
-            title: 'Third heading',
-            titleContentHtml: '<img class="img-responsive" src="http://www.freeimages.com/assets/183333/1833326510/wood-weel-1444183-m.jpg">',
-            contentHtml: lorem,
-            footerContentHtml: '<a href="">Continue Reading</a>'
-        }];
-
-        $scope.addEvent = function() {
-            $scope.events.push({
-                badgeClass: 'info',
-                badgeIconClass: 'glyphicon-check',
-                title: 'First heading',
-                when: '3 hours ago via Twitter',
-                content: 'Some awesome content.'
-            });
-
-        };
-        // optional: not mandatory (uses angular-scroll-animate)
-        $scope.animateElementIn = function($el) {
-            $el.removeClass('timeline-hidden');
-            $el.addClass('bounce-in');
-        };
-
-        // optional: not mandatory (uses angular-scroll-animate)
-        $scope.animateElementOut = function($el) {
-            $el.addClass('timeline-hidden');
-            $el.removeClass('bounce-in');
-        };
-
-        $scope.leftAlign = function() {
-            $scope.side = 'left';
-        }
-
-        $scope.rightAlign = function() {
-            $scope.side = 'right';
-        }
-
-        $scope.defaultAlign = function() {
-            $scope.side = '';
-        }
-    }
- ]);
- </file>
-
- </example>
- */
-
-'use strict';
-
-/**
- * @ngdoc directive
- * @name dependencies.directive:ui-layout
- * @module dependencies
- * @restrict AE
- * @since 1.2
- * @description
- * This directive allows you to split
- * See more :  {@link https://github.com/angular-ui/ui-layout}
- * @example
- <example module="itesoft-showcase">
- <file name="Module.js">
- angular.module('itesoft-showcase',['ui.layout']);
+ angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
+			//configuration of default values
+			itConfigProvider.defaultNamespace('CaptureOmnicanal');
+			itConfigProvider.allowOverride(true);
+			itConfigProvider.configFile("config.json");
+	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
+			$scope.config=itConfig;
+	}]);
  </file>
  <file name="index.html">
-    <div style="position: relative;height:500px">
-     <div ui-layout style="margin-left: 90px;margin-right: 10px" >
-     <div ui-layout-container  size="100px">
-     <h3>
-     NEW CAPTURE 2016JUN30-00001
-     </h3>
-     <div>
-     <span>Environment:</span>
-     </div>
-     <div>
-     <span>Profile:</span>
-     </div>
-     </div>
-     <div ui-layout-container>
-     <div ui-layout="{flow : 'column'}" >
-     <div ui-layout-container  >Settings</div>
-     <div ui-layout-container  >
-     <div>[ ]image 001</div>
-     <div>[ ]image 002</div>
-     <div>[ ]image 003</div>
-     <div>[ ]image 004</div>
-     </div>
-     <div ui-layout-container  >Viewer</div>
-     </div>
-     </div>
-
-     <div ui-layout-container size="60px" style="text-align: right" >
-     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-success it-button-do"
-     disabled="disabled">
-     <span class="ng-binding">
-     Capturer
-     </span>
-     </button>
-     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-primary it-button-do"
-     disabled="disabled">
-     <span class="ng-binding">
-     Envoyer
-     </span>
-     </button>
-     </div>
-     </div>
-    </div>
+ <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+ <div ng-controller="Mycontroller">
+ <p>All properties : {{config.get() | json}}</p>
+ <p>Other namespace properties : {{config.get('common') | json}}</p>
+ <p>One propertie : {{config.get().baseUrl}}</p>
+ </div>
+ </file>
+ <file name="config.json">
+ {
+     "CaptureOmnicanal" : {
+         "baseUrl":"http://test/base"
+     },
+     "common": {
+         "debug":true
+     }
+ }
  </file>
  </example>
- */
+ **/
+IteSoft.provider('itConfig', [function itConfigProvider() {
+    var allowOverride = false;
+    var configFile = 'app/config/config.json';
+    var defaultNamespace = null;
+    var overrideConfig = undefined;
+    var isLoaded = false;
+    var baseConfig = undefined;
+
+    this.allowOverride = function (value) {
+        allowOverride = value;
+    };
+
+    this.configFile = function (value) {
+        configFile = value;
+    };
+
+    this.defaultNamespace = function (value) {
+        defaultNamespace = value;
+    };
+
+    this.get = function () {
+        if (!isLoaded) {
+            return _load(overrideConfig);
+        } else {
+            return baseConfig[defaultNamespace];
+        }
+    };
+
+    /**
+     * Return query parameter without $location.search
+     * @returns {*|{}}
+     * @private
+     */
+    function _getRequestParam() {
+        var queryPart = location.search;
+        if(queryPart == ""){
+            queryPart = location.hash;
+        }
+        var search = queryPart
+            .split(/[&||?]/)
+            .filter(function (x) { return x.indexOf("=") > -1; })
+            .map(function (x) { return x.split(/=/); })
+            .map(function (x) {
+                x[1] = x[1].replace(/\+/g, " ");
+                return x;
+            })
+            .map(function (x) {
+                if (x[1] == "true") {
+                    x[1] = true;
+                    return x;
+                } else if (x[1] == "false") {
+                    x[1] = false;
+                    return x;
+                } else {
+                    return x;
+                }
+            })
+            .reduce(function (acc, current) {
+                acc[current[0]] = current[1];
+                return acc;
+            }, {});
+        return search;
+    };
+
+    function _load(overrideConfig) {
+        var defaultConfig = {};
+        if (baseConfig == undefined) {
+            overrideConfig = _getRequestParam();
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    baseConfig = JSON.parse(xhttp.responseText);
+                    isLoaded = true;
+                    if (allowOverride) {
+                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
+                            defaultConfig = baseConfig[defaultNamespace];
+                            for (var propertyName in defaultConfig) {
+                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
+                                    defaultConfig[propertyName] = overrideConfig[propertyName];
+                                }
+                            }
+                        }
+                    }
+                    isLoaded = true;
+                }
+            };
+            xhttp.open("GET", configFile, false);
+            xhttp.send();
+        }
+        return defaultConfig;
+    }
+
+    this.$get = ['$location', function itConfigFactory($location) {
+
+        var self = this;
+        return {
+            get: function (namespace) {
+
+                if (!isLoaded) {
+                    _load(overrideConfig);
+                }
+
+                if ((namespace != null) && (namespace != undefined)) {
+                    return baseConfig[namespace];
+                } else {
+                    if (defaultNamespace != null) {
+                        return baseConfig[defaultNamespace];
+                    } else {
+                        return baseConfig;
+                    }
+                }
+            }
+        };
+    }];
+}]);
+
 
 'use strict';
 /**
@@ -9246,480 +9230,6 @@ angular.module('itesoft.language',['itesoft.popup','LocalStorageModule'])
         }
     }];
 });
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itConfig
- * @module itesoft
- * @since 1.2
- * @requires $location
- *
- * @description
- * This is a configuration provider. It load a json file and let you inject everywhere, you can also override
- * each properties of the configuration through url parameters.
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>configFile</code></td>
- *     <td>app/config/config.json</td>
- *     <td>Allows to override the default url to get JSON configuration object</td>
- * </tr>
- * <tr>
- *     <td><code>defaultNamespace</code></td>
- *     <td>''</td>
- *     <td>Set the default namespace of the configuration file when you use get() function</td>
- * </tr>
- * <tr>
- *     <td><code>allowOverride</code></td>
- *     <td>false</td>
- *     <td>Allows to use URL parameters to override JSON configuration peroperties in URL ?key=value&key=value</td>
- * </tr>
- * </table>
- *
- *
- *
- * @example
- <example module="itesoft">
- <file name="Controller.js">
- angular.module('itesoft').config(['itConfigProvider', function (itConfigProvider) {
-			//configuration of default values
-			itConfigProvider.defaultNamespace('CaptureOmnicanal');
-			itConfigProvider.allowOverride(true);
-			itConfigProvider.configFile("config.json");
-	}]).controller('Mycontroller',['$scope','itConfig', function($scope, itConfig) {
-			$scope.config=itConfig;
-	}]);
- </file>
- <file name="index.html">
- <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
- <div ng-controller="Mycontroller">
- <p>All properties : {{config.get() | json}}</p>
- <p>Other namespace properties : {{config.get('common') | json}}</p>
- <p>One propertie : {{config.get().baseUrl}}</p>
- </div>
- </file>
- <file name="config.json">
- {
-     "CaptureOmnicanal" : {
-         "baseUrl":"http://test/base"
-     },
-     "common": {
-         "debug":true
-     }
- }
- </file>
- </example>
- **/
-IteSoft.provider('itConfig', [function itConfigProvider() {
-    var allowOverride = false;
-    var configFile = 'app/config/config.json';
-    var defaultNamespace = null;
-    var overrideConfig = undefined;
-    var isLoaded = false;
-    var baseConfig = undefined;
-
-    this.allowOverride = function (value) {
-        allowOverride = value;
-    };
-
-    this.configFile = function (value) {
-        configFile = value;
-    };
-
-    this.defaultNamespace = function (value) {
-        defaultNamespace = value;
-    };
-
-    this.get = function () {
-        if (!isLoaded) {
-            return _load(overrideConfig);
-        } else {
-            return baseConfig[defaultNamespace];
-        }
-    };
-
-    /**
-     * Return query parameter without $location.search
-     * @returns {*|{}}
-     * @private
-     */
-    function _getRequestParam() {
-        var queryPart = location.search;
-        if(queryPart == ""){
-            queryPart = location.hash;
-        }
-        var search = queryPart
-            .split(/[&||?]/)
-            .filter(function (x) { return x.indexOf("=") > -1; })
-            .map(function (x) { return x.split(/=/); })
-            .map(function (x) {
-                x[1] = x[1].replace(/\+/g, " ");
-                return x;
-            })
-            .map(function (x) {
-                if (x[1] == "true") {
-                    x[1] = true;
-                    return x;
-                } else if (x[1] == "false") {
-                    x[1] = false;
-                    return x;
-                } else {
-                    return x;
-                }
-            })
-            .reduce(function (acc, current) {
-                acc[current[0]] = current[1];
-                return acc;
-            }, {});
-        return search;
-    };
-
-    function _load(overrideConfig) {
-        var defaultConfig = {};
-        if (baseConfig == undefined) {
-            overrideConfig = _getRequestParam();
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (xhttp.readyState == 4 && xhttp.status == 200) {
-                    baseConfig = JSON.parse(xhttp.responseText);
-                    isLoaded = true;
-                    if (allowOverride) {
-                        if ((defaultNamespace != undefined) && (defaultNamespace != null)) {
-                            defaultConfig = baseConfig[defaultNamespace];
-                            for (var propertyName in defaultConfig) {
-                                if (typeof overrideConfig !== 'undefined' && typeof overrideConfig[propertyName] !== 'undefined') {
-                                    defaultConfig[propertyName] = overrideConfig[propertyName];
-                                }
-                            }
-                        }
-                    }
-                    isLoaded = true;
-                }
-            };
-            xhttp.open("GET", configFile, false);
-            xhttp.send();
-        }
-        return defaultConfig;
-    }
-
-    this.$get = ['$location', function itConfigFactory($location) {
-
-        var self = this;
-        return {
-            get: function (namespace) {
-
-                if (!isLoaded) {
-                    _load(overrideConfig);
-                }
-
-                if ((namespace != null) && (namespace != undefined)) {
-                    return baseConfig[namespace];
-                } else {
-                    if (defaultNamespace != null) {
-                        return baseConfig[defaultNamespace];
-                    } else {
-                        return baseConfig;
-                    }
-                }
-            }
-        };
-    }];
-}]);
-
-'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itPopup
- * @module itesoft
- * @since 1.0
- * @requires $uibModal
- * @requires $uibModalStack
- * @requires $rootScope
- * @requires $q
- *
- * @description
- * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
- * The popup system has support for more flexible versions of the built in alert(),
- * prompt(), and confirm() functions that users are used to,
- * in addition to allowing popups with completely custom content and look.
- *
- * @example
-    <example module="itesoft">
-
-        <file name="Controller.js">
-             angular.module('itesoft')
-             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
-
-                  $scope.showAlert = function(){
-                      var alertPopup = itPopup.alert({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}"
-                      });
-                      alertPopup.then(function() {
-                         alert('alert callback');
-                      });
-                  };
-
-                  $scope.showConfirm = function(){
-                      var confirmPopup = itPopup.confirm({
-                          title: "{{'POPUP_TITLE' | translate}}",
-                          text: "{{'POPUP_CONTENT' | translate}}",
-                          buttons: [
-
-                              {
-                                  text: 'Cancel',
-                                  type: '',
-                                  onTap: function () {
-                                      return false;
-                                  }
-                              },
-                              {
-                                  text: 'ok',
-                                  type: '',
-                                  onTap: function () {
-                                      return true;
-                                  }
-                              }
-                             ]
-                      });
-                      confirmPopup.then(function(res) {
-
-                          alert('confirm validate');
-                      },function(){
-                          alert('confirm canceled');
-                      });
-                  };
-
-              $scope.data = {};
-              $scope.data.user =  '';
-
-              $scope.showCustomConfirm = function(){
-              var customPopup = itPopup.custom({
-                  title: 'My Custom title',
-                  scope: $scope,
-                  backdrop:false,
-                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
-                  buttons: [{
-                          text: 'My Custom Action Button',
-                          type: 'btn-danger',
-                          onTap: function (event,scope) {
-                               console.log(scope.data );
-                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
-                                    event.preventDefault();
-                               }
-                              return true;
-                          }
-                      }
-                  ]
-              });
-              customPopup.then(function(res) {
-                 console.log(res);
-                  alert('confirm validate');
-              },function(){
-                  alert('confirm canceled');
-              });
-              };
-
-              $scope.showPrompt = function(){
-                  var promptPopup = itPopup.prompt({
-                      title: "{{'POPUP_TITLE' | translate}}",
-                      text: "{{'POPUP_CONTENT' | translate}}",
-                      inputLabel : "{{'POPUP_LABEL' | translate}}",
-                      inputType: 'password'
-                  });
-                  promptPopup.then(function(data) {
-                      alert('prompt validate with value ' + data.response);
-                  },function(){
-                      alert('prompt canceled');
-                  });
-              };
-
-              }]);
-
-         </file>
-         <file name="index.html">
-             <div ng-controller="PopupCtrl">
-                 <button class="btn btn-info" ng-click="showAlert()">
-                 Alert
-                 </button>
-                 <button class="btn btn-danger" ng-click="showConfirm()">
-                 Confirm
-                 </button>
-                 <button class="btn btn-warning" ng-click="showPrompt()">
-                 Prompt
-                 </button>
-
-                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
-                 My Custom popup
-                 </button>
-             </div>
-         </file>
-     </example>
- */
-angular.module('itesoft.popup',['ui.bootstrap.modal'])
-    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($uibModal,$uibModalStack,$rootScope,$q,$compile){
-
-        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
-                             '<h3 it-compile="options.title"></h3>'+
-                         '</div>'+
-                         '<div class="modal-body">'+
-                            '<p it-compile="options.text"></p>'+
-                         '</div>'+
-                         '<div class="modal-footer">'+
-                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-                         '</div>';
-
-        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
-            '<h3 it-compile="options.title"></h3>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-body">'+
-            '<p it-compile="options.text"></p>'+
-            '   <div class="form-group">'+
-            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
-            '</div>'+
-            '</div>'+
-            '<div class="modal-footer">'+
-            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
-            '</div>';
-
-        var itPopup = {
-            alert : _showAlert,
-            confirm :_showConfirm,
-            prompt : _showPromt,
-            custom : _showCustom
-        };
-
-        function _createPopup(options){
-            var self = {};
-            self.scope = (options.scope || $rootScope).$new();
-
-            self.responseDeferred = $q.defer();
-            self.scope.$buttonTapped= function(event, button ) {
-                var result = (button.onTap || noop)(event);
-                self.responseDeferred.resolve(result);
-            };
-
-            function _noop(){
-                return false;
-            }
-
-            options = angular.extend({
-                scope: self.scope,
-                template : MODAL_TPLS,
-
-                controller :['$scope' ,'$uibModalInstance',function($scope, $modalInstance) {
-                   // $scope.data = {};
-                    $scope.itButtonAction= function(event, button ) {
-                        var todo = (button.onTap || _noop)(event,$scope);
-
-                        var result = todo;
-                        if (!event.isDefaultPrevented()) {
-                            self.responseDeferred.resolve(result ? close() : cancel());
-                        }
-                    };
-
-                    function close(){
-                        $modalInstance.close($scope.data);
-                    }
-                    function cancel() {
-                        $modalInstance.dismiss('cancel');
-                    }
-                }],
-                buttons: []
-            }, options || {});
-
-            options.scope.options = options;
-
-
-            self.options = options;
-
-            return self;
-
-        }
-
-        function _showPopup(options){
-            $modalStack.dismissAll();
-            var popup = _createPopup(options);
-
-            return  $modal.open(popup.options).result;
-        }
-
-        function _showAlert(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-
-                buttons: [{
-                    text: opts.okText || 'OK',
-                    type: opts.okType || 'btn-info',
-                    onTap: function() {
-                        return true;
-                    }
-                }]
-            }, opts || {}));
-        }
-
-        function _showConfirm(opts){
-            $modalStack.dismissAll();
-
-            return _showPopup(angular.extend({
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() { return true; }
-                    },{
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() { return false; }
-                    }]
-            }, opts || {}));
-        }
-
-
-        function _showCustom(opts){
-            $modalStack.dismissAll();
-         return   _showPopup(opts);
-        }
-
-        function _showPromt(opts){
-            $modalStack.dismissAll();
-
-            var scope = $rootScope.$new(true);
-            scope.data = {};
-            var text = '';
-            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
-                text = '<span>' + opts.template + '</span>';
-                delete opts.template;
-            }
-
-            return _showPopup(angular.extend({
-                template : MODAL_TPLS_PROMT,
-                inputLabel : opts.inputLabel || '',
-                buttons: [
-                    {
-                        text: opts.okText || 'OK',
-                        type: opts.okType || 'btn-info',
-                        onTap: function() {
-                            return true;
-                        }
-                    },
-                    {
-                        text: opts.cancelText || 'Cancel',
-                        type: opts.cancelType || '',
-                        onTap: function() {}
-                    } ]
-            }, opts || {}));
-        }
-        return itPopup;
-    }]);
 
 'use strict';
 
@@ -10812,6 +10322,295 @@ IteSoft.provider('itNotifier', [ function () {
         return itNotifier;
     }];
 }]);
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itPopup
+ * @module itesoft
+ * @since 1.0
+ * @requires $uibModal
+ * @requires $uibModalStack
+ * @requires $rootScope
+ * @requires $q
+ *
+ * @description
+ * The Itesoft Popup service allows programmatically creating and showing popup windows that require the user to respond in order to continue.
+ * The popup system has support for more flexible versions of the built in alert(),
+ * prompt(), and confirm() functions that users are used to,
+ * in addition to allowing popups with completely custom content and look.
+ *
+ * @example
+    <example module="itesoft">
+
+        <file name="Controller.js">
+             angular.module('itesoft')
+             .controller('PopupCtrl',['$scope','itPopup', function($scope,itPopup) {
+
+                  $scope.showAlert = function(){
+                      var alertPopup = itPopup.alert({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}"
+                      });
+                      alertPopup.then(function() {
+                         alert('alert callback');
+                      });
+                  };
+
+                  $scope.showConfirm = function(){
+                      var confirmPopup = itPopup.confirm({
+                          title: "{{'POPUP_TITLE' | translate}}",
+                          text: "{{'POPUP_CONTENT' | translate}}",
+                          buttons: [
+
+                              {
+                                  text: 'Cancel',
+                                  type: '',
+                                  onTap: function () {
+                                      return false;
+                                  }
+                              },
+                              {
+                                  text: 'ok',
+                                  type: '',
+                                  onTap: function () {
+                                      return true;
+                                  }
+                              }
+                             ]
+                      });
+                      confirmPopup.then(function(res) {
+
+                          alert('confirm validate');
+                      },function(){
+                          alert('confirm canceled');
+                      });
+                  };
+
+              $scope.data = {};
+              $scope.data.user =  '';
+
+              $scope.showCustomConfirm = function(){
+              var customPopup = itPopup.custom({
+                  title: 'My Custom title',
+                  scope: $scope,
+                  backdrop:false,
+                  text: '<h3 id="example_my-custom-html-content">My custom html content</h3> <p>{{data.user}} </p>  <input it-input class="form-control floating-label" type="text" it-label="Email Required!!" ng-model="data.user">',
+                  buttons: [{
+                          text: 'My Custom Action Button',
+                          type: 'btn-danger',
+                          onTap: function (event,scope) {
+                               console.log(scope.data );
+                               if(typeof scope.data.user === 'undefined' ||scope.data.user ==='' ){
+                                    event.preventDefault();
+                               }
+                              return true;
+                          }
+                      }
+                  ]
+              });
+              customPopup.then(function(res) {
+                 console.log(res);
+                  alert('confirm validate');
+              },function(){
+                  alert('confirm canceled');
+              });
+              };
+
+              $scope.showPrompt = function(){
+                  var promptPopup = itPopup.prompt({
+                      title: "{{'POPUP_TITLE' | translate}}",
+                      text: "{{'POPUP_CONTENT' | translate}}",
+                      inputLabel : "{{'POPUP_LABEL' | translate}}",
+                      inputType: 'password'
+                  });
+                  promptPopup.then(function(data) {
+                      alert('prompt validate with value ' + data.response);
+                  },function(){
+                      alert('prompt canceled');
+                  });
+              };
+
+              }]);
+
+         </file>
+         <file name="index.html">
+             <div ng-controller="PopupCtrl">
+                 <button class="btn btn-info" ng-click="showAlert()">
+                 Alert
+                 </button>
+                 <button class="btn btn-danger" ng-click="showConfirm()">
+                 Confirm
+                 </button>
+                 <button class="btn btn-warning" ng-click="showPrompt()">
+                 Prompt
+                 </button>
+
+                 <button class="btn btn-warning" ng-click="showCustomConfirm()">
+                 My Custom popup
+                 </button>
+             </div>
+         </file>
+     </example>
+ */
+angular.module('itesoft.popup',['ui.bootstrap.modal'])
+    .factory('itPopup',['$uibModal','$uibModalStack','$rootScope','$q','$compile',function($uibModal,$uibModalStack,$rootScope,$q,$compile){
+
+        var MODAL_TPLS = '<div class="modal-header it-view-header">' +
+                             '<h3 it-compile="options.title"></h3>'+
+                         '</div>'+
+                         '<div class="modal-body">'+
+                            '<p it-compile="options.text"></p>'+
+                         '</div>'+
+                         '<div class="modal-footer">'+
+                              '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+                         '</div>';
+
+        var MODAL_TPLS_PROMT = '<div class="modal-header it-view-header">' +
+            '<h3 it-compile="options.title"></h3>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-body">'+
+            '<p it-compile="options.text"></p>'+
+            '   <div class="form-group">'+
+            '<div class="form-control-wrapper"><input type="{{options.inputType}}" class="form-control" ng-model="data.response"  placeholder="{{options.inputPlaceholder}}"></div>'+
+            '</div>'+
+            '</div>'+
+            '<div class="modal-footer">'+
+            '<button ng-repeat="button in options.buttons" class="btn btn-raised {{button.type}}" ng-click="itButtonAction($event,button)" it-compile="button.text"></button>'+
+            '</div>';
+
+        var itPopup = {
+            alert : _showAlert,
+            confirm :_showConfirm,
+            prompt : _showPromt,
+            custom : _showCustom
+        };
+
+        function _createPopup(options){
+            var self = {};
+            self.scope = (options.scope || $rootScope).$new();
+
+            self.responseDeferred = $q.defer();
+            self.scope.$buttonTapped= function(event, button ) {
+                var result = (button.onTap || noop)(event);
+                self.responseDeferred.resolve(result);
+            };
+
+            function _noop(){
+                return false;
+            }
+
+            options = angular.extend({
+                scope: self.scope,
+                template : MODAL_TPLS,
+
+                controller :['$scope' ,'$uibModalInstance',function($scope, $uibModalInstance) {
+                   // $scope.data = {};
+                    $scope.itButtonAction= function(event, button ) {
+                        var todo = (button.onTap || _noop)(event,$scope);
+
+                        var result = todo;
+                        if (!event.isDefaultPrevented()) {
+                            self.responseDeferred.resolve(result ? close() : cancel());
+                        }
+                    };
+
+                    function close(){
+                        $uibModalInstance.close($scope.data);
+                    }
+                    function cancel() {
+                        $uibModalInstance.dismiss('cancel');
+                    }
+                }],
+                buttons: []
+            }, options || {});
+
+            options.scope.options = options;
+
+
+            self.options = options;
+
+            return self;
+
+        }
+
+        function _showPopup(options){
+            $uibModalStack.dismissAll();
+            var popup = _createPopup(options);
+
+            return  $uibModal.open(popup.options).result;
+        }
+
+        function _showAlert(opts){
+            $uibModalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+
+                buttons: [{
+                    text: opts.okText || 'OK',
+                    type: opts.okType || 'btn-info',
+                    onTap: function() {
+                        return true;
+                    }
+                }]
+            }, opts || {}));
+        }
+
+        function _showConfirm(opts){
+            $uibModalStack.dismissAll();
+
+            return _showPopup(angular.extend({
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() { return true; }
+                    },{
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() { return false; }
+                    }]
+            }, opts || {}));
+        }
+
+
+        function _showCustom(opts){
+            $uibModalStack.dismissAll();
+         return   _showPopup(opts);
+        }
+
+        function _showPromt(opts){
+            $uibModalStack.dismissAll();
+
+            var scope = $rootScope.$new(true);
+            scope.data = {};
+            var text = '';
+            if (opts.template && /<[a-z][\s\S]*>/i.test(opts.template) === false) {
+                text = '<span>' + opts.template + '</span>';
+                delete opts.template;
+            }
+
+            return _showPopup(angular.extend({
+                template : MODAL_TPLS_PROMT,
+                inputLabel : opts.inputLabel || '',
+                buttons: [
+                    {
+                        text: opts.okText || 'OK',
+                        type: opts.okType || 'btn-info',
+                        onTap: function() {
+                            return true;
+                        }
+                    },
+                    {
+                        text: opts.cancelText || 'Cancel',
+                        type: opts.cancelType || '',
+                        onTap: function() {}
+                    } ]
+            }, opts || {}));
+        }
+        return itPopup;
+    }]);
+
 /**
  * Created by SZA on 28/06/2016.
  */
@@ -10984,6 +10783,203 @@ IteSoft
 
     }])
 'use strict';
+
+
+/**
+ * @ngdoc directive
+ * @name dependencies.directive:timeline
+ * @module dependencies
+ * @since 1.2
+ * @description
+ * An Angular.js directive that generates a responsive, data-driven vertical timeline to tell a story, show history or describe a sequence of events.
+ * See more :  {@link https://gitlab.com/itesoft/timeline}
+ * @example
+ <example module="itesoft-showcase">
+ <file name="index.html">
+
+
+ <div class="container-fluid"  ng-controller="mainController">
+ <h1>Angular Timeline</h1>
+ <button ng-click="addEvent()">Add New Event</button>
+ <button ng-click="leftAlign()">Left Side</button>
+ <button ng-click="rightAlign()">Right Side</button>
+ <button ng-click="defaultAlign()">Alternate Sides</button>
+ <br/>
+ <br/>
+ <timeline>
+ <!-- can also hard-code to side="left" or side="right" -->
+ <timeline-event ng-repeat="event in events" side="{{side}}">
+ <!-- uses angular-scroll-animate to give it some pop -->
+ <timeline-badge class="{{event.badgeClass}} timeline-hidden"
+ when-visible="animateElementIn" when-not-visible="animateElementOut">
+ <i class="glyphicon {{event.badgeIconClass}}"></i>
+ </timeline-badge>
+
+ <!-- uses angular-scroll-animate to give it some pop -->
+ <timeline-panel class="{{event.badgeClass}} timeline-hidden"
+ when-visible="animateElementIn" when-not-visible="animateElementOut">
+ <timeline-heading>
+ <h4>{{event.title}}</h4>
+
+ <p ng-if="event.when">
+ <small class="text-muted"><i class="glyphicon glyphicon-time"></i>{{event.when}}</small>
+ </p>
+ <p ng-if="event.titleContentHtml" ng-bind-html="event.titleContentHtml">
+ </p>
+ </timeline-heading>
+ <p ng-bind-html="event.contentHtml"></p>
+ <timeline-footer ng-if="event.footerContentHtml">
+ <span ng-bind-html="event.footerContentHtml"></span>
+ </timeline-footer>
+ </timeline-panel>
+ </timeline-event>
+ </timeline>
+ </div>
+
+
+
+ </file>
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['angular-timeline','itesoft']);
+ </file>
+ <file name="Controller.js">
+ angular.module('itesoft-showcase').controller('mainController', ['$rootScope','$document','$timeout','$scope',
+ function($rootScope, $document, $timeout, $scope) {
+
+        var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. " +
+                      "Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor." +
+                      "Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, " +
+                      "ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor." +
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+
+        $scope.side = '';
+
+
+
+        $scope.events = [{
+            badgeClass: 'info',
+            badgeIconClass: 'fa fa-check-square',
+            title: 'First heading',
+            when: '11 hours ago via Twitter',
+            content: 'Some awesome content.'
+        }, {
+            badgeClass: 'warning',
+            badgeIconClass: 'fa fa-credit-card',
+            title: 'Second heading',
+            when: '12 hours ago via Twitter',
+            content: 'More awesome content.'
+        }, {
+            badgeClass: 'default',
+            badgeIconClass: 'glyphicon-credit-card',
+            title: 'Third heading',
+            titleContentHtml: '<img class="img-responsive" src="http://www.freeimages.com/assets/183333/1833326510/wood-weel-1444183-m.jpg">',
+            contentHtml: lorem,
+            footerContentHtml: '<a href="">Continue Reading</a>'
+        }];
+
+        $scope.addEvent = function() {
+            $scope.events.push({
+                badgeClass: 'info',
+                badgeIconClass: 'glyphicon-check',
+                title: 'First heading',
+                when: '3 hours ago via Twitter',
+                content: 'Some awesome content.'
+            });
+
+        };
+        // optional: not mandatory (uses angular-scroll-animate)
+        $scope.animateElementIn = function($el) {
+            $el.removeClass('timeline-hidden');
+            $el.addClass('bounce-in');
+        };
+
+        // optional: not mandatory (uses angular-scroll-animate)
+        $scope.animateElementOut = function($el) {
+            $el.addClass('timeline-hidden');
+            $el.removeClass('bounce-in');
+        };
+
+        $scope.leftAlign = function() {
+            $scope.side = 'left';
+        }
+
+        $scope.rightAlign = function() {
+            $scope.side = 'right';
+        }
+
+        $scope.defaultAlign = function() {
+            $scope.side = '';
+        }
+    }
+ ]);
+ </file>
+
+ </example>
+ */
+
+'use strict';
+
+/**
+ * @ngdoc directive
+ * @name dependencies.directive:ui-layout
+ * @module dependencies
+ * @restrict AE
+ * @since 1.2
+ * @description
+ * This directive allows you to split
+ * See more :  {@link https://github.com/angular-ui/ui-layout}
+ * @example
+ <example module="itesoft-showcase">
+ <file name="Module.js">
+ angular.module('itesoft-showcase',['ui.layout']);
+ </file>
+ <file name="index.html">
+    <div style="position: relative;height:500px">
+     <div ui-layout style="margin-left: 90px;margin-right: 10px" >
+     <div ui-layout-container  size="100px">
+     <h3>
+     NEW CAPTURE 2016JUN30-00001
+     </h3>
+     <div>
+     <span>Environment:</span>
+     </div>
+     <div>
+     <span>Profile:</span>
+     </div>
+     </div>
+     <div ui-layout-container>
+     <div ui-layout="{flow : 'column'}" >
+     <div ui-layout-container  >Settings</div>
+     <div ui-layout-container  >
+     <div>[ ]image 001</div>
+     <div>[ ]image 002</div>
+     <div>[ ]image 003</div>
+     <div>[ ]image 004</div>
+     </div>
+     <div ui-layout-container  >Viewer</div>
+     </div>
+     </div>
+
+     <div ui-layout-container size="60px" style="text-align: right" >
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-success it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Capturer
+     </span>
+     </button>
+     <button it-block="" name="lines-table-invoice-coding-btn nowrap" class="btn btn-primary it-button-do"
+     disabled="disabled">
+     <span class="ng-binding">
+     Envoyer
+     </span>
+     </button>
+     </div>
+     </div>
+    </div>
+ </file>
+ </example>
+ */
+'use strict';
 /**
  * TODO Image implementation desc
  */
@@ -11000,19 +10996,10 @@ itImageViewer
 
         IMAGEPage.prototype.renderPage = function (page, callback) {
             var self = this;
-            /*if(this.rendered) {
-             if(callback) {
-             callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-             }
-             return;
-             };
-
-             this.rendered = true;*/
 
             if(page.canvasRendered){
                 page.wrapper.append(page.canvas);
             }else {
-                //self.canvasRendered = true;
                 page.wrapper.append(page.canvas);
 
                 var ctx = page.canvas[0].getContext('2d');
@@ -11029,10 +11016,11 @@ itImageViewer
         return (IMAGEPage);
     }])
 
-    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage) {
+    .factory('IMAGEViewer', ['$log', 'MultiPagesViewer', 'MultiPagesViewerAPI', 'IMAGEPage' , 'DownloadManager', function ($log, MultiPagesViewer, MultiPagesViewerAPI, IMAGEPage, DownloadManager) {
         function IMAGEViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new MultiPagesViewerAPI(this), element);
+            this.name = "IMAGEViewer";
         }
 
         IMAGEViewer.prototype = new MultiPagesViewer;
@@ -11052,10 +11040,14 @@ itImageViewer
         IMAGEViewer.prototype.setUrl = function(url) {
             if (url !== undefined && url !== null && url !== '') {
                 var self = this;
+                self.url = url;
                 self.getAllPages(url, function(pageList) {
                     self.pages = pageList;
                     self.addPages();
                 });
+                self.api.download = function () {
+                    DownloadManager.download(null, url);
+                };
             }
         };
         IMAGEViewer.prototype.setFile = function(file) {
@@ -11068,6 +11060,9 @@ itImageViewer
                         self.pages = pageList;
                         self.addPages();
                     });
+                    self.api.download = function () {
+                        DownloadManager.download(DownloadManager.dataURItoBlob(url), url, 'document.png');
+                    };
                 };
 
                 reader.onprogress = function (e) {
@@ -11114,8 +11109,6 @@ itImageViewer
             img.onload = function() {
                 var page =  new IMAGEPage(self, 0, img, [0,0, img.width, img.height]);
                 pageList[0] = page;
-
-                //self.addPage(page);
 
                 callback(pageList);
             };
@@ -11198,6 +11191,176 @@ itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', f
 
 'use strict';
 /**
+ * TODO DownloadManager desc
+ */
+itMultiPagesViewer
+    .factory('DownloadManager', ['$log', function ($log) {
+        var digits =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+        function dataURItoBlob(dataURI, base64) {
+            if(base64 != null && !dataURI.startsWith(base64)) {
+                dataURI = base64 + dataURI;
+            }
+            // convert base64 to raw binary data held in a string
+            // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+            var byteString = atob(dataURI.split(',')[1]);
+
+            // separate out the mime component
+            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+            // write the bytes of the string to an ArrayBuffer
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            // write the ArrayBuffer to a blob, and you're done
+            var blob = new Blob([ab], {type: mimeString});
+            return blob;
+
+            // Old code
+            // var bb = new BlobBuilder();
+            // bb.append(ab);
+            // return bb.getBlob(mimeString);
+        }
+
+        function isValidUrl(url, allowRelative) {
+            if (!url || typeof url !== 'string') {
+                return false;
+            }
+            // RFC 3986 (http://tools.ietf.org/html/rfc3986#section-3.1)
+            // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+            var protocol = /^[a-z][a-z0-9+\-.]*(?=:)/i.exec(url);
+            if (!protocol) {
+                return allowRelative;
+            }
+            protocol = protocol[0].toLowerCase();
+            switch (protocol) {
+                case 'http':
+                case 'https':
+                case 'ftp':
+                case 'mailto':
+                case 'tel':
+                    return true;
+                default:
+                    return false;
+            }
+        };
+
+        function download(blobUrl, filename) {
+            var a = document.createElement('a');
+            if (a.click) {
+                // Use a.click() if available. Otherwise, Chrome might show
+                // "Unsafe JavaScript attempt to initiate a navigation change
+                //  for frame with URL" and not open the PDF at all.
+                // Supported by (not mentioned = untested):
+                // - Firefox 6 - 19 (4- does not support a.click, 5 ignores a.click)
+                // - Chrome 19 - 26 (18- does not support a.click)
+                // - Opera 9 - 12.15
+                // - Internet Explorer 6 - 10
+                // - Safari 6 (5.1- does not support a.click)
+                a.href = blobUrl;
+                a.target = '_parent';
+                // Use a.download if available. This increases the likelihood that
+                // the file is downloaded instead of opened by another PDF plugin.
+                if ('download' in a) {
+                    a.download = filename;
+                }
+                // <a> must be in the document for IE and recent Firefox versions.
+                // (otherwise .click() is ignored)
+                (document.body || document.documentElement).appendChild(a);
+                a.click();
+                a.parentNode.removeChild(a);
+            } else {
+                if (window.top === window &&
+                    blobUrl.split('#')[0] === window.location.href.split('#')[0]) {
+                    // If _parent == self, then opening an identical URL with different
+                    // location hash will only cause a navigation, not a download.
+                    var padCharacter = blobUrl.indexOf('?') === -1 ? '?' : '&';
+                    blobUrl = blobUrl.replace(/#|$/, padCharacter + '$&');
+                }
+                window.open(blobUrl, '_parent');
+            }
+        };
+
+        function createBlob(data, contentType) {
+            if (typeof Blob !== 'undefined') {
+                return new Blob([data], { type: contentType });
+            }
+            $log.log('The "Blob" constructor is not supported.');
+        };
+
+        function createObjectURL(data, contentType, forceDataSchema) {
+            if (!forceDataSchema &&
+                typeof URL !== 'undefined' && URL.createObjectURL) {
+                var blob = createBlob(data, contentType);
+                return URL.createObjectURL(blob);
+            }
+
+            var buffer = 'data:' + contentType + ';base64,';
+            for (var i = 0, ii = data.length; i < ii; i += 3) {
+                var b1 = data[i] & 0xFF;
+                var b2 = data[i + 1] & 0xFF;
+                var b3 = data[i + 2] & 0xFF;
+                var d1 = b1 >> 2, d2 = ((b1 & 3) << 4) | (b2 >> 4);
+                var d3 = i + 1 < ii ? ((b2 & 0xF) << 2) | (b3 >> 6) : 64;
+                var d4 = i + 2 < ii ? (b3 & 0x3F) : 64;
+                buffer += digits[d1] + digits[d2] + digits[d3] + digits[d4];
+            }
+            return buffer;
+        }
+
+        return {
+            dataURItoBlob : dataURItoBlob,
+            isValidUrl: isValidUrl,
+            downloadUrl: function (url, filename) {
+                if (!isValidUrl(url, true)) {
+                    return; // restricted/invalid URL
+                }
+
+                download(url + '#pdfjs.action=download', filename);
+            },
+            downloadData: function (data, filename,
+                                    contentType) {
+                if (navigator.msSaveBlob) { // IE10 and above
+                    return navigator.msSaveBlob(new Blob([data], { type: contentType }),
+                        filename);
+                }
+
+                var blobUrl = createObjectURL(data, contentType,
+                    PDFJS.disableCreateObjectURL);
+                download(blobUrl, filename);
+            },
+            download: function (blob, url, filename) {
+                if(filename == null && url != null) {
+                    var words = url.split('.');
+                    filename =  "document." + words[words.length - 1];
+                }
+                if (!URL || blob == null) {
+                    // URL.createObjectURL is not supported
+                    this.downloadUrl(url, filename);
+                    return;
+                }
+
+                if (navigator.msSaveBlob) {
+                    // IE10 / IE11
+                    if (!navigator.msSaveBlob(blob, filename)) {
+                        this.downloadUrl(url, filename);
+                    }
+                    return;
+                }
+
+                var blobUrl = typeof blob == typeof "" ? blob : createObjectURL(blob);
+                download(blobUrl, filename);
+            },
+            createBlob :createBlob
+        };
+    }]);
+
+'use strict';
+/**
  * TODO itProgressbarViewer desc
  */
 itMultiPagesViewer.directive('itProgressbarViewer', [function(){
@@ -11206,7 +11369,7 @@ itMultiPagesViewer.directive('itProgressbarViewer', [function(){
             api: "="
         },
         restrict: 'E',
-        template :  '<div class="loader" >' +
+        template :  '<div class="multipage-viewer-loader" >' +
         '<div class="progress-bar">' +
         '<span class="bar" ng-style=\'{width: api.downloadProgress + "%"}\'></span>' +
         '</div>' +
@@ -11250,44 +11413,46 @@ itMultiPagesViewer.directive('itToolbarViewer', ['$log', function($log){
             api: "="
         },
         restrict: 'E',
-        template :  '<div class="toolbar">' +
-
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<select ng-model="mode" ng-change="onModeChanged()" ng-options="mode as mode.label for mode in api.getModes()">' +
+        template :  '<div class="multipage-viewer-toolbar row" ng-show="api.getNumPages() > 0">' +
+        '<div class="form-group">' +
+        '<select ng-model="mode" class="form-control" ng-change="onModeChanged()" ng-options="mode as mode.label for mode in api.getModes()">' +
         '</select> ' +
-        '<button type="button" ng-click="api.zoomOut()">-</button> ' +
-        '<select ng-model="scale" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.zoomOut()">-</button> ' +
+        '<select ng-model="scale" class="form-control" ng-change="onZoomLevelChanged()" ng-options="zoom as zoom.label for zoom in api.getZoomLevels()">' +
         '</select> ' +
-        '<button type="button" ng-click="api.zoomIn()">+</button> ' +
-        '</div>' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.zoomIn()">+</button> ' +
 
-        '<div class="select_page_wrapper" ng-show="api.getNumPages() > 1">' +
+        '<div class="horizontal-group" ng-show="api.getNumPages() > 1">' +
         '<span>Page : </span>' +
-        '<button type="button" ng-click="api.goToPrevPage()"><</button> ' +
-        '<input type="text" ng-model="currentPage" ng-change="onPageChanged()"/> ' +
-        '<button type="button" ng-click="api.goToNextPage()">></button> ' +
-        '<span> of {{api.getNumPages()}}</span> ' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.goToPrevPage()"><</button> ' +
+        '<input type="text" class="form-control input-page"  ng-model="currentPage" ng-change="onPageChanged()"/> ' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.goToNextPage()">></button> ' +
+        '<span> of {{api.getNumPages()}} </span> ' +
         '</div>' +
 
-        '<div class="zoom_wrapper" ng-show="api.getNumPages() > 0">' +
-        '<button type="button" ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
-        '<button type="button" ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button>' +
+        ' <button type="button" class="btn btn-sm btn-default" ng-click="api.rotatePageRight()"><i class="fa fa-repeat" aria-hidden="true"></i></button>' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.rotatePageLeft()"><i class="fa fa-undo" aria-hidden="true"></i></button> ' +
+        '<button type="button" class="btn btn-sm btn-default" ng-click="api.download()"><i class="fa fa-floppy-o" aria-hidden="true"></i></button>' +
         '</div>' +
         '</div>',
         link: linker
     };
-}])
+}]);
 
 'use strict';
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce) {
+itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', 'DownloadManager', function ($sce, DownloadManager) {
     return function (scope) {
         if(scope){
             scope.$watch("src", function (src) {
                 if(typeof src === typeof "") {
-                    scope.url = src;
+                    if(DownloadManager.isValidUrl(src)) {
+                        scope.url = src;
+                    } else{
+                        scope.file = DownloadManager.dataURItoBlob("data:image/png;base64," + src);
+                    }
                 }else{
                     scope.file = src;
                 }
@@ -11306,7 +11471,7 @@ itMultiPagesViewer.factory('MultiPagesAddEventWatcher', ['$sce', function ($sce)
 
             scope.trustSrc = function(src) {
                 return $sce.trustAsResourceUrl(src)
-            }; 
+            };
         }
     };
 }]);
@@ -11319,9 +11484,9 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
     PAGE_RENDER_FAILED : -1,
     PAGE_RENDER_CANCELLED : 0,
     PAGE_RENDERED : 1,
-    PAGE_ALREADY_RENDERED : 2, 
+    PAGE_ALREADY_RENDERED : 2,
     ZOOM_LEVELS_LUT : [
-        0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+        0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
         1.0, 1.1, 1.3, 1.5, 1.7, 1.9,
         2.0, 2.2, 2.4, 2.6, 2.8,
         3.0, 3.3, 3.6, 3.9,
@@ -11335,982 +11500,1057 @@ itMultiPagesViewer.constant("MultiPagesConstants", {
     MODE_HAND : "mode_hand",
     MODE_ZOOM_SELECTION : "mode_zoomSelection",
     MODE_TEXT: "mode_text"
-})
+});
 
 'use strict';
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('MultiPagesPage', ['$log' , 'MultiPagesConstants', 'PageViewport' , 'ZoomSelection', function ($log, MultiPagesConstants, PageViewport, ZoomSelection) {
+itMultiPagesViewer
+    .factory('MultiPagesPage', ['$log', 'MultiPagesConstants', 'PageViewport' , 'ZoomSelection' , 'ZoomWheel', function ($log, MultiPagesConstants, PageViewport, ZoomSelection, ZoomWheel) {
 
-    function MultiPagesPage(viewer, pageIndex, view) {
-        this.viewer = viewer;
-        this.pageIndex = pageIndex;
-        this.id = pageIndex + 1;
+        function MultiPagesPage(viewer, pageIndex, view) {
+            this.viewer = viewer;
+            this.pageIndex = pageIndex;
+            this.id = pageIndex + 1;
 
 
-        this.container = angular.element('<div></div>');
-        this.container.attr("id", "page_" + pageIndex);
+            this.container = angular.element('<div></div>');
+            this.container.attr("id", "page_" + pageIndex);
 
-        this.wrapper = angular.element('<div class="page {{api.isPageSelected(' + this.id + ')}}"  ></div>');
-        this.container.append(this.wrapper);
+            this.wrapper = angular.element('<div class="page {{api.isPageSelected(' + this.id + ')}}"  ></div>');
+            this.container.append(this.wrapper);
 
-        this.canvasRendered = false;
-        this.rendered = false;
-
-        //transform
-        this.rotation = 0;
-        this.scale = 1.0;
-        this.view = view;
-
-    }
-
-    MultiPagesPage.prototype = {
-        clear: function () {
-            this.rendered = false;
-            this.wrapper.empty();
-            this.layer = null;
-            if(this.cleanUp) {
-                this.cleanUp();
-            }
-        },
-        getViewport: function (scale, rotation) {
-            return new PageViewport(this.view, scale, rotation, 0, 0, true);
-        },
-        transform : function() {
-            this.clear();
-            this.viewport = this.getViewport(this.scale, this.rotation);
             this.canvasRendered = false;
-            this.canvas = angular.element("<canvas></canvas>");
-            this.canvas.attr("width", this.viewport.width);
-            this.canvas.attr("height", this.viewport.height);
+            this.rendered = false;
 
-            this.wrapper.css("width", this.viewport.width + "px");
-            this.wrapper.css("height", this.viewport.height + "px");
-        },
-        resize: function (scale) {
-            this.setOrientation();
-            this.scale = scale;
-            this.transform();
-        },
-        setOrientation : function(orientation) {
-            //this.orientation = orientation;
-            switch (this.viewer.orientation) {
-                case MultiPagesConstants.ORIENTATION_HORIZONTAL:
-                    this.container.addClass("horizontal");
-                    this.container.removeClass("vertical");
-                    break;
-                default:
-                    this.container.addClass("vertical");
-                    this.container.removeClass("horizontal");
-                    break;
-            };
-        },
-        rotate: function (rotation) {
-            this.rotation = rotation;
-            this.transform();
-        },
-        isVisible: function () {
-            var pageContainer = this.container[0];
-            var parentContainer = this.container.parent()[0];
-            switch (this.viewer.orientation) {
-                case MultiPagesConstants.ORIENTATION_HORIZONTAL :
-                    var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
-                    var pageRight = pageLeft + pageContainer.offsetWidth;
-                    return (pageRight >= 0 && pageLeft <= parentContainer.offsetWidth);
-                    break;
-                default:
-                    var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                    var pageBottom = pageTop + pageContainer.offsetHeight;
-                    return (pageBottom >= 0 && pageTop <= parentContainer.offsetHeight);
-                    break;
-            };
-        },
-        addLayer : function(layer) {
-            if(this.layer == null) {
-                this.layer = angular.element("<div class='selectable-layer'></div>");
-                this.wrapper.append(this.layer);
-            }
-            this.layer.append(layer);
-        },
-        initSelectZoom : function () {
-            function setMousePosition(e) {
-                var ev = e || window.event; //Moz || IE
-                var offset = self.wrapper[0].getBoundingClientRect();
-                if (ev.pageX) { //Moz
-                    mouse.x = (ev.pageX - offset.left);
-                    mouse.y = (ev.pageY - offset.top);
-                } else if (ev.clientX) { //IE
-                    mouse.x = (ev.clientX - offset.left);
-                    mouse.y = (ev.clientY  - offset.top);
+            //transform
+            this.rotation = 0;
+            this.scale = 1.0;
+            this.view = view;
+
+        }
+
+        MultiPagesPage.prototype = {
+            clear: function () {
+                this.rendered = false;
+                this.wrapper.empty();
+                this.layer = null;
+            },
+            remove: function () {
+                this.clear();
+                if(this.cleanUp) {
+                    this.cleanUp();
                 }
-            };
+            },
+            getViewport: function (scale, rotation) {
+                return new PageViewport(this.view, scale, rotation, 0, 0, true);
+            },
+            transform : function() {
+                this.clear();
+                this.canvasRendered = false;
+                this.viewport = this.getViewport(this.scale, this.rotation);
+                this.canvas = angular.element("<canvas></canvas>");
+                this.canvas.attr("width", this.viewport.width);
+                this.canvas.attr("height", this.viewport.height);
 
-            function getCtrlKey (e) {
+                this.wrapper.css("width", this.viewport.width + "px");
+                this.wrapper.css("height", this.viewport.height + "px");
+            },
+            resize: function (scale) {
+                this.setOrientation();
+                this.scale = scale;
+                this.transform();
+            },
+            setOrientation : function(orientation) {
+                //this.orientation = orientation;
+                switch (this.viewer.orientation) {
+                    case MultiPagesConstants.ORIENTATION_HORIZONTAL:
+                        this.container.addClass("horizontal");
+                        this.container.removeClass("vertical");
+                        break;
+                    default:
+                        this.container.addClass("vertical");
+                        this.container.removeClass("horizontal");
+                        break;
+                };
+            },
+            rotate: function (rotation) {
+                this.rotation = rotation;
+                this.transform();
+                $log.debug(this.viewer.name + " : rotate page " + this.id);
+            },
+            isVisible: function () {
+                var pageContainer = this.container[0];
+                var parentContainer = this.container.parent()[0];
+                switch (this.viewer.orientation) {
+                    case MultiPagesConstants.ORIENTATION_HORIZONTAL :
+                        var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
+                        var pageRight = pageLeft + pageContainer.offsetWidth;
+                        return (pageRight >= 0 && pageLeft <= parentContainer.offsetWidth);
+                        break;
+                    default:
+                        var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                        var pageBottom = pageTop + pageContainer.offsetHeight;
+                        return (pageBottom >= 0 && pageTop <= parentContainer.offsetHeight);
+                        break;
+                };
+            },
+            addLayer : function(layer) {
+                if(this.layer == null) {
+                    this.layer = angular.element("<div class='selectable-layer'></div>");
+                    this.wrapper.append(this.layer);
+                }
+                this.layer.append(layer);
+            },
+            getZoomSelectionShortcutKey : function(e) {
                 if(e != null) {
-                    var shortcutKey = self.viewer.zoomSelectionShortcutKey;
+                    var shortcutKey = this.viewer.zoomSelectionShortcutKey;
                     if(shortcutKey != null && e[shortcutKey] != null) {
                         return e[shortcutKey];
                     }
                     return e.ctrlKey;
                 }
                 return false;
-            };
+            },
+            initSelectZoom : function () {
+                if(this.cleanUp == null) {
+                    var setMousePosition = function (e) {
+                        var ev = e || window.event; //Moz || IE
+                        var pageOffset = self.wrapper[0].getBoundingClientRect();
+                        var viewerOffset =  self.viewer.element[0].getBoundingClientRect();
+                        if (ev.pageX) { //Moz
+                            mouseRelativeToPage.x = Math.round(ev.pageX - pageOffset.left);
+                            mouseRelativeToPage.y = Math.round(ev.pageY - pageOffset.top);
+                            mouseRelativeToViewer.x = Math.round(ev.pageX - viewerOffset.left);
+                            mouseRelativeToViewer.y = Math.round(ev.pageY - viewerOffset.top);
+                        } else if (ev.clientX) { //IE
+                            mouseRelativeToPage.x = Math.round(ev.clientX - pageOffset.left);
+                            mouseRelativeToPage.y = Math.round(ev.clientY  - pageOffset.top);
+                            mouseRelativeToViewer.x = Math.round(ev.clientX - viewerOffset.left);
+                            mouseRelativeToViewer.y = Math.round(ev.clientY  - viewerOffset.top);
+                        }
+                    };
 
-            var self = this,
-                mouse = {
-                    x: 0,
-                    y: 0,
-                    startX: 0,
-                    startY: 0
-                },
-                rect = null,
-                element = null,
-                onMouseDown = function (e) {
-                    if(self.viewer.mode.id === MultiPagesConstants.MODE_ZOOM_SELECTION || getCtrlKey(e)) {
-                        if(rect == null) {
-                            setMousePosition(e);
+                    var self = this,
+                        mouseRelativeToPage = {
+                            x: 0,
+                            y: 0,
+                            startX: 0,
+                            startY: 0
+                        },
+                        mouseRelativeToViewer = {
+                            x: 0,
+                            y: 0,
+                        },
+                        rect = null,
+                        element = null,
+                        onMouseDown = function (e) {
+                            if(self.viewer.mode.id === MultiPagesConstants.MODE_ZOOM_SELECTION || self.getZoomSelectionShortcutKey(e)) {
+                                if(rect == null) {
+                                    setMousePosition(e);
 
-                            if(self.layer) {
-                                self.layer.removeClass("selectable-layer");
+                                    if(self.layer) {
+                                        self.layer.removeClass("selectable-layer");
+                                    }
+                                    mouseRelativeToPage.startX = mouseRelativeToPage.x;
+                                    mouseRelativeToPage.startY = mouseRelativeToPage.y;
+                                    rect = {};
+                                    rect.x = mouseRelativeToPage.x;
+                                    rect.y = mouseRelativeToPage.y;
+                                    element = angular.element('<div class="zoom-selection-rectangle"></div>');
+                                    element.css("left",  mouseRelativeToPage.x + 'px');
+                                    element.css("top",  mouseRelativeToPage.y + 'px');
+                                    self.wrapper.append(element);
+                                    self.viewer.element.on('mouseup', onMouseUp);
+                                    self.viewer.element.on('mousemove', onMouseMove);
+                                    self.viewer.element.addClass("viewer-zoom-cursor");
+                                }
+                            } else {
+                                self.viewer.selectedPage = self.id;
+                                if(self.viewer.onPageClicked) {
+                                    self.viewer.onPageClicked(self.id);
+                                }
+                                if(self.viewer.api.onPageClicked) {
+                                    self.viewer.api.onPageClicked(self.id);
+                                }
                             }
-                            mouse.startX = mouse.x;
-                            mouse.startY = mouse.y;
-                            rect = {};
-                            rect.offsetX = mouse.x;
-                            rect.offsetY = mouse.y;
-                            element = angular.element('<div class="zoom-selection-rectangle"></div>');
-                            element.css("left",  mouse.x + 'px');
-                            element.css("top",  mouse.y + 'px');
-                            self.wrapper.append(element);
-                            self.viewer.element.on('mouseup', onMouseUp);
-                            self.viewer.element.on('mousemove', onMouseMove);
-                            self.viewer.element.addClass("viewer-zoom-cursor");
-                        }
-                    } else {
-                        self.viewer.selectedPage = self.id;
-                        if(self.viewer.onPageClicked) {
-                            self.viewer.onPageClicked(self.id);
-                        }
-                        if(self.viewer.api.onPageClicked) {
-                            self.viewer.api.onPageClicked(self.id);
-                        }
-                    }
-                },
-                onMouseUp = function (e) {
-                    self.viewer.element.removeClass("viewer-zoom-cursor");
-                    self.viewer.element.off('mouseup', onMouseUp);
-                    self.viewer.element.off('mousemove', onMouseMove);
-                    if(rect != null) {
-                        if(self.layer) {
-                            self.layer.addClass("selectable-layer");
-                        }
-                        if(rect.width > 10 || rect.height > 10) {
-                            self.viewer.zoomTo(new ZoomSelection(rect, self));
-                        }
+                        },
+                        onMouseUp = function (e) {
+                            self.viewer.element.removeClass("viewer-zoom-cursor");
+                            self.viewer.element.off('mouseup', onMouseUp);
+                            self.viewer.element.off('mousemove', onMouseMove);
+                            if(rect != null) {
+                                if(self.layer) {
+                                    self.layer.addClass("selectable-layer");
+                                }
 
-                        element.remove();
-                        element = null;
-                        rect = null;
+                                if(rect.width > 10 || rect.height > 10) {
+                                    self.viewer.zoomToSelection(new ZoomSelection(rect, self));
+                                }
+
+                                element.remove();
+                                element = null;
+                                rect = null;
+                            }
+                        },
+                        onMouseMove = function (e) {
+                            setMousePosition(e);
+                            if (rect !== null) {
+                                rect.width =  Math.abs(mouseRelativeToPage.x - mouseRelativeToPage.startX);
+                                rect.height = Math.abs(mouseRelativeToPage.y - mouseRelativeToPage.startY);
+                                rect.x = (mouseRelativeToPage.x - mouseRelativeToPage.startX < 0) ? mouseRelativeToPage.x : mouseRelativeToPage.startX;
+                                rect.y = (mouseRelativeToPage.y - mouseRelativeToPage.startY < 0) ? mouseRelativeToPage.y : mouseRelativeToPage.startY;
+                                element.css("width", rect.width + 'px');
+                                element.css("height", rect.height + 'px');
+                                element.css("left", rect.x + 'px');
+                                element.css("top", rect.y + 'px');
+                            }
+                        },
+                        onMousewheel = function(e) {
+                            if(self.viewer.mode.id === MultiPagesConstants.MODE_ZOOM_SELECTION) {
+                                var ev = e.originalEvent || e;
+                                setMousePosition(ev);
+                                var zoomLevel = (ev.wheelDelta > 0 || ev.detail < 0) ? self.viewer.api.getNextZoomLevel() : self.viewer.api.getPreviousZoomLevel();
+                                if(zoomLevel) {
+                                    self.viewer.zoomToSelection(new ZoomWheel(mouseRelativeToPage, mouseRelativeToViewer, self, zoomLevel));
+                                }
+                                ev.preventDefault();
+                            }
+                        };
+                    // IE9, Chrome, Safari, Opera, FireFox
+                    self.container.bind("mousewheel DOMMouseScroll", onMousewheel);
+                    self.container.on('mousedown', onMouseDown);
+
+                    self.cleanUp = function () {
+                        self.container.off("mousewheel DOMMouseScroll", onMousewheel);
+                        self.container.off('mousedown', onMouseDown);
+                        delete self.cleanUp;
+                    };
+                }
+            },
+            render: function (callback) {
+                if(this.onRendering) {
+                    this.onRendering();
+                }
+                if(this.rendered) {
+                    if(callback) {
+                        callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                     }
-                },
-                onMouseMove = function (e) {
-                    setMousePosition(e);
-                    if (rect !== null) {
-                        rect.width =  Math.abs(mouse.x - mouse.startX);
-                        rect.height = Math.abs(mouse.y - mouse.startY);
-                        rect.offsetLeft = (mouse.x - mouse.startX < 0) ? mouse.x : mouse.startX;
-                        rect.offsetTop = (mouse.y - mouse.startY < 0) ? mouse.y : mouse.startY;
-                        element.css("width", rect.width + 'px');
-                        element.css("height", rect.height + 'px');
-                        element.css("left", rect.offsetLeft + 'px');
-                        element.css("top", rect.offsetTop + 'px');
-                    }
+                    return;
                 };
 
-            self.container.on('mousedown', onMouseDown);
+                $log.debug(this.viewer.name + " : render page " + this.id +" started");
+                var start = new Date();
+                this.rendered = true;
+                this.initSelectZoom();
+                this.renderPage(this, function (page, status) {
+                    switch (status) {
+                        case MultiPagesConstants.PAGE_RENDERED:
+                            page.canvasRendered = true;
+                            $log.debug(page.viewer.name + " : render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
+                            break;
+                        case MultiPagesConstants.PAGE_ALREADY_RENDERED:
+                            $log.debug(page.viewer.name + " : page " + page.id + " already rendered");
+                            break;
+                        case MultiPagesConstants.PAGE_RENDER_CANCELLED:
+                            $log.debug(page.viewer.name + " : render page " + page.id + " canceled");
+                            break;
+                        default:
+                            break;
+                    }
 
-            self.cleanUp = function () {
-                self.container.off('mousedown', onMouseDown);
-                delete self.cleanUp;
-            };
-        },
-        render: function (callback) {
-            if(this.onRendering) {
-                this.onRendering();
+                    if(callback) {
+                        callback(page, status);
+                    }
+                });
+            },
+            renderPage: function (page, callback) {
+                throw "NotImplementedError - renderPage(page, callback)";
             }
-            if(this.rendered) {
-                if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-                return;
-            };
+        };
 
-            $log.debug("render page " + this.id +" started");
-            var start = new Date();
-            this.rendered = true;
-            this.initSelectZoom();
-            this.renderPage(this, function (page, status) {
-                if(status === MultiPagesConstants.PAGE_RENDERED) {
-                    page.canvasRendered = true;
-                    $log.debug("render page " + page.id +" ended, duration : " + (( (new Date() - start)  % 60000) / 1000).toFixed(0) + " sec");
-                } else  if(status === MultiPagesConstants.PAGE_ALREADY_RENDERED) {
-                    $log.debug("page " + page.id +" already rendered");
-                }
-                
-                if(callback) {
-                    callback(page, status);
-                }
-            });
-        },
-        renderPage: function (page, callback) {
-            throw "NotImplementedError - renderPage(page, callback)";
-        }
-    };
-
-    return (MultiPagesPage);
-}]);
+        return (MultiPagesPage);
+    }]);
 
 'use strict';
 /**
  * TODO MultiPagesViewer desc
  */
-itMultiPagesViewer.factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', '$document' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, $document, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
-    function getElementInnerSize(element, margin) {
-        var tallTempElement = angular.element("<div></div>");
-        tallTempElement.css("height", "10000px");
+itMultiPagesViewer
+    .factory('MultiPagesViewer', ['$log' ,'$timeout', '$compile', '$document' , 'MultiPagesViewerAPI' , 'MultiPagesConstants' , 'SizeWatcher' ,'TranslateViewer', function ($log,$timeout,$compile, $document, MultiPagesViewerAPI, MultiPagesConstants, SizeWatcher, TranslateViewer) {
+        function getElementInnerSize(element, margin) {
+            var tallTempElement = angular.element("<div></div>");
+            tallTempElement.css("height", "10000px");
 
-        element.append(tallTempElement);
+            element.append(tallTempElement);
 
-        var w = tallTempElement[0].offsetWidth;
+            var w = tallTempElement[0].offsetWidth;
 
-        tallTempElement.remove();
+            tallTempElement.remove();
 
-        var h = element[0].offsetHeight;
-        if(h === 0) {
-            // TODO: Should we get the parent height?
-            h = 2 * margin;
-        }
+            var h = element[0].offsetHeight;
+            if(h === 0) {
+                // TODO: Should we get the parent height?
+                h = 2 * margin;
+            }
 
-        w -= 2 * margin;
-        h -= 2 * margin + 10;
+            w -= 2 * margin;
+            h -= 2 * margin + 10;
 
-        return {
-            width: w,
-            height: h
+            return {
+                width: w,
+                height: h
+            };
         };
-    };
 
-    function MultiPagesViewer(api, element) {
-        this.pages = [];
-        this.currentPages = [];
-        this.fitWidthScale = 1.0;
-        this.fitHeightScale = 1.0;
-        this.fitPageScale = 1.0;
-        this.element = element;
-        this.pageMargin = 0;
-        this.orientation = MultiPagesConstants.ORIENTATION_VERTICAL;
-        this.currentPage = 0;
-        this.lastScrollDir = 0;
-        this.rotation = 0;
-        this.scaleItem = null;
-        this.scaleItems = {};
-        this.zoomLevels = [];
-        this.modes = [
-            {
-                id: MultiPagesConstants.MODE_HAND,
-                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_HAND', 'Main'),
-                activate : function() {
-                    var container = element[0];
-                    var data = {
-                        acceptPropagatedEvent : true,
-                        preventDefault : true
-                    };
-                    var onMouseDown = function (event) {
-                            if(event.ctrlKey != true) {
-                                element.css("cursor", "-webkit-grabbing");
-                                element.css("cursor", "grabbing");
-                                // mousedown, left click, check propagation
-                                if (event.which!=1 ||
-                                    (!data.acceptPropagatedEvent && event.target != this)){
-                                    return false;
+        function MultiPagesViewer(api, element) {
+            this.pages = [];
+            this.currentPages = [];
+            this.fitWidthScale = 1.0;
+            this.fitHeightScale = 1.0;
+            this.fitPageScale = 1.0;
+            this.element = element;
+            this.pageMargin = 0;
+            this.orientation = MultiPagesConstants.ORIENTATION_VERTICAL;
+            this.currentPage = 0;
+            this.lastScrollDir = 0;
+            this.rotation = 0;
+            this.scaleItem = null;
+            this.scaleItems = {};
+            this.zoomLevels = [];
+            this.renderAllVisiblePagesTimeoutValue = 350;
+            var self = this;
+            this.modes = [
+                {
+                    id: MultiPagesConstants.MODE_HAND,
+                    label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_HAND', 'Hand'),
+                    activate : function() {
+                        var container = element[0];
+                        var data = {
+                            acceptPropagatedEvent : true,
+                            preventDefault : true
+                        };
+                        var onMouseDown = function (event) {
+                                if(event.ctrlKey != true) {
+                                    element.css("cursor", "-webkit-grabbing");
+                                    element.css("cursor", "grabbing");
+                                    // mousedown, left click, check propagation
+                                    if (event.which!=1 ||
+                                        (!data.acceptPropagatedEvent && event.target != this)){
+                                        return false;
+                                    }
+
+                                    // Initial coordinates will be the last when dragging
+                                    data.lastCoord = {left: event.clientX, top: event.clientY};
+
+                                    $document.on('mouseup', onMouseUp);
+                                    $document.on('mousemove', onMouseMove);
+                                    if (data.preventDefault) {
+                                        event.preventDefault();
+                                        return false;
+                                    }
                                 }
+                            },
+                            onMouseMove = function (event) {
+                                // How much did the mouse move?
+                                var delta = {left: (event.clientX - data.lastCoord.left),
+                                    top: (event.clientY - data.lastCoord.top)};
 
-                                // Initial coordinates will be the last when dragging
-                                data.lastCoord = {left: event.clientX, top: event.clientY};
+                                // Set the scroll position relative to what ever the scroll is now
+                                container.scrollLeft = container.scrollLeft - delta.left;
+                                container.scrollTop = container.scrollTop - delta.top;
 
-                                $document.on('mouseup', onMouseUp);
-                                $document.on('mousemove', onMouseMove);
+                                // Save where the cursor is
+                                data.lastCoord={left: event.clientX, top: event.clientY};
                                 if (data.preventDefault) {
                                     event.preventDefault();
                                     return false;
                                 }
-                            }
-                        },
-                        onMouseMove = function (event) {
-                            // How much did the mouse move?
-                            var delta = {left: (event.clientX - data.lastCoord.left),
-                                top: (event.clientY - data.lastCoord.top)};
+                            },
+                            onMouseUp = function (event) {
+                                $document.off('mouseup', onMouseUp);
+                                $document.off('mousemove', onMouseMove);
+                                element.css("cursor", "-webkit-grab");
+                                element.css("cursor", "grab");
+                                if (data.preventDefault) {
+                                    event.preventDefault();
+                                    return false;
+                                }
+                            };
 
-                            // Set the scroll position relative to what ever the scroll is now
-                            container.scrollLeft = container.scrollLeft - delta.left;
-                            container.scrollTop = container.scrollTop - delta.top;
+                        element.on('mousedown', onMouseDown);
+                        element.css("cursor", "-webkit-grab");
+                        element.css("cursor", "grab");
 
-                            // Save where the cursor is
-                            data.lastCoord={left: event.clientX, top: event.clientY};
-                            if (data.preventDefault) {
-                                event.preventDefault();
-                                return false;
-                            }
-                        },
-                        onMouseUp = function (event) {
-                            $document.off('mouseup', onMouseUp);
-                            $document.off('mousemove', onMouseMove);
-                            element.css("cursor", "-webkit-grab");
-                            element.css("cursor", "grab");
-                            if (data.preventDefault) {
-                                event.preventDefault();
-                                return false;
-                            }
+                        this.cleanUp = function () {
+                            element.off('mousedown', onMouseDown);
+                            element.css("cursor", "default");
                         };
+                    }
+                },
+                {
+                    id: MultiPagesConstants.MODE_ZOOM_SELECTION,
+                    label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_ZOOM_SELECTION', 'Zoom selection'),
+                    activate : function() {
+                        var onMousewheel = function(e) {
+                            e.preventDefault();
+                        };
+                        element.on("mousewheel DOMMouseScroll", onMousewheel);
+                        this.cleanUp = function () {
+                            element.off("mousewheel DOMMouseScroll", onMousewheel);
+                        };
+                    }
+                }
+            ];
 
-                    element.on('mousedown', onMouseDown);
-                    element.css("cursor", "-webkit-grab");
-                    element.css("cursor", "grab");
+            this.api = api;
 
-                    this.cleanUp = function () {
-                        element.off('mousedown', onMouseDown);
-                        element.css("cursor", "default");
-                    };
+            // Hooks for the client...
+            this.onPageRendered = null;
+            this.onTextLayerRendered = null;
+            this.onDataDownloaded = null;
+            this.onCurrentPageChanged = null;
+
+            this.setMode(this.modes[0]);
+        }
+
+        MultiPagesViewer.prototype = {
+            setMode : function(mode) {
+                if(this.element != null && mode != null && this.mode != mode) {
+                    if(this.mode && this.mode.cleanUp != null) {
+                        this.mode.cleanUp();
+                    }
+                    this.mode = mode;
+                    this.mode.activate();
                 }
             },
-            {
-                id: MultiPagesConstants.MODE_ZOOM_SELECTION,
-                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_ZOOM_SELECTION', 'Zoom sélection'),
-                activate : function() { }
-            }
-        ];
-
-        this.api = api;
-
-        // Hooks for the client...
-        this.onPageRendered = null;
-        this.onTextLayerRendered = null;
-        this.onDataDownloaded = null;
-        this.onCurrentPageChanged = null;
-
-        this.setMode(this.modes[0]);
-    }
-
-    MultiPagesViewer.prototype = {
-        setMode : function(mode) {
-            if(this.element != null && mode != null && this.mode != mode) {
-                if(this.mode && this.mode.cleanUp != null) {
-                    this.mode.cleanUp();
+            getAPI: function () {
+                return this.api;
+            },
+            setScrollPosition : function(offsetTop, offsetLeft) {
+                var element = this.element[0];
+                if(Math.round(element.scrollLeft) === offsetLeft){
+                    offsetLeft -= 1;
                 }
-                this.mode = mode;
-                this.mode.activate();
-            }
-        },
-        getAPI: function () {
-            return this.api;
-        },
-        zoomTo : function(zoomSelection) {
-            var page = this.pages[zoomSelection.pageIndex];
-            if(page != undefined) {
-                var rect = {
-                    width : (page.viewport.width * zoomSelection.percentWidth) / 100,
-                    height : (page.viewport.height * zoomSelection.percentHeight) / 100
-                };
-                var containerSize = {
-                    width: this.containerSize.width * this.scaleItem.value,
-                    height: this.containerSize.height * this.scaleItem.value
-                };
+                if(Math.round(element.scrollTop) === offsetTop){
+                    offsetTop -= 1;
+                }
+                element.scrollLeft = offsetLeft;
+                element.scrollTop = offsetTop;
 
-                var mainProperty = rect.width > rect.height ? "width" : "height";
-                var numZoomLevels = this.zoomLevels.length;
-                for (var i = 0; i < numZoomLevels; ++i) {
-                    var zoomLevel = this.zoomLevels[i];
-                    var nextZoomLevel = this.zoomLevels[i + 1];
+                this.renderAllVisiblePages();
+            },
+            zoomToSelection : function(zoomSelection) {
+                var page = this.pages[zoomSelection.pageIndex];
+                if(page != undefined) {
+                    if(zoomSelection.zoomLevel) {
+                        this.setScale(zoomSelection.zoomLevel);
 
-                    var rectValue = rect[mainProperty];
+                        var center = {
+                            width: (this.containerSize.width * zoomSelection.percentCenterLeft) / 100,
+                            height: (this.containerSize.height * zoomSelection.percentCenterTop) / 100
+                        };
+                        var factor = this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL ? 5.5 : 10.5;
+                        var scrollTop = ((page.viewport.height * zoomSelection.percentTop) / 100) + page.container[0].offsetTop - center.height + factor;
+                        var scrollLeft = ((page.viewport.width * zoomSelection.percentLeft) / 100) + page.container[0].offsetLeft  - center.width + factor;
 
-                    if ((nextZoomLevel == null || (zoomLevel.value * rectValue) <= containerSize[mainProperty] && (nextZoomLevel.value * rectValue) >= containerSize[mainProperty])) {
-                        if(this.scaleItem.value != zoomLevel.value) {
-                            this.setScale(zoomLevel);
-                        }
-
-                        var scrollTop = ((page.viewport.height * zoomSelection.percentTop) / 100) + page.container[0].offsetTop;
-                        var scrollLeft = ((page.viewport.width * zoomSelection.percentLeft) / 100) + page.container[0].offsetLeft;
-
-                        this.element[0].scrollTop = scrollTop;
-                        this.element[0].scrollLeft = scrollLeft;
-
-                        if(zoomSelection.pageIndex === 0) {
-                            this.renderAllVisiblePages();
-                        }
+                        this.setScrollPosition(scrollTop, scrollLeft);
 
                         if(this.api.onZoomToSelection) {
                             this.api.onZoomToSelection(zoomSelection);
                         }
-                        break;
-                    }
-                }
-            }
-        },
-        addPages : function () {
-            var self = this;
-            // Append all page containers to the $element...
-            var numPages = self.pages.length;
-            for(var iPage = 0;iPage < numPages; ++iPage) {
-                this.element.append(self.pages[iPage].container);
-            }
-            self.onPageRendered("loaded", 1, numPages, "");
-            if(self.initialMode != null) {
-                angular.forEach(self.modes, function(mode) {
-                    if (self.initialMode === mode.id) {
-                        self.setMode(mode);
-                    }
-                });
-            }
-            self.setContainerSize(self.initialScale);
-        },
-        updateScaleItem : function(scaleItem) {
-            var result = this.scaleItems[scaleItem.id];
-            if(result == undefined){
-                this.scaleItems[scaleItem.id] = scaleItem;
-                result = scaleItem;
-            }else{
-                result.value = scaleItem.value;
-            }
+                    } else {
+                        var rect = {
+                            width : (page.viewport.width * zoomSelection.percentWidth) / 100,
+                            height : (page.viewport.height * zoomSelection.percentHeight) / 100
+                        };
+                        var containerSize = {
+                            width: this.containerSize.width * this.scaleItem.value,
+                            height: this.containerSize.height * this.scaleItem.value
+                        };
 
-            this.zoomLevels.push(result);
+                        var mainProperty = rect.width > rect.height ? "width" : "height";
+                        var numZoomLevels = this.zoomLevels.length;
+                        for (var i = 0; i < numZoomLevels; ++i) {
+                            var zoomLevel = this.zoomLevels[i];
+                            var nextZoomLevel = this.zoomLevels[i + 1];
 
-            return result;
-        },
-        setContainerSize: function (initialScale) {
-            if(this.pages.length > 0) {
-                var containerSize = getElementInnerSize(this.element, this.pageMargin);
-                if(containerSize.width > 0 && containerSize.height > 0) {
-                    if(this.onContainerSizeChanged) {
-                        this.onContainerSizeChanged(containerSize);
-                    }
-                    this.containerSize = containerSize;
+                            var rectValue = rect[mainProperty];
 
-                    var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
-
-                    this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
-                    this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
-                    this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
-
-                    this.zoomLevels = [];
-                    var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
-                    for(var i = 0;i < numZoomLevels;++i) {
-                        var scaleItem = null;
-                        var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
-                        var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
-                        if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_WIDTH,
-                                value : this.fitWidthScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
-                            });
-                        }
-
-                        if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
-                                value : this.fitHeightScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
-                            });
-                        }
-
-                        if (scale < this.fitPageScale && newScale > this.fitPageScale) {
-                            scaleItem = this.updateScaleItem({
-                                id: MultiPagesConstants.ZOOM_FIT_PAGE,
-                                value : this.fitPageScale,
-                                label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
-                            });
-                        }
-
-                        var label = (newScale * 100.0).toFixed(0) + "%";
-                        scaleItem = this.updateScaleItem({
-                            id: label,
-                            value : newScale,
-                            label: label
-                        });
-                    }
-
-                    if (this.scaleItem == undefined && initialScale) {
-                        if(this.scaleItems[initialScale] != undefined) {
-                            this.scaleItem = this.scaleItems[initialScale];
-                        }else{
-                            $log.debug("InitialScale not found : " + initialScale);
-                        }
-                    }
-
-                    if(this.api.onZoomLevelsChanged) {
-                        this.api.onZoomLevelsChanged(this.zoomLevels);
-                    }
-
-                    if(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null) {
-                        this.renderAllVisiblePages();
-                        return;
-                    }
-
-                    this.setScale(this.scaleItem);
-                    this.render();
-                }
-            }
-        },
-        hasMultiplePages: function() {
-            return this.pages.length > 1;
-        },
-        setOrientation : function (orientation) {
-            this.orientation = orientation;
-            if(this.hasMultiplePages()) {
-                this.setScale(this.scaleItem);
-                this.render();
-            }
-        },
-        setScale: function (scaleItem) {
-            if(scaleItem != undefined){
-                this.scaleItem = scaleItem;
-            }
-            var sci = scaleItem  || this.scaleItems["100%"];
-
-            var numPages = this.pages.length;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-                // Resize to current scaleItem...
-                page.resize(sci.value);
-            }
-        },
-        calcScale: function (desiredScale) {
-            if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
-                // Find the widest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var page = this.pages[0];
-                var maxWidth = page.getViewport(1.0, page.rotation).width;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    page = this.pages[iPage];
-                    maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
-                }
-
-                return this.containerSize.width / maxWidth;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
-                // Find the highest page in the document and fit it to the container.
-                var numPages = this.pages.length;
-                var page = this.pages[0];
-                var maxHeight = page.getViewport(1.0, page.rotation).height;
-                for(var iPage = 1;iPage < numPages;++iPage) {
-                    page = this.pages[iPage];
-                    maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
-                }
-
-                return this.containerSize.height / maxHeight;
-            } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
-                // Find the smaller dimension of the container and fit the 1st page to it.
-                var page = this.pages[0];
-                var page0Viewport = page.getViewport(1.0, page.rotation);
-
-                if(this.containerSize.height < this.containerSize.width) {
-                    return this.containerSize.height / page0Viewport.height;
-                }
-
-                return this.containerSize.width / page0Viewport.width;
-            }
-
-            var scale = parseFloat(desiredScale);
-            if(isNaN(scale)) {
-                $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
-                return 1.0;
-            }
-
-            return scale;
-        },
-        removeDistantPages: function (curPageID, lastPageID, distance) {
-            var numPages = this.pages.length;
-
-            var firstActivePageID = Math.max(curPageID - distance, 0);
-            var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
-
-            for(var iPage = 0;iPage < firstActivePageID;++iPage) {
-                this.pages[iPage].clear();
-            }
-
-            for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
-                this.pages[iPage].clear();
-            }
-        },
-        renderAllVisiblePages: function (scrollDir) {
-            if(scrollDir != undefined){
-                this.lastScrollDir = scrollDir;
-            }
-
-            var self = this;
-            this.currentPages = [];
-            var numPages = this.pages.length;
-            var currentPageID = -1;
-            var lastPageID = 0;
-            var atLeastOnePageInViewport = false;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                var page = this.pages[iPage];
-
-                if(page.isVisible()) {
-                    var parentContainer = page.container.parent()[0];
-                    var pageContainer = page.container[0];
-
-                    if(self.hasMultiplePages()) {
-                        if(currentPageID === -1) {
-                            if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                                var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
-                                var pageCenter = pageContainer.offsetWidth / 1.5;
-                                if((pageCenter + pageLeft) >= 0) {
-                                    currentPageID = iPage;
+                            if ((nextZoomLevel == null || (zoomLevel.value * rectValue) <= containerSize[mainProperty] && (nextZoomLevel.value * rectValue) >= containerSize[mainProperty])) {
+                                if(this.scaleItem.value != zoomLevel.value) {
+                                    this.setScale(zoomLevel);
                                 }
-                            } else {
-                                var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
-                                var pageCenter = pageContainer.offsetHeight / 1.5;
-                                if((pageCenter + pageTop) >= 0) {
-                                    currentPageID = iPage;
+
+                                var scrollTop = ((page.viewport.height * zoomSelection.percentTop) / 100) + page.container[0].offsetTop;
+                                var scrollLeft = ((page.viewport.width * zoomSelection.percentLeft) / 100) + page.container[0].offsetLeft;
+                                this.setScrollPosition(scrollTop, scrollLeft);
+
+                                if(this.api.onZoomToSelection) {
+                                    this.api.onZoomToSelection(zoomSelection);
                                 }
+                                break;
                             }
                         }
-                    } else {
-                        currentPageID = iPage;
                     }
-
-
-
-                    atLeastOnePageInViewport = true;
-                    lastPageID = iPage;
-                    this.currentPages.push(page);
-                    page.render(function (page, status) {
-                        if(status === MultiPagesConstants.PAGE_RENDERED) {
-                            self.onPageRendered("success", page.id, self.pages.length, "");
-                        } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                            self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                }
+            },
+            addPages : function () {
+                var self = this;
+                // Append all page containers to the $element...
+                var numPages = self.pages.length;
+                for(var iPage = 0;iPage < numPages; ++iPage) {
+                    this.element.append(self.pages[iPage].container);
+                }
+                self.onPageRendered("loaded", 1, numPages, "");
+                if(self.initialMode != null) {
+                    angular.forEach(self.modes, function(mode) {
+                        if (self.initialMode === mode.id) {
+                            self.setMode(mode);
                         }
                     });
-                } else {
-                    if(atLeastOnePageInViewport) {
-                        break;
-                    }
                 }
-            }
+                self.setContainerSize(self.initialScale);
+            },
+            updateScaleItem : function(scaleItem) {
+                var result = this.scaleItems[scaleItem.id];
+                if(result == undefined){
+                    this.scaleItems[scaleItem.id] = scaleItem;
+                    result = scaleItem;
+                }else{
+                    result.value = scaleItem.value;
+                }
 
-            if(currentPageID === -1) {
-                currentPageID = lastPageID;
-            }
+                this.zoomLevels.push(result);
 
-            if(self.hasMultiplePages()) {
-                this.clearDistantSelectedPage(currentPageID + 1, lastPageID + 1);
+                return result;
+            },
+            setContainerSize: function (initialScale) {
+                if(this.pages.length > 0) {
+                    var containerSize = getElementInnerSize(this.element, this.pageMargin);
+                    if(containerSize.width > 0 && containerSize.height > 0) {
+                        if(this.onContainerSizeChanged) {
+                            this.onContainerSizeChanged(containerSize);
+                        }
+                        this.containerSize = containerSize;
 
-                if(this.lastScrollDir !== 0) {
-                    var nextPageID = (this.lastScrollDir > 0 ? lastPageID : currentPageID) + this.lastScrollDir;
-                    if(nextPageID >= 0 && nextPageID < numPages) {
-                        var page = this.pages[nextPageID];
-                        this.currentPages.push(page);
-                        page.render(function (page, status) {
-                            if(status === MultiPagesConstants.PAGE_RENDERED) {
-                                self.onPageRendered("success", page.id, self.pages.length, "");
-                            } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
-                                self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                        var oldScaleValue = this.scaleItem ? this.scaleItem.value : null;
+
+                        this.fitWidthScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_WIDTH);
+                        this.fitHeightScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_HEIGHT);
+                        this.fitPageScale = this.calcScale(MultiPagesConstants.ZOOM_FIT_PAGE);
+
+                        this.zoomLevels = [];
+                        var numZoomLevels = MultiPagesConstants.ZOOM_LEVELS_LUT.length - 1;
+                        for(var i = 0;i < numZoomLevels;++i) {
+                            var scaleItem = null;
+                            var scale = MultiPagesConstants.ZOOM_LEVELS_LUT[i];
+                            var newScale = MultiPagesConstants.ZOOM_LEVELS_LUT[i + 1];
+                            if (scale < this.fitWidthScale && newScale > this.fitWidthScale) {
+                                scaleItem = this.updateScaleItem({
+                                    id: MultiPagesConstants.ZOOM_FIT_WIDTH,
+                                    value : this.fitWidthScale,
+                                    label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_WIDTH_LABEL', 'Fit width')
+                                });
                             }
-                        });
+
+                            if (scale < this.fitHeightScale && newScale > this.fitHeightScale) {
+                                scaleItem = this.updateScaleItem({
+                                    id: MultiPagesConstants.ZOOM_FIT_HEIGHT,
+                                    value : this.fitHeightScale,
+                                    label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_HEIGHT_LABEL', 'Fit height')
+                                });
+                            }
+
+                            if (scale < this.fitPageScale && newScale > this.fitPageScale) {
+                                scaleItem = this.updateScaleItem({
+                                    id: MultiPagesConstants.ZOOM_FIT_PAGE,
+                                    value : this.fitPageScale,
+                                    label: TranslateViewer.translate('GLOBAL.VIEWER.FIT_PAGE_LABEL', 'Fit page')
+                                });
+                            }
+
+                            var label = (newScale * 100.0).toFixed(0) + "%";
+                            scaleItem = this.updateScaleItem({
+                                id: label,
+                                value : newScale,
+                                label: label
+                            });
+                        }
+
+                        if (this.scaleItem == undefined && initialScale) {
+                            if(this.scaleItems[initialScale] != undefined) {
+                                this.scaleItem = this.scaleItems[initialScale];
+                            }else{
+                                $log.debug("InitialScale not found : " + initialScale);
+                            }
+                        }
+
+                        if(this.api.onZoomLevelsChanged) {
+                            this.api.onZoomLevelsChanged(this.zoomLevels);
+                        }
+
+                        if(!(this.scaleItem != null && this.scaleItem.value === oldScaleValue && this.pages[0] && this.pages[0].viewport != null)) {
+                            this.setScale(this.scaleItem);
+                        }
+
+                        this.renderAllVisiblePages();
                     }
                 }
-
-                this.removeDistantPages(currentPageID, lastPageID, 1);
-            }
-
-            this.currentPage = currentPageID + 1;
-            //this.currentPage = (this.lastScrollDir > 0 ? currentPageID : lastPageID) + 1;
-            if(this.onCurrentPageChanged) {
-                this.onCurrentPageChanged( currentPageID + 1);
-            }
-        },
-        clearDistantSelectedPage: function (currentPageID, lastPageID) {
-            if(this.selectedPage <= currentPageID || this.selectedPage > lastPageID) {
-                this.selectedPage = null;
-            }
-        },
-        render: function () {
-            if(this.currentPage != 0 && this.currentPage != 1) {
-                this.api.goToPage(this.api.getSelectedPage());
-            }else{
-                this.renderAllVisiblePages();
-            }
-        },
-        rotate : function (args) {
-            if(args != undefined) {
-                var page = this.pages[args.pageIndex];
-                if(page != undefined) {
-                    var rotation = page.rotation + args.rotation;
-                    if(rotation === 360 || rotation === -360){
-                        rotation = 0;
-                    }
-                    page.rotation = rotation;
-                    page.rotate(rotation);
-                    if(this.api.onPageRotation) {
-                        this.api.onPageRotation(args);
-                    }
-                    this.setContainerSize(this.initialScale);
-
-                    if(this.thumbnail) {
-                        this.thumbnail.rotate(args);
-                    }
+            },
+            hasMultiplePages: function() {
+                return this.pages.length > 1;
+            },
+            setOrientation : function (orientation) {
+                this.orientation = orientation;
+                if(this.hasMultiplePages()) {
+                    this.setScale(this.scaleItem);
+                    this.renderAllVisiblePages();
                 }
-            }
-        },
-        rotatePages : function (rotation) {
-            var numPages = this.pages.length;
-            var currentRotation = this.rotation - rotation;
-            if(currentRotation === 360 || currentRotation === -360){
-                currentRotation = 0;
-            }
-            this.rotation = currentRotation;
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                this.pages[iPage].rotate(currentRotation);
-            }
-
-            this.setContainerSize(this.initialScale);
-
-            if(this.thumbnail) {
-                this.thumbnail.rotatePages(rotation);
-            }
-        },
-        downloadProgress: function(progressData) {
-            // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
-            // give us the total size of the document (total == undefined). In this case,
-            // we guess the total size in order to correctly show a progress bar if needed (even
-            // if the actual progress indicator will be incorrect).
-            var total = 0;
-            if (typeof progressData.total === "undefined")
-            {
-                while (total < progressData.loaded)
-                {
-                    total += 1024 * 1024;
+            },
+            setScale: function (scaleItem) {
+                if(scaleItem != undefined){
+                    this.scaleItem = scaleItem;
                 }
-            }
-            else {
-                total = progressData.total;
-            }
+                var sci = scaleItem  || this.scaleItems["100%"];
 
-            if(this.onDataDownloaded){
-                this.onDataDownloaded("loading", progressData.loaded, total, "");
-            }
-        },
-        hookScope: function(scope) {
-            var self = this;
-            var lastScrollY = 0;
-            var watcher = new SizeWatcher(self.element[0], 200);
-            scope.$watchGroup(watcher.group, function(values) {
-                if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
-                scope.sizeWatcherTimeout = $timeout(function() {
-                    $log.debug("SizeChanged");
-                    self.setContainerSize(self.initialScale);
-                }, 450);
-            });
+                var numPages = this.pages.length;
 
-            scope.$watch("options.orientation", function (value) {
-                self.setOrientation(value);
-            });
-
-            var onProgress = function(operation, state, value, total, message) {
-                if (operation === "render" && value === 1) {
-                    if (state === "loaded") {
-                        $compile(self.element.contents())(scope);
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    var page = this.pages[iPage];
+                    // Resize to current scaleItem...
+                    page.resize(sci.value);
+                }
+            },
+            calcScale: function (desiredScale) {
+                if(desiredScale === MultiPagesConstants.ZOOM_FIT_WIDTH) {
+                    // Find the widest page in the document and fit it to the container.
+                    var numPages = this.pages.length;
+                    var page = this.pages[0];
+                    var maxWidth = page.getViewport(1.0, page.rotation).width;
+                    for(var iPage = 1;iPage < numPages;++iPage) {
+                        page = this.pages[iPage];
+                        maxWidth = Math.max(maxWidth, page.getViewport(1.0, page.rotation).width);
                     }
-                    else if (state === "success") {
-                        $log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+
+                    return this.containerSize.width / maxWidth;
+                } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_HEIGHT) {
+                    // Find the highest page in the document and fit it to the container.
+                    var numPages = this.pages.length;
+                    var page = this.pages[0];
+                    var maxHeight = page.getViewport(1.0, page.rotation).height;
+                    for(var iPage = 1;iPage < numPages;++iPage) {
+                        page = this.pages[iPage];
+                        maxHeight = Math.max(maxHeight, page.getViewport(1.0, page.rotation).height);
                     }
-                    else {
-                        if(self.api.onError) {
-                            self.api.onError(operation, message);
+
+                    return this.containerSize.height / maxHeight;
+                } else if(desiredScale === MultiPagesConstants.ZOOM_FIT_PAGE) {
+                    // Find the smaller dimension of the container and fit the 1st page to it.
+                    var page = this.pages[0];
+                    var page0Viewport = page.getViewport(1.0, page.rotation);
+
+                    if(this.containerSize.height < this.containerSize.width) {
+                        return this.containerSize.height / page0Viewport.height;
+                    }
+
+                    return this.containerSize.width / page0Viewport.width;
+                }
+
+                var scale = parseFloat(desiredScale);
+                if(isNaN(scale)) {
+                    $log.debug("PDF viewer: " + desiredScale + " isn't a valid scaleItem value.");
+                    return 1.0;
+                }
+
+                return scale;
+            },
+            removeDistantPages: function (curPageID, lastPageID, distance) {
+                var numPages = this.pages.length;
+
+                var firstActivePageID = Math.max(curPageID - distance, 0);
+                var lastActivePageID = Math.min(lastPageID + distance, numPages - 1);
+
+                for(var iPage = 0;iPage < firstActivePageID;++iPage) {
+                    this.pages[iPage].remove();
+                }
+
+                for(var iPage = lastActivePageID + 1;iPage < numPages;++iPage) {
+                    this.pages[iPage].remove();
+                }
+            },
+            renderAllVisiblePages: function (scrollDir) {
+                if(scrollDir != undefined){
+                    this.lastScrollDir = scrollDir;
+                }
+                var self = this;
+                if (self.renderAllVisiblePagesTimeout) $timeout.cancel(self.renderAllVisiblePagesTimeout);
+                self.renderAllVisiblePagesTimeout = $timeout(function() {
+                    self.currentPages = [];
+                    var numPages = self.pages.length;
+                    var currentPageID = -1;
+                    var lastPageID = 0;
+                    var atLeastOnePageInViewport = false;
+                    for(var iPage = 0;iPage < numPages;++iPage) {
+                        var page = self.pages[iPage];
+
+                        if(page.isVisible()) {
+                            var parentContainer = page.container.parent()[0];
+                            var pageContainer = page.container[0];
+
+                            if(self.hasMultiplePages()) {
+                                if(currentPageID === -1) {
+                                    if(self.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                                        var pageLeft = pageContainer.offsetLeft - parentContainer.scrollLeft;
+                                        var pageCenter = pageContainer.offsetWidth / 1.5;
+                                        if((pageCenter + pageLeft) >= 0) {
+                                            currentPageID = iPage;
+                                        }
+                                    } else {
+                                        var pageTop = pageContainer.offsetTop - parentContainer.scrollTop;
+                                        var pageCenter = pageContainer.offsetHeight / 1.5;
+                                        if((pageCenter + pageTop) >= 0) {
+                                            currentPageID = iPage;
+                                        }
+                                    }
+                                }
+                            } else {
+                                currentPageID = iPage;
+                            }
+
+                            atLeastOnePageInViewport = true;
+                            lastPageID = iPage;
+                            self.currentPages.push(page);
+                            page.render(function (page, status) {
+                                if(status === MultiPagesConstants.PAGE_RENDERED) {
+                                    self.onPageRendered("success", page.id, self.pages.length, "");
+                                } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                                    self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                                }
+                            });
                         } else {
-                            $log.debug("Failed to render 1st page!\n\n" + message);
+                            if(atLeastOnePageInViewport) {
+                                break;
+                            }
+                        }
+                    }
+
+                    if(currentPageID === -1) {
+                        currentPageID = lastPageID;
+                    }
+
+                    if(self.hasMultiplePages()) {
+                        self.clearDistantSelectedPage(currentPageID + 1, lastPageID + 1);
+
+                        if(self.lastScrollDir !== 0) {
+                            var nextPageID = (self.lastScrollDir > 0 ? lastPageID : currentPageID) + self.lastScrollDir;
+                            if(nextPageID >= 0 && nextPageID < numPages) {
+                                var page = self.pages[nextPageID];
+                                self.currentPages.push(page);
+                                page.render(function (page, status) {
+                                    if(status === MultiPagesConstants.PAGE_RENDERED) {
+                                        self.onPageRendered("success", page.id, self.pages.length, "");
+                                    } else if (status === MultiPagesConstants.PAGE_RENDER_FAILED) {
+                                        self.onPageRendered("failed", page.id, self.pages.length, "Failed to render page.");
+                                    }
+                                });
+                            }
+                        }
+
+                        self.removeDistantPages(currentPageID, lastPageID, 1);
+                    }
+
+                    self.currentPage = currentPageID + 1;
+                    if(self.onCurrentPageChanged) {
+                        self.onCurrentPageChanged( currentPageID + 1);
+                    }
+                }, this.renderAllVisiblePagesTimeoutValue);
+            },
+            clearDistantSelectedPage: function (currentPageID, lastPageID) {
+                if(this.selectedPage && !this.pages[this.selectedPage - 1].isVisible()) {
+                    this.selectedPage = null;
+                }
+            },
+            rotate : function (args) {
+                if(args != undefined) {
+                    var page = this.pages[args.pageIndex];
+                    if(page != undefined) {
+                        var rotation = page.rotation + args.rotation;
+                        if(rotation === 360 || rotation === -360){
+                            rotation = 0;
+                        }
+                        page.rotation = rotation;
+                        page.rotate(rotation);
+                        if(this.api.onPageRotation) {
+                            this.api.onPageRotation(args);
+                        }
+                        this.setContainerSize(this.initialScale);
+
+                        if(this.thumbnail) {
+                            this.thumbnail.rotate(args);
                         }
                     }
                 }
-                else if (operation === "download" && state === "loading") {
-                    self.api.downloadProgress = (value / total) * 100.0;
+            },
+            rotatePages : function (rotation) {
+                var numPages = this.pages.length;
+                var currentRotation = this.rotation - rotation;
+                if(currentRotation === 360 || currentRotation === -360){
+                    currentRotation = 0;
+                }
+                this.rotation = currentRotation;
+                for(var iPage = 0;iPage < numPages;++iPage) {
+                    this.pages[iPage].rotate(currentRotation);
+                }
+
+                this.setContainerSize(this.initialScale);
+
+                if(this.thumbnail) {
+                    this.thumbnail.rotatePages(rotation);
+                }
+            },
+            downloadProgress: function(progressData) {
+                // JD: HACK: Sometimes (depending on the server serving the TIFFs) TIFF.js doesn't
+                // give us the total size of the document (total == undefined). In this case,
+                // we guess the total size in order to correctly show a progress bar if needed (even
+                // if the actual progress indicator will be incorrect).
+                var total = 0;
+                if (typeof progressData.total === "undefined")
+                {
+                    while (total < progressData.loaded)
+                    {
+                        total += 1024 * 1024;
+                    }
                 }
                 else {
-                    if (state === "failed") {
-                        if(self.api.onError) {
-                            self.api.onError(operation, message);
-                        } else {
-                            $log.debug("Something went really bad!\n\n" + message);
+                    total = progressData.total;
+                }
+
+                if(this.onDataDownloaded){
+                    this.onDataDownloaded("loading", progressData.loaded, total, "");
+                }
+            },
+            hookScope: function(scope) {
+                var self = this;
+                var lastScrollY = 0;
+                var watcher = new SizeWatcher(self.element[0], 200);
+                scope.$watchGroup(watcher.group, function(values) {
+                    if (scope.sizeWatcherTimeout) $timeout.cancel(scope.sizeWatcherTimeout);
+                    scope.sizeWatcherTimeout = $timeout(function() {
+                        $log.debug("SizeChanged");
+                        self.setContainerSize(self.initialScale);
+                    }, 450);
+                });
+
+                scope.$watch("options.orientation", function (value) {
+                    self.setOrientation(value);
+                });
+
+                var onProgress = function(operation, state, value, total, message) {
+                    if (operation === "render" && value === 1) {
+                        if (state === "loaded") {
+                            $compile(self.element.contents())(scope);
+                        }
+                        else if (state === "success") {
+                            //$log.debug("onProgress(" + operation + ", " + state + ", " + value + ", " + total + ")");
+                        }
+                        else {
+                            if(self.api.onError) {
+                                self.api.onError(operation, message);
+                            } else {
+                                $log.debug("Failed to render 1st page!\n\n" + message);
+                            }
                         }
                     }
-                }
-            };
-
-            scope.onPageRendered = function(status, pageID, numPages, message) {
-                onProgress("render", status, pageID, numPages, message);
-            };
-
-            scope.onTextLayerRendered = function(pageID, textLayer) {
-                //$compile(textLayer)(scope);
-                $log.debug("TextLayer of page id " + pageID + " rendered");
-            };
-
-            scope.onDataDownloaded = function(status, loaded, total, message) {
-                onProgress("download", status, loaded, total, message);
-            };
-
-            self.onPageRendered = angular.bind(scope, scope.onPageRendered);
-            self.onTextLayerRendered =  angular.bind(scope, scope.onTextLayerRendered);
-            self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
-
-
-            scope.$on('$destroy', function() {
-                if(self.onDestroy != null){
-                    try	{
-
-                    }catch (ex)
-                    {
-                        $log.log(ex);
+                    else if (operation === "download" && state === "loading") {
+                        self.api.downloadProgress = (value / total) * 100.0;
                     }
-                    self.onDestroy();
-                }
-                self.thumbnail = null;
-                watcher.cancel();
-                self.element.empty();
-                $log.debug("viewer destroyed");
-            });
+                    else {
+                        if (state === "failed") {
+                            if(self.api.onError) {
+                                self.api.onError(operation, message);
+                            } else {
+                                $log.debug("Something went really bad!\n\n" + message);
+                            }
+                        }
+                    }
+                };
 
-            self.element.bind("scroll", function(event) {
-                if (scope.scrollTimeout) $timeout.cancel(scope.scrollTimeout);
-                scope.scrollTimeout = $timeout(function() {
+                scope.onPageRendered = function(status, pageID, numPages, message) {
+                    onProgress("render", status, pageID, numPages, message);
+                };
+
+                scope.onTextLayerRendered = function(pageID, textLayer) {
+                    //$compile(textLayer)(scope);
+                    $log.debug("TextLayer of page id " + pageID + " rendered");
+                };
+
+                scope.onDataDownloaded = function(status, loaded, total, message) {
+                    onProgress("download", status, loaded, total, message);
+                };
+
+                self.onPageRendered = angular.bind(scope, scope.onPageRendered);
+                self.onTextLayerRendered =  angular.bind(scope, scope.onTextLayerRendered);
+                self.onDataDownloaded = angular.bind(scope, scope.onDataDownloaded);
+
+
+                scope.$on('$destroy', function() {
+                    if(self.onDestroy != null){
+                        try	{
+
+                        }catch (ex)
+                        {
+                            $log.log(ex);
+                        }
+                        self.onDestroy();
+                    }
+                    self.thumbnail = null;
+                    watcher.cancel();
+                    self.element.empty();
+                    $log.debug("viewer destroyed");
+                });
+
+                self.element.bind("scroll", function(event) {
                     var scrollTop = self.element[0].scrollTop;
 
                     var scrollDir = scrollTop - lastScrollY;
                     lastScrollY = scrollTop;
 
                     var normalizedScrollDir = scrollDir > 0 ? 1 : (scrollDir < 0 ? -1 : 0);
-                    self.renderAllVisiblePages(normalizedScrollDir);
-                }, 350);
-            });
-        }
-    };
 
-    return (MultiPagesViewer);
-}]);
+                    self.renderAllVisiblePages(normalizedScrollDir);
+                });
+            }
+        };
+
+        return (MultiPagesViewer);
+    }]);
 
 'use strict';
 /**
  * TODO MultiPagesViewerAPI desc
  */
-itMultiPagesViewer.factory('MultiPagesViewerAPI', ['$log', 'MultiPagesConstants', function ($log, MultiPagesConstants) {
+itMultiPagesViewer
+    .factory('MultiPagesViewerAPI', ['$log', 'MultiPagesConstants' , 'DownloadManager', function ($log, MultiPagesConstants, DownloadManager) {
 
-    function MultiPagesViewerAPI(viewer) {
-        this.viewer = viewer;
-    };
+        function MultiPagesViewerAPI(viewer) {
+            this.viewer = viewer;
+        };
 
-    MultiPagesViewerAPI.prototype = {
-        getViewer: function () {
-            return this.viewer;
-        }, 
-        getMode: function () {
-            return this.viewer.mode;
-        },
-        getModes: function () {
-            return this.viewer.modes;
-        },
-        setMode : function(mode) {
-            this.viewer.setMode(mode);
-        },
-        getZoomLevels: function () {
-            return this.viewer.zoomLevels;
-        },
-        zoomTo: function (scaleItem) {
-            if(scaleItem != undefined) {
-                this.viewer.setScale(scaleItem);
-                this.viewer.render();
-            }
-        },
-        getZoomLevel: function () {
-            return this.viewer.scaleItem;
-        },
-        zoomToSelection: function (zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
-        },
-        zoomIn: function() {
-            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-            if(index < this.viewer.zoomLevels.length) {
-                this.zoomTo(this.viewer.zoomLevels[index + 1]);
-            }
-        },
-        zoomOut: function() {
-            var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
-            if(index > 0) {
-                this.zoomTo(this.viewer.zoomLevels[index - 1]);
-            }
-        },
-        getCurrentPage: function () {
-            return this.viewer.currentPage;
-        },
-        getSelectedPage: function () {
-            return this.viewer.selectedPage || this.viewer.currentPage;
-        },
-        isPageSelected: function(pageIndex) {
-            return (this.getSelectedPage() === pageIndex) ? "selected" : null;
-        },
-        goToPage: function (pageIndex) {
-            if(pageIndex < 1 || pageIndex > this.getNumPages()) {
-                return;
-            }
-            var pageContainer = this.viewer.pages[pageIndex - 1].container[0];
-            var element = this.viewer.element[0];
-            //this.viewer.pages[pageIndex - 1].container[0].scrollIntoView();
-            if(this.viewer.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                var offsetLeft = pageContainer.offsetLeft - 10;
-                if(Math.round(element.scrollLeft) === offsetLeft){
-                    offsetLeft -= 1;
+        MultiPagesViewerAPI.prototype = {
+            getViewer: function () {
+                return this.viewer;
+            },
+            download : function() {
+                throw "NotImplementedError - api.download()";
+            },
+            getMode: function () {
+                return this.viewer.mode;
+            },
+            getModes: function () {
+                return this.viewer.modes;
+            },
+            setMode : function(mode) {
+                this.viewer.setMode(mode);
+            },
+            getZoomLevels: function () {
+                return this.viewer.zoomLevels;
+            },
+            zoomTo: function (zoomLevel) {
+                if(zoomLevel != null) {
+                    this.viewer.setScale(zoomLevel);
+                    this.viewer.renderAllVisiblePages();
                 }
-                element.scrollLeft = offsetLeft;
-                element.scrollTop = 0;
-            } else {
-                var offsetTop = pageContainer.offsetTop - 10;
-                if(Math.round(element.scrollTop) === offsetTop){
-                    offsetTop -= 1;
+            },
+            getZoomLevel: function () {
+                return this.viewer.scaleItem;
+            },
+            zoomToSelection: function (zoomSelection) {
+                this.viewer.zoomToSelection(zoomSelection);
+            },
+            getNextZoomLevel: function() {
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index < this.viewer.zoomLevels.length) {
+                    return this.viewer.zoomLevels[index + 1];
                 }
-                element.scrollTop = offsetTop;
-                element.scrollLeft = 0;
+                return null;
+            },
+            getPreviousZoomLevel: function() {
+                var index = this.viewer.zoomLevels.indexOf(this.getZoomLevel());
+                if(index > 0) {
+                    return this.viewer.zoomLevels[index - 1];
+                }
+                return null;
+            },
+            zoomIn: function() {
+                this.zoomTo(this.getNextZoomLevel());
+            },
+            zoomOut: function() {
+                this.zoomTo(this.getPreviousZoomLevel());
+            },
+            getCurrentPage: function () {
+                return this.viewer.currentPage;
+            },
+            getSelectedPage: function () {
+                return this.viewer.selectedPage || this.viewer.currentPage;
+            },
+            isPageSelected: function(pageIndex) {
+                return (this.getSelectedPage() === pageIndex) ? "selected" : null;
+            },
+            goToPage: function (pageId) {
+                var page = this.viewer.pages[pageId - 1];
+                if(page) {
+                    var pageContainer = page.container[0];
+                    if(this.viewer.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                        this.viewer.setScrollPosition(0, pageContainer.offsetLeft - 10);
+                    } else {
+                        this.viewer.setScrollPosition(pageContainer.offsetTop - 10, 0);
+                    }
+                }
+            },
+            goToNextPage: function () {
+                if(this.getSelectedPage() >= this.getNumPages()) {
+                    return;
+                }
+                if(this.viewer.selectedPage == null) {
+                    this.viewer.selectedPage = this.viewer.currentPage;
+                }
+                this.viewer.selectedPage += 1;
+                this.goToPage(this.viewer.selectedPage);
+            },
+            goToPrevPage: function () {
+                if(this.getSelectedPage() <= 1) {
+                    return;
+                }
+                if(this.viewer.selectedPage == null) {
+                    this.viewer.selectedPage = this.viewer.currentPage;
+                }
+                this.viewer.selectedPage -= 1;
+                this.goToPage(this.viewer.selectedPage);
+            },
+            getNumPages: function () {
+                return this.viewer.pages.length;
+            },
+            rotatePagesRight: function() {
+                this.viewer.rotatePages(90);
+            },
+            rotatePagesLeft: function() {
+                this.viewer.rotatePages(-90);
+            },
+            rotatePageRight: function(pageIndex) {
+                this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: 90 });
+            },
+            rotatePageLeft: function(pageIndex) {
+                this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: -90 });
+            },
+            rotatePage: function(args) {
+                this.viewer.rotate(args);
             }
-        },
-        goToNextPage: function () {
-            this.goToPage(this.getSelectedPage() + 1);
-        },
-        goToPrevPage: function () {
-            this.goToPage(this.getSelectedPage() - 1);
-        },
-        getNumPages: function () {
-            return this.viewer.pages.length;
-        },
-        rotatePagesRight: function() {
-            this.viewer.rotatePages(90);
-        },
-        rotatePagesLeft: function() {
-            this.viewer.rotatePages(-90);
-        },
-        rotatePageRight: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: 90 });
-        },
-        rotatePageLeft: function(pageIndex) {
-            this.rotatePage({ pageIndex : (pageIndex | this.getSelectedPage() -1), rotation: -90 });
-        },
-        rotatePage: function(args) {
-            this.viewer.rotate(args);
-        }
-    };
+        };
 
-    return (MultiPagesViewerAPI);
-}]);
+        return (MultiPagesViewerAPI);
+    }]);
 
 
 'use strict';
@@ -12471,18 +12711,34 @@ itMultiPagesViewer.factory('TranslateViewer', ['$translate', function($translate
 /**
  * TODO MultiPagesPage desc
  */
-itMultiPagesViewer.factory('ZoomSelection', ['$log' , 'MultiPagesConstants', function ($log, MultiPagesConstants) {
-    function ZoomSelection(rect, page) {
-        this.percentTop = (rect.offsetTop * 100) / page.viewport.height;
-        this.percentLeft = (rect.offsetLeft * 100) / page.viewport.width;
-        this.percentWidth = (rect.width * 100) / page.viewport.width;
-        this.percentHeight = (rect.height * 100) / page.viewport.height;
+itMultiPagesViewer
+    .factory('ZoomSelection', [function () {
+        function ZoomSelection(rect, page) {
+            this.percentTop = (rect.y * 100) / page.viewport.height;
+            this.percentLeft = (rect.x * 100) / page.viewport.width;
+            this.percentWidth = (rect.width * 100) / page.viewport.width;
+            this.percentHeight = (rect.height * 100) / page.viewport.height;
 
-        this.pageIndex = page.pageIndex;
-    }
+            this.pageIndex = page.pageIndex;
+        }
 
-    return (ZoomSelection);
-}]);
+        return (ZoomSelection);
+    }])
+
+    .factory('ZoomWheel', [function () {
+        function ZoomWheel(mouseRelativeToPage, mouseRelativeToViewer, page, zoomLevel) {
+            this.percentTop = (mouseRelativeToPage.y * 100) / page.viewport.height;
+            this.percentLeft = (mouseRelativeToPage.x * 100) / page.viewport.width;
+            this.percentCenterTop = (mouseRelativeToViewer.y * 100) / page.viewer.containerSize.height;
+            this.percentCenterLeft = (mouseRelativeToViewer.x * 100) / page.viewer.containerSize.width;
+            this.zoomLevel = zoomLevel;
+
+            this.pageIndex = page.pageIndex;
+        }
+
+        return (ZoomWheel);
+    }]);
+
 
 
 'use strict';
@@ -12610,7 +12866,7 @@ itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', func
         template :
         '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
             '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
-            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="multipage-viewer-thumbnail-menu">' +
                 '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
                     '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
                         '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
@@ -12632,12 +12888,37 @@ itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', func
  * TODO Pdf implementation desc
  */
 itPdfViewer
-    .factory('PDFViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+    .factory('PDFViewerAPI', ['$log', 'MultiPagesViewerAPI', 'DownloadManager', function ($log, MultiPagesViewerAPI, DownloadManager) {
+
+        function getFileNameFromURL (url) {
+            var reURI = /^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
+            //            SCHEME      HOST         1.PATH  2.QUERY   3.REF
+            // Pattern to get last matching NAME.pdf
+            var reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
+            var splitURI = reURI.exec(url);
+            var suggestedFilename = reFilename.exec(splitURI[1]) ||
+                reFilename.exec(splitURI[2]) ||
+                reFilename.exec(splitURI[3]);
+            if (suggestedFilename) {
+                suggestedFilename = suggestedFilename[0];
+                if (suggestedFilename.indexOf('%') !== -1) {
+                    // URL-encoded %2Fpath%2Fto%2Ffile.pdf should be file.pdf
+                    try {
+                        suggestedFilename =
+                            reFilename.exec(decodeURIComponent(suggestedFilename))[0];
+                    } catch(e) { // Possible (extremely rare) errors:
+                        // URIError "Malformed URI", e.g. for "%AA.pdf"
+                        // TypeError "null has no properties", e.g. for "%2F.pdf"
+                    }
+                }
+            }
+            return suggestedFilename || 'document.pdf';
+        }
 
         function PDFViewerAPI(viewer) {
             this.base = MultiPagesViewerAPI;
             this.base(viewer);
-        }; 
+        };
 
         PDFViewerAPI.prototype = new MultiPagesViewerAPI;
 
@@ -12653,7 +12934,6 @@ itPdfViewer
 
             this.viewer.highlightSearchResult(nextHighlightID);
         };
-
         PDFViewerAPI.prototype.findPrev = function () {
             if(this.viewer.searchHighlightResultID === -1) {
                 return;
@@ -12666,11 +12946,24 @@ itPdfViewer
 
             this.viewer.highlightSearchResult(prevHighlightID);
         };
+        PDFViewerAPI.prototype.download = function() {
+            var self = this;
+            var url = self.viewer.url;
+            var filename = getFileNameFromURL(url);
+
+            self.viewer.pdf.getData().then(function (data) {
+                    var blob = DownloadManager.createBlob(data, 'application/pdf');
+                    DownloadManager.download(blob, url, filename);
+                }, function() {
+                    DownloadManager.downloadUrl(url, filename);
+                } // Error occurred try downloading with just the url.
+            );
+        };
 
         return (PDFViewerAPI);
     }])
 
-    .factory('PDFPage', ['$log', '$window', '$document', '$timeout', 'MultiPagesPage',  'MultiPagesConstants' , 'TextLayerBuilder', function ($log, $window, $document,$timeout, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+    .factory('PDFPage', ['$log', 'MultiPagesPage', 'MultiPagesConstants', 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
 
         function PDFPage(viewer, pdfPage) {
             this.base = MultiPagesPage;
@@ -12683,7 +12976,7 @@ itPdfViewer
         PDFPage.prototype = new MultiPagesPage;
 
         PDFPage.prototype.clear = function () {
-            if(this.renderTask !== null) {
+            if(this.renderTask != null) {
                 this.renderTask.cancel();
             }
             MultiPagesPage.prototype.clear.call(this);
@@ -12729,6 +13022,9 @@ itPdfViewer
             }
         };
         PDFPage.prototype.transform = function () {
+            if(this.renderTask) {
+                this.renderTask.cancel();
+            }
             MultiPagesPage.prototype.transform.call(this);
             this.textLayer = null;
         };
@@ -12739,12 +13035,12 @@ itPdfViewer
         };
         PDFPage.prototype.renderPage = function (page, callback) {
 
-            if(page.canvasRendered){
+            if(page.canvasRendered === true){
                 page.wrapper.append(page.canvas);
                 if(callback) {
-                    callback(this, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                    callback(page, MultiPagesConstants.PAGE_ALREADY_RENDERED);
                 }
-            }else {
+            } else {
 
                 page.wrapper.append(page.canvas);
 
@@ -12779,11 +13075,12 @@ itPdfViewer
         return (PDFPage);
     }])
 
-    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage' , 'MultiPagesConstants' , 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
+    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', 'MultiPagesConstants', 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
+
         function PDFViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new PDFViewerAPI(this), element);
-
+            this.name = "PDFViewer";
             this.pdf = null;
             // Hooks for the client...
             this.passwordCallback = null;
@@ -12941,6 +13238,7 @@ itPdfViewer
 
         PDFViewer.prototype.open = function (obj, options) {
             this.element.empty();
+            this.url = null;
             this.pages = [];
             if (obj !== undefined && obj !== null && obj !== '') {
                 angular.extend(this, options);
@@ -12969,6 +13267,7 @@ itPdfViewer
             this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
             this.getDocumentTask.then(function (pdf) {
                 self.pdf = pdf;
+                self.url = url;
 
                 self.getAllPages( function (pageList, pagesRefMap) {
                     self.pages = pageList;
@@ -13597,7 +13896,7 @@ itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer
         scope : { options : "=", orientation : "=" },
         transclude : true,
         restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select class="form-control" ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
         '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
         link: linker
     };
@@ -13650,7 +13949,7 @@ itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , 
 /**
  * TODO Thumbnail implementation desc
  */
-itMultiPagesViewer
+itMultiPagesViewer 
     .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
 
         function ThumbnailViewerAPI(viewer) {
@@ -13661,13 +13960,13 @@ itMultiPagesViewer
         ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
 
         ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-           return this.viewer.viewer.getAPI().getSelectedPage();
+            return this.viewer.viewer.getAPI().getSelectedPage();
         };
 
         return (ThumbnailViewerAPI);
     }])
 
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', 'MultiPagesConstants', function($log, $timeout, MultiPagesPage, MultiPagesConstants) {
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', function($log, $timeout, MultiPagesPage) {
 
         function ThumbnailPage(viewer, page, showNumPages) {
             this.base = MultiPagesPage;
@@ -13682,6 +13981,13 @@ itMultiPagesViewer
 
         ThumbnailPage.prototype = new MultiPagesPage;
 
+        ThumbnailPage.prototype.clear = function () {
+            if(this.renderTask != null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
         ThumbnailPage.prototype.getViewport = function (scale, rotation) {
             return this.page.getViewport(scale, rotation);
         };
@@ -13690,6 +13996,9 @@ itMultiPagesViewer
             if(this.pageNum != undefined) {
                 page.wrapper.append(this.pageNum);
             }
+        };
+        ThumbnailPage.prototype.getZoomSelectionShortcutKey = function(e) {
+            return this.page.getZoomSelectionShortcutKey(e);
         };
 
         return (ThumbnailPage);
@@ -13700,6 +14009,7 @@ itMultiPagesViewer
         function ThumbnailViewer(element) {
             this.base = MultiPagesViewer;
             this.base(new ThumbnailViewerAPI(this), element);
+            this.name = "ThumbnailViewer";
         }
 
         ThumbnailViewer.prototype = new MultiPagesViewer;
@@ -13710,6 +14020,8 @@ itMultiPagesViewer
             if(viewerApi != null) {
                 var self = this;
                 this.viewer = viewerApi.getViewer();
+                //defer rendering of thumbnail
+                this.renderAllVisiblePagesTimeoutValue = (this.viewer.renderAllVisiblePagesTimeoutValue + 100);
                 this.viewer.thumbnail = this;
                 this.pageMargin = pageMargin;
                 this.showNumPages = showNumPages;
@@ -13767,13 +14079,12 @@ itMultiPagesViewer
             }
         };
 
-        ThumbnailViewer.prototype.zoomTo = function(zoomSelection) {
-            this.viewer.zoomTo(zoomSelection);
+        ThumbnailViewer.prototype.zoomToSelection = function(value) {
+            this.viewer.zoomToSelection(value);
         };
 
         return (ThumbnailViewer);
     }]);
-
 'use strict';
 /**
  * TODO itTiffViewer desc
@@ -13798,7 +14109,7 @@ itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', fun
         template :
         '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
         '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
-        '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+        '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="multipage-viewer-thumbnail-menu">' +
         '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
         '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
         '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +

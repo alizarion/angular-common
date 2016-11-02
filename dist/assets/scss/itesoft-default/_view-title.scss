@@ -1,7 +1,9 @@
-it-view-title h3 {
-  color: $primary;
-}
+it-view-title {
+  h3 {
+    color: $primary;
+  }
 
-it-view-title hr {
-  border-top: 2px solid $primary;
+  hr {
+    border-top: 2px solid $primary;
+  }
 }
