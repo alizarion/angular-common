@@ -316,7 +316,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "itesoft",
       "shortDescription": "The itPanelForm provides dynamic content panel in a form embedded.",
-      "keywords": "$scope $templatecache angular annuler api appelle autocomplete bonjour cancel cancel-label code code1 code2 codecheckbox codedate codehtml codeinput1 codeinput2 codelabel codeselect1 codetextarea content controller date-format dd directive dynamic embedded form function google homectrl href html http input items itesoft itpanelform jours js label link mettre module ng-controller number option options panel query require scope select textarea title titleautocomplete1 titlecheckbox titledate titlehtml titleinput1 titleinput2 titleinput3 titleinput4 titleselect1 titletextarea tito toggle true type update update-label updatevalue value1 value2 valueinput1 valueinput2 valuelabel"
+      "keywords": "$scope $templatecache angular annuler api area autocomplete cancel cancel-label checkbox code content controller date-format dd directive dynamic embedded fields form function google homectrl href html http input inputnumber items itesoft itpanelform je jours js label labelalone link mettre module ng-controller number option options panel query require sans scope select suis text textarea title titleautocomplete1 titlecheckbox titledate titlehtml titleinput1 titleinputnumber titleselect1 titletextarea titre toggle type update update-label updatevalue value1 value2 variable"
     },
     {
       "section": "api",
