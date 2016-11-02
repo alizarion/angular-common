@@ -22,7 +22,7 @@ itTiffViewer.directive('itTiffViewer', ['$log', 'MultiPagesAddEventWatcher', fun
         template :
         '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
         '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
-        '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="thumbnail-menu">' +
+        '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="multipage-viewer-thumbnail-menu">' +
         '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
         '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
         '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
