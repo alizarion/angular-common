@@ -1,5 +1,5 @@
 @charset "UTF-8";
-html {
+html.itesoft-container {
   overflow: hidden
 }
 
@@ -63,19 +63,23 @@ html {
   width: 300px;
 }
 
-.it-login-input,.it-login-input:focus{
-  color:white !important;
-  padding:5px !important;
+.it-login-input, .it-login-input:focus {
+  color: white !important;
+  padding: 5px !important;
 }
+
 .it-login-input::-webkit-input-placeholder {
   color: white !important;
 }
+
 .it-login-input:-moz-placeholder {
   color: white !important;
 }
+
 .it-login-input::-moz-placeholder {
   color: white !important;
 }
+
 .it-login-input:-ms-input-placeholder {
   color: white !important;
 }
