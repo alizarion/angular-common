@@ -1,79 +1,81 @@
-.dashboard-with-footer{
-  height:100%;
-  padding-bottom: 60px;
-}
+.it-theme-container {
+  .dashboard-with-footer {
+    height: 100%;
+    padding-bottom: 60px;
+  }
 
-.dashboard-panel-container {
-  height: 100%;
-  padding-right: 0 !important;
-  position: relative;
-  background-color: white;
-}
+  .dashboard-panel-container {
+    height: 100%;
+    padding-right: 0 !important;
+    position: relative;
+    background-color: white;
+  }
 
-.dashboard-scrollable-content{
-  height: 100%;
-  max-height: 100%;
-  overflow: auto;
-}
+  .dashboard-scrollable-content {
+    height: 100%;
+    max-height: 100%;
+    overflow: auto;
+  }
 
-.dashboard-panel-content {
-  padding-top: 30px;
-  height: 100%;
-  max-height: 100%;
-  position: relative;
-  background-color: white;
-}
+  .dashboard-panel-content {
+    padding-top: 30px;
+    height: 100%;
+    max-height: 100%;
+    position: relative;
+    background-color: white;
+  }
 
-.dashboard-panel-header {
-  height: 30px;
-  position: absolute;
-  width: 100%;
-  padding: 0px 10px;
-  color: #1C1F26;
-  font-size: 20px;
-  z-index: 20;
-}
+  .dashboard-panel-header {
+    height: 30px;
+    position: absolute;
+    width: 100%;
+    padding: 0px 10px;
+    color: #1C1F26;
+    font-size: 20px;
+    z-index: 20;
+  }
 
-.dashboard-panel-container-indicator {
-  background-color: white;
-  height: 150px;
-}
+  .dashboard-panel-container-indicator {
+    background-color: white;
+    height: 150px;
+  }
 
-.dashboard-panel-container-indicator:hover {
-  cursor: pointer;
-}
+  .dashboard-panel-container-indicator:hover {
+    cursor: pointer;
+  }
 
-.dashboard-panel-container-indicator:hover .dashboard-indicator-count {
-  color: $btnSuccessBackColor;
-  opacity: 1;
-}
+  .dashboard-panel-container-indicator:hover .dashboard-indicator-count {
+    color: $btnSuccessBackColor;
+    opacity: 1;
+  }
 
-.dashboard-row-indicators-parent {
-}
+  .dashboard-row-indicators-parent {
+  }
 
-.dashboard-row-indicator {
-  margin-bottom: 10px;
-  padding: 5px;
-  width: 20%;
-  float: left;
-  box-sizing: border-box;
-  display: inline-block;
-}
+  .dashboard-row-indicator {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 20%;
+    float: left;
+    box-sizing: border-box;
+    display: inline-block;
+  }
 
-.dashboard-indicator-count {
-  vertical-align: middle;
-  text-align: center;
-  color: #8A8F9B;
-  opacity: 0.6;
-  font-size: 75px;
-  width: 100%;
-}
+  .dashboard-indicator-count {
+    vertical-align: middle;
+    text-align: center;
+    color: #8A8F9B;
+    opacity: 0.6;
+    font-size: 75px;
+    width: 100%;
+  }
 
-.dashboard-indicator-title {
-  vertical-align: middle;
-  text-align: center;
-  color: #1C1F26;
-  font-size: 15px;
-  width: 100%;
-}
+  .dashboard-indicator-title {
+    vertical-align: middle;
+    text-align: center;
+    color: #1C1F26;
+    font-size: 15px;
+    width: 100%;
+  }
 
+}

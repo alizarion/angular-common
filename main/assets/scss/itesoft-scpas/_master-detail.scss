@@ -1,6 +1,8 @@
-.it-master {
-  .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell {
-    background: #3A89EB !important;
-    color: white;
+.it-theme-container {
+  .it-master {
+    .ui-grid-row.ui-grid-row-selected > [ui-grid-row] > .ui-grid-cell {
+      background: #3A89EB !important;
+      color: white;
+    }
   }
 }

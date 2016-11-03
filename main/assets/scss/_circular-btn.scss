@@ -9,120 +9,122 @@ $modal-full-screen-animation: $animation-speed;
   }
 }
 
-it-circular-btn {
-  display: inline-block;
+.it-theme-container {
+  it-circular-btn {
+    display: inline-block;
 
-  .it-modal-full-screen {
-    /*transition  : all $animation-speed ease-in-out;*/
+    .it-modal-full-screen {
+      /*transition  : all $animation-speed ease-in-out;*/
+    }
+
+    .it-circular-button-container .btn {
+      padding: 1px !important;
+      font-size: 16px;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+
+      transition: none;
+
+      opacity: .80;
+    }
+
+    .it-circular-button-container .btn {
+      cursor: pointer !important;
+    }
+
+    .it-modal-background {
+      background-color: $modal-background;
+    }
+
+    .it-circular-button-container .btn {
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      opacity: .80;
+      clear: both;
+      display: inline-flex;
+      background-size: 0 2px, 100% 1px;
+      background-repeat: no-repeat;
+      background-position: center bottom, center calc(100% - 1px);
+      background-color: transparent;
+
+    }
+
+    .it-modal-full-screen-content {
+      padding-top: 40px;
+
+    }
+
+    .it-circular-button-container:hover .btn {
+      box-shadow: 0 1px 6px 0 rgba(0, 0, 0, .12), 0 1px 6px 0 rgba(0, 0, 0, .12);
+      outline: 0;
+      background-image: radial-gradient($info, $primary);
+      animation: modal-highlight $modal-full-screen-animation forwards;
+      background-size: 0 2px, 100% 1px;
+    }
+
+    .it-animated-circular-button {
+      height: 100% !important;
+      width: 100% !important;
+      padding: 3px !important;
+      border-radius: 50% !important;
+      background-color: $modal-background !important;
+
+    }
+
+    .it-opened.it-modal-full-screen {
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px;
+      overflow: auto;
+      /* transition  : all $animation-speed ease-in-out;*/
+    }
+
+    .btn {
+      -webkit-transition: none !important;
+      -moz-transition: none !important;
+      -ms-transition: none !important;
+      -o-transition: none !important;
+      -webkit-transition-duration: none;
+      -moz-transition-duration: none;
+      -ms-transition-duration: none;
+      -o-transition-duration: none;
+      transition-duration: none;
+      -webkit-transition-timing-function: none;
+      -moz-transition-timing-function: none;
+      -ms-transition-timing-function: none;
+      -o-transition-timing-function: none;
+      transition-timing-function: none;
+      -webkit-transition-delay: 0;
+      -moz-transition-delay: 0;
+      -ms-transition-delay: 0;
+      transition-delay: 0;
+      -webkit-transition-timing-function: none !important;
+      -moz-transition-timing-function: none !important;
+      -ms-transition-timing-function: none !important;
+      -o-transition-timing-function: none !important;
+      transition-timing-function: none !important;
+    }
+
+    .it-modal-full-screen-header {
+      float: right;
+    }
+
+    a {
+      color: rgba(0, 0, 0, 0.843137) !important;
+    }
+
+    :hover li, :hover a {
+      color: $primary !important;
+    }
+
   }
-
-  .it-circular-button-container .btn {
-    padding: 1px !important;
-    font-size: 16px;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-
-    transition: none;
-
-    opacity: .80;
-  }
-
-  .it-circular-button-container .btn {
-    cursor: pointer !important;
-  }
-
-  .it-modal-background {
-    background-color: $modal-background;
-  }
-
-  .it-circular-button-container .btn {
-    padding: 5px;
-    font-size: 16px;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    opacity: .80;
-    clear: both;
-    display: inline-flex;
-    background-size: 0 2px, 100% 1px;
-    background-repeat: no-repeat;
-    background-position: center bottom, center calc(100% - 1px);
-    background-color: transparent;
-
-  }
-
-  .it-modal-full-screen-content {
-    padding-top: 40px;
-
-  }
-
-  .it-circular-button-container:hover .btn {
-    box-shadow: 0 1px 6px 0 rgba(0, 0, 0, .12), 0 1px 6px 0 rgba(0, 0, 0, .12);
-    outline: 0;
-    background-image: radial-gradient($info, $primary);
-    animation: modal-highlight $modal-full-screen-animation forwards;
-    background-size: 0 2px, 100% 1px;
-  }
-
-  .it-animated-circular-button {
-    height: 100% !important;
-    width: 100% !important;
-    padding: 3px !important;
-    border-radius: 50% !important;
-    background-color: $modal-background !important;
-
-  }
-
-  .it-opened.it-modal-full-screen {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 10px;
-    overflow: auto;
-    /* transition  : all $animation-speed ease-in-out;*/
-  }
-
-  .btn {
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -ms-transition: none !important;
-    -o-transition: none !important;
-    -webkit-transition-duration: none;
-    -moz-transition-duration: none;
-    -ms-transition-duration: none;
-    -o-transition-duration: none;
-    transition-duration: none;
-    -webkit-transition-timing-function: none;
-    -moz-transition-timing-function: none;
-    -ms-transition-timing-function: none;
-    -o-transition-timing-function: none;
-    transition-timing-function: none;
-    -webkit-transition-delay: 0;
-    -moz-transition-delay: 0;
-    -ms-transition-delay: 0;
-    transition-delay: 0;
-    -webkit-transition-timing-function: none !important;
-    -moz-transition-timing-function: none !important;
-    -ms-transition-timing-function: none !important;
-    -o-transition-timing-function: none !important;
-    transition-timing-function: none !important;
-  }
-
-  .it-modal-full-screen-header {
-    float: right;
-  }
-
-  a {
-    color: rgba(0, 0, 0, 0.843137) !important;
-  }
-
-  :hover li, :hover a {
-    color: $primary !important;
-  }
-
 }

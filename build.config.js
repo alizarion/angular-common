@@ -21,14 +21,14 @@ module.exports = {
     srcFolder: 'main',
     testFolder: 'test',
     docFolder: 'docs',
-    viewerFolder : 'dist-viewer',
-    themes : ['itesoft-default','itesoft-scpas'],
+    themes: ['itesoft-default', 'itesoft-scpas'],
 
     /**
      * Liste des fichiers JS de l'application qui seront minifier pour la prod.
      */
     appFiles: [
-        'main/app/app.module.js',
+        'main/app/composite/media-viewer/viewer.module.js',
+        'main/app/lib.module.js',
         'main/app/**/*.js'
     ],
     /**

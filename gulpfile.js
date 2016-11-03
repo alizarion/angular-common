@@ -35,7 +35,7 @@ var chmod = require('gulp-chmod');
  * Execute les actions de build dans l'ordre
  */
 gulp.task('build', function (callback) {
-    runSequence('clean', 'sass', 'copy-sass', 'less',
+    runSequence('clean', 'sass', 'copy-sass',
         'css',
         ['uglify', 'uglify-debug', 'vendor', 'html', 'assets', 'fonts', 'demo-js', 'copy-rename-files'],
         callback);
@@ -43,73 +43,14 @@ gulp.task('build', function (callback) {
 
 
 /**
- * Build le viewer
- */
-gulp.task('build-viewer', function () {
-    var libs = [
-        {src: 'main/assets/lib/pdfjs-dist/**/*', dest: '/assets/lib/pdfjs-dist'},
-        {src: 'main/assets/lib/libtiff/**/*', dest: '/assets/lib/libtiff'},
-
-        {src: 'main/assets/lib/pdfjs-dist/build/pdf.js', dest: '/assets/lib/lib-viewer'},
-        {src: 'main/assets/lib/pdfjs-dist/build/pdf.worker.js', dest: '/assets/lib/lib-viewer'},
-        {src: 'main/assets/lib/libtiff/tiff.min.js', dest: '/assets/lib/lib-viewer'},
-
-        {src: 'main/assets/lib/angular/**/*', dest: '/assets/lib/angular'},
-        {src: 'main/assets/lib/angular-ui-layout/**/*', dest: '/assets/lib/angular-ui-layout'},
-        {src: 'main/assets/lib/angular-translate/**/*', dest: '/assets/lib/angular-translate'},
-        {src: 'main/assets/lib/components-font-awesome/**/*', dest: '/assets/lib/components-font-awesome'},
-
-        {src: 'main/app/composite/media-viewer/index.html', dest: ''}
-    ];
-    //clean
-    return gulp.src([buildConfig.viewerFolder], {force: true})
-        .pipe(clean())
-        .on('end', function () {
-            //sass
-            gulp.src(buildConfig.srcFolder + '/assets/scss/itViewer.scss')
-                .pipe(sass({
-                    errLogToConsole: true
-                }))
-                .pipe(gulp.dest(buildConfig.viewerFolder + '/assets/css'))
-                .pipe(minifyCss({
-                    keepSpecialComments: 0
-                }))
-                .pipe(rename({extname: '.min.css'}))
-                .pipe(gulp.dest(buildConfig.viewerFolder + '/assets/css'));
-
-            //copy viewer lib
-            for (var i = 0; i < libs.length; i++) {
-                var fileToCopy = libs[i];
-                gulp.src(fileToCopy.src)
-                    .pipe(gulp.dest(buildConfig.viewerFolder + fileToCopy.dest + "/"));
-            }
-
-            //itViewer.js and itViewer.min.js
-            return gulp.src([buildConfig.srcFolder + '/app/viewer.module.js', buildConfig.srcFolder + '/app/composite/media-viewer/**/*.js'])
-                .pipe(concat('itViewer.js'))
-                .pipe(header(buildConfig.closureStart))
-                .pipe(footer(buildConfig.closureEnd))
-                .pipe(header(buildConfig.banner, {pkg: pkg}))
-                .pipe(gulp.dest(buildConfig.viewerFolder + '/app'))
-                .pipe(uglify())
-                .pipe(concat('itViewer.min.js'))
-                .pipe(header(buildConfig.banner, {pkg: pkg}))
-                .pipe(gulp.dest(buildConfig.viewerFolder + '/app'));
-        });
-});
-
-/**
  *
  * Traitement du less pour chaque theme
  *
  */
 gulp.task('less', function () {
-    buildConfig.themes.forEach(function (entry) {
-        gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
-            .pipe(less())
-            .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css/' + entry));
-
-    })
+    gulp.src(buildConfig.srcFolder + '/assets/less/material/material.less')
+        .pipe(less())
+        .pipe(gulp.dest(buildConfig.srcFolder + '/assets/css/material'));
 });
 
 /**
@@ -135,7 +76,7 @@ gulp.task('copy-sass', function (done) {
 /**
  * Compile les fichier scss en css et les dépose dans le répertoire /main/assets/css
  */
-gulp.task('sass', function (done) {
+gulp.task('sass', ['less'], function (done) {
     gulp.src(buildConfig.srcFolder + '/assets/scss/**/*.scss')
         .pipe(sass({
             errLogToConsole: true
@@ -155,11 +96,12 @@ gulp.task('css', function (callback) {
 /**
  * build css files
  */
-gulp.task('css-unpack', function (callback) {
+gulp.task('css-unpack', function (done) {
     buildConfig.themes.forEach(function (entry) {
         gulp.src([buildConfig.srcFolder + '/assets/css/' + entry + '/*.css'
         ]).pipe(gulp.dest(buildConfig.distFolder + '/assets/css'));
     });
+    done();
 });
 
 /**
@@ -179,18 +121,14 @@ gulp.task('vendor-css', function () {
  * build css minified css file.
  */
 gulp.task('itesoft-css', function (done) {
-    buildConfig.themes.forEach(function (entry) {
-        gulp.src(
-            [buildConfig.srcFolder + '/assets/css/' + entry + '/material.css',
-                buildConfig.srcFolder + '/assets/css/' + entry + '/' + entry + '.css']
-        )
-            .pipe(concat(entry + '.css'))
-            .pipe(minifyCss({
-                keepSpecialComments: 0
-            }))
-            .pipe(rename({extname: '.min.css'}))
-            .pipe(gulp.dest(buildConfig.distFolder + '/assets/css'));
-    });
+
+    gulp.src([buildConfig.srcFolder + '/assets/css/**/*.css'])
+        .pipe(minifyCss({
+            keepSpecialComments: 0
+        }))
+        .pipe(rename({extname: '.min.css'}))
+        .pipe(gulp.dest(buildConfig.distFolder + '/assets/css'));
+
     done();
 });
 
@@ -201,7 +139,8 @@ gulp.task('itesoft-css', function (done) {
 gulp.task('css-bundle', function () {
     buildConfig.themes.forEach(function (entry) {
         gulp.src([buildConfig.distFolder + '/assets/fonts/vendor.min.css',
-            buildConfig.distFolder + '/assets/css/' + entry + '.min.css'])
+            buildConfig.distFolder + '/assets/css/material/material.min.css',
+            buildConfig.distFolder + '/assets/css/' + entry + '/' + entry + '.min.css'])
             .pipe(concat(entry + '-bundle.css'))
             .pipe(rename({extname: '.min.css'}))
             .pipe(gulp.dest(buildConfig.distFolder + '/assets/fonts'));
