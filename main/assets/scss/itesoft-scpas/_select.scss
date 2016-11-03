@@ -1,72 +1,74 @@
-button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
-  padding: 0px;
-  padding-left: 2px;
-  height: 30px;
-  padding-right: 20px;
-  border-radius: 0px;
-}
+.it-container {
+  button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
+    padding: 0px;
+    padding-left: 2px;
+    height: 30px;
+    padding-right: 20px;
+    border-radius: 0px;
+  }
 
-button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
-  background-color: $inputTextBackColor;
-  color: $inputTextColor;
-  font-size: 15px;
-  background-image: none;
-  background-size: 0px;
-  margin: 5px;
-  width: 100%;
-  text-align: inherit;
-}
+  button[bs-select]:not(.it-select-more-filter):not(.it-save-filter):not(.excel-style-settings) {
+    background-color: $inputTextBackColor;
+    color: $inputTextColor;
+    font-size: 15px;
+    background-image: none;
+    background-size: 0px;
+    margin: 5px;
+    width: 100%;
+    text-align: inherit;
+  }
 
-.it-select-more-filter {
-  background-color: transparent;
-  background-size: 100%;
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  border: 0;
-  color: transparent;
-}
+  .it-select-more-filter {
+    background-color: transparent;
+    background-size: 100%;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: 0;
+    color: transparent;
+  }
 
-.it-save-filter {
-  background-size: 100%;
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  border: 0;
-  color: grey;
-  margin-top: auto;
-  cursor: pointer;
-  right: -5px;
-  bottom: -10px;
-  position: absolute;
-}
+  .it-save-filter {
+    background-size: 100%;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: 0;
+    color: grey;
+    margin-top: auto;
+    cursor: pointer;
+    right: -5px;
+    bottom: -10px;
+    position: absolute;
+  }
 
-ul.dropdown-menu > li:not(.active) > a:hover {
-  background-color: #eeeeee !important;
-  color: black !important;
-}
+  ul.dropdown-menu > li:not(.active) > a:hover {
+    background-color: #eeeeee !important;
+    color: black !important;
+  }
 
-button[bs-select] > span.caret {
-  right: 0px;
-  position: absolute;
-  margin: 10px;
-}
+  button[bs-select] > span.caret {
+    right: 0px;
+    position: absolute;
+    margin: 10px;
+  }
 
-ul.dropdown-menu > li > a {
-  margin: 0px;
-  padding-left: 1px;
-}
+  ul.dropdown-menu > li > a {
+    margin: 0px;
+    padding-left: 1px;
+  }
 
-ul.dropdown-menu {
-  border-radius: 0px !important;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #3A89EB;
-}
+  ul.dropdown-menu {
+    border-radius: 0px !important;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #3A89EB;
+  }
 
-.dropdown-menu .active a, .dropdown-menu .active-add a, .dropdown-menu .active-add a:focus, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
-  color: white;
-  text-decoration: none;
-  background-color: #3A89EB;
-  outline: 0;
+  .dropdown-menu .active a, .dropdown-menu .active-add a, .dropdown-menu .active-add a:focus, .dropdown-menu .active a:focus, .dropdown-menu .active a:hover {
+    color: white;
+    text-decoration: none;
+    background-color: #3A89EB;
+    outline: 0;
+  }
 }

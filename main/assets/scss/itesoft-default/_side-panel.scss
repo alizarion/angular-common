@@ -1,100 +1,100 @@
 $panel-border-color: #D9D9D9 !default;
 $panel-transition: all linear $animation-speed !default;
 $panel-button-transition: all linear $animation-speed !default;
+.it-container {
+  it-side-panel {
 
-it-side-panel {
+    .it-side-panel-container {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      display: block;
+    }
 
-  .it-side-panel-container {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    display: block;
+    .it-side-panel-container.it-side-panel-container-show {
+      padding: 0px;
+      display: block;
+      -moz-box-shadow: 0 0 36px $panel-border-color;
+      -webkit-box-shadow: 0 0 36px $panel-border-color;
+      -o-box-shadow: 0 0 36px $panel-border-color;
+      box-shadow: 0 0 36px $panel-border-color;
+      -webkit-transition: $panel-transition;
+      -moz-transition: $panel-transition;
+      -o-transition: $panel-transition;
+      transition: $panel-transition;
+    }
+
+    .it-side-panel-container .it-side-panel {
+      background: #f8f8f8;
+      overflow: hidden;
+      z-index: 1000;
+      border: 1px $panel-border-color solid;
+      -webkit-transition: $panel-transition;
+      -moz-transition: $panel-transition;
+      -o-transition: $panel-transition;
+      transition: $panel-transition;
+    }
+
+    .it-side-panel-container .it-vertical-text {
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+
+    .it-side-panel-container .it-side-panel-button {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      top: 0px;
+
+      background-color: #00BFFF;
+
+      margin-right: 0px !important;
+      margin-top: 0px !important;
+      padding: 10px;
+      color: white;
+      display: block;
+
+      -moz-box-shadow: -2px 0 2px 0px #656565;
+      -webkit-box-shadow: -2px 0 2px 0px #656565;
+      -o-box-shadow: -2px 0 2px 0px #656565;
+      box-shadow: -2px 0 2px 0px #656565;
+
+      border-bottom-left-radius: 1em 3em;
+      border-top-left-radius: 1em 3em;
+
+      -webkit-transition: $panel-button-transition;
+      -moz-transition: $panel-button-transition;
+      -o-transition: $panel-button-transition;
+      transition: $panel-button-transition;
+    }
+
+    .it-side-panel-container .it-side-panel-button-show {
+      border-bottom-right-radius: 1em 3em;
+      border-top-right-radius: 1em 3em;
+      border-bottom-left-radius: 0em 0em;
+      border-top-left-radius: 0em 0em;
+
+      -webkit-transition: $panel-button-transition;
+      -moz-transition: $panel-button-transition;
+      -o-transition: $panel-button-transition;
+      transition: all linear $animation-speed;
+    }
+
+    .it-side-panel-container .it-side-panel-button-right {
+      right: 0px;
+    }
+
+    .it-side-panel-container .it-side-panel .it-side-panel-content {
+      padding: 10px;
+    }
+
+    .it-side-panel-container .it-side-panel .it-side-panel-header {
+      top: 0;
+    }
+
+    .it-side-panel-container .it-side-panel .it-side-panel-footer {
+      text-align: center;
+    }
+
   }
-
-  .it-side-panel-container.it-side-panel-container-show {
-    padding: 0px;
-    display: block;
-    -moz-box-shadow: 0 0 36px $panel-border-color;
-    -webkit-box-shadow: 0 0 36px $panel-border-color;
-    -o-box-shadow: 0 0 36px $panel-border-color;
-    box-shadow: 0 0 36px $panel-border-color;
-    -webkit-transition: $panel-transition;
-    -moz-transition: $panel-transition;
-    -o-transition: $panel-transition;
-    transition: $panel-transition;
-  }
-
-  .it-side-panel-container .it-side-panel {
-    background: #f8f8f8;
-    overflow: hidden;
-    z-index: 1000;
-    border: 1px $panel-border-color solid;
-    -webkit-transition: $panel-transition;
-    -moz-transition: $panel-transition;
-    -o-transition: $panel-transition;
-    transition: $panel-transition;
-  }
-
-  .it-side-panel-container .it-vertical-text {
-    font-family: sans-serif;
-    font-weight: bold;
-  }
-
-  .it-side-panel-container .it-side-panel-button {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    top: 0px;
-
-    background-color: #00BFFF;
-
-    margin-right: 0px !important;
-    margin-top: 0px !important;
-    padding: 10px;
-    color: white;
-    display: block;
-
-    -moz-box-shadow: -2px 0 2px 0px #656565;
-    -webkit-box-shadow: -2px 0 2px 0px #656565;
-    -o-box-shadow: -2px 0 2px 0px #656565;
-    box-shadow: -2px 0 2px 0px #656565;
-
-    border-bottom-left-radius: 1em 3em;
-    border-top-left-radius: 1em 3em;
-
-    -webkit-transition: $panel-button-transition;
-    -moz-transition: $panel-button-transition;
-    -o-transition: $panel-button-transition;
-    transition: $panel-button-transition;
-  }
-
-  .it-side-panel-container .it-side-panel-button-show {
-    border-bottom-right-radius: 1em 3em;
-    border-top-right-radius: 1em 3em;
-    border-bottom-left-radius: 0em 0em;
-    border-top-left-radius: 0em 0em;
-
-    -webkit-transition: $panel-button-transition;
-    -moz-transition: $panel-button-transition;
-    -o-transition: $panel-button-transition;
-    transition: all linear $animation-speed;
-  }
-
-  .it-side-panel-container .it-side-panel-button-right {
-    right: 0px;
-  }
-
-  .it-side-panel-container .it-side-panel .it-side-panel-content {
-    padding: 10px;
-  }
-
-  .it-side-panel-container .it-side-panel .it-side-panel-header {
-    top: 0;
-  }
-
-  .it-side-panel-container .it-side-panel .it-side-panel-footer {
-    text-align: center;
-  }
-
 }
-

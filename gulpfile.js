@@ -37,6 +37,7 @@ var chmod = require('gulp-chmod');
 gulp.task('build', function (callback) {
     runSequence('clean', 'sass', 'copy-sass', 'less',
         'css',
+        'css-unpack',
         ['uglify', 'uglify-debug', 'vendor', 'html', 'assets', 'fonts', 'demo-js', 'copy-rename-files'],
         callback);
 });
@@ -155,11 +156,12 @@ gulp.task('css', function (callback) {
 /**
  * build css files
  */
-gulp.task('css-unpack', function (callback) {
+gulp.task('css-unpack', function (done) {
     buildConfig.themes.forEach(function (entry) {
         gulp.src([buildConfig.srcFolder + '/assets/css/' + entry + '/*.css'
         ]).pipe(gulp.dest(buildConfig.distFolder + '/assets/css'));
     });
+    done();
 });
 
 /**
