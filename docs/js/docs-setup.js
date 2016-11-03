@@ -131,6 +131,15 @@ NG_DOCS={
     },
     {
       "section": "api",
+      "id": "itesoft.directive:itAutoRefreshMessage",
+      "shortName": "itAutoRefreshMessage",
+      "type": "directive",
+      "moduleName": "itesoft",
+      "shortDescription": "The itAutoRefreshMessage provides dynamic message refresh.",
+      "keywords": "$scope $templatecache add-message-button-visible add-message-function addmessage admin adminmessagepopup ajouter angular annuler api backdrop btn-primary btn-success buttons ceci class col-lg-4 col-md-6 col-xs-12 comment-input control-label controller currentmessage custom data directive dynamic elements envoyer est exemple false form-group full-with function homectrl html itautorefreshmessage itesoft itpopup js mess message module ng-controller ng-model ontap push refresh return scope second text title transition true type var"
+    },
+    {
+      "section": "api",
       "id": "itesoft.directive:itBlock",
       "shortName": "itBlock",
       "type": "directive",

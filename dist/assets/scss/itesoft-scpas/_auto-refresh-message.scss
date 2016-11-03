@@ -1,0 +1,42 @@
+.it-theme-container {
+  it-auto-refresh-message {
+
+    .it-message {
+      position: relative;
+      width: 100%;
+      display: block;
+    }
+
+    .it-message-comment-transition-opacity-0 {
+      opacity: 0;
+      transition: 0.5s linear all;
+      min-height: 35px;
+    }
+
+    .it-message-comment-transition-opacity-1 {
+      opacity: 1;
+      transition: 0.5s linear all;
+      min-height: 35px;
+    }
+
+    .it-message-comment-from {
+      font-weight: bold;
+      color: black;
+    }
+
+    .it-message-comment-time {
+      color: $grey-600;
+      font-size: 11px;
+      padding-bottom: 0px;
+      padding-left: 10px;
+    }
+
+    .it-message-comment-add-button {
+      right: 5px;
+      position: absolute;
+      height: 50%;
+      top: 50%;
+      transform: translateY(-16px);
+    }
+  }
+}

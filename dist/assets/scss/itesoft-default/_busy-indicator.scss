@@ -1,41 +1,42 @@
 $busy-indicator-background: $background;
-
-it-busy-indicator {
-  .mask-loading-container {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 900;
-    opacity: 0.3;
-    background: $busy-indicator-background; /* Old browsers */
-    background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
-    background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
-    //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
-  }
-  .main-loading-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -50px;
-    margin-left: -50px;
-    width: 100px;
-    height: 100px;
-    z-index: 901;
-    border-color: black;
-    border-radius: 5px;
-    opacity: 0.8;
-    padding: 20px;
-    background: $busy-indicator-background; /* Old browsers */
-    background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
-    background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
-    //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
+.it-theme-container {
+  it-busy-indicator {
+    .mask-loading-container {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 900;
+      opacity: 0.3;
+      background: $busy-indicator-background; /* Old browsers */
+      background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
+      background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
+      background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
+      background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
+      background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
+      //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
+    }
+    .main-loading-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -50px;
+      width: 100px;
+      height: 100px;
+      z-index: 901;
+      border-color: black;
+      border-radius: 5px;
+      opacity: 0.8;
+      padding: 20px;
+      background: $busy-indicator-background; /* Old browsers */
+      background: -moz-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* FF3.6+ */
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, $busy-indicator-background), color-stop(100%, $busy-indicator-background)); /* Chrome,Safari4+ */
+      background: -webkit-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Chrome10+,Safari5.1+ */
+      background: -o-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* Opera 11.10+ */
+      background: -ms-linear-gradient(top, $busy-indicator-background 0%, $busy-indicator-background 100%); /* IE10+ */
+      background: linear-gradient(to bottom, $busy-indicator-background 0%, $busy-indicator-background 100%); /* W3C */
+      //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f1d818', endColorstr='#f9ea1b', GradientType=0); /* IE6-9 */
+    }
   }
 }

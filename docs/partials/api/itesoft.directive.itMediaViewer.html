@@ -157,39 +157,39 @@
 </table>
 
 <pre><code class="lang-html">  &lt;style&gt;
-        //override style selection
-        .multipage-viewer .selected {
+//override style selection
+.multipage-viewer .selected {
            border-style: solid;
            border-width: 1px;
            border-color: red;
         }
 
-        .thumbnail-viewer .selected {
+.thumbnail-viewer .selected {
            border-style: solid;
            border-width: 1px;
            border-color: red;
         }
 
-        //override thumbnail num-page
-        .thumbnail-viewer .num-page {
+//override thumbnail num-page
+.thumbnail-viewer .num-page {
             text-align: center;
         }
 
-         //override full text rectangle
-        .multipage-viewer .textLayer &gt; .word:hover {
+//override full text rectangle
+.multipage-viewer .textLayer &gt; .word:hover {
              border: solid;
              border-color: red;
              border-width: 1px;
        }
 
-        //override text selection color
-       .multipage-viewer .textLayer ::selection {
+//override text selection color
+.multipage-viewer .textLayer ::selection {
             background: rgba(0,0,255, 0.2);
        }
-       .multipage-viewer .textLayer ::-moz-selection {
+.multipage-viewer .textLayer ::-moz-selection {
             background: rgba(0,0,255, 0.2);
        }
-     &lt;/style&gt;
+&lt;/style&gt;
   &lt;it-media-viewer&gt;&lt;/it-media-viewer&gt;
 </code></pre>
 </div></div>
@@ -213,28 +213,28 @@ as class<pre class="prettyprint linenums">&lt;ANY class="it-media-viewer"&gt;
 </div>
 <h2 id="example">Example</h2>
 <div class="example"><div class="itesoft-directive-page itesoft-directive-itmediaviewer-page"><h4 id="example_source">Source</h4>
-<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-6" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div source-edit="itesoft-showcase" source-edit-deps="angular.js Module.js controller.js" source-edit-html="index.html-13" source-edit-css="" source-edit-js="Module.js controller.js" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
 <div class="tabbable"><div class="tab-pane" title="index.html">
-<pre class="prettyprint linenums" ng-set-text="index.html-6" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
-<script type="text/ng-template" id="index.html-6">
-    <div ng-controller="HomeCtrl" class="row">
-       <div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
-    </div>
+<pre class="prettyprint linenums" ng-set-text="index.html-13" ng-html-wrap-loaded="itesoft-showcase angular.js Module.js controller.js"></pre>
+<script type="text/ng-template" id="index.html-13">
+<div ng-controller="HomeCtrl" class="row">
+<div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+</div>
 </script>
 </div>
 <div class="tab-pane" title="Module.js">
 <pre class="prettyprint linenums" ng-set-text="Module.js"></pre>
 <script type="text/ng-template" id="Module.js">
-   angular.module('itesoft-showcase',['itesoft.viewer'])
+angular.module('itesoft-showcase',['itesoft.viewer'])
 </script>
 </div>
 <div class="tab-pane" title="controller.js">
 <pre class="prettyprint linenums" ng-set-text="controller.js"></pre>
 <script type="text/ng-template" id="controller.js">
-    angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : '/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : 'js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
 </script>
 </div>
 </div><h4 id="example_demo">Demo</h4>
-<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-6" ng-eval-javascript="Module.js controller.js"></div>
+<div class="well doc-example-live animate-container" ng-embed-app="itesoft-showcase" ng-set-html="index.html-13" ng-eval-javascript="Module.js controller.js"></div>
 </div></div>
 </div>

@@ -1,9 +1,11 @@
-it-view-title {
-  h3 {
-    color: $primary;
-  }
+.it-theme-container {
+  it-view-title {
+    h3 {
+      color: $primary;
+    }
 
-  hr {
-    border-top: 2px solid $primary;
+    hr {
+      border-top: 2px solid $primary;
+    }
   }
 }

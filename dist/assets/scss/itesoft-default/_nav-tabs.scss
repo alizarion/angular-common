@@ -1,56 +1,55 @@
-.nav-tabs>li>a {
-  display: inline-block;
-  color: #7a7a7a;
-  position: relative;
-  width: 100%;
-  -webkit-transition: all;
-  -o-transition: all;
-  transition: all;
-  -webkit-transition-duration: 250ms;
-  transition-duration: 250ms;
-  font-weight: 500;
-}
+.it-theme-container {
+  .nav-tabs > li > a {
+    display: inline-block;
+    color: #7a7a7a;
+    position: relative;
+    width: 100%;
+    -webkit-transition: all;
+    -o-transition: all;
+    transition: all;
+    -webkit-transition-duration: 250ms;
+    transition-duration: 250ms;
+    font-weight: 500;
+  }
 
+  .nav-tabs > li > a:after {
+    content: "";
+    height: 3px;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    -webkit-transition: all;
+    -o-transition: all;
+    transition: all;
+    -webkit-transition-duration: 250ms;
+    transition-duration: 250ms;
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    -o-transform: scale(0);
+    transform: scale(0);
+  }
 
+  .nav-tabs > li > a:after {
+    background: $primary;
+  }
 
-.nav-tabs > li > a:after {
-  content: "";
-  height: 3px;
-  position: absolute;
-  width: 100%;
-  left: 0;
-  bottom: 0;
-  -webkit-transition: all;
-  -o-transition: all;
-  transition: all;
-  -webkit-transition-duration: 250ms;
-  transition-duration: 250ms;
-  -webkit-transform: scale(0);
-  -ms-transform: scale(0);
-  -o-transform: scale(0);
-  transform: scale(0);
-}
+  .nav-tabs > li.active > a:after {
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
 
-.nav-tabs > li > a:after {
-  background: $primary;
-}
+  }
 
+  .nav.nav-tabs > li.active > a {
+    font-weight: bold;
+  }
 
-.nav-tabs > li.active > a:after {
-  -webkit-transform: scale(1);
-  -ms-transform: scale(1);
-  -o-transform: scale(1);
-  transform: scale(1);
-
-}
-
-.nav.nav-tabs > li.active > a {
-  font-weight: bold;
-}
-
-*:before, *:after {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
+  *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
 }

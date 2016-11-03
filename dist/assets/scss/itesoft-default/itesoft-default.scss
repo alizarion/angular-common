@@ -22,109 +22,112 @@ html {
   height: 100%;
 }
 
-html, body {
+html, html body.it-theme-container {
   margin: 0;
   height: 100%;
   min-height: 100% !important;
 }
 
-.it-view-header hr {
-  border-top: 2px solid $primary;
-}
+.it-theme-container {
 
-.it-view-header h3 {
-  color: $primary;
-}
-
-.it-fill {
-  height: 100% !important;
-  min-height: 100%;
-}
-
-input::-ms-clear {
-  display: none;
-}
-
-.it-watermark {
-  position: absolute;
-  top: 80px;
-  opacity: 0.25;
-  font-size: 3em;
-  width: 100%;
-  text-align: center;
-}
-
-.it-background {
-  background-color: $background;
-}
-
-.row-height-10 {
-  min-height: 100%;
-  height: 100%;
-}
-
-.row-height-1 {
-  min-height: 10%;
-  height: 10%;
-}
-
-.row-height-2 {
-  min-height: 20%;
-  height: 20%;
-}
-
-.row-height-3 {
-  min-height: 30%;
-  height: 30%;
-}
-
-.row-height-4 {
-  min-height: 40%;
-  height: 40%;
-}
-
-.row-height-5 {
-  min-height: 50%;
-  height: 50%;
-}
-
-.row-height-6 {
-  min-height: 60%;
-  height: 60%;
-}
-
-.row-height-7 {
-  min-height: 70%;
-  height: 70%;
-}
-
-.row-height-8 {
-  min-height: 80%;
-  height: 80%;
-}
-
-.row-height-9 {
-  min-height: 90%;
-  height: 90%;
-}
-
-@for $i from 1 through 40 {
-  .width-#{25 * $i} {
-    width: 25 * $i+px;
+  .it-view-header hr {
+    border-top: 2px solid $primary;
   }
-}
 
-.message-text-overflow {
-  text-overflow: ellipsis;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-}
+  .it-view-header h3 {
+    color: $primary;
+  }
 
-.label-text-overflow {
-  text-overflow: ellipsis;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
+  .it-fill {
+    height: 100% !important;
+    min-height: 100%;
+  }
+
+  input::-ms-clear {
+    display: none;
+  }
+
+  .it-watermark {
+    position: absolute;
+    top: 80px;
+    opacity: 0.25;
+    font-size: 3em;
+    width: 100%;
+    text-align: center;
+  }
+
+  .it-background {
+    background-color: $background;
+  }
+
+  .row-height-10 {
+    min-height: 100%;
+    height: 100%;
+  }
+
+  .row-height-1 {
+    min-height: 10%;
+    height: 10%;
+  }
+
+  .row-height-2 {
+    min-height: 20%;
+    height: 20%;
+  }
+
+  .row-height-3 {
+    min-height: 30%;
+    height: 30%;
+  }
+
+  .row-height-4 {
+    min-height: 40%;
+    height: 40%;
+  }
+
+  .row-height-5 {
+    min-height: 50%;
+    height: 50%;
+  }
+
+  .row-height-6 {
+    min-height: 60%;
+    height: 60%;
+  }
+
+  .row-height-7 {
+    min-height: 70%;
+    height: 70%;
+  }
+
+  .row-height-8 {
+    min-height: 80%;
+    height: 80%;
+  }
+
+  .row-height-9 {
+    min-height: 90%;
+    height: 90%;
+  }
+
+  @for $i from 1 through 40 {
+    .width-#{25 * $i} {
+      width: 25 * $i+px;
+    }
+  }
+
+  .message-text-overflow {
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .label-text-overflow {
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }

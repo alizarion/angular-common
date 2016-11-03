@@ -11,7 +11,7 @@
   src: local("Source Sans Pro Bold"), url(../fonts/SourceSansPro-Bold.woff2) format('woff2');
 }
 
-* {
+.it-theme-container:not(.fa) {
   font-size: 100%;
   font-family: 'Source Sans Pro', sans-serif;
 }
