@@ -18,17 +18,17 @@
 "template",
 "view-title";
 
-.it-container {
+html {
+  height: 100%;
+}
 
-  html {
-    height: 100%;
-  }
+html, html body.it-theme-container {
+  margin: 0;
+  height: 100%;
+  min-height: 100% !important;
+}
 
-  html, html body {
-    margin: 0;
-    height: 100%;
-    min-height: 100% !important;
-  }
+.it-theme-container {
 
   .it-view-header hr {
     border-top: 2px solid $primary;

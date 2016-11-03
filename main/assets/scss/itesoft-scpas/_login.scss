@@ -1,8 +1,10 @@
 @charset "UTF-8";
-.it-container {
-  html {
-    overflow: hidden
-  }
+
+body.it-theme-container {
+  overflow: hidden
+}
+
+.it-theme-container {
 
   .login-block {
     display: table;

@@ -163,62 +163,64 @@
  *
  * ```html
  *    <style>
-         //override style selection
-         .multipage-viewer .selected {
+ //override style selection
+ .multipage-viewer .selected {
             border-style: solid;
             border-width: 1px;
             border-color: red;
          }
 
-         .thumbnail-viewer .selected {
+ .thumbnail-viewer .selected {
             border-style: solid;
             border-width: 1px;
             border-color: red;
          }
 
-         //override thumbnail num-page
-         .thumbnail-viewer .num-page {
+ //override thumbnail num-page
+ .thumbnail-viewer .num-page {
          	text-align: center;
          }
 
-          //override full text rectangle
-         .multipage-viewer .textLayer > .word:hover {
+ //override full text rectangle
+ .multipage-viewer .textLayer > .word:hover {
               border: solid;
               border-color: red;
               border-width: 1px;
         }
 
-         //override text selection color
-        .multipage-viewer .textLayer ::selection {
+ //override text selection color
+ .multipage-viewer .textLayer ::selection {
              background: rgba(0,0,255, 0.2);
         }
-        .multipage-viewer .textLayer ::-moz-selection {
+ .multipage-viewer .textLayer ::-moz-selection {
              background: rgba(0,0,255, 0.2);
         }
-      </style>
+ </style>
  *    <it-media-viewer></it-media-viewer>
  * ```
  *
  * @example
  <example module="itesoft-showcase">
  <file name="index.html">
-     <div ng-controller="HomeCtrl" class="row">
-        <div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
-     </div>
+ <div ng-controller="HomeCtrl" class="row">
+ <div class="col-md-12"><div style="height: 500px;">SelectedText : {{selectedText}}<it-media-viewer src="'http://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf'" options="options"></it-media-viewer></div></div>
+ </div>
  </file>
  <file name="Module.js">
-    angular.module('itesoft-showcase',['itesoft.viewer'])
+ angular.module('itesoft-showcase',['itesoft.viewer'])
  </file>
  <file name="controller.js">
-     angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : '/angular-common/docs/js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+ angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : 'js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
  </file>
  </example>
  */
 
-angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', function(itScriptService){
+
+
+angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', function (itScriptService) {
 
     var _splitLast = function (word, character) {
-        if(word != undefined){
+        if (word != undefined) {
             var words = word.split(character);
             return words[words.length - 1];
         }
@@ -234,7 +236,7 @@ angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', 
                     scope.pdfSrc = value;
                     itScriptService.LoadScripts([
                         pathJs + '/pdf.js',
-                    ]).then(function() {
+                    ]).then(function () {
                         //Hack for IE http://stackoverflow.com/questions/26101071/no-pdfjs-workersrc-specified/26291032
                         PDFJS.workerSrc = pathJs + "/pdf.worker.js";
                         //PDFJS.cMapUrl = pathJs + "/cmaps/";
@@ -253,12 +255,12 @@ angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', 
                     scope.tiffSrc = value;
                     itScriptService.LoadScripts([
                         pathJs + '/tiff.min.js'
-                    ]).then(function() {
+                    ]).then(function () {
                         scope.template = '<it-tiff-viewer src="tiffSrc" options="options"></it-tiff-viewer>';
                     });
                     break;
                 default :
-                    if(scope.options && scope.options.onTemplateNotFound) {
+                    if (scope.options && scope.options.onTemplateNotFound) {
                         scope.options.onTemplateNotFound(ext);
                     }
                     $log.debug('No template found for extension : ' + ext);
@@ -267,15 +269,15 @@ angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', 
             }
         };
 
-        var _setValue = function(newValue, oldValue) {
-            if(newValue){
-                if(typeof newValue === typeof ""){
+        var _setValue = function (newValue, oldValue) {
+            if (newValue) {
+                if (typeof newValue === typeof "") {
                     scope.ext = _splitLast(newValue, '.').toLowerCase();
                     _setTemplate(scope.ext, newValue);
                 } else {
-                    if(attrs.type) {
+                    if (attrs.type) {
                         _setTemplate(attrs.type.toLowerCase(), newValue);
-                    }else if(newValue.name != undefined) {
+                    } else if (newValue.name != undefined) {
                         scope.ext = _splitLast(_splitLast(newValue.name, '.'), '/').toLowerCase();
                         _setTemplate(scope.ext, newValue);
                     } else {
@@ -283,7 +285,7 @@ angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', 
                         scope.template = null;
                     }
                 }
-            } else if(newValue != oldValue) {
+            } else if (newValue != oldValue) {
                 scope.template = null;
             }
         };
@@ -294,13 +296,13 @@ angular.module('itesoft.viewer').directive('itMediaViewer', ['itScriptService', 
 
     return {
         scope: {
-            src : '=',
+            src: '=',
             file: '=',
             type: '@',
-            options : '=',
+            options: '=',
         },
         restrict: 'E',
-        template :  '<div it-include="template"></div>',
+        template: '<div it-include="template"></div>',
         link: linker
     };
 }]);
