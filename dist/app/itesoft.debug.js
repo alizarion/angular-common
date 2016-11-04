@@ -47,6 +47,55 @@ var IteSoft = angular.module('itesoft', [
     'angular-timeline'
 ]);
 
+/**
+ * @ngdoc filter
+ * @name itesoft.filter:itUnicode
+ * @module itesoft
+ * @restrict EA
+ * @since 1.0
+ * @description
+ * Simple filter that escape string to unicode.
+ *
+ *
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+             <div ng-controller="myController">
+                <p ng-bind-html="stringToEscape | itUnicode"></p>
+
+                 {{stringToEscape | itUnicode}}
+             </div>
+        </file>
+         <file name="Controller.js">
+            angular.module('itesoft')
+                .controller('myController',function($scope){
+                 $scope.stringToEscape = 'o"@&\'';
+            });
+
+         </file>
+    </example>
+ */
+IteSoft
+    .filter('itUnicode',['$sce', function($sce){
+        return function(input) {
+            function _toUnicode(theString) {
+                var unicodeString = '';
+                for (var i=0; i < theString.length; i++) {
+                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
+                    while (theUnicode.length < 4) {
+                        theUnicode = '0' + theUnicode;
+                    }
+                    theUnicode = '&#x' + theUnicode + ";";
+
+                    unicodeString += theUnicode;
+                }
+                return unicodeString;
+            }
+            return $sce.trustAsHtml(_toUnicode(input));
+        };
+}]);
+
+
 'use strict';
 
 /**
@@ -8923,55 +8972,6 @@ IteSoft
         }
     });
 
-/**
- * @ngdoc filter
- * @name itesoft.filter:itUnicode
- * @module itesoft
- * @restrict EA
- * @since 1.0
- * @description
- * Simple filter that escape string to unicode.
- *
- *
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-             <div ng-controller="myController">
-                <p ng-bind-html="stringToEscape | itUnicode"></p>
-
-                 {{stringToEscape | itUnicode}}
-             </div>
-        </file>
-         <file name="Controller.js">
-            angular.module('itesoft')
-                .controller('myController',function($scope){
-                 $scope.stringToEscape = 'o"@&\'';
-            });
-
-         </file>
-    </example>
- */
-IteSoft
-    .filter('itUnicode',['$sce', function($sce){
-        return function(input) {
-            function _toUnicode(theString) {
-                var unicodeString = '';
-                for (var i=0; i < theString.length; i++) {
-                    var theUnicode = theString.charCodeAt(i).toString(16).toUpperCase();
-                    while (theUnicode.length < 4) {
-                        theUnicode = '0' + theUnicode;
-                    }
-                    theUnicode = '&#x' + theUnicode + ";";
-
-                    unicodeString += theUnicode;
-                }
-                return unicodeString;
-            }
-            return $sce.trustAsHtml(_toUnicode(input));
-        };
-}]);
-
-
 'use strict';
 /**
  * @ngdoc service
@@ -11345,6 +11345,1350 @@ itImageViewer.directive('itImageViewer', ['$log', 'MultiPagesAddEventWatcher', f
 
 'use strict';
 /**
+ * TODO itThumbnailMenuViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
+    var linker = function (scope, element, attrs) {
+        scope.model = {};
+        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
+        scope.model.currentSize = scope.model.sizes[2];
+    };
+
+    return {
+        scope : { options : "=", orientation : "=" },
+        transclude : true,
+        restrict: 'E',
+        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select class="form-control" ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
+        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO itThumbnailViewer desc
+ */
+itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
+    var pageMargin = 10;
+
+    return {
+        restrict: "E",
+        scope: {
+            viewerApi: "=",
+            orientation : "=",
+            showNumPages : "="
+        },
+        controller: ['$scope', '$element', function($scope, $element) {
+
+            $scope.shouldShowNumPages = function () {
+                var showNumPages = this.showNumPages;
+                if(typeof showNumPages === typeof true) {
+                    return showNumPages;
+                }
+
+                return true;
+            };
+
+            var viewer = new ThumbnailViewer($element);
+            $element.addClass('thumbnail-viewer');
+            $scope.api = viewer.getAPI();
+            $scope.onViewerApiChanged = function () {
+                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
+            };
+
+            viewer.hookScope($scope);
+        }],
+        link: function(scope, element, attrs) {
+            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
+                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
+                  scope.onViewerApiChangedTimeout = $timeout(function() {
+                      scope.onViewerApiChanged()
+                  }, 300);
+            });
+        }
+    };
+}]);
+'use strict';
+/**
+ * TODO Thumbnail implementation desc
+ */
+itMultiPagesViewer 
+    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
+
+        function ThumbnailViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
+            return this.viewer.viewer.getAPI().getSelectedPage();
+        };
+
+        return (ThumbnailViewerAPI);
+    }])
+
+    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', function($log, $timeout, MultiPagesPage) {
+
+        function ThumbnailPage(viewer, page, showNumPages) {
+            this.base = MultiPagesPage;
+            this.base(viewer, page.pageIndex, page.view);
+
+            if(showNumPages) {
+                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
+            }
+
+            this.page = page;
+        }
+
+        ThumbnailPage.prototype = new MultiPagesPage;
+
+        ThumbnailPage.prototype.clear = function () {
+            if(this.renderTask != null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
+        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
+            return this.page.getViewport(scale, rotation);
+        };
+        ThumbnailPage.prototype.renderPage = function (page, callback) {
+            this.page.renderPage(page, callback);
+            if(this.pageNum != undefined) {
+                page.wrapper.append(this.pageNum);
+            }
+        };
+        ThumbnailPage.prototype.getZoomSelectionShortcutKey = function(e) {
+            return this.page.getZoomSelectionShortcutKey(e);
+        };
+
+        return (ThumbnailPage);
+    }])
+
+    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
+
+        function ThumbnailViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new ThumbnailViewerAPI(this), element);
+            this.name = "ThumbnailViewer";
+        }
+
+        ThumbnailViewer.prototype = new MultiPagesViewer;
+
+        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
+            this.element.empty();
+            this.pages = [];
+            if(viewerApi != null) {
+                var self = this;
+                this.viewer = viewerApi.getViewer();
+                //defer rendering of thumbnail
+                this.renderAllVisiblePagesTimeoutValue = (this.viewer.renderAllVisiblePagesTimeoutValue + 100);
+                this.viewer.thumbnail = this;
+                this.pageMargin = pageMargin;
+                this.showNumPages = showNumPages;
+
+
+                this.orientation = orientation;
+
+                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
+                } else {
+                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
+                }
+
+                this.getAllPages(function(pageList) {
+                    self.pages = pageList;
+                    self.addPages();
+                    self.setContainerSize(self.initialScale);
+                });
+            }
+        };
+        ThumbnailViewer.prototype.getAllPages = function(callback) {
+            var pageList = [],
+                numPages = this.viewer.pages.length,
+                remainingPages = numPages,
+                self = this;
+            for(var iPage = 0; iPage<numPages;++iPage) {
+                pageList.push({});
+                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
+                pageList[iPage] = page;
+
+                --remainingPages;
+                if (remainingPages === 0) {
+                    callback(pageList);
+                }
+            }
+        };
+        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
+            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
+                containerSize.height -= 20;
+            }
+        };
+        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
+            if(this.viewer) {
+                this.viewer.api.goToPage(pageIndex);
+                this.viewer.selectedPage = pageIndex;
+            }
+        };
+        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
+            //Keep selection
+        };
+        ThumbnailViewer.prototype.onDestroy = function () {
+            if(self.viewer != null){
+                this.viewer.thumbnail = null;
+                self.viewer = null;
+            }
+        };
+
+        ThumbnailViewer.prototype.zoomToSelection = function(value) {
+            this.viewer.zoomToSelection(value);
+        };
+
+        return (ThumbnailViewer);
+    }]);
+'use strict';
+/**
+ * TODO CustomStyle desc
+ */
+itPdfViewer.factory('CustomStyle', [function () {
+        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
+        //              animate-css-transforms-firefox-webkit.html
+        // in some versions of IE9 it is critical that ms appear in this list
+        // before Moz
+        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
+        var _cache = {};
+
+        function CustomStyle() {}
+
+        CustomStyle.getProp = function get(propName, element) {
+            // check cache only when no element is given
+            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
+                return _cache[propName];
+            }
+
+            element = element || document.documentElement;
+            var style = element.style, prefixed, uPropName;
+
+            // test standard property first
+            if (typeof style[propName] === 'string') {
+                return (_cache[propName] = propName);
+            }
+
+            // capitalize
+            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+
+            // test vendor specific properties
+            for (var i = 0, l = prefixes.length; i < l; i++) {
+                prefixed = prefixes[i] + uPropName;
+                if (typeof style[prefixed] === 'string') {
+                    return (_cache[propName] = prefixed);
+                }
+            }
+
+            //if all fails then set to undefined
+            return (_cache[propName] = 'undefined');
+        };
+
+        CustomStyle.setProp = function set(propName, element, str) {
+            var prop = this.getProp(propName);
+            if (prop !== 'undefined') {
+                element.style[prop] = str;
+            }
+        };
+
+        return (CustomStyle);
+    }]);
+
+'use strict';
+/**
+ * TODO EventBus desc
+ */
+itPdfViewer .factory('EventBus', [function () {
+        function EventBus() {
+            this._listeners = Object.create(null);
+        }
+
+        EventBus.prototype = {
+            on: function EventBus_on(eventName, listener) {
+                var eventListeners = this._listeners[eventName];
+                if (!eventListeners) {
+                    eventListeners = [];
+                    this._listeners[eventName] = eventListeners;
+                }
+                eventListeners.push(listener);
+            },
+            off: function EventBus_on(eventName, listener) {
+                var eventListeners = this._listeners[eventName];
+                var i;
+                if (!eventListeners || ((i = eventListeners.indexOf(listener)) < 0)) {
+                    return;
+                }
+                eventListeners.splice(i, 1);
+            },
+            dispatch: function EventBus_dispath(eventName) {
+                var eventListeners = this._listeners[eventName];
+                if (!eventListeners || eventListeners.length === 0) {
+                    return;
+                }
+                // Passing all arguments after the eventName to the listeners.
+                var args = Array.prototype.slice.call(arguments, 1);
+                // Making copy of the listeners array in case if it will be modified
+                // during dispatch.
+                eventListeners.slice(0).forEach(function (listener) {
+                    listener.apply(null, args);
+                });
+            }
+        };
+
+        return (EventBus);
+    }]);
+
+'use strict';
+/**
+ * TODO itPdfViewer desc
+ */
+itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
+    var linker = function (scope, element, attrs) {
+
+        scope.thumbnailCollapsed = false;
+        scope.onPassword = function (reason) {
+            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
+        };
+
+        scope.toggleThumbnail = function () {
+            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
+        };
+
+        MultiPagesAddEventWatcher(scope);
+    };
+
+    return {
+        scope: {
+            src: "=",
+            options: "="
+        },
+        restrict: 'E',
+        template :
+        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
+            '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
+            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="multipage-viewer-thumbnail-menu">' +
+                '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
+                    '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
+                        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
+                    '</div>' +
+                '</it-thumbnail-menu-viewer>' +
+            '</div>' +
+            '<div ui-layout-container>' +
+                '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options" password-callback="onPassword(reason)"></pdf-viewer>' +
+            '</div>' +
+            '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
+                '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
+            '</div>' +
+        '</div>',
+        link: linker
+    };
+}]);
+'use strict';
+/**
+ * TODO Pdf implementation desc
+ */
+itPdfViewer
+    .factory('PDFViewerAPI', ['$log', 'MultiPagesViewerAPI', 'DownloadManager', function ($log, MultiPagesViewerAPI, DownloadManager) {
+
+        function getFileNameFromURL (url) {
+            var reURI = /^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
+            //            SCHEME      HOST         1.PATH  2.QUERY   3.REF
+            // Pattern to get last matching NAME.pdf
+            var reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
+            var splitURI = reURI.exec(url);
+            var suggestedFilename = reFilename.exec(splitURI[1]) ||
+                reFilename.exec(splitURI[2]) ||
+                reFilename.exec(splitURI[3]);
+            if (suggestedFilename) {
+                suggestedFilename = suggestedFilename[0];
+                if (suggestedFilename.indexOf('%') !== -1) {
+                    // URL-encoded %2Fpath%2Fto%2Ffile.pdf should be file.pdf
+                    try {
+                        suggestedFilename =
+                            reFilename.exec(decodeURIComponent(suggestedFilename))[0];
+                    } catch(e) { // Possible (extremely rare) errors:
+                        // URIError "Malformed URI", e.g. for "%AA.pdf"
+                        // TypeError "null has no properties", e.g. for "%2F.pdf"
+                    }
+                }
+            }
+            return suggestedFilename || 'document.pdf';
+        }
+
+        function PDFViewerAPI(viewer) {
+            this.base = MultiPagesViewerAPI;
+            this.base(viewer);
+        };
+
+        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
+
+        PDFViewerAPI.prototype.findNext = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
+            if(nextHighlightID >= this.viewer.searchResults.length) {
+                nextHighlightID = 0;
+            }
+
+            this.viewer.highlightSearchResult(nextHighlightID);
+        };
+        PDFViewerAPI.prototype.findPrev = function () {
+            if(this.viewer.searchHighlightResultID === -1) {
+                return;
+            }
+
+            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
+            if(prevHighlightID < 0) {
+                prevHighlightID = this.viewer.searchResults.length - 1;
+            }
+
+            this.viewer.highlightSearchResult(prevHighlightID);
+        };
+        PDFViewerAPI.prototype.download = function() {
+            var self = this;
+            var url = self.viewer.url;
+            var filename = getFileNameFromURL(url);
+
+            self.viewer.pdf.getData().then(function (data) {
+                    var blob = DownloadManager.createBlob(data, 'application/pdf');
+                    DownloadManager.download(blob, url, filename);
+                }, function() {
+                    DownloadManager.downloadUrl(url, filename);
+                } // Error occurred try downloading with just the url.
+            );
+        };
+
+        return (PDFViewerAPI);
+    }])
+
+    .factory('PDFPage', ['$log', 'MultiPagesPage', 'MultiPagesConstants', 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
+
+        function PDFPage(viewer, pdfPage) {
+            this.base = MultiPagesPage;
+            this.base(viewer, pdfPage.pageIndex);
+
+            this.pdfPage = pdfPage;
+            this.renderTask = null;
+        }
+
+        PDFPage.prototype = new MultiPagesPage;
+
+        PDFPage.prototype.clear = function () {
+            if(this.renderTask != null) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.clear.call(this);
+            this.renderTask = null;
+        };
+        PDFPage.prototype.getViewport = function (scale , rotation) {
+            return this.pdfPage.getViewport(scale, rotation + (this.pdfPage.pageInfo ? this.pdfPage.pageInfo.rotate : 0), 0, 0);
+        };
+        PDFPage.prototype.renderTextLayer = function () {
+            var self = this;
+            if(this.viewer.mode.id === MultiPagesConstants.MODE_TEXT) {
+                if(self.textLayer != null) {
+                    self.addLayer(self.textLayer);
+                } else {
+
+                    self.textLayer = angular.element("<div class='textLayer r" + self.rotation + "'></div>");
+                    self.textLayer.css("width", this.viewport.width + "px");
+                    self.textLayer.css("height", this.viewport.height + "px");
+                    if (self.textContentTask == null) {
+                        self.textContentTask = self.pdfPage.getTextContent();
+                    }
+
+                    self.textContentTask.then(function (textContent) {
+                        // Render the text layer...
+                        var textLayerBuilder = new TextLayerBuilder({
+                            textLayerDiv: self.textLayer[0],
+                            pageIndex: self.id,
+                            viewport: self.viewport
+                        });
+
+                        textLayerBuilder.setTextContent(textContent);
+                        textLayerBuilder.render(null, function() {
+                            self.addLayer(self.textLayer);
+                            self.viewer.onTextLayerRendered(self.id, self.textLayer);
+                        });
+                    });
+                }
+            }
+        };
+        PDFPage.prototype.removeTextLayer = function () {
+            if(this.textLayer != null) {
+                this.textLayer.remove();
+            }
+        };
+        PDFPage.prototype.transform = function () {
+            if(this.renderTask) {
+                this.renderTask.cancel();
+            }
+            MultiPagesPage.prototype.transform.call(this);
+            this.textLayer = null;
+        };
+        PDFPage.prototype.onRendering = function() {
+            if(this.renderTextLayer) {
+                this.renderTextLayer();
+            }
+        };
+        PDFPage.prototype.renderPage = function (page, callback) {
+
+            if(page.canvasRendered === true){
+                page.wrapper.append(page.canvas);
+                if(callback) {
+                    callback(page, MultiPagesConstants.PAGE_ALREADY_RENDERED);
+                }
+            } else {
+
+                page.wrapper.append(page.canvas);
+
+                page.renderTask = this.pdfPage.render({
+                    canvasContext: page.canvas[0].getContext('2d'),
+                    viewport: page.viewport
+                });
+
+                page.renderTask.then(function () {
+                    page.renderTask = null;
+
+                    if(callback) {
+                        callback(page, MultiPagesConstants.PAGE_RENDERED);
+                    }
+                }, function (message) {
+                    page.rendered = false;
+                    page.renderTask = null;
+
+                    if(message === "cancelled") {
+                        if(callback) {
+                            callback(page, MultiPagesConstants.PAGE_RENDER_CANCELLED);
+                        }
+                    } else {
+                        if(callback) {
+                            callback(page, MultiPagesConstants.PAGE_RENDER_FAILED);
+                        }
+                    }
+                });
+            }
+        };
+
+        return (PDFPage);
+    }])
+
+    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', 'MultiPagesConstants', 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
+
+        function PDFViewer(element) {
+            this.base = MultiPagesViewer;
+            this.base(new PDFViewerAPI(this), element);
+            this.name = "PDFViewer";
+            this.pdf = null;
+            // Hooks for the client...
+            this.passwordCallback = null;
+
+            function setMousePosition(e) {
+                var ev = e || window.event; //Moz || IE
+                var el = element[0];
+                var offset = el.getBoundingClientRect();
+                if (ev.pageX) { //Moz
+                    mouse.x = (ev.pageX + el.scrollLeft - offset.left);
+                    mouse.y = (ev.pageY + el.scrollTop - offset.top);
+                } else if (ev.clientX) { //IE
+                    mouse.x = (ev.clientX + el.scrollLeft - offset.left);
+                    mouse.y = (ev.clientY + el.scrollTop  - offset.top);
+                }
+            };
+
+            function getPosition(el) {
+                var xPos = 0;
+                var yPos = 0;
+                var container = element[0];
+                do {
+                    xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+                    yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+
+                    el = el.offsetParent;
+                } while (el != container && el != null);
+                return {
+                    x: xPos,
+                    y: yPos
+                };
+            };
+
+            var self = this,
+                mouse = {
+                    x: 0,
+                    y: 0
+                },
+                onDbClick = function(e) {
+                    if ($window.getSelection) {
+                        if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
+                        self.wordEventTimeout = null;
+                        var selection =  $window.getSelection();
+                        var range = $document[0].createRange();
+                        range.selectNodeContents(e.target);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        var text = range.toString();
+                        self.api.selectedText = text;
+                        if(self.api.onTextSelected != null) {
+                            self.api.onTextSelected(text);
+                        }
+                    }
+                },
+                onMouseDown = function (e) {
+                    if(self.selectionTooltip == null){
+                        if(self.wordTooltip != null){
+                            self.wordTooltip.css("display", "none");
+                        }
+
+                        self.selectionTooltip = angular.element('<div class="selection-tooltip"></div>');
+                        self.selectionTooltip.css("left",  mouse.x + 'px');
+                        self.selectionTooltip.css("top",  mouse.y + 'px');
+                        element.append(self.selectionTooltip);
+                    }
+                },
+                onMouseUp = function (e) {
+                    if(self.selectionTooltip != null) {
+                        self.selectionTooltip.remove();
+                        self.selectionTooltip = null;
+                    }
+
+                    if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
+                    self.wordEventTimeout = $timeout(function() {
+                        var text = "";
+                        if ($window.getSelection) {
+                            text = $window.getSelection().toString();
+                        }
+                        if(text.length > 0) {
+                            self.api.selectedText = text;
+                            if(self.api.onTextSelected != null) {
+                                self.api.onTextSelected(text);
+                            }
+                        }
+                    }, 450);
+                },
+                onMouseMove = function (e) {
+                    setMousePosition(e);
+                    if(self.selectionTooltip != null) {
+                        self.selectionTooltip.css("left",  mouse.x + 'px');
+                        self.selectionTooltip.css("top",  mouse.y + 'px');
+                        var text = "";
+                        if ($window.getSelection) {
+                            text = $window.getSelection().toString();
+                        }
+                        if(text.length > 0) {
+                            if(text.length > 30) {
+                                var start = text.slice(0, 15);
+                                var end = text.slice(text.length - 15, text.length);
+                                self.selectionTooltip[0].innerHTML = start + " [...] " + end;
+                            } else {
+                                self.selectionTooltip[0].innerHTML = text;
+                            }
+                            self.selectionTooltip.css("display", "block");
+                        } else {
+                            self.selectionTooltip.css("display", "none");
+                        }
+                    } else {
+                        if(e.target && e.target.className == "word") {
+                            if(self.wordTooltip == null){
+                                self.wordTooltip = angular.element('<div class="word-tooltip"></div>');
+                            }
+                            element.append(self.wordTooltip);
+
+                            var position = getPosition(e.target);
+                            self.wordTooltip[0].textContent = e.target.textContent;
+                            self.wordTooltip.css("display", "table");
+                            self.wordTooltip.css("left",  position.x + 'px');
+                            self.wordTooltip.css("top",  (position.y - self.wordTooltip[0].offsetHeight - 10) + 'px');
+                        } else {
+                            if(self.wordTooltip != null){
+                                self.wordTooltip.css("display", "none");
+                            }
+                        }
+                    }
+                };
+
+            this.modes.push({
+                id: MultiPagesConstants.MODE_TEXT,
+                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_TEXT', 'Text'),
+                activate : function() {
+                    angular.forEach(self.currentPages, function(page) {
+                        page.renderTextLayer();
+                    });
+
+                    element.on('dblclick', onDbClick);
+                    element.on('mousedown', onMouseDown);
+                    element.on('mouseup', onMouseUp);
+                    element.on('mousemove', onMouseMove);
+                },
+                cleanUp : function() {
+                    for(var iPage = 0;iPage < self.pages.length;++iPage) {
+                        self.pages[iPage].removeTextLayer();
+                    }
+
+                    element.off('dblclick', onDbClick);
+                    element.off('mousedown', onMouseDown);
+                    element.off('mouseup', onMouseUp);
+                    element.off('mousemove', onMouseMove);
+                }
+            });
+        }
+
+        PDFViewer.prototype = new MultiPagesViewer;
+
+        PDFViewer.prototype.open = function (obj, options) {
+            this.element.empty();
+            this.url = null;
+            this.pages = [];
+            if (obj !== undefined && obj !== null && obj !== '') {
+                angular.extend(this, options);
+                var isFile = typeof obj != typeof "";
+
+                if(this.getDocumentTask != undefined){
+                    var self = this;
+                    this.getDocumentTask.destroy().then(function () {
+                        if(isFile){
+                            self.setFile(obj);
+                        }else {
+                            self.setUrl(obj);
+                        }
+                    });
+                } else {
+                    if(isFile){
+                        this.setFile(obj);
+                    }else {
+                        this.setUrl(obj);
+                    }
+                }
+            }
+        };
+        PDFViewer.prototype.setUrl = function (url) {
+            var self = this;
+            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
+            this.getDocumentTask.then(function (pdf) {
+                self.pdf = pdf;
+                self.url = url;
+
+                self.getAllPages( function (pageList, pagesRefMap) {
+                    self.pages = pageList;
+                    self.pagesRefMap = pagesRefMap;
+                    self.addPages();
+                    //self.setContainerSize(self.initialScale);
+                });
+            }, function (message) {
+                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+            });
+        };
+        PDFViewer.prototype.setFile = function (file) {
+            var self = this;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var arrayBuffer = e.target.result;
+                var uint8Array = new Uint8Array(arrayBuffer);
+                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
+                getDocumentTask.then(function (pdf) {
+                    self.pdf = pdf;
+
+                    self.getAllPages(function (pageList, pagesRefMap) {
+                        self.pages = pageList;
+                        self.pagesRefMap = pagesRefMap;
+                        self.addPages();
+                        //self.setContainerSize(self.initialScale);
+                    });
+                }, function (message) {
+                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
+                });
+            };
+
+            reader.onprogress = function (e) {
+                self.downloadProgress(e);
+            };
+
+            reader.onloadend = function (e) {
+                var error = e.target.error;
+                if(error !== null) {
+                    var message = "File API error: ";
+                    switch(e.code) {
+                        case error.ENCODING_ERR:
+                            message += "Encoding error.";
+                            break;
+                        case error.NOT_FOUND_ERR:
+                            message += "File not found.";
+                            break;
+                        case error.NOT_READABLE_ERR:
+                            message += "File could not be read.";
+                            break;
+                        case error.SECURITY_ERR:
+                            message += "Security issue with file.";
+                            break;
+                        default:
+                            message += "Unknown error.";
+                            break;
+                    }
+
+                    self.onDataDownloaded("failed", 0, 0, message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+        PDFViewer.prototype.getAllPages = function (callback) {
+            var pageList = [],
+                pagesRefMap = {},
+                numPages = this.pdf.numPages,
+                remainingPages = numPages,
+                self = this;
+
+            for(var iPage = 0;iPage < numPages;++iPage) {
+                pageList.push({});
+
+                var getPageTask = this.pdf.getPage(iPage + 1);
+                getPageTask.then(function (page) {
+                    // Page reference map. Required by the annotation layer.
+                    var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
+                    pagesRefMap[refStr] = page.pageIndex + 1;
+
+                    var pdfPage = new PDFPage(self, page, true);
+                    pageList[page.pageIndex] = pdfPage;
+
+                    --remainingPages;
+                    if(remainingPages === 0) {
+                        callback(pageList, pagesRefMap);
+                    }
+                });
+            }
+        };
+        PDFViewer.prototype.onDestroy = function () {
+            if(this.getDocumentTask){
+                this.getDocumentTask.destroy();
+                this.getDocumentTask = null;
+            }
+        };
+
+        return (PDFViewer);
+    }])
+
+    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
+        var pageMargin = 10;
+
+        return {
+            restrict: "E",
+            scope: {
+                src: "@",
+                file: "=",
+                api: "=",
+                options: "=",
+                passwordCallback: "&"
+            },
+            controller: ['$scope', '$element', function ($scope, $element) {
+
+                var getOption = function(optionName) {
+                    if($scope.options === null || $scope.options === undefined) {
+                        return null;
+                    }
+                    return $scope.options[optionName];
+                };
+
+                var getOptions = function() {
+                    return {
+                        initialScale : getOption("initialScale"),
+                        initialMode : getOption("initialMode"),
+                        orientation : getOption("orientation"),
+                        zoomSelectionShortcutKey : getOption("zoomSelectionShortcutKey"),
+                        pageMargin : pageMargin
+                    };
+                };
+
+                $scope.getPassword = function (passwordFunc, reason) {
+                    if(this.passwordCallback) {
+                        var self = this;
+                        this.$apply(function () {
+                            var password = self.passwordCallback({reason: reason});
+
+                            if(password !== "" && password !== undefined && password !== null) {
+                                passwordFunc(password);
+                            } else {
+                                $log.log("A password is required to read this document.");
+                            }
+                        });
+                    } else {
+                        $log.log("A password is required to read this document.");
+                    }
+                };
+
+                var viewer = new PDFViewer($element);
+                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
+
+                $scope.api = viewer.getAPI();
+
+                $scope.Open = function(value) {
+                    viewer.open(value, getOptions());
+                };
+
+                viewer.hookScope($scope);
+            }],
+            link: function (scope, element, attrs) {
+                attrs.$observe('src', scope.Open);
+                scope.$watch("file", scope.Open);
+            }
+        };
+    }]);
+
+'use strict';
+/**
+ * TODO TextLayerBuilder desc
+ */
+itPdfViewer.factory('TextLayerBuilder', ['CustomStyle' , 'EventBus', function (CustomStyle, EventBus) {
+        function attachDOMEventsToEventBus(eventBus) {
+            eventBus.on('documentload', function () {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('documentload', true, true, {});
+                window.dispatchEvent(event);
+            });
+            eventBus.on('pagerendered', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagerendered', true, true, {
+                    pageNumber: e.pageNumber,
+                    cssTransform: e.cssTransform,
+                });
+                e.source.div.dispatchEvent(event);
+            });
+            eventBus.on('textlayerrendered', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('textlayerrendered', true, true, {
+                    pageNumber: e.pageNumber
+                });
+                e.source.textLayerDiv.dispatchEvent(event);
+            });
+            eventBus.on('pagechange', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('pagechange', true, true, window, 0);
+                event.pageNumber = e.pageNumber;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('pagesinit', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagesinit', true, true, null);
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('pagesloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagesloaded', true, true, {
+                    pagesCount: e.pagesCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('scalechange', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('scalechange', true, true, window, 0);
+                event.scale = e.scale;
+                event.presetValue = e.presetValue;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('updateviewarea', function (e) {
+                var event = document.createEvent('UIEvents');
+                event.initUIEvent('updateviewarea', true, true, window, 0);
+                event.location = e.location;
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('find', function (e) {
+                if (e.source === window) {
+                    return; // event comes from FirefoxCom, no need to replicate
+                }
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('find' + e.type, true, true, {
+                    query: e.query,
+                    phraseSearch: e.phraseSearch,
+                    caseSensitive: e.caseSensitive,
+                    highlightAll: e.highlightAll,
+                    findPrevious: e.findPrevious
+                });
+                window.dispatchEvent(event);
+            });
+            eventBus.on('attachmentsloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('attachmentsloaded', true, true, {
+                    attachmentsCount: e.attachmentsCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
+            eventBus.on('sidebarviewchanged', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('sidebarviewchanged', true, true, {
+                    view: e.view,
+                });
+                e.source.outerContainer.dispatchEvent(event);
+            });
+            eventBus.on('pagemode', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('pagemode', true, true, {
+                    mode: e.mode,
+                });
+                e.source.pdfViewer.container.dispatchEvent(event);
+            });
+            eventBus.on('namedaction', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('namedaction', true, true, {
+                    action: e.action
+                });
+                e.source.pdfViewer.container.dispatchEvent(event);
+            });
+            eventBus.on('presentationmodechanged', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('presentationmodechanged', true, true, {
+                    active: e.active,
+                    switchInProgress: e.switchInProgress
+                });
+                window.dispatchEvent(event);
+            });
+            eventBus.on('outlineloaded', function (e) {
+                var event = document.createEvent('CustomEvent');
+                event.initCustomEvent('outlineloaded', true, true, {
+                    outlineCount: e.outlineCount
+                });
+                e.source.container.dispatchEvent(event);
+            });
+        }
+
+        var globalEventBus = null;
+        function getGlobalEventBus() {
+            if (globalEventBus) {
+                return globalEventBus;
+            }
+            globalEventBus = new EventBus();
+            attachDOMEventsToEventBus(globalEventBus);
+            return globalEventBus;
+        }
+        function TextLayerBuilder(options) {
+            this.textLayerDiv = options.textLayerDiv;
+            this.eventBus = options.eventBus || getGlobalEventBus();
+            this.renderingDone = false;
+            this.divContentDone = false;
+            this.pageIdx = options.pageIndex;
+            this.pageNumber = this.pageIdx + 1;
+            this.matches = [];
+            this.viewport = options.viewport;
+            this.textDivs = [];
+            this.findController = options.findController || null;
+            this.textLayerRenderTask = null;
+            this.enhanceTextSelection = options.enhanceTextSelection;
+            this._bindMouse();
+        }
+
+        TextLayerBuilder.prototype = {
+            _finishRendering: function TextLayerBuilder_finishRendering() {
+                this.renderingDone = true;
+
+                this.eventBus.dispatch('textlayerrendered', {
+                    source: this,
+                    pageNumber: this.pageNumber
+                });
+            },
+
+            /**
+             * Renders the text layer.
+             * @param {number} timeout (optional) if specified, the rendering waits
+             *   for specified amount of ms.
+             */
+            render: function TextLayerBuilder_render(timeout, callback) {
+                if (!this.divContentDone || this.renderingDone) {
+                    return;
+                }
+
+                if (this.textLayerRenderTask) {
+                    this.textLayerRenderTask.cancel();
+                    this.textLayerRenderTask = null;
+                }
+
+                this.textDivs = [];
+                var textLayerFrag = document.createDocumentFragment();
+                this.textLayerRenderTask = PDFJS.renderTextLayer({
+                    textContent: this.textContent,
+                    container: textLayerFrag,
+                    viewport: this.viewport,
+                    textDivs: this.textDivs,
+                    timeout: timeout,
+                    enhanceTextSelection: this.enhanceTextSelection,
+                });
+                this.textLayerRenderTask.promise.then(function () {
+                    this.textLayerDiv.appendChild(textLayerFrag);
+                    this._finishRendering();
+                    this.updateMatches();
+                    for (var i = 0; i < this.textDivs.length; i++) {
+                        this.textDivs[i].setAttribute("class",  "word");
+                    }
+
+                    if(callback) {
+                        callback();
+                    }
+                }.bind(this), function (reason) {
+                    // canceled or failed to render text layer -- skipping errors
+                });
+            },
+
+            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+                if (this.textLayerRenderTask) {
+                    this.textLayerRenderTask.cancel();
+                    this.textLayerRenderTask = null;
+                }
+                this.textContent = textContent;
+                this.divContentDone = true;
+            },
+
+            convertMatches: function TextLayerBuilder_convertMatches(matches,
+                                                                     matchesLength) {
+                var i = 0;
+                var iIndex = 0;
+                var bidiTexts = this.textContent.items;
+                var end = bidiTexts.length - 1;
+                var queryLen = (this.findController === null ?
+                    0 : this.findController.state.query.length);
+                var ret = [];
+                if (!matches) {
+                    return ret;
+                }
+                for (var m = 0, len = matches.length; m < len; m++) {
+                    // Calculate the start position.
+                    var matchIdx = matches[m];
+
+                    // Loop over the divIdxs.
+                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    if (i === bidiTexts.length) {
+                        console.error('Could not find a matching mapping');
+                    }
+
+                    var match = {
+                        begin: {
+                            divIdx: i,
+                            offset: matchIdx - iIndex
+                        }
+                    };
+
+                    // Calculate the end position.
+                    if (matchesLength) { // multiterm search
+                        matchIdx += matchesLength[m];
+                    } else { // phrase search
+                        matchIdx += queryLen;
+                    }
+
+                    // Somewhat the same array as above, but use > instead of >= to get
+                    // the end position right.
+                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
+                        iIndex += bidiTexts[i].str.length;
+                        i++;
+                    }
+
+                    match.end = {
+                        divIdx: i,
+                        offset: matchIdx - iIndex
+                    };
+                    ret.push(match);
+                }
+
+                return ret;
+            },
+
+            renderMatches: function TextLayerBuilder_renderMatches(matches) {
+                // Early exit if there is nothing to render.
+                if (matches.length === 0) {
+                    return;
+                }
+
+                var bidiTexts = this.textContent.items;
+                var textDivs = this.textDivs;
+                var prevEnd = null;
+                var pageIdx = this.pageIdx;
+                var isSelectedPage = (this.findController === null ?
+                    false : (pageIdx === this.findController.selected.pageIdx));
+                var selectedMatchIdx = (this.findController === null ?
+                    -1 : this.findController.selected.matchIdx);
+                var highlightAll = (this.findController === null ?
+                    false : this.findController.state.highlightAll);
+                var infinity = {
+                    divIdx: -1,
+                    offset: undefined
+                };
+
+                function beginText(begin, className) {
+                    var divIdx = begin.divIdx;
+                    textDivs[divIdx].textContent = '';
+                    appendTextToDiv(divIdx, 0, begin.offset, className);
+                }
+
+                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+                    var div = textDivs[divIdx];
+                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+                    var node = document.createTextNode(content);
+                    if (className) {
+                        var span = document.createElement('span');
+                        span.className = className;
+                        span.appendChild(node);
+                        div.appendChild(span);
+                        return;
+                    }
+                    div.appendChild(node);
+                }
+
+                var i0 = selectedMatchIdx, i1 = i0 + 1;
+                if (highlightAll) {
+                    i0 = 0;
+                    i1 = matches.length;
+                } else if (!isSelectedPage) {
+                    // Not highlighting all and this isn't the selected page, so do nothing.
+                    return;
+                }
+
+                for (var i = i0; i < i1; i++) {
+                    var match = matches[i];
+                    var begin = match.begin;
+                    var end = match.end;
+                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
+                    var highlightSuffix = (isSelected ? ' selected' : '');
+
+                    if (this.findController) {
+                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
+                            begin.divIdx);
+                    }
+
+                    // Match inside new div.
+                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+                        // If there was a previous div, then add the text at the end.
+                        if (prevEnd !== null) {
+                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                        }
+                        // Clear the divs and set the content until the starting point.
+                        beginText(begin);
+                    } else {
+                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+                    }
+
+                    if (begin.divIdx === end.divIdx) {
+                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
+                            'highlight' + highlightSuffix);
+                    } else {
+                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
+                            'highlight begin' + highlightSuffix);
+                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+                        }
+                        beginText(end, 'highlight end' + highlightSuffix);
+                    }
+                    prevEnd = end;
+                }
+
+                if (prevEnd) {
+                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+                }
+            },
+
+            updateMatches: function TextLayerBuilder_updateMatches() {
+                // Only show matches when all rendering is done.
+                if (!this.renderingDone) {
+                    return;
+                }
+
+                // Clear all matches.
+                var matches = this.matches;
+                var textDivs = this.textDivs;
+                var bidiTexts = this.textContent.items;
+                var clearedUntilDivIdx = -1;
+
+                // Clear all current matches.
+                for (var i = 0, len = matches.length; i < len; i++) {
+                    var match = matches[i];
+                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+                        var div = textDivs[n];
+                        div.textContent = bidiTexts[n].str;
+                        div.className = '';
+                    }
+                    clearedUntilDivIdx = match.end.divIdx + 1;
+                }
+
+                if (this.findController === null || !this.findController.active) {
+                    return;
+                }
+
+                // Convert the matches on the page controller into the match format
+                // used for the textLayer.
+                var pageMatches, pageMatchesLength;
+                if (this.findController !== null) {
+                    pageMatches = this.findController.pageMatches[this.pageIdx] || null;
+                    pageMatchesLength = (this.findController.pageMatchesLength) ?
+                    this.findController.pageMatchesLength[this.pageIdx] || null : null;
+                }
+
+                this.matches = this.convertMatches(pageMatches, pageMatchesLength);
+                this.renderMatches(this.matches);
+            },
+
+            /**
+             * Fixes text selection: adds additional div where mouse was clicked.
+             * This reduces flickering of the content if mouse slowly dragged down/up.
+             * @private
+             */
+            _bindMouse: function TextLayerBuilder_bindMouse() {
+                var div = this.textLayerDiv;
+                var self = this;
+                div.addEventListener('mousedown', function (e) {
+                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
+                        self.textLayerRenderTask.expandTextDivs(true);
+                        return;
+                    }
+                    var end = div.querySelector('.endOfContent');
+                    if (!end) {
+                        return;
+                    }
+                    //#if !(MOZCENTRAL || FIREFOX)
+                    // On non-Firefox browsers, the selection will feel better if the height
+                    // of the endOfContent div will be adjusted to start at mouse click
+                    // location -- this will avoid flickering when selections moves up.
+                    // However it does not work when selection started on empty space.
+                    var adjustTop = e.target !== div;
+                    //#if GENERIC
+                    adjustTop = adjustTop && window.getComputedStyle(end).
+                        getPropertyValue('-moz-user-select') !== 'none';
+                    //#endif
+                    if (adjustTop) {
+                        var divBounds = div.getBoundingClientRect();
+                        var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
+                        end.style.top = (r * 100).toFixed(2) + '%';
+                    }
+                    //#endif
+                    end.classList.add('active');
+                });
+                div.addEventListener('mouseup', function (e) {
+                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
+                        self.textLayerRenderTask.expandTextDivs(false);
+                        return;
+                    }
+                    var end = div.querySelector('.endOfContent');
+                    if (!end) {
+                        return;
+                    }
+                    //#if !(MOZCENTRAL || FIREFOX)
+                    end.style.top = '';
+                    //#endif
+                    end.classList.remove('active');
+                });
+            },
+        };
+
+        return (TextLayerBuilder);
+    }]);
+
+'use strict';
+/**
  * TODO DownloadManager desc
  */
 itMultiPagesViewer
@@ -12895,1350 +14239,6 @@ itMultiPagesViewer
 
 
 
-'use strict';
-/**
- * TODO CustomStyle desc
- */
-itPdfViewer.factory('CustomStyle', [function () {
-        // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
-        //              animate-css-transforms-firefox-webkit.html
-        // in some versions of IE9 it is critical that ms appear in this list
-        // before Moz
-        var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
-        var _cache = {};
-
-        function CustomStyle() {}
-
-        CustomStyle.getProp = function get(propName, element) {
-            // check cache only when no element is given
-            if (arguments.length === 1 && typeof _cache[propName] === 'string') {
-                return _cache[propName];
-            }
-
-            element = element || document.documentElement;
-            var style = element.style, prefixed, uPropName;
-
-            // test standard property first
-            if (typeof style[propName] === 'string') {
-                return (_cache[propName] = propName);
-            }
-
-            // capitalize
-            uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-
-            // test vendor specific properties
-            for (var i = 0, l = prefixes.length; i < l; i++) {
-                prefixed = prefixes[i] + uPropName;
-                if (typeof style[prefixed] === 'string') {
-                    return (_cache[propName] = prefixed);
-                }
-            }
-
-            //if all fails then set to undefined
-            return (_cache[propName] = 'undefined');
-        };
-
-        CustomStyle.setProp = function set(propName, element, str) {
-            var prop = this.getProp(propName);
-            if (prop !== 'undefined') {
-                element.style[prop] = str;
-            }
-        };
-
-        return (CustomStyle);
-    }]);
-
-'use strict';
-/**
- * TODO EventBus desc
- */
-itPdfViewer .factory('EventBus', [function () {
-        function EventBus() {
-            this._listeners = Object.create(null);
-        }
-
-        EventBus.prototype = {
-            on: function EventBus_on(eventName, listener) {
-                var eventListeners = this._listeners[eventName];
-                if (!eventListeners) {
-                    eventListeners = [];
-                    this._listeners[eventName] = eventListeners;
-                }
-                eventListeners.push(listener);
-            },
-            off: function EventBus_on(eventName, listener) {
-                var eventListeners = this._listeners[eventName];
-                var i;
-                if (!eventListeners || ((i = eventListeners.indexOf(listener)) < 0)) {
-                    return;
-                }
-                eventListeners.splice(i, 1);
-            },
-            dispatch: function EventBus_dispath(eventName) {
-                var eventListeners = this._listeners[eventName];
-                if (!eventListeners || eventListeners.length === 0) {
-                    return;
-                }
-                // Passing all arguments after the eventName to the listeners.
-                var args = Array.prototype.slice.call(arguments, 1);
-                // Making copy of the listeners array in case if it will be modified
-                // during dispatch.
-                eventListeners.slice(0).forEach(function (listener) {
-                    listener.apply(null, args);
-                });
-            }
-        };
-
-        return (EventBus);
-    }]);
-
-'use strict';
-/**
- * TODO itPdfViewer desc
- */
-itPdfViewer.directive('itPdfViewer', ['$log' , 'MultiPagesAddEventWatcher', function($log, MultiPagesAddEventWatcher) {
-    var linker = function (scope, element, attrs) {
-
-        scope.thumbnailCollapsed = false;
-        scope.onPassword = function (reason) {
-            return prompt("The selected PDF is password protected. PDF.js reason: " + reason, "");
-        };
-
-        scope.toggleThumbnail = function () {
-            scope.thumbnailCollapsed = !scope.thumbnailCollapsed;
-        };
-
-        MultiPagesAddEventWatcher(scope);
-    };
-
-    return {
-        scope: {
-            src: "=",
-            options: "="
-        },
-        restrict: 'E',
-        template :
-        '<div ui-layout="{ flow : \'column\', dividerSize : 0 }" class="multipage-container">' +
-            '<it-progressbar-viewer api="options.$$api" ng-if="options.showProgressbar != false"></it-progressbar-viewer><it-toolbar-viewer  api="options.$$api" ng-if="options.showToolbar != false"></it-toolbar-viewer>' +
-            '<div ng-if="options.showThumbnail != false" collapsed="thumbnailCollapsed" ui-layout-container size="210px" class="multipage-viewer-thumbnail-menu">' +
-                '<it-thumbnail-menu-viewer orientation="\'vertical\'" options="options">' +
-                    '<div class="ui-splitbar-container-column pull-right"  ng-click="toggleThumbnail()">' +
-                        '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-left"></span>' +
-                    '</div>' +
-                '</it-thumbnail-menu-viewer>' +
-            '</div>' +
-            '<div ui-layout-container>' +
-                '<pdf-viewer class="multipage-viewer" file="file" src="{{trustSrc(url)}}" api="options.$$api" options="options" password-callback="onPassword(reason)"></pdf-viewer>' +
-            '</div>' +
-            '<div class="ui-splitbar-container-column pull-left"  ng-click="toggleThumbnail()" ng-if="thumbnailCollapsed">' +
-                '<span class="collapsed-splitbar-button ui-splitbar-icon ui-splitbar-icon-right"></span>' +
-            '</div>' +
-        '</div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO Pdf implementation desc
- */
-itPdfViewer
-    .factory('PDFViewerAPI', ['$log', 'MultiPagesViewerAPI', 'DownloadManager', function ($log, MultiPagesViewerAPI, DownloadManager) {
-
-        function getFileNameFromURL (url) {
-            var reURI = /^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
-            //            SCHEME      HOST         1.PATH  2.QUERY   3.REF
-            // Pattern to get last matching NAME.pdf
-            var reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
-            var splitURI = reURI.exec(url);
-            var suggestedFilename = reFilename.exec(splitURI[1]) ||
-                reFilename.exec(splitURI[2]) ||
-                reFilename.exec(splitURI[3]);
-            if (suggestedFilename) {
-                suggestedFilename = suggestedFilename[0];
-                if (suggestedFilename.indexOf('%') !== -1) {
-                    // URL-encoded %2Fpath%2Fto%2Ffile.pdf should be file.pdf
-                    try {
-                        suggestedFilename =
-                            reFilename.exec(decodeURIComponent(suggestedFilename))[0];
-                    } catch(e) { // Possible (extremely rare) errors:
-                        // URIError "Malformed URI", e.g. for "%AA.pdf"
-                        // TypeError "null has no properties", e.g. for "%2F.pdf"
-                    }
-                }
-            }
-            return suggestedFilename || 'document.pdf';
-        }
-
-        function PDFViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        PDFViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        PDFViewerAPI.prototype.findNext = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var nextHighlightID = this.viewer.searchHighlightResultID + 1;
-            if(nextHighlightID >= this.viewer.searchResults.length) {
-                nextHighlightID = 0;
-            }
-
-            this.viewer.highlightSearchResult(nextHighlightID);
-        };
-        PDFViewerAPI.prototype.findPrev = function () {
-            if(this.viewer.searchHighlightResultID === -1) {
-                return;
-            }
-
-            var prevHighlightID = this.viewer.searchHighlightResultID - 1;
-            if(prevHighlightID < 0) {
-                prevHighlightID = this.viewer.searchResults.length - 1;
-            }
-
-            this.viewer.highlightSearchResult(prevHighlightID);
-        };
-        PDFViewerAPI.prototype.download = function() {
-            var self = this;
-            var url = self.viewer.url;
-            var filename = getFileNameFromURL(url);
-
-            self.viewer.pdf.getData().then(function (data) {
-                    var blob = DownloadManager.createBlob(data, 'application/pdf');
-                    DownloadManager.download(blob, url, filename);
-                }, function() {
-                    DownloadManager.downloadUrl(url, filename);
-                } // Error occurred try downloading with just the url.
-            );
-        };
-
-        return (PDFViewerAPI);
-    }])
-
-    .factory('PDFPage', ['$log', 'MultiPagesPage', 'MultiPagesConstants', 'TextLayerBuilder', function ($log, MultiPagesPage, MultiPagesConstants, TextLayerBuilder) {
-
-        function PDFPage(viewer, pdfPage) {
-            this.base = MultiPagesPage;
-            this.base(viewer, pdfPage.pageIndex);
-
-            this.pdfPage = pdfPage;
-            this.renderTask = null;
-        }
-
-        PDFPage.prototype = new MultiPagesPage;
-
-        PDFPage.prototype.clear = function () {
-            if(this.renderTask != null) {
-                this.renderTask.cancel();
-            }
-            MultiPagesPage.prototype.clear.call(this);
-            this.renderTask = null;
-        };
-        PDFPage.prototype.getViewport = function (scale , rotation) {
-            return this.pdfPage.getViewport(scale, rotation + (this.pdfPage.pageInfo ? this.pdfPage.pageInfo.rotate : 0), 0, 0);
-        };
-        PDFPage.prototype.renderTextLayer = function () {
-            var self = this;
-            if(this.viewer.mode.id === MultiPagesConstants.MODE_TEXT) {
-                if(self.textLayer != null) {
-                    self.addLayer(self.textLayer);
-                } else {
-
-                    self.textLayer = angular.element("<div class='textLayer r" + self.rotation + "'></div>");
-                    self.textLayer.css("width", this.viewport.width + "px");
-                    self.textLayer.css("height", this.viewport.height + "px");
-                    if (self.textContentTask == null) {
-                        self.textContentTask = self.pdfPage.getTextContent();
-                    }
-
-                    self.textContentTask.then(function (textContent) {
-                        // Render the text layer...
-                        var textLayerBuilder = new TextLayerBuilder({
-                            textLayerDiv: self.textLayer[0],
-                            pageIndex: self.id,
-                            viewport: self.viewport
-                        });
-
-                        textLayerBuilder.setTextContent(textContent);
-                        textLayerBuilder.render(null, function() {
-                            self.addLayer(self.textLayer);
-                            self.viewer.onTextLayerRendered(self.id, self.textLayer);
-                        });
-                    });
-                }
-            }
-        };
-        PDFPage.prototype.removeTextLayer = function () {
-            if(this.textLayer != null) {
-                this.textLayer.remove();
-            }
-        };
-        PDFPage.prototype.transform = function () {
-            if(this.renderTask) {
-                this.renderTask.cancel();
-            }
-            MultiPagesPage.prototype.transform.call(this);
-            this.textLayer = null;
-        };
-        PDFPage.prototype.onRendering = function() {
-            if(this.renderTextLayer) {
-                this.renderTextLayer();
-            }
-        };
-        PDFPage.prototype.renderPage = function (page, callback) {
-
-            if(page.canvasRendered === true){
-                page.wrapper.append(page.canvas);
-                if(callback) {
-                    callback(page, MultiPagesConstants.PAGE_ALREADY_RENDERED);
-                }
-            } else {
-
-                page.wrapper.append(page.canvas);
-
-                page.renderTask = this.pdfPage.render({
-                    canvasContext: page.canvas[0].getContext('2d'),
-                    viewport: page.viewport
-                });
-
-                page.renderTask.then(function () {
-                    page.renderTask = null;
-
-                    if(callback) {
-                        callback(page, MultiPagesConstants.PAGE_RENDERED);
-                    }
-                }, function (message) {
-                    page.rendered = false;
-                    page.renderTask = null;
-
-                    if(message === "cancelled") {
-                        if(callback) {
-                            callback(page, MultiPagesConstants.PAGE_RENDER_CANCELLED);
-                        }
-                    } else {
-                        if(callback) {
-                            callback(page, MultiPagesConstants.PAGE_RENDER_FAILED);
-                        }
-                    }
-                });
-            }
-        };
-
-        return (PDFPage);
-    }])
-
-    .factory('PDFViewer', ['$log' , '$window', '$document', '$timeout', 'MultiPagesViewer', 'PDFViewerAPI', 'PDFPage', 'MultiPagesConstants', 'TranslateViewer', function ($log, $window, $document, $timeout, MultiPagesViewer, PDFViewerAPI, PDFPage, MultiPagesConstants, TranslateViewer) {
-
-        function PDFViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new PDFViewerAPI(this), element);
-            this.name = "PDFViewer";
-            this.pdf = null;
-            // Hooks for the client...
-            this.passwordCallback = null;
-
-            function setMousePosition(e) {
-                var ev = e || window.event; //Moz || IE
-                var el = element[0];
-                var offset = el.getBoundingClientRect();
-                if (ev.pageX) { //Moz
-                    mouse.x = (ev.pageX + el.scrollLeft - offset.left);
-                    mouse.y = (ev.pageY + el.scrollTop - offset.top);
-                } else if (ev.clientX) { //IE
-                    mouse.x = (ev.clientX + el.scrollLeft - offset.left);
-                    mouse.y = (ev.clientY + el.scrollTop  - offset.top);
-                }
-            };
-
-            function getPosition(el) {
-                var xPos = 0;
-                var yPos = 0;
-                var container = element[0];
-                do {
-                    xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
-                    yPos += (el.offsetTop - el.scrollTop + el.clientTop);
-
-                    el = el.offsetParent;
-                } while (el != container && el != null);
-                return {
-                    x: xPos,
-                    y: yPos
-                };
-            };
-
-            var self = this,
-                mouse = {
-                    x: 0,
-                    y: 0
-                },
-                onDbClick = function(e) {
-                    if ($window.getSelection) {
-                        if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
-                        self.wordEventTimeout = null;
-                        var selection =  $window.getSelection();
-                        var range = $document[0].createRange();
-                        range.selectNodeContents(e.target);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                        var text = range.toString();
-                        self.api.selectedText = text;
-                        if(self.api.onTextSelected != null) {
-                            self.api.onTextSelected(text);
-                        }
-                    }
-                },
-                onMouseDown = function (e) {
-                    if(self.selectionTooltip == null){
-                        if(self.wordTooltip != null){
-                            self.wordTooltip.css("display", "none");
-                        }
-
-                        self.selectionTooltip = angular.element('<div class="selection-tooltip"></div>');
-                        self.selectionTooltip.css("left",  mouse.x + 'px');
-                        self.selectionTooltip.css("top",  mouse.y + 'px');
-                        element.append(self.selectionTooltip);
-                    }
-                },
-                onMouseUp = function (e) {
-                    if(self.selectionTooltip != null) {
-                        self.selectionTooltip.remove();
-                        self.selectionTooltip = null;
-                    }
-
-                    if (self.wordEventTimeout) $timeout.cancel(self.wordEventTimeout);
-                    self.wordEventTimeout = $timeout(function() {
-                        var text = "";
-                        if ($window.getSelection) {
-                            text = $window.getSelection().toString();
-                        }
-                        if(text.length > 0) {
-                            self.api.selectedText = text;
-                            if(self.api.onTextSelected != null) {
-                                self.api.onTextSelected(text);
-                            }
-                        }
-                    }, 450);
-                },
-                onMouseMove = function (e) {
-                    setMousePosition(e);
-                    if(self.selectionTooltip != null) {
-                        self.selectionTooltip.css("left",  mouse.x + 'px');
-                        self.selectionTooltip.css("top",  mouse.y + 'px');
-                        var text = "";
-                        if ($window.getSelection) {
-                            text = $window.getSelection().toString();
-                        }
-                        if(text.length > 0) {
-                            if(text.length > 30) {
-                                var start = text.slice(0, 15);
-                                var end = text.slice(text.length - 15, text.length);
-                                self.selectionTooltip[0].innerHTML = start + " [...] " + end;
-                            } else {
-                                self.selectionTooltip[0].innerHTML = text;
-                            }
-                            self.selectionTooltip.css("display", "block");
-                        } else {
-                            self.selectionTooltip.css("display", "none");
-                        }
-                    } else {
-                        if(e.target && e.target.className == "word") {
-                            if(self.wordTooltip == null){
-                                self.wordTooltip = angular.element('<div class="word-tooltip"></div>');
-                            }
-                            element.append(self.wordTooltip);
-
-                            var position = getPosition(e.target);
-                            self.wordTooltip[0].textContent = e.target.textContent;
-                            self.wordTooltip.css("display", "table");
-                            self.wordTooltip.css("left",  position.x + 'px');
-                            self.wordTooltip.css("top",  (position.y - self.wordTooltip[0].offsetHeight - 10) + 'px');
-                        } else {
-                            if(self.wordTooltip != null){
-                                self.wordTooltip.css("display", "none");
-                            }
-                        }
-                    }
-                };
-
-            this.modes.push({
-                id: MultiPagesConstants.MODE_TEXT,
-                label: TranslateViewer.translate('GLOBAL.VIEWER.MODE_TEXT', 'Text'),
-                activate : function() {
-                    angular.forEach(self.currentPages, function(page) {
-                        page.renderTextLayer();
-                    });
-
-                    element.on('dblclick', onDbClick);
-                    element.on('mousedown', onMouseDown);
-                    element.on('mouseup', onMouseUp);
-                    element.on('mousemove', onMouseMove);
-                },
-                cleanUp : function() {
-                    for(var iPage = 0;iPage < self.pages.length;++iPage) {
-                        self.pages[iPage].removeTextLayer();
-                    }
-
-                    element.off('dblclick', onDbClick);
-                    element.off('mousedown', onMouseDown);
-                    element.off('mouseup', onMouseUp);
-                    element.off('mousemove', onMouseMove);
-                }
-            });
-        }
-
-        PDFViewer.prototype = new MultiPagesViewer;
-
-        PDFViewer.prototype.open = function (obj, options) {
-            this.element.empty();
-            this.url = null;
-            this.pages = [];
-            if (obj !== undefined && obj !== null && obj !== '') {
-                angular.extend(this, options);
-                var isFile = typeof obj != typeof "";
-
-                if(this.getDocumentTask != undefined){
-                    var self = this;
-                    this.getDocumentTask.destroy().then(function () {
-                        if(isFile){
-                            self.setFile(obj);
-                        }else {
-                            self.setUrl(obj);
-                        }
-                    });
-                } else {
-                    if(isFile){
-                        this.setFile(obj);
-                    }else {
-                        this.setUrl(obj);
-                    }
-                }
-            }
-        };
-        PDFViewer.prototype.setUrl = function (url) {
-            var self = this;
-            this.getDocumentTask = PDFJS.getDocument(url, null, angular.bind(this, this.passwordCallback), angular.bind(this, this.downloadProgress));
-            this.getDocumentTask.then(function (pdf) {
-                self.pdf = pdf;
-                self.url = url;
-
-                self.getAllPages( function (pageList, pagesRefMap) {
-                    self.pages = pageList;
-                    self.pagesRefMap = pagesRefMap;
-                    self.addPages();
-                    //self.setContainerSize(self.initialScale);
-                });
-            }, function (message) {
-                self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-            });
-        };
-        PDFViewer.prototype.setFile = function (file) {
-            var self = this;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var arrayBuffer = e.target.result;
-                var uint8Array = new Uint8Array(arrayBuffer);
-                var getDocumentTask = PDFJS.getDocument(uint8Array, null, angular.bind(self, self.passwordCallback), angular.bind(self, self.downloadProgress));
-                getDocumentTask.then(function (pdf) {
-                    self.pdf = pdf;
-
-                    self.getAllPages(function (pageList, pagesRefMap) {
-                        self.pages = pageList;
-                        self.pagesRefMap = pagesRefMap;
-                        self.addPages();
-                        //self.setContainerSize(self.initialScale);
-                    });
-                }, function (message) {
-                    self.onDataDownloaded("failed", 0, 0, "PDF.js: " + message);
-                });
-            };
-
-            reader.onprogress = function (e) {
-                self.downloadProgress(e);
-            };
-
-            reader.onloadend = function (e) {
-                var error = e.target.error;
-                if(error !== null) {
-                    var message = "File API error: ";
-                    switch(e.code) {
-                        case error.ENCODING_ERR:
-                            message += "Encoding error.";
-                            break;
-                        case error.NOT_FOUND_ERR:
-                            message += "File not found.";
-                            break;
-                        case error.NOT_READABLE_ERR:
-                            message += "File could not be read.";
-                            break;
-                        case error.SECURITY_ERR:
-                            message += "Security issue with file.";
-                            break;
-                        default:
-                            message += "Unknown error.";
-                            break;
-                    }
-
-                    self.onDataDownloaded("failed", 0, 0, message);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        };
-        PDFViewer.prototype.getAllPages = function (callback) {
-            var pageList = [],
-                pagesRefMap = {},
-                numPages = this.pdf.numPages,
-                remainingPages = numPages,
-                self = this;
-
-            for(var iPage = 0;iPage < numPages;++iPage) {
-                pageList.push({});
-
-                var getPageTask = this.pdf.getPage(iPage + 1);
-                getPageTask.then(function (page) {
-                    // Page reference map. Required by the annotation layer.
-                    var refStr = page.ref.num + ' ' + page.ref.gen + ' R';
-                    pagesRefMap[refStr] = page.pageIndex + 1;
-
-                    var pdfPage = new PDFPage(self, page, true);
-                    pageList[page.pageIndex] = pdfPage;
-
-                    --remainingPages;
-                    if(remainingPages === 0) {
-                        callback(pageList, pagesRefMap);
-                    }
-                });
-            }
-        };
-        PDFViewer.prototype.onDestroy = function () {
-            if(this.getDocumentTask){
-                this.getDocumentTask.destroy();
-                this.getDocumentTask = null;
-            }
-        };
-
-        return (PDFViewer);
-    }])
-
-    .directive("pdfViewer", ['$log', 'PDFViewer', function ($log, PDFViewer) {
-        var pageMargin = 10;
-
-        return {
-            restrict: "E",
-            scope: {
-                src: "@",
-                file: "=",
-                api: "=",
-                options: "=",
-                passwordCallback: "&"
-            },
-            controller: ['$scope', '$element', function ($scope, $element) {
-
-                var getOption = function(optionName) {
-                    if($scope.options === null || $scope.options === undefined) {
-                        return null;
-                    }
-                    return $scope.options[optionName];
-                };
-
-                var getOptions = function() {
-                    return {
-                        initialScale : getOption("initialScale"),
-                        initialMode : getOption("initialMode"),
-                        orientation : getOption("orientation"),
-                        zoomSelectionShortcutKey : getOption("zoomSelectionShortcutKey"),
-                        pageMargin : pageMargin
-                    };
-                };
-
-                $scope.getPassword = function (passwordFunc, reason) {
-                    if(this.passwordCallback) {
-                        var self = this;
-                        this.$apply(function () {
-                            var password = self.passwordCallback({reason: reason});
-
-                            if(password !== "" && password !== undefined && password !== null) {
-                                passwordFunc(password);
-                            } else {
-                                $log.log("A password is required to read this document.");
-                            }
-                        });
-                    } else {
-                        $log.log("A password is required to read this document.");
-                    }
-                };
-
-                var viewer = new PDFViewer($element);
-                viewer.passwordCallback = angular.bind($scope, $scope.getPassword);
-
-                $scope.api = viewer.getAPI();
-
-                $scope.Open = function(value) {
-                    viewer.open(value, getOptions());
-                };
-
-                viewer.hookScope($scope);
-            }],
-            link: function (scope, element, attrs) {
-                attrs.$observe('src', scope.Open);
-                scope.$watch("file", scope.Open);
-            }
-        };
-    }]);
-
-'use strict';
-/**
- * TODO TextLayerBuilder desc
- */
-itPdfViewer.factory('TextLayerBuilder', ['CustomStyle' , 'EventBus', function (CustomStyle, EventBus) {
-        function attachDOMEventsToEventBus(eventBus) {
-            eventBus.on('documentload', function () {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('documentload', true, true, {});
-                window.dispatchEvent(event);
-            });
-            eventBus.on('pagerendered', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('pagerendered', true, true, {
-                    pageNumber: e.pageNumber,
-                    cssTransform: e.cssTransform,
-                });
-                e.source.div.dispatchEvent(event);
-            });
-            eventBus.on('textlayerrendered', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('textlayerrendered', true, true, {
-                    pageNumber: e.pageNumber
-                });
-                e.source.textLayerDiv.dispatchEvent(event);
-            });
-            eventBus.on('pagechange', function (e) {
-                var event = document.createEvent('UIEvents');
-                event.initUIEvent('pagechange', true, true, window, 0);
-                event.pageNumber = e.pageNumber;
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('pagesinit', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('pagesinit', true, true, null);
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('pagesloaded', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('pagesloaded', true, true, {
-                    pagesCount: e.pagesCount
-                });
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('scalechange', function (e) {
-                var event = document.createEvent('UIEvents');
-                event.initUIEvent('scalechange', true, true, window, 0);
-                event.scale = e.scale;
-                event.presetValue = e.presetValue;
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('updateviewarea', function (e) {
-                var event = document.createEvent('UIEvents');
-                event.initUIEvent('updateviewarea', true, true, window, 0);
-                event.location = e.location;
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('find', function (e) {
-                if (e.source === window) {
-                    return; // event comes from FirefoxCom, no need to replicate
-                }
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('find' + e.type, true, true, {
-                    query: e.query,
-                    phraseSearch: e.phraseSearch,
-                    caseSensitive: e.caseSensitive,
-                    highlightAll: e.highlightAll,
-                    findPrevious: e.findPrevious
-                });
-                window.dispatchEvent(event);
-            });
-            eventBus.on('attachmentsloaded', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('attachmentsloaded', true, true, {
-                    attachmentsCount: e.attachmentsCount
-                });
-                e.source.container.dispatchEvent(event);
-            });
-            eventBus.on('sidebarviewchanged', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('sidebarviewchanged', true, true, {
-                    view: e.view,
-                });
-                e.source.outerContainer.dispatchEvent(event);
-            });
-            eventBus.on('pagemode', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('pagemode', true, true, {
-                    mode: e.mode,
-                });
-                e.source.pdfViewer.container.dispatchEvent(event);
-            });
-            eventBus.on('namedaction', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('namedaction', true, true, {
-                    action: e.action
-                });
-                e.source.pdfViewer.container.dispatchEvent(event);
-            });
-            eventBus.on('presentationmodechanged', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('presentationmodechanged', true, true, {
-                    active: e.active,
-                    switchInProgress: e.switchInProgress
-                });
-                window.dispatchEvent(event);
-            });
-            eventBus.on('outlineloaded', function (e) {
-                var event = document.createEvent('CustomEvent');
-                event.initCustomEvent('outlineloaded', true, true, {
-                    outlineCount: e.outlineCount
-                });
-                e.source.container.dispatchEvent(event);
-            });
-        }
-
-        var globalEventBus = null;
-        function getGlobalEventBus() {
-            if (globalEventBus) {
-                return globalEventBus;
-            }
-            globalEventBus = new EventBus();
-            attachDOMEventsToEventBus(globalEventBus);
-            return globalEventBus;
-        }
-        function TextLayerBuilder(options) {
-            this.textLayerDiv = options.textLayerDiv;
-            this.eventBus = options.eventBus || getGlobalEventBus();
-            this.renderingDone = false;
-            this.divContentDone = false;
-            this.pageIdx = options.pageIndex;
-            this.pageNumber = this.pageIdx + 1;
-            this.matches = [];
-            this.viewport = options.viewport;
-            this.textDivs = [];
-            this.findController = options.findController || null;
-            this.textLayerRenderTask = null;
-            this.enhanceTextSelection = options.enhanceTextSelection;
-            this._bindMouse();
-        }
-
-        TextLayerBuilder.prototype = {
-            _finishRendering: function TextLayerBuilder_finishRendering() {
-                this.renderingDone = true;
-
-                this.eventBus.dispatch('textlayerrendered', {
-                    source: this,
-                    pageNumber: this.pageNumber
-                });
-            },
-
-            /**
-             * Renders the text layer.
-             * @param {number} timeout (optional) if specified, the rendering waits
-             *   for specified amount of ms.
-             */
-            render: function TextLayerBuilder_render(timeout, callback) {
-                if (!this.divContentDone || this.renderingDone) {
-                    return;
-                }
-
-                if (this.textLayerRenderTask) {
-                    this.textLayerRenderTask.cancel();
-                    this.textLayerRenderTask = null;
-                }
-
-                this.textDivs = [];
-                var textLayerFrag = document.createDocumentFragment();
-                this.textLayerRenderTask = PDFJS.renderTextLayer({
-                    textContent: this.textContent,
-                    container: textLayerFrag,
-                    viewport: this.viewport,
-                    textDivs: this.textDivs,
-                    timeout: timeout,
-                    enhanceTextSelection: this.enhanceTextSelection,
-                });
-                this.textLayerRenderTask.promise.then(function () {
-                    this.textLayerDiv.appendChild(textLayerFrag);
-                    this._finishRendering();
-                    this.updateMatches();
-                    for (var i = 0; i < this.textDivs.length; i++) {
-                        this.textDivs[i].setAttribute("class",  "word");
-                    }
-
-                    if(callback) {
-                        callback();
-                    }
-                }.bind(this), function (reason) {
-                    // canceled or failed to render text layer -- skipping errors
-                });
-            },
-
-            setTextContent: function TextLayerBuilder_setTextContent(textContent) {
-                if (this.textLayerRenderTask) {
-                    this.textLayerRenderTask.cancel();
-                    this.textLayerRenderTask = null;
-                }
-                this.textContent = textContent;
-                this.divContentDone = true;
-            },
-
-            convertMatches: function TextLayerBuilder_convertMatches(matches,
-                                                                     matchesLength) {
-                var i = 0;
-                var iIndex = 0;
-                var bidiTexts = this.textContent.items;
-                var end = bidiTexts.length - 1;
-                var queryLen = (this.findController === null ?
-                    0 : this.findController.state.query.length);
-                var ret = [];
-                if (!matches) {
-                    return ret;
-                }
-                for (var m = 0, len = matches.length; m < len; m++) {
-                    // Calculate the start position.
-                    var matchIdx = matches[m];
-
-                    // Loop over the divIdxs.
-                    while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    if (i === bidiTexts.length) {
-                        console.error('Could not find a matching mapping');
-                    }
-
-                    var match = {
-                        begin: {
-                            divIdx: i,
-                            offset: matchIdx - iIndex
-                        }
-                    };
-
-                    // Calculate the end position.
-                    if (matchesLength) { // multiterm search
-                        matchIdx += matchesLength[m];
-                    } else { // phrase search
-                        matchIdx += queryLen;
-                    }
-
-                    // Somewhat the same array as above, but use > instead of >= to get
-                    // the end position right.
-                    while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
-                        iIndex += bidiTexts[i].str.length;
-                        i++;
-                    }
-
-                    match.end = {
-                        divIdx: i,
-                        offset: matchIdx - iIndex
-                    };
-                    ret.push(match);
-                }
-
-                return ret;
-            },
-
-            renderMatches: function TextLayerBuilder_renderMatches(matches) {
-                // Early exit if there is nothing to render.
-                if (matches.length === 0) {
-                    return;
-                }
-
-                var bidiTexts = this.textContent.items;
-                var textDivs = this.textDivs;
-                var prevEnd = null;
-                var pageIdx = this.pageIdx;
-                var isSelectedPage = (this.findController === null ?
-                    false : (pageIdx === this.findController.selected.pageIdx));
-                var selectedMatchIdx = (this.findController === null ?
-                    -1 : this.findController.selected.matchIdx);
-                var highlightAll = (this.findController === null ?
-                    false : this.findController.state.highlightAll);
-                var infinity = {
-                    divIdx: -1,
-                    offset: undefined
-                };
-
-                function beginText(begin, className) {
-                    var divIdx = begin.divIdx;
-                    textDivs[divIdx].textContent = '';
-                    appendTextToDiv(divIdx, 0, begin.offset, className);
-                }
-
-                function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
-                    var div = textDivs[divIdx];
-                    var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
-                    var node = document.createTextNode(content);
-                    if (className) {
-                        var span = document.createElement('span');
-                        span.className = className;
-                        span.appendChild(node);
-                        div.appendChild(span);
-                        return;
-                    }
-                    div.appendChild(node);
-                }
-
-                var i0 = selectedMatchIdx, i1 = i0 + 1;
-                if (highlightAll) {
-                    i0 = 0;
-                    i1 = matches.length;
-                } else if (!isSelectedPage) {
-                    // Not highlighting all and this isn't the selected page, so do nothing.
-                    return;
-                }
-
-                for (var i = i0; i < i1; i++) {
-                    var match = matches[i];
-                    var begin = match.begin;
-                    var end = match.end;
-                    var isSelected = (isSelectedPage && i === selectedMatchIdx);
-                    var highlightSuffix = (isSelected ? ' selected' : '');
-
-                    if (this.findController) {
-                        this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                            begin.divIdx);
-                    }
-
-                    // Match inside new div.
-                    if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
-                        // If there was a previous div, then add the text at the end.
-                        if (prevEnd !== null) {
-                            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                        }
-                        // Clear the divs and set the content until the starting point.
-                        beginText(begin);
-                    } else {
-                        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
-                    }
-
-                    if (begin.divIdx === end.divIdx) {
-                        appendTextToDiv(begin.divIdx, begin.offset, end.offset,
-                            'highlight' + highlightSuffix);
-                    } else {
-                        appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
-                            'highlight begin' + highlightSuffix);
-                        for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
-                            textDivs[n0].className = 'highlight middle' + highlightSuffix;
-                        }
-                        beginText(end, 'highlight end' + highlightSuffix);
-                    }
-                    prevEnd = end;
-                }
-
-                if (prevEnd) {
-                    appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-                }
-            },
-
-            updateMatches: function TextLayerBuilder_updateMatches() {
-                // Only show matches when all rendering is done.
-                if (!this.renderingDone) {
-                    return;
-                }
-
-                // Clear all matches.
-                var matches = this.matches;
-                var textDivs = this.textDivs;
-                var bidiTexts = this.textContent.items;
-                var clearedUntilDivIdx = -1;
-
-                // Clear all current matches.
-                for (var i = 0, len = matches.length; i < len; i++) {
-                    var match = matches[i];
-                    var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-                    for (var n = begin, end = match.end.divIdx; n <= end; n++) {
-                        var div = textDivs[n];
-                        div.textContent = bidiTexts[n].str;
-                        div.className = '';
-                    }
-                    clearedUntilDivIdx = match.end.divIdx + 1;
-                }
-
-                if (this.findController === null || !this.findController.active) {
-                    return;
-                }
-
-                // Convert the matches on the page controller into the match format
-                // used for the textLayer.
-                var pageMatches, pageMatchesLength;
-                if (this.findController !== null) {
-                    pageMatches = this.findController.pageMatches[this.pageIdx] || null;
-                    pageMatchesLength = (this.findController.pageMatchesLength) ?
-                    this.findController.pageMatchesLength[this.pageIdx] || null : null;
-                }
-
-                this.matches = this.convertMatches(pageMatches, pageMatchesLength);
-                this.renderMatches(this.matches);
-            },
-
-            /**
-             * Fixes text selection: adds additional div where mouse was clicked.
-             * This reduces flickering of the content if mouse slowly dragged down/up.
-             * @private
-             */
-            _bindMouse: function TextLayerBuilder_bindMouse() {
-                var div = this.textLayerDiv;
-                var self = this;
-                div.addEventListener('mousedown', function (e) {
-                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
-                        self.textLayerRenderTask.expandTextDivs(true);
-                        return;
-                    }
-                    var end = div.querySelector('.endOfContent');
-                    if (!end) {
-                        return;
-                    }
-                    //#if !(MOZCENTRAL || FIREFOX)
-                    // On non-Firefox browsers, the selection will feel better if the height
-                    // of the endOfContent div will be adjusted to start at mouse click
-                    // location -- this will avoid flickering when selections moves up.
-                    // However it does not work when selection started on empty space.
-                    var adjustTop = e.target !== div;
-                    //#if GENERIC
-                    adjustTop = adjustTop && window.getComputedStyle(end).
-                        getPropertyValue('-moz-user-select') !== 'none';
-                    //#endif
-                    if (adjustTop) {
-                        var divBounds = div.getBoundingClientRect();
-                        var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
-                        end.style.top = (r * 100).toFixed(2) + '%';
-                    }
-                    //#endif
-                    end.classList.add('active');
-                });
-                div.addEventListener('mouseup', function (e) {
-                    if (self.enhanceTextSelection && self.textLayerRenderTask) {
-                        self.textLayerRenderTask.expandTextDivs(false);
-                        return;
-                    }
-                    var end = div.querySelector('.endOfContent');
-                    if (!end) {
-                        return;
-                    }
-                    //#if !(MOZCENTRAL || FIREFOX)
-                    end.style.top = '';
-                    //#endif
-                    end.classList.remove('active');
-                });
-            },
-        };
-
-        return (TextLayerBuilder);
-    }]);
-
-'use strict';
-/**
- * TODO itThumbnailMenuViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailMenuViewer', ['$log' , 'TranslateViewer', function($log, TranslateViewer){
-    var linker = function (scope, element, attrs) {
-        scope.model = {};
-        scope.model.sizes = [{ label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.SMALL", "small"), value : "small" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.MEDIUM", "medium"), value : "medium" }, { label : TranslateViewer.translate("GLOBAL.VIEWER.SIZE_MENU.BIG", "big"), value : "big" }];
-        scope.model.currentSize = scope.model.sizes[2];
-    };
-
-    return {
-        scope : { options : "=", orientation : "=" },
-        transclude : true,
-        restrict: 'E',
-        template :  '<div class="thumbnail-menu-select" ng-if="options.showSizeMenu != false"><select class="form-control" ng-model="model.currentSize" ng-options="size as size.label for size in model.sizes"></select></div>' +
-        '<div class="thumbnail-menu-{{orientation}}-{{model.currentSize.value}}" ><it-thumbnail-viewer viewer-api="options.$$api" orientation="orientation" show-num-pages="options.showNumPages"></it-thumbnail-viewer><ng-transclude></ng-transclude></div>',
-        link: linker
-    };
-}]);
-'use strict';
-/**
- * TODO itThumbnailViewer desc
- */
-itMultiPagesViewer.directive('itThumbnailViewer', ['$log' , 'ThumbnailViewer' , '$timeout', function($log, ThumbnailViewer, $timeout) {
-    var pageMargin = 10;
-
-    return {
-        restrict: "E",
-        scope: {
-            viewerApi: "=",
-            orientation : "=",
-            showNumPages : "="
-        },
-        controller: ['$scope', '$element', function($scope, $element) {
-
-            $scope.shouldShowNumPages = function () {
-                var showNumPages = this.showNumPages;
-                if(typeof showNumPages === typeof true) {
-                    return showNumPages;
-                }
-
-                return true;
-            };
-
-            var viewer = new ThumbnailViewer($element);
-            $element.addClass('thumbnail-viewer');
-            $scope.api = viewer.getAPI();
-            $scope.onViewerApiChanged = function () {
-                viewer.open($scope.viewerApi, $scope.orientation, $scope.shouldShowNumPages(), pageMargin);
-            };
-
-            viewer.hookScope($scope);
-        }],
-        link: function(scope, element, attrs) {
-            scope.$watchGroup(["viewerApi.getNumPages()", "showNumPages"], function() {
-                 if (scope.onViewerApiChangedTimeout) $timeout.cancel(scope.onViewerApiChangedTimeout);
-                  scope.onViewerApiChangedTimeout = $timeout(function() {
-                      scope.onViewerApiChanged()
-                  }, 300);
-            });
-        }
-    };
-}]);
-'use strict';
-/**
- * TODO Thumbnail implementation desc
- */
-itMultiPagesViewer 
-    .factory('ThumbnailViewerAPI', ['$log' , 'MultiPagesViewerAPI', function ($log, MultiPagesViewerAPI) {
-
-        function ThumbnailViewerAPI(viewer) {
-            this.base = MultiPagesViewerAPI;
-            this.base(viewer);
-        };
-
-        ThumbnailViewerAPI.prototype = new MultiPagesViewerAPI;
-
-        ThumbnailViewerAPI.prototype.getSelectedPage = function () {
-            return this.viewer.viewer.getAPI().getSelectedPage();
-        };
-
-        return (ThumbnailViewerAPI);
-    }])
-
-    .factory('ThumbnailPage', ['$log' , '$timeout', 'MultiPagesPage', function($log, $timeout, MultiPagesPage) {
-
-        function ThumbnailPage(viewer, page, showNumPages) {
-            this.base = MultiPagesPage;
-            this.base(viewer, page.pageIndex, page.view);
-
-            if(showNumPages) {
-                this.pageNum = angular.element("<div class='num-page'>" + this.id + "</div>");
-            }
-
-            this.page = page;
-        }
-
-        ThumbnailPage.prototype = new MultiPagesPage;
-
-        ThumbnailPage.prototype.clear = function () {
-            if(this.renderTask != null) {
-                this.renderTask.cancel();
-            }
-            MultiPagesPage.prototype.clear.call(this);
-            this.renderTask = null;
-        };
-        ThumbnailPage.prototype.getViewport = function (scale, rotation) {
-            return this.page.getViewport(scale, rotation);
-        };
-        ThumbnailPage.prototype.renderPage = function (page, callback) {
-            this.page.renderPage(page, callback);
-            if(this.pageNum != undefined) {
-                page.wrapper.append(this.pageNum);
-            }
-        };
-        ThumbnailPage.prototype.getZoomSelectionShortcutKey = function(e) {
-            return this.page.getZoomSelectionShortcutKey(e);
-        };
-
-        return (ThumbnailPage);
-    }])
-
-    .factory('ThumbnailViewer', ['$log', 'ThumbnailViewerAPI' , 'ThumbnailPage' , 'MultiPagesViewer' , 'MultiPagesConstants', function($log, ThumbnailViewerAPI, ThumbnailPage, MultiPagesViewer, MultiPagesConstants) {
-
-        function ThumbnailViewer(element) {
-            this.base = MultiPagesViewer;
-            this.base(new ThumbnailViewerAPI(this), element);
-            this.name = "ThumbnailViewer";
-        }
-
-        ThumbnailViewer.prototype = new MultiPagesViewer;
-
-        ThumbnailViewer.prototype.open = function(viewerApi, orientation, showNumPages, pageMargin) {
-            this.element.empty();
-            this.pages = [];
-            if(viewerApi != null) {
-                var self = this;
-                this.viewer = viewerApi.getViewer();
-                //defer rendering of thumbnail
-                this.renderAllVisiblePagesTimeoutValue = (this.viewer.renderAllVisiblePagesTimeoutValue + 100);
-                this.viewer.thumbnail = this;
-                this.pageMargin = pageMargin;
-                this.showNumPages = showNumPages;
-
-
-                this.orientation = orientation;
-
-                if(this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_HEIGHT;
-                } else {
-                    this.initialScale = MultiPagesConstants.ZOOM_FIT_WIDTH;
-                }
-
-                this.getAllPages(function(pageList) {
-                    self.pages = pageList;
-                    self.addPages();
-                    self.setContainerSize(self.initialScale);
-                });
-            }
-        };
-        ThumbnailViewer.prototype.getAllPages = function(callback) {
-            var pageList = [],
-                numPages = this.viewer.pages.length,
-                remainingPages = numPages,
-                self = this;
-            for(var iPage = 0; iPage<numPages;++iPage) {
-                pageList.push({});
-                var page =  new ThumbnailPage(self, self.viewer.pages[iPage], self.showNumPages);
-                pageList[iPage] = page;
-
-                --remainingPages;
-                if (remainingPages === 0) {
-                    callback(pageList);
-                }
-            }
-        };
-        ThumbnailViewer.prototype.onContainerSizeChanged = function(containerSize) {
-            if(this.showNumPages === true && this.orientation === MultiPagesConstants.ORIENTATION_HORIZONTAL) {
-                containerSize.height -= 20;
-            }
-        };
-        ThumbnailViewer.prototype.onPageClicked = function (pageIndex) {
-            if(this.viewer) {
-                this.viewer.api.goToPage(pageIndex);
-                this.viewer.selectedPage = pageIndex;
-            }
-        };
-        ThumbnailViewer.prototype.clearDistantSelectedPage = function (currentPageID, lastPageID) {
-            //Keep selection
-        };
-        ThumbnailViewer.prototype.onDestroy = function () {
-            if(self.viewer != null){
-                this.viewer.thumbnail = null;
-                self.viewer = null;
-            }
-        };
-
-        ThumbnailViewer.prototype.zoomToSelection = function(value) {
-            this.viewer.zoomToSelection(value);
-        };
-
-        return (ThumbnailViewer);
-    }]);
 'use strict';
 /**
  * TODO itTiffViewer desc

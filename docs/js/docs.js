@@ -29,7 +29,9 @@ docsApp.directive.ngHtmlWrapLoaded = function(reindentCode, templateMerge, loade
             module: '',
             body: element.text()
           },
-        html = "<!doctype html>\n<html ng-app{{module}}>\n  <head>\n{{head:4}}  </head>\n  <body>\n{{body:4}}  </body>\n</html>";
+        html = "<!doctype html>\n<html ng-app{{module}}>\n  <head>\n{{head:4}}  </head>\n  <body" +
+            " class=\"it-theme-container\">\n{{body:4}}" +
+            "  </body>\n</html>";
 
       angular.forEach(loadedUrls.base, function(dep) {
         //properties.head += '<script src="' + dep + '"></script>\n';
@@ -186,7 +188,7 @@ docsApp.serviceFactory.openPlunkr = function(templateMerge, formPostData, loaded
         '  <head>\n' +
         '{{scriptDeps}}' +
         '  </head>\n' +
-        '  <body>\n\n' +
+        '  <body class="it-theme-container">\n\n' +
         '{{indexContents}}\n\n' +
         '  </body>\n' +
         '</html>\n';
