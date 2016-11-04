@@ -152,7 +152,7 @@ docsApp.serviceFactory.loadedUrls = function($document) {
 
 
    angular.forEach(NG_DOCS.styles, function(style) {
-        tmp.pathname = style.file;
+        tmp.href = style.file;
         var match = cssUrls[tmp.pathname];
         if (match) {
             urls.base.push(match);
