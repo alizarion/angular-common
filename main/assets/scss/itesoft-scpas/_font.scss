@@ -11,7 +11,17 @@
   src: local("Source Sans Pro Bold"), url(../fonts/SourceSansPro-Bold.woff2) format('woff2');
 }
 
+html.it-theme-container {
+  font-size: 100% !important;
+  font-family: 'Source Sans Pro', sans-serif !important;
+}
+
+html.it-theme-container, html.it-theme-container, .it-theme-container body {
+  font-size: 100% !important;
+  font-family: 'Source Sans Pro', sans-serif !important;
+}
+
 .it-theme-container:not(.fa) {
-  font-size: 100%;
-  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 100% !important;
+  font-family: 'Source Sans Pro', sans-serif !important;
 }

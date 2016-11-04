@@ -1,7 +1,7 @@
 .it-theme-container {
   .it-select-more-filter {
     background-color: transparent;
-    background: url('../../assets/img/filter/more_20_gray.svg') no-repeat;
+    background: url('more_20_gray.svg') no-repeat;
     background-size: 100%;
     width: 20px;
     height: 20px;
@@ -17,7 +17,7 @@
 
   .it-save-filter {
     background-size: 100%;
-    background: url('../../assets/img/filter/save_20_gray.svg') no-repeat;
+    background: url('save_20_gray.svg') no-repeat;
     width: 20px;
     height: 20px;
     display: inline-block;
@@ -30,6 +30,10 @@
     position: absolute !important;
   }
 
+  .it-save-filter.it-icon {
+    height: 20px;
+  }
+
   .it-save-filter.small-btn.btn {
     padding: 6px;
     margin-left: 5px !important;
@@ -38,7 +42,7 @@
 
   .it-less-filter {
     background-size: 100%;
-    background: url('../../assets/img/filter/less_20_gray.svg') no-repeat;
+    background: url('less_20_gray.svg') no-repeat;
     width: 20px;
     height: 20px;
     display: inline-block;
