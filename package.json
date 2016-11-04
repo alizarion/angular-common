@@ -1,8 +1,8 @@
 {
   "name": "angular-common",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Mise en commun de directives AngularJS",
-  "dependencies": {
+  "devDependencies": {
     "bower": "1.6.5",
     "gulp": "3.9.0",
     "gulp-chmod": "1.3.0",
@@ -18,7 +18,7 @@
     "gulp-karma": "0.0.5",
     "gulp-less": "3.0.3",
     "gulp-minify-css": "1.2.1",
-    "gulp-ngdocs": "https://github.com/alizarion/gulp-ngdocs/tarball/8bef6bbd82af7870f22ca529147f4722804daee7",
+    "gulp-ngdocs": "https://github.com/alizarion/gulp-ngdocs/tarball/5769ca26452389c5f666bae05e51dfc40e57c6e6",
     "gulp-protractor": "2.1.0",
     "gulp-rename": "1.2.2",
     "gulp-sass": "2.1.0",
@@ -34,5 +34,8 @@
     "run-sequence": "1.1.0",
     "shelljs": "0.5.3",
     "cors": "^2.8.1"
+  },
+  "scripts": {
+    "install": "bower install & gulp build & gulp docs"
   }
 }
