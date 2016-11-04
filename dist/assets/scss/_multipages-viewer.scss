@@ -370,15 +370,7 @@
       width: 8px;
       height: 100%;
     }
-    .ui-splitbar-container-column > .collapsed-splitbar-button {
-      cursor: pointer;
-      text-align: center;
-      font-size: 16px;
-      color: black;
-      position: absolute;
-      top: 50%;
-      z-index: 1010;
-    }
+   
   }
 
   .ui-splitbar-container-row {
@@ -397,3 +389,13 @@
   }
 
 }
+
+ .it-theme-container .ui-splitbar-container-column > .collapsed-splitbar-button {
+      cursor: pointer;
+      text-align: center;
+      font-size: 16px;
+      color: black;
+      position: absolute;
+      top: 50%;
+      z-index: 1010;
+    }
