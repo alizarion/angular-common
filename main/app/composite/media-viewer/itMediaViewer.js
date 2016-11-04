@@ -210,7 +210,22 @@
  angular.module('itesoft-showcase',['itesoft.viewer'])
  </file>
  <file name="controller.js">
- angular.module('itesoft-showcase').controller('HomeCtrl', ['$scope', function($scope) {  $scope.options = {showProgressbar: true, showToolbar : true, initialScale : 'fit_height', libPath : 'js/dist/assets/lib', onApiLoaded : function (api) { api.onTextSelected = function(text) { $scope.selectedText = text; }, api.onZoomLevelsChanged = function (zoomLevels) { console.log(zoomLevels); } } }; }]);
+    angular.module('itesoft-showcase')
+     .controller('HomeCtrl', ['$scope', function($scope) {
+        $scope.options = {showProgressbar: true,
+              showToolbar : true,
+             initialScale : 'fit_height',
+             libPath : 'http://alizarion.github.io/angular-common/docs/js/dist/assets/lib/',
+             onApiLoaded : function (api) {
+                api.onTextSelected = function(text) {
+                 $scope.selectedText = text;
+                 },
+                 api.onZoomLevelsChanged = function (zoomLevels) {
+                  console.log(zoomLevels);
+                   }
+                  }
+                };
+           }]);
  </file>
  </example>
  */
