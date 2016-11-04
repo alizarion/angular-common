@@ -5271,497 +5271,6 @@ IteSoft
 'use strict';
 /**
  * @ngdoc directive
- * @name itesoft.directive:itCollapsedItem
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * <img src="../dist/assets/img/collapsed-item.gif" alt="">
- * @usage
- *  <li>
- *  </li>
- *  <li it-collapsed-item=""  >
- *    <a href=""><h5>Menu Title</h5></a>
- *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
- *        <li>
- *            <a  href="#/datatable">Normal</a>
- *        </li>
- *    </ul>
- *  </li>
- *  <li>
- *  </li>
- */
-IteSoft
-    .directive('itCollapsedItem', function() {
-        return  {
-            restrict : 'A',
-            link : function ( scope,element, attrs) {
-                var menuItems = angular.element(element[0]
-                    .querySelector('ul'));
-                var link = angular.element(element[0]
-                    .querySelector('a'));
-                menuItems.addClass('it-side-menu-collapse');
-                element.addClass('it-sub-menu');
-                var title = angular.element(element[0]
-                    .querySelector('h5'));
-                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
-                title.append(i);
-                link.on('click', function () {
-                    if (menuItems.hasClass('it-side-menu-collapse')) {
-                        menuItems.removeClass('it-side-menu-collapse');
-                        menuItems.addClass('it-side-menu-expanded');
-                        i.removeClass('fa-angle-right');
-                        i.addClass('fa-angle-down');
-                        element.addClass('toggled');
-                    } else {
-                        element.removeClass('toggled');
-                        i.addClass('fa-angle-right');
-                        i.removeClass('fa-angle-down');
-                        menuItems.removeClass('it-side-menu-expanded');
-                        menuItems.addClass('it-side-menu-collapse');
-
-                    }
-                });
-
-            }
-        }
-    });
-
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itNavActive
- * @module itesoft
- * @restrict A
- * @since 1.0
- * @description
- * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- *  <div class="jumborton ng-scope">
- *    <img src="../dist/assets/img/nav-active.gif" alt="">
- *  </div>
- *
- * ```html
- *     <it-side-menu>
- *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
- *                <li>
- *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
- *                </li>
- *                <li>
- *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
- *                </li>
- *                <li>
- *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
- *                </li>
- *            </ul>
- *
- *     </it-side-menu>
- * ```
- *
- */
-
-IteSoft.
-    directive('itNavActive', ['$location', function ($location) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element,attrs) {
-                var clazz = attrs.itActive || 'active';
-                function setActive() {
-                    var path = $location.path();
-                    if (path) {
-                        angular.forEach(element.find('li'), function (li) {
-                            var anchor = li.querySelector('a');
-                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
-                                angular.element(li).addClass(clazz);
-                            } else {
-                                angular.element(li).removeClass(clazz);
-                            }
-                        });
-                    }
-                }
-
-                setActive();
-
-                scope.$on('$locationChangeSuccess', setActive);
-            }
-        }
-    }]);
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenu
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- *
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-    .directive('itSideMenu',function(){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope:false,
-            link:function(scope, element, attrs ){
-
-                calculateWidth();
-
-                scope.$watch(function(){
-                    calculateWidth();
-                });
-
-                var sideMenuHeader = angular.element(document
-                    .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                   scope.$noMenuHeader = true;
-                }
-
-                function calculateWidth(){
-                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
-                    scope.sideMenuCalc1 = { 'width': (scope.itSideMenuWidth * 1) + (50 * 1) + 'px' };
-                    scope.sideMenuCalc2 = { 'width': scope.$itSideMenuWidth + 'px' };
-                }
-            },
-            template :
-            '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
-                '<div ng-style="sideMenuCalc1"  class="it-sidebar-inner">' +
-                    '<div ng-style="sideMenuCalc2" class="nav navbar navbar-inverse">' +
-                    '<nav class="" ng-transclude ></nav>' +
-                    '</div>'+
-                '</div>'+
-            '</div>'
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuContent
- * @since 1.0
- * @module itesoft
- * @restrict E
- * @parent itesoft/sideMenus
- *
- * @description
- * A container for a side menu, sibling to an directive.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
- * @usage
- * <it-side-menu>
- * </it-side-menu>
- */
-IteSoft
-
-    .directive('itSideMenuContent',function(){
-        return {
-            restrict : 'ECA',
-            require : '^itSideMenus',
-            transclude : true,
-            scope : false,
-            link : function(scope){
-                var sideMenuHeader = angular.element(document
-                    .querySelector('it-side-menu-header'));
-                if(!sideMenuHeader[0]){
-                    scope.showmenu = true;
-                }
-
-                calculatePadding();
-                scope.$watch('$itSideMenuWidth',function(){
-                    calculatePadding();
-                });
-
-                function calculatePadding(){
-                    scope.menuOpenStyle = {'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px'};
-                    scope.menuCloseStyle = {'padding-left': '0px'};
-                }
-            },
-            template :
-            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
-                '<div class="it-container it-fill" ng-transclude></div>' +
-            '</div>'
-        }
-    });
-'use strict';
-
-IteSoft
-    .controller("$sideMenuCtrl",[
-        '$scope',
-        '$document',
-        '$timeout'
-        ,'$window',
-        function($scope,
-                 $document,
-                 $timeout,
-                 $window){
-        var _self = this;
-        _self.scope = $scope;
-
-        _self.scope.showmenu = false;
-        _self.toggleMenu = function(){
-
-            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
-
-            $timeout(function(){
-                var event = document.createEvent('Event');
-                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
-                $window.dispatchEvent(event);
-            },300)
-        };
-        _self.hideSideMenu = function(){
-            _self.scope.showmenu= false;
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenuHeader
- * @module itesoft
- * @restrict E
- * @parent sideMenus
- * @since 1.0
- * @description
- * A container for a side menu header.
- * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
- *
- * <table class="table">
- *  <tr>
- *   <td><code>it-animate="true | false"</code></td>
- *   <td>Static or animated button.</td>
- *  </tr>
- *  <tr>
- *   <td><code>it-button-menu="true | false"</code></td>
- *   <td>show or hide side menu button</td>
- *  </tr>
- *</table>
- *
- * @usage
- * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
- * </it-side-menu-header>
- */
-IteSoft
-    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
-        return {
-            restrict: 'E',
-            require : '^itSideMenus',
-            transclude : true,
-            scope: true,
-            link : function (scope, element, attrs ,sideMenuCtrl) {
-
-                var child = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__layer'));
-                var button = angular.element(element[0]
-                    .querySelector('.it-material-design-hamburger__icon'));
-
-                var menuContent = angular.element(document
-                    .querySelector('it-side-menu-content'));
-
-
-                if(menuContent){
-                    menuContent.css('padding-top','60px');
-                }
-
-                scope.toggleMenu = sideMenuCtrl.toggleMenu;
-                if(attrs.itAnimate === "true") {
-                    scope.$watch('showmenu', function (newValue, oldValue) {
-                        if (newValue != oldValue) {
-                            if (!newValue) {
-                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
-                                child.addClass('it-material-design-hamburger__icon--from-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
-                            } else {
-                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
-                                child.addClass('it-material-design-hamburger__icon--to-arrow');
-                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
-                            }
-                        }
-                    }, true);
-                }
-
-                if(attrs.itHideButtonMenu){
-                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
-
-                }
-                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
-                    scope.itHideButtonMenu = newValue;
-                    if(newValue){
-                        sideMenuCtrl.hideSideMenu();
-                    }
-                });
-
-            },
-            template :
-                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
-                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
-                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
-                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
-                            '</span>' +
-                        '</button>' +
-                    ' </section>' +
-                    '<div class="container-fluid" ng-transclude>' +
-                    '</div>' +
-                '</nav>'
-        }
-    }]);
-
-'use strict';
-/**
- * @ngdoc directive
- * @name itesoft.directive:itSideMenus
- * @module itesoft
- * @restrict ECA
- * @since 1.0
- * @description
- * A container element for side menu(s) and the main content. Allows the left and/or right side menu
- * to be toggled by dragging the main content area side to side.
- *
- * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
- * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
- * and `<it-side-menu>` directives
- *
- * <table class="table">
- *  <tr>
- *  <td><code>it-width="400"  attribute on it-side-menu directive </code></td>
- *   <td>Width of the side menu, in pixels, max value 800.</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-animate="true"  on it-side-menu-header  </code></td>
- *   <td>to animate de side menu open and close button</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-hide-button-menu="true"  on it-side-menu-header  </code></td>
- *   <td>to hide header menu Close/open button</td>
- *  </tr>
- *  <tr>
- *  <td><code> it-side-menu-header </code></td>
- *   <td>headers are optionnal</td>
- *  </tr>
- *  </table>
- *
- * ```html
- * <it-side-menus>
- *
- *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
- *  </it-side-menu-header>
- *
- *   <!-- Center content -->
- *
- *   <it-side-menu-content>
- *   </it-side-menu-content>
- *
- *   <!-- menu -->
- *
- *
- *   <it-side-menu >
- *   </it-side-menu>
- *
- * </it-side-menus>
- * ```
- * @example
-    <example module="itesoft">
-        <file name="index.html">
-
-         <it-side-menus>
-             <it-side-menu-header it-animate="true"  it-button-menu="true">
-
-                 <!-- Header Menu-->
-                 <div class="collapse navbar-collapse">
-                 <div uib-dropdown class="nav navbar-nav navbar-right ">
-                 <button class="btn loginButton" type="button" uib-dropdown-toggle>
-                 <i class="glyphicon glyphicon-user ">&nbsp;John Doe&nbsp;</i><span class="caret"></span>
-                 </button>
-                 <ul class="dropdown-menu" role="menu">
-                 <li>
-                 <a ng-cloak>
-                 français
-                 <i class="pull-right">
-                 </i>
-                 </a>
-                 </li>
-                 <li>
-                 <a ng-cloak>
-                 anglais
-                 <i class="pull-right glyphicon glyphicon-ok">
-                 </i>
-                 </a>
-                 </li>
-                 <li>
-                 <a ng-cloak>
-                 dothraki
-                 <i class="pull-right">
-                 </i>
-                 </a>
-                 </li>
-                 <li class="divider"></li>
-                 <li>
-                 <a ng-cloak>
-                 logout
-                 </a>
-                 </li>
-                 </ul>
-                 </div>
-                 </div>
-             </it-side-menu-header>
-
-         <it-side-menu it-width="200">
-             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
-             <li it-collapsed-item>
-             <a href=""><h5><i class="fa fa-music"></i>&nbsp; Menu 1</h5></a>
-             <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
-             <li >
-             <a href="#/menu1/sub1" translate>SubMenu 1</a>
-             </li>
-             <li >
-             <a href="#/menu2/sub2" translate>SubMenu 2</a>
-             </li>
-             </ul>
-             </li>
-             <li>
-             <a href="#/menu2"><h5><i class="fa fa-list"></i>&nbsp; Menu 2</h5></a>
-             </li>
-             <li>
-             <a href="#/menu3"><h5><i class="fa fa-pied-piper-alt"></i>&nbsp; Menu 3</h5></a>
-             </li>
-             </ul>
-         </it-side-menu>
-
-
-         <it-side-menu-content>
-
-             <div class="container-fluid">
-                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi, veritatis, earum ullam accusantium consectetur consequuntur totam enim nemo impedit atque blanditiis ratione eum provident libero illum laboriosam qui amet eius.</p>
-
-             </div>
-
-
-            </it-side-menu-content>
-         </it-side-menus>
-
-    </file>
-  </example>
- */
-IteSoft
-    .directive('itSideMenus',function(){
-        return {
-            restrict: 'ECA',
-            transclude : true,
-            controller : '$sideMenuCtrl',
-            template : '<div class="it-side-menu-group" ng-transclude></div>'
-        }
-});
-'use strict';
-/**
- * @ngdoc directive
  * @name itesoft.directive:itSidePanel
  * @module itesoft
  * @restrict E
@@ -6561,6 +6070,497 @@ IteSoft
     });
 
 
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itCollapsedItem
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * Directive to collapse grouped item in {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * <img src="../dist/assets/img/collapsed-item.gif" alt="">
+ * @usage
+ *  <li>
+ *  </li>
+ *  <li it-collapsed-item=""  >
+ *    <a href=""><h5>Menu Title</h5></a>
+ *    <ul  class=" nav navbar-nav  nav-pills nav-stacked it-menu-animated ">
+ *        <li>
+ *            <a  href="#/datatable">Normal</a>
+ *        </li>
+ *    </ul>
+ *  </li>
+ *  <li>
+ *  </li>
+ */
+IteSoft
+    .directive('itCollapsedItem', function() {
+        return  {
+            restrict : 'A',
+            link : function ( scope,element, attrs) {
+                var menuItems = angular.element(element[0]
+                    .querySelector('ul'));
+                var link = angular.element(element[0]
+                    .querySelector('a'));
+                menuItems.addClass('it-side-menu-collapse');
+                element.addClass('it-sub-menu');
+                var title = angular.element(element[0]
+                    .querySelector('h5'));
+                var i = angular.element('<i class="pull-right fa fa-angle-right" ></i>');
+                title.append(i);
+                link.on('click', function () {
+                    if (menuItems.hasClass('it-side-menu-collapse')) {
+                        menuItems.removeClass('it-side-menu-collapse');
+                        menuItems.addClass('it-side-menu-expanded');
+                        i.removeClass('fa-angle-right');
+                        i.addClass('fa-angle-down');
+                        element.addClass('toggled');
+                    } else {
+                        element.removeClass('toggled');
+                        i.addClass('fa-angle-right');
+                        i.removeClass('fa-angle-down');
+                        menuItems.removeClass('it-side-menu-expanded');
+                        menuItems.addClass('it-side-menu-collapse');
+
+                    }
+                });
+
+            }
+        }
+    });
+
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itNavActive
+ * @module itesoft
+ * @restrict A
+ * @since 1.0
+ * @description
+ * Directive to set active view css class on side menu item {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ *  <div class="jumborton ng-scope">
+ *    <img src="../dist/assets/img/nav-active.gif" alt="">
+ *  </div>
+ *
+ * ```html
+ *     <it-side-menu>
+ *            <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+ *                <li>
+ *                <a href="#"><h5><i class="fa fa-home fa-fw"></i>&nbsp; Content</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href="#/typo"><h5><i class="fa fa-book fa-fw"></i>&nbsp; Typography</h5></a>
+ *                </li>
+ *                <li>
+ *                <a href=""><h5><i class="fa fa-book fa-fw"></i>&nbsp; Tables</h5></a>
+ *                </li>
+ *            </ul>
+ *
+ *     </it-side-menu>
+ * ```
+ *
+ */
+
+IteSoft.
+    directive('itNavActive', ['$location', function ($location) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element,attrs) {
+                var clazz = attrs.itActive || 'active';
+                function setActive() {
+                    var path = $location.path();
+                    if (path) {
+                        angular.forEach(element.find('li'), function (li) {
+                            var anchor = li.querySelector('a');
+                            if (anchor.href.match('#' + path + '(?=\\?|$)')) {
+                                angular.element(li).addClass(clazz);
+                            } else {
+                                angular.element(li).removeClass(clazz);
+                            }
+                        });
+                    }
+                }
+
+                setActive();
+
+                scope.$on('$locationChangeSuccess', setActive);
+            }
+        }
+    }]);
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenu
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu, sibling to an {@link itesoft.directive:itSideMenuContent} Directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ *
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+    .directive('itSideMenu',function(){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope:false,
+            link:function(scope, element, attrs ){
+
+                calculateWidth();
+
+                scope.$watch(function(){
+                    calculateWidth();
+                });
+
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                   scope.$noMenuHeader = true;
+                }
+
+                function calculateWidth(){
+                    scope.$itSideMenuWidth = attrs.itWidth ? attrs.itWidth : 260;
+                    scope.sideMenuCalc1 = { 'width': (scope.itSideMenuWidth * 1) + (50 * 1) + 'px' };
+                    scope.sideMenuCalc2 = { 'width': scope.$itSideMenuWidth + 'px' };
+                }
+            },
+            template :
+            '<div style="{{$noMenuHeader ? \'top:0px;padding-bottom:0px;left:0px;\':\'\'}}width:{{$itSideMenuWidth}}px;" class="it-side-menu it-side-menu-left it-side-menu-hide it-menu-animated" ng-class="{\'it-side-menu-hide\':!showmenu,\'it-side-menu-slide\':showmenu}">' +
+                '<div ng-style="sideMenuCalc1"  class="it-sidebar-inner">' +
+                    '<div ng-style="sideMenuCalc2" class="nav navbar navbar-inverse">' +
+                    '<nav class="" ng-transclude ></nav>' +
+                    '</div>'+
+                '</div>'+
+            '</div>'
+        }
+});
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuContent
+ * @since 1.0
+ * @module itesoft
+ * @restrict E
+ * @parent itesoft/sideMenus
+ *
+ * @description
+ * A container for a side menu, sibling to an directive.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}.
+ * @usage
+ * <it-side-menu>
+ * </it-side-menu>
+ */
+IteSoft
+
+    .directive('itSideMenuContent',function(){
+        return {
+            restrict : 'ECA',
+            require : '^itSideMenus',
+            transclude : true,
+            scope : false,
+            link : function(scope){
+                var sideMenuHeader = angular.element(document
+                    .querySelector('it-side-menu-header'));
+                if(!sideMenuHeader[0]){
+                    scope.showmenu = true;
+                }
+
+                calculatePadding();
+                scope.$watch('$itSideMenuWidth',function(){
+                    calculatePadding();
+                });
+
+                function calculatePadding(){
+                    scope.menuOpenStyle = {'padding-left': (scope.$itSideMenuWidth ? scope.$itSideMenuWidth : 0) + 'px'};
+                    scope.menuCloseStyle = {'padding-left': '0px'};
+                }
+            },
+            template :
+            '<div class="it-menu-content"  ng-style="showmenu && menuOpenStyle || menuCloseStyle">' +
+                '<div class="it-container it-fill" ng-transclude></div>' +
+            '</div>'
+        }
+    });
+'use strict';
+
+IteSoft
+    .controller("$sideMenuCtrl",[
+        '$scope',
+        '$document',
+        '$timeout'
+        ,'$window',
+        function($scope,
+                 $document,
+                 $timeout,
+                 $window){
+        var _self = this;
+        _self.scope = $scope;
+
+        _self.scope.showmenu = false;
+        _self.toggleMenu = function(){
+
+            _self.scope.showmenu=(_self.scope.showmenu) ? false : true;
+
+            $timeout(function(){
+                var event = document.createEvent('Event');
+                event.initEvent('resize', true /*bubbles*/, true /*cancelable*/);
+                $window.dispatchEvent(event);
+            },300)
+        };
+        _self.hideSideMenu = function(){
+            _self.scope.showmenu= false;
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenuHeader
+ * @module itesoft
+ * @restrict E
+ * @parent sideMenus
+ * @since 1.0
+ * @description
+ * A container for a side menu header.
+ * see {@link itesoft.directive:itSideMenus `<it-side-menus>`}
+ *
+ * <table class="table">
+ *  <tr>
+ *   <td><code>it-animate="true | false"</code></td>
+ *   <td>Static or animated button.</td>
+ *  </tr>
+ *  <tr>
+ *   <td><code>it-button-menu="true | false"</code></td>
+ *   <td>show or hide side menu button</td>
+ *  </tr>
+ *</table>
+ *
+ * @usage
+ * <it-side-menu-header it-animate="true | false" it-hide-button-menu="true | false">
+ * </it-side-menu-header>
+ */
+IteSoft
+    .directive('itSideMenuHeader',['$rootScope',function($rootScope){
+        return {
+            restrict: 'E',
+            require : '^itSideMenus',
+            transclude : true,
+            scope: true,
+            link : function (scope, element, attrs ,sideMenuCtrl) {
+
+                var child = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__layer'));
+                var button = angular.element(element[0]
+                    .querySelector('.it-material-design-hamburger__icon'));
+
+                var menuContent = angular.element(document
+                    .querySelector('it-side-menu-content'));
+
+
+                if(menuContent){
+                    menuContent.css('padding-top','60px');
+                }
+
+                scope.toggleMenu = sideMenuCtrl.toggleMenu;
+                if(attrs.itAnimate === "true") {
+                    scope.$watch('showmenu', function (newValue, oldValue) {
+                        if (newValue != oldValue) {
+                            if (!newValue) {
+                                child.removeClass('it-material-design-hamburger__icon--to-arrow');
+                                child.addClass('it-material-design-hamburger__icon--from-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'opened');
+                            } else {
+                                child.removeClass('it-material-design-hamburger__icon--from-arrow');
+                                child.addClass('it-material-design-hamburger__icon--to-arrow');
+                                $rootScope.$broadcast('it-sidemenu-state', 'closed');
+                            }
+                        }
+                    }, true);
+                }
+
+                if(attrs.itHideButtonMenu){
+                    scope.itHideButtonMenu = scope.$eval(attrs.itHideButtonMenu);
+
+                }
+                scope.$watch(attrs.itHideButtonMenu, function(newValue, oldValue) {
+                    scope.itHideButtonMenu = newValue;
+                    if(newValue){
+                        sideMenuCtrl.hideSideMenu();
+                    }
+                });
+
+            },
+            template :
+                '<nav id="header" class="it-side-menu-header nav navbar navbar-fixed-top navbar-inverse">' +
+                    '<section class="it-material-design-hamburger" ng-hide="itHideButtonMenu">' +
+                        '<button  ng-click="toggleMenu()" class="it-material-design-hamburger__icon">' +
+                            '<span class="it-menu-animated it-material-design-hamburger__layer"> ' +
+                            '</span>' +
+                        '</button>' +
+                    ' </section>' +
+                    '<div class="container-fluid" ng-transclude>' +
+                    '</div>' +
+                '</nav>'
+        }
+    }]);
+
+'use strict';
+/**
+ * @ngdoc directive
+ * @name itesoft.directive:itSideMenus
+ * @module itesoft
+ * @restrict ECA
+ * @since 1.0
+ * @description
+ * A container element for side menu(s) and the main content. Allows the left and/or right side menu
+ * to be toggled by dragging the main content area side to side.
+ *
+ * To use side menus, add an `<it-side-menus>` parent element. This will encompass all pages that have a
+ * side menu, and have at least 2 child elements: 1 `<it-side-menu-content>` for the center content,
+ * and `<it-side-menu>` directives
+ *
+ * <table class="table">
+ *  <tr>
+ *  <td><code>it-width="400"  attribute on it-side-menu directive </code></td>
+ *   <td>Width of the side menu, in pixels, max value 800.</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-animate="true"  on it-side-menu-header  </code></td>
+ *   <td>to animate de side menu open and close button</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-hide-button-menu="true"  on it-side-menu-header  </code></td>
+ *   <td>to hide header menu Close/open button</td>
+ *  </tr>
+ *  <tr>
+ *  <td><code> it-side-menu-header </code></td>
+ *   <td>headers are optionnal</td>
+ *  </tr>
+ *  </table>
+ *
+ * ```html
+ * <it-side-menus>
+ *
+ *  <it-side-menu-header it-animate="true"  it-hide-button-menu="true">
+ *  </it-side-menu-header>
+ *
+ *   <!-- Center content -->
+ *
+ *   <it-side-menu-content>
+ *   </it-side-menu-content>
+ *
+ *   <!-- menu -->
+ *
+ *
+ *   <it-side-menu >
+ *   </it-side-menu>
+ *
+ * </it-side-menus>
+ * ```
+ * @example
+    <example module="itesoft">
+        <file name="index.html">
+
+         <it-side-menus>
+             <it-side-menu-header it-animate="true"  it-button-menu="true">
+
+                 <!-- Header Menu-->
+                 <div class="collapse navbar-collapse">
+                 <div uib-dropdown class="nav navbar-nav navbar-right ">
+                 <button class="btn loginButton" type="button" uib-dropdown-toggle>
+                 <i class="glyphicon glyphicon-user ">&nbsp;John Doe&nbsp;</i><span class="caret"></span>
+                 </button>
+                 <ul class="dropdown-menu" role="menu">
+                 <li>
+                 <a ng-cloak>
+                 français
+                 <i class="pull-right">
+                 </i>
+                 </a>
+                 </li>
+                 <li>
+                 <a ng-cloak>
+                 anglais
+                 <i class="pull-right glyphicon glyphicon-ok">
+                 </i>
+                 </a>
+                 </li>
+                 <li>
+                 <a ng-cloak>
+                 dothraki
+                 <i class="pull-right">
+                 </i>
+                 </a>
+                 </li>
+                 <li class="divider"></li>
+                 <li>
+                 <a ng-cloak>
+                 logout
+                 </a>
+                 </li>
+                 </ul>
+                 </div>
+                 </div>
+             </it-side-menu-header>
+
+         <it-side-menu it-width="200">
+             <ul it-nav-active="active" class="nav navbar-nav nav-pills nav-stacked list-group">
+             <li it-collapsed-item>
+             <a href=""><h5><i class="fa fa-music"></i>&nbsp; Menu 1</h5></a>
+             <ul  class="nav navbar-nav nav-pills nav-stacked it-menu-animated">
+             <li >
+             <a href="#/menu1/sub1" translate>SubMenu 1</a>
+             </li>
+             <li >
+             <a href="#/menu2/sub2" translate>SubMenu 2</a>
+             </li>
+             </ul>
+             </li>
+             <li>
+             <a href="#/menu2"><h5><i class="fa fa-list"></i>&nbsp; Menu 2</h5></a>
+             </li>
+             <li>
+             <a href="#/menu3"><h5><i class="fa fa-pied-piper-alt"></i>&nbsp; Menu 3</h5></a>
+             </li>
+             </ul>
+         </it-side-menu>
+
+
+         <it-side-menu-content>
+
+             <div class="container-fluid">
+                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi, veritatis, earum ullam accusantium consectetur consequuntur totam enim nemo impedit atque blanditiis ratione eum provident libero illum laboriosam qui amet eius.</p>
+
+             </div>
+
+
+            </it-side-menu-content>
+         </it-side-menus>
+
+    </file>
+  </example>
+ */
+IteSoft
+    .directive('itSideMenus',function(){
+        return {
+            restrict: 'ECA',
+            transclude : true,
+            controller : '$sideMenuCtrl',
+            template : '<div class="it-side-menu-group" ng-transclude></div>'
+        }
+});
 'use strict';
 
 /**
@@ -9386,432 +9386,6 @@ angular.module('itesoft.language',['itesoft.popup','LocalStorageModule'])
 });
 
 'use strict';
-/**
- * @ngdoc service
- * @name itesoft.service:itNotifier
- * @module itesoft
- * @since 1.1
- * @requires ngToast
- * @requires $rootScope
- * @requires $log
- *
- * @description
- * Simple notifier service, that display toasters.
- *
- * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Default value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td><code>additionalClasses</code></td>
- *     <td>''</td>
- *     <td>Allows to add some classes to the current ngToast</td>
- * </tr>
- * <tr>
- *     <td><code>animation</code></td>
- *     <td>'fade'</td>
- *     <td>Adds an openning/ending animation, for example 'fade'</td>
- * </tr>
- * <tr>
- *     <td><code>className</code></td>
- *     <td>"success"</td>
- *     <td>The className of the toast message</td>
- * </tr>
- * <tr>
- *     <td><code>content</code></td>
- *     <td>''</td>
- *     <td>Content of the toast message as String (HTML compliant)</td>
- * </tr>
- * <tr>
- *     <td><code>combineDuplications</code></td>
- *     <td>false</td>
- *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
- * </tr>
- * <tr>
- *     <td><code>compileContent</code></td>
- *     <td>false</td>
- *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnTimeout</code></td>
- *     <td>true</td>
- *     <td>Automatically remove toast message after specific time</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButton:</code></td>
- *     <td>true</td>
- *     <td>Adds close button on toast message</td>
- * </tr>
- * <tr>
- *     <td><code>dismissButtonHtml</code></td>
- *     <td>"&#38;times;"</td>
- *     <td>Html of close button</td>
- * </tr>
- * <tr>
- *     <td><code>dismissOnClick</code></td>
- *     <td>false</td>
- *     <td>Allows to remove toast message with a click</td>
- * </tr>
- * <tr>
- *     <td><code>horizontalPosition</code></td>
- *     <td>"right"</td>
- *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
- * </tr>
- * <tr>
- *     <td><code>maxNumber</code></td>
- *     <td>0</td>
- *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
- * </tr>
- * <tr>
- *     <td><code>timeout</code></td>
- *     <td>4000</td>
- *     <td>Timer for remove toast message</td>
- * </tr>
- * <tr>
- *     <td><code>verticalPosition</code></td>
- *     <td>"bottom"</td>
- *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
- * </tr>
- * </table>
- * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
- *
- * Overload of defaults options value for each type of toasts are :
- * <ul>
- * <li>success:{dismissOnClick: true}</li>
- * <li>info:{dismissOnClick: true}</li>
- * <li>error:{dismissOnTimeout: false}</li>
- * <li>warning:{dismissOnTimeout: false}</li>
- * </ul>
- * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
- * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
- *
- *
- * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
- *
- * <table class="table">
- * <tr>
- *     <th>Property</th>
- *     <th>Possible value</th>
- *     <th>Description</th>
- * </tr>
- * <tr>
- *     <td>CODE</td>
- *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
- *     <td>The code bounds to the status of the action</td>
- * </tr>
- * <tr>
- *     <td>TYPE</td>
- *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
- *     <td>The type message received</td>
- * </tr>
- * <tr>
- *     <td>MESSAGE</td>
- *     <td></td>
- *     <td>The message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DETAIL</td>
- *     <td></td>
- *     <td>The detail of the message received from the server</td>
- * </tr>
- * <tr>
- *     <td>DONE</td>
- *     <td>TRUE("1"), FALSE("0");</td>
- *     <td>A boolean that decribes the final result of the request</td>
- * </tr>
- * </table>
- * <br/>
- *
- * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
- *
- * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
- * @example
-     <example module="itesoft">
-
-         <file name="Controller.js">
-
-            angular.module('itesoft')
-                .config(['itNotifierProvider', function (itNotifierProvider) {
-                    //configuration of default values
-                    itNotifierProvider.defaultOptions = {
-                        dismissOnTimeout: true,
-                        timeout: 4000,
-                        dismissButton: true,
-                        animation: 'fade',
-                        horizontalPosition: 'right',
-                        verticalPosition: 'bottom',
-                        compileContent: true,
-                        dismissOnClick: false,
-                        success:{dismissOnClick: true},//optional overload behavior toast success
-                        info:{dismissOnClick: true},//optional overload behavior toast info
-                        error:{dismissOnTimeout: false},//optional overload behavior toast error
-                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-                    };
-
-                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
-                    $scope.showSuccess = function(){
-                        itNotifier.notifySuccess({
-                        content: "Success popup"
-                        });
-                    };
-                    $scope.showSuccessEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                            type: "SUCCESS",
-                            options: {
-                                content : "Success event popup"
-                            }}
-                         );
-                    };
-                    $scope.showError = function(){
-                        itNotifier.notifyError({
-                            content: "Error popup",
-                            dismissOnTimeout: false
-                        },
-                        {
-                            CODE:500,
-                            TYPE:'error',
-                            MESSAGE:'Something bad happened',
-                            DETAIL:'You don\'t wanna know',
-                            DONE:1
-                        });
-                    };
-                    $scope.showErrorOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "ERROR",
-                        options: {
-                                content : "error event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:500,
-                                TYPE:'error',
-                                MESSAGE:'Something bad happened',
-                                DETAIL:'You don\'t wanna know',
-                                DONE:1
-                            }
-                        });
-                    }
-                    $scope.showInfo = function(){
-                        itNotifier.notifyInfo({
-                        content: "Information popup"
-                        });
-                    };
-                    $scope.showWarningOnEvent = function(){
-                        $scope.$emit('itNotifierEvent', {
-                        type: "WARNING",
-                        options: {
-                                content : "Warning event popup"
-                            },
-                        errorDetails :
-                            {
-                                CODE:1000,
-                                TYPE:'warning',
-                                MESSAGE:'The request is empty',
-                                DETAIL:'Nothing',
-                                DONE:1
-                            }
-                        });
-                    };
-                    $scope.dismiss = function(){
-                        itNotifier.notifyDismiss();
-                        $scope.$emit('itNotifierEvent',{
-                            type:"DISMISS"
-                        });
-                    };
-                    $scope.dismissOnEvent = function(){
-                        $scope.$emit("$locationChangeSuccess");
-
-                    };
-                }]);
-         </file>
-         <file name="index.html">
-             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
-             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
-             <div ng-controller="NotifierCtrl">
-                 <button class="btn btn-success" ng-click="showSuccess()">
-                    Success
-                 </button>
-                 <button class="btn btn-success" ng-click="showSuccessEvent()">
-                    Success on event
-                 </button>
-                 <button class="btn btn-danger" ng-click="showError()">
-                    Error
-                 </button>
-                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
-                    Error on event
-                 </button>
-                 <button class="btn btn-info" ng-click="showInfo()">
-                    Info
-                 </button>
-                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
-                    Warning
-                 </button>
-                 <button class="btn btn-success" ng-click="dismiss()">
-                    Dismiss all popups
-                 </button>
-                 <button class="btn btn-success" ng-click="dismissOnEvent()">
-                    Dismiss on Change location event
-                 </button>
-             </div>
-         </file>
-     </example>
- **/
-IteSoft.provider('itNotifier', [ function () {
-
-    var self = this;
-
-    //default behaviors
-    self.defaultOptions = {
-        dismissOnTimeout: true,
-        timeout: 4000,
-        dismissButton: true,
-        animation: 'fade',
-        horizontalPosition: 'right',
-        verticalPosition: 'bottom',
-        compileContent: true,
-        dismissOnClick: false,
-        success:{dismissOnClick: true},//optional overload behavior toast success
-        info:{dismissOnClick: true},//optional overload behavior toast info
-        error:{dismissOnTimeout: false},//optional overload behavior toast error
-        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
-    };
-
-    //provide get method to build provider
-    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
-
-        // service declaration
-        var itNotifier = {};
-
-        //configuration of the ngToast
-        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
-
-        /**
-         * Private method that format error details message
-         * @param errorDetails
-         * @returns {string}
-         * @private
-         */
-        function _formatErrorDetails(errorDetails){
-            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
-        }
-
-        /** method declaration**/
-        /**
-         * Display a toast configure as success element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifySuccess= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
-            ngToast.success(localOptions);
-            if(errorDetails != undefined) {
-                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as error element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyError= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
-
-            ngToast.danger(localOptions);
-            if(errorDetails != undefined) {
-                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as info element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyInfo= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
-
-            ngToast.info(localOptions);
-            if(errorDetails != undefined) {
-                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Display a toast configure as warning element
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyWarning= function (options,errorDetails) {
-            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
-
-            ngToast.warning(localOptions);
-            if(errorDetails != undefined) {
-                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
-            }
-        };
-        /**
-         * Dismiss all toaster
-         * @param options
-         * @param errorDetails
-         */
-        itNotifier.notifyDismiss= function (options,errorDetails) {
-            ngToast.dismiss();
-        };
-        /**
-         * Log an error because this type is unknown
-         * @param options
-         */
-        itNotifier.notify= function (options) {
-            $log.error('Unknown type for itNotifier: '+options )
-        }
-
-        /** events declaration **/
-
-        /**
-         * Listen an event and dismiss all toaster
-         */
-        $rootScope.$on("$locationChangeSuccess", function () {
-            // Remove all currently display toaster messages.
-            itNotifier.notifyDismiss();
-        });
-
-        /**
-         * Listen an event and display associated toast depending on his type
-         */
-        $rootScope.$on("itNotifierEvent",function(event, args){
-            //Handle event and calls appropriate method depending on the type of request
-            if (args) {
-                switch (args.type) {
-                    case "SUCCESS":
-                        itNotifier.notifySuccess(args.options,args.errorDetails);
-                        break;
-                    case "ERROR":
-                        itNotifier.notifyError(args.options,args.errorDetails);
-                        break;
-                    case "INFO":
-                        itNotifier.notifyInfo(args.options,args.errorDetails);
-                        break;
-                    case "WARNING":
-                        itNotifier.notifyWarning(args.options,args.errorDetails);
-                        break;
-                    case "DISMISS":
-                        itNotifier.notifyDismiss(args.options,args.errorDetails);
-                        break;
-                    default:
-                        itNotifier.notify(args.type);
-                        break;
-                }
-            }
-            else{
-                $log.error('Bad usage of itNotifier. Check manual for details');
-            }
-        });
-        return itNotifier;
-    }];
-}]);
-'use strict';
 
 /**
  * @ngdoc service
@@ -10476,6 +10050,432 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             }]
     }])
 
+'use strict';
+/**
+ * @ngdoc service
+ * @name itesoft.service:itNotifier
+ * @module itesoft
+ * @since 1.1
+ * @requires ngToast
+ * @requires $rootScope
+ * @requires $log
+ *
+ * @description
+ * Simple notifier service, that display toasters.
+ *
+ * You can personalise itNotifier behavior using attribute and modifying original object setting's toaster:
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Default value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td><code>additionalClasses</code></td>
+ *     <td>''</td>
+ *     <td>Allows to add some classes to the current ngToast</td>
+ * </tr>
+ * <tr>
+ *     <td><code>animation</code></td>
+ *     <td>'fade'</td>
+ *     <td>Adds an openning/ending animation, for example 'fade'</td>
+ * </tr>
+ * <tr>
+ *     <td><code>className</code></td>
+ *     <td>"success"</td>
+ *     <td>The className of the toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>content</code></td>
+ *     <td>''</td>
+ *     <td>Content of the toast message as String (HTML compliant)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>combineDuplications</code></td>
+ *     <td>false</td>
+ *     <td>Combine toaster in a unique one. A counter precede the toaster content</td>
+ * </tr>
+ * <tr>
+ *     <td><code>compileContent</code></td>
+ *     <td>false</td>
+ *     <td>Re-compiles the toast message content within parent (or given) scope. Needs to be used with trusted HTML content. See here for more information. (boolean|object)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnTimeout</code></td>
+ *     <td>true</td>
+ *     <td>Automatically remove toast message after specific time</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButton:</code></td>
+ *     <td>true</td>
+ *     <td>Adds close button on toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissButtonHtml</code></td>
+ *     <td>"&#38;times;"</td>
+ *     <td>Html of close button</td>
+ * </tr>
+ * <tr>
+ *     <td><code>dismissOnClick</code></td>
+ *     <td>false</td>
+ *     <td>Allows to remove toast message with a click</td>
+ * </tr>
+ * <tr>
+ *     <td><code>horizontalPosition</code></td>
+ *     <td>"right"</td>
+ *     <td>Horizontal position of the toast message. Possible values : "right", "left" or "center"</td>
+ * </tr>
+ * <tr>
+ *     <td><code>maxNumber</code></td>
+ *     <td>0</td>
+ *     <td>Maximum number of toast message to display. (0 means unlimined)</td>
+ * </tr>
+ * <tr>
+ *     <td><code>timeout</code></td>
+ *     <td>4000</td>
+ *     <td>Timer for remove toast message</td>
+ * </tr>
+ * <tr>
+ *     <td><code>verticalPosition</code></td>
+ *     <td>"bottom"</td>
+ *     <td>Vertical position of the toast message. possible values "top" or "bottom"</td>
+ * </tr>
+ * </table>
+ * It's possible to defines specific behavior for each type of error. When overloading ngToast configuration, add an attribute to ngToast.configure() parameter.
+ *
+ * Overload of defaults options value for each type of toasts are :
+ * <ul>
+ * <li>success:{dismissOnClick: true}</li>
+ * <li>info:{dismissOnClick: true}</li>
+ * <li>error:{dismissOnTimeout: false}</li>
+ * <li>warning:{dismissOnTimeout: false}</li>
+ * </ul>
+ * For example, in the "Controller.js", the notifyError method override orginial settings and add some content and disable the dismiss on timeout.
+ * The toasts success behavior is also overloaded for dissmiss the toast on click. (see .config(['ngToastProvider' for details)
+ *
+ *
+ * <br/><br/>If Error log is enabled, you can pass errorDetail object to the methods. Here is the details of this object
+ *
+ * <table class="table">
+ * <tr>
+ *     <th>Property</th>
+ *     <th>Possible value</th>
+ *     <th>Description</th>
+ * </tr>
+ * <tr>
+ *     <td>CODE</td>
+ *     <td>EMPTY_REQUEST(1000), INCOMPLETE_OBJECT(1001), MALFORMED_OBJECT(1002), INTERNAL_ERROR(2000), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500), OK(200)</td>
+ *     <td>The code bounds to the status of the action</td>
+ * </tr>
+ * <tr>
+ *     <td>TYPE</td>
+ *     <td>ERROR("error"), INFO("information"), WARN("warning"), DETAIL("detail"), SUCCESS("S");</td>
+ *     <td>The type message received</td>
+ * </tr>
+ * <tr>
+ *     <td>MESSAGE</td>
+ *     <td></td>
+ *     <td>The message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DETAIL</td>
+ *     <td></td>
+ *     <td>The detail of the message received from the server</td>
+ * </tr>
+ * <tr>
+ *     <td>DONE</td>
+ *     <td>TRUE("1"), FALSE("0");</td>
+ *     <td>A boolean that decribes the final result of the request</td>
+ * </tr>
+ * </table>
+ * <br/>
+ *
+ * There is two ways to use it, by injecting the service in each controller or by using events. See Controller.js for details
+ *
+ * Possible itNotifier type : "SUCCESS", "ERROR", "INFO", "WARNING" and "DISMISS"<br/>
+ * @example
+     <example module="itesoft">
+
+         <file name="Controller.js">
+
+            angular.module('itesoft')
+                .config(['itNotifierProvider', function (itNotifierProvider) {
+                    //configuration of default values
+                    itNotifierProvider.defaultOptions = {
+                        dismissOnTimeout: true,
+                        timeout: 4000,
+                        dismissButton: true,
+                        animation: 'fade',
+                        horizontalPosition: 'right',
+                        verticalPosition: 'bottom',
+                        compileContent: true,
+                        dismissOnClick: false,
+                        success:{dismissOnClick: true},//optional overload behavior toast success
+                        info:{dismissOnClick: true},//optional overload behavior toast info
+                        error:{dismissOnTimeout: false},//optional overload behavior toast error
+                        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+                    };
+
+                }]).controller('NotifierCtrl',['$scope','itNotifier', function($scope,itNotifier) {
+                    $scope.showSuccess = function(){
+                        itNotifier.notifySuccess({
+                        content: "Success popup"
+                        });
+                    };
+                    $scope.showSuccessEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                            type: "SUCCESS",
+                            options: {
+                                content : "Success event popup"
+                            }}
+                         );
+                    };
+                    $scope.showError = function(){
+                        itNotifier.notifyError({
+                            content: "Error popup",
+                            dismissOnTimeout: false
+                        },
+                        {
+                            CODE:500,
+                            TYPE:'error',
+                            MESSAGE:'Something bad happened',
+                            DETAIL:'You don\'t wanna know',
+                            DONE:1
+                        });
+                    };
+                    $scope.showErrorOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "ERROR",
+                        options: {
+                                content : "error event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:500,
+                                TYPE:'error',
+                                MESSAGE:'Something bad happened',
+                                DETAIL:'You don\'t wanna know',
+                                DONE:1
+                            }
+                        });
+                    }
+                    $scope.showInfo = function(){
+                        itNotifier.notifyInfo({
+                        content: "Information popup"
+                        });
+                    };
+                    $scope.showWarningOnEvent = function(){
+                        $scope.$emit('itNotifierEvent', {
+                        type: "WARNING",
+                        options: {
+                                content : "Warning event popup"
+                            },
+                        errorDetails :
+                            {
+                                CODE:1000,
+                                TYPE:'warning',
+                                MESSAGE:'The request is empty',
+                                DETAIL:'Nothing',
+                                DONE:1
+                            }
+                        });
+                    };
+                    $scope.dismiss = function(){
+                        itNotifier.notifyDismiss();
+                        $scope.$emit('itNotifierEvent',{
+                            type:"DISMISS"
+                        });
+                    };
+                    $scope.dismissOnEvent = function(){
+                        $scope.$emit("$locationChangeSuccess");
+
+                    };
+                }]);
+         </file>
+         <file name="index.html">
+             <!-- CSS adaptation of ngToast for example purposes. Do not do this in production-->
+             <toast class="toaster" style="left:0px !important; bottom:0px !important"></toast>
+             <div ng-controller="NotifierCtrl">
+                 <button class="btn btn-success" ng-click="showSuccess()">
+                    Success
+                 </button>
+                 <button class="btn btn-success" ng-click="showSuccessEvent()">
+                    Success on event
+                 </button>
+                 <button class="btn btn-danger" ng-click="showError()">
+                    Error
+                 </button>
+                 <button class="btn btn-danger" ng-click="showErrorOnEvent()">
+                    Error on event
+                 </button>
+                 <button class="btn btn-info" ng-click="showInfo()">
+                    Info
+                 </button>
+                 <button class="btn btn-warning" ng-click="showWarningOnEvent()">
+                    Warning
+                 </button>
+                 <button class="btn btn-success" ng-click="dismiss()">
+                    Dismiss all popups
+                 </button>
+                 <button class="btn btn-success" ng-click="dismissOnEvent()">
+                    Dismiss on Change location event
+                 </button>
+             </div>
+         </file>
+     </example>
+ **/
+IteSoft.provider('itNotifier', [ function () {
+
+    var self = this;
+
+    //default behaviors
+    self.defaultOptions = {
+        dismissOnTimeout: true,
+        timeout: 4000,
+        dismissButton: true,
+        animation: 'fade',
+        horizontalPosition: 'right',
+        verticalPosition: 'bottom',
+        compileContent: true,
+        dismissOnClick: false,
+        success:{dismissOnClick: true},//optional overload behavior toast success
+        info:{dismissOnClick: true},//optional overload behavior toast info
+        error:{dismissOnTimeout: false},//optional overload behavior toast error
+        warning:{dismissOnTimeout: false}//optional overload behavior toast warning
+    };
+
+    //provide get method to build provider
+    this.$get= ['ngToast', '$rootScope','$log', function(ngToast, $rootScope, $log){
+
+        // service declaration
+        var itNotifier = {};
+
+        //configuration of the ngToast
+        ngToast.settings = angular.extend(ngToast.settings,self.defaultOptions);
+
+        /**
+         * Private method that format error details message
+         * @param errorDetails
+         * @returns {string}
+         * @private
+         */
+        function _formatErrorDetails(errorDetails){
+            return " CODE : "+errorDetails.CODE +", TYPE : "+ errorDetails.TYPE +", MESSAGE : "+ errorDetails.MESSAGE +", DETAIL : "+ errorDetails.DETAIL +", DONE : "+ errorDetails.DONE;
+        }
+
+        /** method declaration**/
+        /**
+         * Display a toast configure as success element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifySuccess= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.success,options,options.success);
+            ngToast.success(localOptions);
+            if(errorDetails != undefined) {
+                $log.log("Success popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as error element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyError= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.error,options, options.error);
+
+            ngToast.danger(localOptions);
+            if(errorDetails != undefined) {
+                $log.error("Error popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as info element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyInfo= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.info,options, options.info);
+
+            ngToast.info(localOptions);
+            if(errorDetails != undefined) {
+                $log.info("Info popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Display a toast configure as warning element
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyWarning= function (options,errorDetails) {
+            var localOptions = angular.extend(ngToast.settings, self.defaultOptions,self.defaultOptions.warning,options, options.warning);
+
+            ngToast.warning(localOptions);
+            if(errorDetails != undefined) {
+                $log.warn("Warning popup called : "+_formatErrorDetails(errorDetails));
+            }
+        };
+        /**
+         * Dismiss all toaster
+         * @param options
+         * @param errorDetails
+         */
+        itNotifier.notifyDismiss= function (options,errorDetails) {
+            ngToast.dismiss();
+        };
+        /**
+         * Log an error because this type is unknown
+         * @param options
+         */
+        itNotifier.notify= function (options) {
+            $log.error('Unknown type for itNotifier: '+options )
+        }
+
+        /** events declaration **/
+
+        /**
+         * Listen an event and dismiss all toaster
+         */
+        $rootScope.$on("$locationChangeSuccess", function () {
+            // Remove all currently display toaster messages.
+            itNotifier.notifyDismiss();
+        });
+
+        /**
+         * Listen an event and display associated toast depending on his type
+         */
+        $rootScope.$on("itNotifierEvent",function(event, args){
+            //Handle event and calls appropriate method depending on the type of request
+            if (args) {
+                switch (args.type) {
+                    case "SUCCESS":
+                        itNotifier.notifySuccess(args.options,args.errorDetails);
+                        break;
+                    case "ERROR":
+                        itNotifier.notifyError(args.options,args.errorDetails);
+                        break;
+                    case "INFO":
+                        itNotifier.notifyInfo(args.options,args.errorDetails);
+                        break;
+                    case "WARNING":
+                        itNotifier.notifyWarning(args.options,args.errorDetails);
+                        break;
+                    case "DISMISS":
+                        itNotifier.notifyDismiss(args.options,args.errorDetails);
+                        break;
+                    default:
+                        itNotifier.notify(args.type);
+                        break;
+                }
+            }
+            else{
+                $log.error('Bad usage of itNotifier. Check manual for details');
+            }
+        });
+        return itNotifier;
+    }];
+}]);
 'use strict';
 /**
  * @ngdoc service
