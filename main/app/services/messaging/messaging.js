@@ -235,6 +235,7 @@
                               self.isConnected = false;
                            });
 
+
                         this.login = function(username){
                           self.username = username;
                           itmsg.getToken(self.API_KEY ,{id : username, displayName : username},898090).then(function(token){
