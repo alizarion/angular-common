@@ -83,7 +83,7 @@
 
          <file name="Controller.js">
              var BASE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
-             var API_KEY = 'fbd0ca6b-e3e4-47e3-952a-c0e7630f9932';
+             var API_KEY = 'd57cc83c-cb8b-4586-8e1b-3c3f127934e7';
                 function Message(messageText){
                           this.to = [];
                           this.data =  {
@@ -452,25 +452,35 @@ angular.module('itesoft.messaging',['ngWebSocket'])
     function(){
 
         var providerState = this;
-        providerState.SERVICE_URL = 'tstbuydpoc01:3333/itesoft-messaging';
+        providerState.SERVICE_URL = 'localhost:8080/itesoft-messaging';
+        providerState.HTTP_PROTOCOL = null;
+        providerState.RECONNECT_MAX_COUNT = 0;
 
         this.$get = ['$log',
             '$http',
             '$q',
             '$websocket',
             '$rootScope',
+            '$location',
+            '$timeout',
             function($log,
                      $http,
                      $q,
                      $websocket,
-                     $rootScope){
+                     $rootScope,
+                     $location,
+                     $timeout){
 
         function ItMessaging(token){
 
             var self = this;
             self.URL = providerState.SERVICE_URL ;
             self.onMessageCallbacks = [];
+            self.HTTP_PROTOCOL =  providerState.HTTP_PROTOCOL ? providerState.HTTP_PROTOCOL : $location.protocol();
+            self.WS_PROTOCOL = self.HTTP_PROTOCOL == 'https' ? 'wss' : 'ws';
+            self.RECONNECT_MAX_COUNT = providerState.RECONNECT_MAX_COUNT;
             self.onCloseCallbacks   = [];
+            self.onRetryCallbacks   = [];
 
             self.token = token;
 
@@ -481,7 +491,7 @@ angular.module('itesoft.messaging',['ngWebSocket'])
                 var deferred = $q.defer();
 
                 $http({
-                    url: 'http://'+ this.URL + '/rest/tokens' ,
+                    url: self.HTTP_PROTOCOL + '://'+ this.URL + '/rest/tokens' ,
                     method: "POST",
                     data:observer,
                     headers: {
@@ -500,7 +510,7 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             function _updateTopics(){
                 var deferred = $q.defer();
                 $http({
-                    url: 'http://'+self.URL+'/rest/topics',
+                    url: self.HTTP_PROTOCOL + '://'+ self.URL+'/rest/topics',
                     method: "GET",
                     headers: {
                         'token': self.token
@@ -519,18 +529,46 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             };
 
             this.connect = function(token){
-                if(token){
-                    self.token = token;
-                    self.dataStream = $websocket('ws://'+ self.URL  +'/websocket?token=' + token);
+                function _connect(token){
+                    self.dataStream = $websocket(self.WS_PROTOCOL + '://'+ self.URL  +'/websocket?token=' + token);
                     self.dataStream.onMessage(function(msg){
                         _updateTopics().then(function(topics){
                             _onMessageHandler(msg,topics);
                         })
                     });
-
                     self.dataStream.onClose(function(event){
-                        _onCloseHandler(event);
-                    })
+                        if(self.RECONNECT_MAX_COUNT > 0) {
+
+                            if (self.RECONNECT_MAX_COUNT > recoCount) {
+                                var retryCallbacks;
+                                for (var i = 0; i < self.onCloseCallbacks.length; i++) {
+                                     retryCallbacks = self.onRetryCallbacks[i];
+                                    $rootScope.$applyAsync(function(){
+                                        retryCallbacks.fn.apply(this,event);
+                                    })
+                                }
+                                recoCount++;
+                                $timeout(function () {
+                                    _connect(token);
+
+                                }, 1000);
+
+                            } else {
+                                _onCloseHandler(event);
+                            }
+                        } else {
+                            _onCloseHandler(event);
+                        }
+
+                    });
+
+                }
+
+                var recoCount = 0;
+                if(token){
+                    self.token = token;
+
+                    _connect(token);
 
                     return true;
                 }
@@ -544,7 +582,19 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             };
 
             this.onClose = function(callback) {
+
+
                 self.onCloseCallbacks.push({
+                    fn: callback
+                });
+                return self;
+
+            };
+
+            this.onRetry = function(callback) {
+
+
+                self.onRetryCallbacks.push({
                     fn: callback
                 });
                 return self;
@@ -593,7 +643,7 @@ angular.module('itesoft.messaging',['ngWebSocket'])
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/subscribe?retrieve='+retrieve,
+                        url: self.HTTP_PROTOCOL + '://'+self.URL+'/rest/topics/'+topicname+'/subscribe?retrieve='+retrieve,
                         method: "POST",
                         data : observers,
                         headers: {
@@ -617,7 +667,7 @@ angular.module('itesoft.messaging',['ngWebSocket'])
                 var deferred = $q.defer();
                 if(self.token!=null){
                     $http({
-                        url: 'http://'+self.URL+'/rest/topics/'+topicname+'/unsubscribe',
+                        url:  self.HTTP_PROTOCOL + '://'+self.URL+'/rest/topics/'+topicname+'/unsubscribe',
                         method: "POST",
                         data : observers,
                         headers: {
@@ -640,7 +690,7 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             this.sendMessage = function(messageObj){
                 var deferred = $q.defer();
                 $http({
-                    url: 'http://'+self.URL+'/rest/messages',
+                    url:  self.HTTP_PROTOCOL + '://'+self.URL+'/rest/messages',
                     method: "POST",
                     headers: {
                         'token': self.token
@@ -661,4 +711,4 @@ angular.module('itesoft.messaging',['ngWebSocket'])
             return new ItMessaging(url);
         };
             }]
-    }])
+    }]);
