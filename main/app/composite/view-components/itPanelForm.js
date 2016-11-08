@@ -140,7 +140,7 @@ IteSoft.component('itPanelForm', {
     '</script>'+
     '<!------------------- Template toggle ------------------->'+
     '<script type="text/ng-template" id="toggleTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-toggle">' +
-    '<p><input it-toggle type="checkbox" ng-model="option.value[option.code]" ng-true-value="true" ng-false-value="false"><br></p>'+
+    '<p><input it-toggle type="checkbox" ng-model="option.value[option.code]" ng-true-value="\'true\'" ng-false-value="\'false\'"><br></p>'+
     '</script>' +
     '<!------------------- Template textArea ------------------->'+
     '<script type="text/ng-template" id="textAreaTemplate.html"><div class="col-xs-5 col-md-4 col-lg-4 it-panel-form-textarea">' +
