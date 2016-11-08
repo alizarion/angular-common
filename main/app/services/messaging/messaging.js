@@ -99,6 +99,7 @@
                      angular.module('itesoft')
                      .config(['ItMessagingProvider', function(ItMessagingProvider) {
                             ItMessagingProvider.SERVICE_URL = BASE_URL;
+                            ItMessagingProvider.RECONNECT_MAX_COUNT = 3;
                        }])
                      .filter('conversation',[ function() {
                       return function(input,args) {
@@ -217,6 +218,22 @@
 
                            self.isConnected = false;
                         });
+
+                         itmsg.onRetry(function(event){
+                              itNotifier.notifyError({
+                                         content: "reco",
+                                         dismissOnTimeout: false
+                                     },
+                                     {
+                                         CODE:300,
+                                         TYPE:'info',
+                                         MESSAGE:'Trying to reconnect',
+                                         DETAIL:'You don\'t wanna know',
+                                         DONE:1
+                                     });
+
+                              self.isConnected = false;
+                           });
 
                         this.login = function(username){
                           self.username = username;
